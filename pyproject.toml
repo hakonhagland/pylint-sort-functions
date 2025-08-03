@@ -1,0 +1,64 @@
+[project]
+name = "pylint-sort-functions"
+version = "0.1.0"
+description = "Pylint plugin to sort functions in Python code"
+authors = [
+    { name = "Håkon Hægland", email = "hakon.hagland@gmail.com" }
+]
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "pylint>=3.3.0",
+    "astroid>=3.3.0"
+]
+
+[tool.uv]
+dev-dependencies = [
+    "coverage>=7.6.1",
+    "mypy>=1.17.0",
+    "pylint>=3.3.0",
+    "pytest-mock>=3.14.0",
+    "pytest>=8.3.3",
+    "ruff>=0.6.6",
+    "sphinx-rtd-theme>=2.0.0",
+    "sphinx>=7.0.0",
+    "sphinx-click>=6.0.0",
+    "pre-commit>=3.8.0",
+    "rstcheck>=6.2.4",
+    "tox>=4.20.0",
+    "sphinx-autodoc-typehints>=2.3.0",
+]
+
+[project.entry-points."pylint.checkers"]
+pylint_sort_functions = "pylint_sort_functions"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/pylint_sort_functions"]
+
+[tool.ruff.lint]
+# Enable comprehensive linting rules
+select = ["E", "F", "W", "I"]  # Error, pyflakes, warning, import sorting
+
+[tool.ruff.lint.isort]
+# Configure import sorting to match CLAUDE.md standards
+# Order: standard library → third-party → local (alphabetically sorted)
+known-first-party = ["pylint_sort_functions"]
+split-on-trailing-comma = true
+
+[tool.coverage.report]
+fail_under = 100
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+# Mypy automatically discovers this configuration from pyproject.toml
+# No additional configuration needed for pre-commit hooks
+[tool.mypy]
+python_version = "3.11"
+strict = true
+warn_return_any = true
+disallow_untyped_defs = true
