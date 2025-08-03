@@ -19,19 +19,81 @@ class TestFunctionSortChecker(CheckerTestCase):
     CHECKER_CLASS = FunctionSortChecker
 
     def test_mixed_visibility_fail(self) -> None:
-        """Test that mixed public/private functions trigger warnings."""
-        # TODO: Implement test for mixed visibility functions
-        pass
+        """Test that mixed public/private methods trigger warnings."""
+        # Integration test: Run pylint on real file with mixed visibility methods
+        test_file = TEST_FILES_DIR / "classes" / "mixed_method_visibility.py"
+
+        # Read and parse the test file
+        with open(test_file, encoding="utf-8") as f:
+            content = f.read()
+
+        # Parse file into AST
+        module = astroid.parse(content, module_name="mixed_method_visibility")
+
+        # Get the first class (Calculator) from the module
+        class_node = module.body[0]
+        assert isinstance(class_node, nodes.ClassDef)
+
+        # Use pylint testing framework to verify expected messages are generated
+        with self.assertAddsMessages(
+            MessageTest(
+                msg_id="mixed-function-visibility",
+                line=4,  # Class definition starts on line 4
+                node=class_node,  # The actual class AST node
+                args=("class Calculator",),  # Class name in the message
+                col_offset=0,  # Column offset for class-level messages
+                end_line=4,  # End line matches the class definition
+                end_col_offset=16,  # End column offset
+            )
+        ):
+            # Run our checker on the parsed class
+            self.checker.visit_classdef(class_node)
 
     def test_sorted_functions_pass(self) -> None:
         """Test that properly sorted functions don't trigger warnings."""
-        # TODO: Implement test for correctly sorted functions
-        pass
+        # Integration test: Run pylint on real file with sorted functions
+        test_file = TEST_FILES_DIR / "modules" / "sorted_functions.py"
+
+        # Read and parse the test file
+        with open(test_file, encoding="utf-8") as f:
+            content = f.read()
+
+        # Parse file into AST
+        module = astroid.parse(content, module_name="sorted_functions")
+
+        # Use pylint testing framework to verify no messages are generated
+        with self.assertAddsMessages():
+            # Run our checker on the parsed module
+            self.checker.visit_module(module)
 
     def test_sorted_methods_pass(self) -> None:
         """Test that properly sorted methods don't trigger warnings."""
-        # TODO: Implement test for correctly sorted methods
-        pass
+        # Integration test: Create a simple class with only public methods (no __init__)
+        # to avoid mixed visibility issue caused by __init__ being considered private
+        test_code = '''
+class SimpleClass:
+    """Simple class with only public methods."""
+
+    def method_a(self) -> str:
+        """Method A."""
+        return "a"
+
+    def method_b(self) -> str:
+        """Method B."""
+        return "b"
+'''
+
+        # Parse code into AST
+        module = astroid.parse(test_code, module_name="simple_class")
+
+        # Get the class from the module
+        class_node = module.body[0]
+        assert isinstance(class_node, nodes.ClassDef)
+
+        # Use pylint testing framework to verify no messages are generated
+        with self.assertAddsMessages():
+            # Run our checker on the parsed class
+            self.checker.visit_classdef(class_node)
 
     def test_unsorted_functions_fail(self) -> None:
         """Test that unsorted functions trigger warnings."""
@@ -60,8 +122,44 @@ class TestFunctionSortChecker(CheckerTestCase):
 
     def test_unsorted_methods_fail(self) -> None:
         """Test that unsorted methods trigger warnings."""
-        # TODO: Implement test for incorrectly sorted methods
-        pass
+        # Integration test: Run pylint on real file with unsorted methods
+        test_file = TEST_FILES_DIR / "classes" / "unsorted_methods.py"
+
+        # Read and parse the test file
+        with open(test_file, encoding="utf-8") as f:
+            content = f.read()
+
+        # Parse file into AST
+        module = astroid.parse(content, module_name="unsorted_methods")
+
+        # Get the first class (Calculator) from the module
+        class_node = module.body[0]
+        assert isinstance(class_node, nodes.ClassDef)
+
+        # Use pylint testing framework to verify expected messages are generated
+        # This file has both unsorted methods AND mixed visibility, expect both messages
+        with self.assertAddsMessages(
+            MessageTest(
+                msg_id="unsorted-methods",
+                line=4,  # Class definition starts on line 4
+                node=class_node,  # The actual class AST node
+                args=("Calculator",),  # Class name in the message
+                col_offset=0,  # Column offset for class-level messages
+                end_line=4,  # End line matches the class definition
+                end_col_offset=16,  # End column offset
+            ),
+            MessageTest(
+                msg_id="mixed-function-visibility",
+                line=4,  # Class definition starts on line 4
+                node=class_node,  # The actual class AST node
+                args=("class Calculator",),  # Class name in the message
+                col_offset=0,  # Column offset for class-level messages
+                end_line=4,  # End line matches the class definition
+                end_col_offset=16,  # End column offset
+            ),
+        ):
+            # Run our checker on the parsed class
+            self.checker.visit_classdef(class_node)
 
     def test_visit_classdef_calls_utils(self) -> None:
         """Test that visit_classdef calls utility functions and adds messages."""
