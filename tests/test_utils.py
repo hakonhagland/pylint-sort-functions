@@ -25,7 +25,7 @@ class TestUtils:
     def test_are_functions_properly_separated_false(self) -> None:
         """Test function visibility separation with mixed visibility."""
         file_path = TEST_FILES_DIR / "modules" / "mixed_visibility.py"
-        with open(file_path) as f:
+        with open(file_path, encoding="utf-8") as f:
             content = f.read()
 
         module = astroid.parse(content)
@@ -37,7 +37,7 @@ class TestUtils:
     def test_are_functions_properly_separated_true(self) -> None:
         """Test function visibility separation with properly separated functions."""
         file_path = TEST_FILES_DIR / "modules" / "sorted_functions.py"
-        with open(file_path) as f:
+        with open(file_path, encoding="utf-8") as f:
             content = f.read()
 
         module = astroid.parse(content)
@@ -56,7 +56,7 @@ class TestUtils:
     def test_are_functions_sorted_false(self) -> None:
         """Test function sorting validation with unsorted functions."""
         file_path = TEST_FILES_DIR / "modules" / "unsorted_functions.py"
-        with open(file_path) as f:
+        with open(file_path, encoding="utf-8") as f:
             content = f.read()
 
         module = astroid.parse(content)
@@ -68,7 +68,7 @@ class TestUtils:
     def test_are_functions_sorted_false_private_only(self) -> None:
         """Test function sorting validation with unsorted private functions."""
         file_path = TEST_FILES_DIR / "modules" / "unsorted_private_functions.py"
-        with open(file_path) as f:
+        with open(file_path, encoding="utf-8") as f:
             content = f.read()
 
         module = astroid.parse(content)
@@ -80,7 +80,7 @@ class TestUtils:
     def test_are_functions_sorted_true(self) -> None:
         """Test function sorting validation with sorted functions."""
         file_path = TEST_FILES_DIR / "modules" / "sorted_functions.py"
-        with open(file_path) as f:
+        with open(file_path, encoding="utf-8") as f:
             content = f.read()
 
         module = astroid.parse(content)
@@ -92,7 +92,7 @@ class TestUtils:
     def test_are_methods_sorted_false(self) -> None:
         """Test method sorting validation with unsorted methods."""
         file_path = TEST_FILES_DIR / "classes" / "unsorted_methods.py"
-        with open(file_path) as f:
+        with open(file_path, encoding="utf-8") as f:
             content = f.read()
 
         module = astroid.parse(content)
@@ -106,7 +106,7 @@ class TestUtils:
     def test_are_methods_sorted_true(self) -> None:
         """Test method sorting validation with sorted methods."""
         file_path = TEST_FILES_DIR / "classes" / "sorted_methods.py"
-        with open(file_path) as f:
+        with open(file_path, encoding="utf-8") as f:
             content = f.read()
 
         module = astroid.parse(content)
@@ -147,18 +147,18 @@ class TestUtils:
     def test_get_functions_from_node_empty(self) -> None:
         """Test function extraction from empty module."""
         file_path = TEST_FILES_DIR / "modules" / "empty_module.py"
-        with open(file_path) as f:
+        with open(file_path, encoding="utf-8") as f:
             content = f.read()
 
         module = astroid.parse(content)
         result = utils.get_functions_from_node(module)
 
-        assert result == []
+        assert not result
 
     def test_get_functions_from_node_sorted(self) -> None:
         """Test function extraction from sorted module."""
         file_path = TEST_FILES_DIR / "modules" / "sorted_functions.py"
-        with open(file_path) as f:
+        with open(file_path, encoding="utf-8") as f:
             content = f.read()
 
         module = astroid.parse(content)
@@ -179,7 +179,7 @@ class TestUtils:
     def test_get_methods_from_class_sorted(self) -> None:
         """Test method extraction from sorted class."""
         file_path = TEST_FILES_DIR / "classes" / "sorted_methods.py"
-        with open(file_path) as f:
+        with open(file_path, encoding="utf-8") as f:
             content = f.read()
 
         module = astroid.parse(content)
