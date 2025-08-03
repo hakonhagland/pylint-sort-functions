@@ -11,8 +11,11 @@ def get_functions_from_node(node: nodes.Module) -> list[nodes.FunctionDef]:
     :returns: List of function definition nodes
     :rtype: list[nodes.FunctionDef]
     """
-    # TODO: Implement function extraction logic
-    return []
+    functions = []
+    for child in node.body:
+        if isinstance(child, nodes.FunctionDef):
+            functions.append(child)
+    return functions
 
 
 def get_methods_from_class(node: nodes.ClassDef) -> list[nodes.FunctionDef]:
@@ -23,8 +26,11 @@ def get_methods_from_class(node: nodes.ClassDef) -> list[nodes.FunctionDef]:
     :returns: List of method definition nodes
     :rtype: list[nodes.FunctionDef]
     """
-    # TODO: Implement method extraction logic
-    return []
+    methods = []
+    for child in node.body:
+        if isinstance(child, nodes.FunctionDef):
+            methods.append(child)
+    return methods
 
 
 def are_functions_sorted(functions: list[nodes.FunctionDef]) -> bool:
@@ -35,7 +41,21 @@ def are_functions_sorted(functions: list[nodes.FunctionDef]) -> bool:
     :returns: True if functions are properly sorted
     :rtype: bool
     """
-    # TODO: Implement sorting validation logic
+    if len(functions) <= 1:
+        return True
+
+    public_functions, private_functions = get_function_groups(functions)
+
+    # Check if public functions are sorted
+    public_names = [f.name for f in public_functions]
+    if public_names != sorted(public_names):
+        return False
+
+    # Check if private functions are sorted
+    private_names = [f.name for f in private_functions]
+    if private_names != sorted(private_names):
+        return False
+
     return True
 
 
@@ -47,8 +67,8 @@ def are_methods_sorted(methods: list[nodes.FunctionDef]) -> bool:
     :returns: True if methods are properly sorted
     :rtype: bool
     """
-    # TODO: Implement method sorting validation logic
-    return True
+    # Methods follow the same sorting rules as functions
+    return are_functions_sorted(methods)
 
 
 def are_functions_properly_separated(functions: list[nodes.FunctionDef]) -> bool:
@@ -59,7 +79,19 @@ def are_functions_properly_separated(functions: list[nodes.FunctionDef]) -> bool
     :returns: True if public functions come before private functions
     :rtype: bool
     """
-    # TODO: Implement visibility separation validation logic
+    if len(functions) <= 1:
+        return True
+
+    # Track if we've seen any private functions
+    seen_private = False
+
+    for func in functions:
+        if is_private_function(func):
+            seen_private = True
+        elif seen_private:
+            # Found a public function after a private function
+            return False
+
     return True
 
 
