@@ -24,9 +24,8 @@ repos:
     hooks:
       - id: mypy
         name: mypy
-        # Use system language to leverage pyproject.toml dependencies instead of duplicating them
         language: system
-        entry: mypy src tests
+        entry: bash -c "source .venv/bin/activate && mypy src tests"
         types: [python]
         pass_filenames: false
         always_run: true
@@ -35,14 +34,14 @@ repos:
       - id: rstcheck
         name: rstcheck
         language: system
-        entry: rstcheck --ignore-directives=automodule,click --report-level=WARNING
-        files: \.rst$
-        types: [text]
+        entry: bash -c "source .venv/bin/activate && rstcheck --ignore-directives=automodule,click --report-level=WARNING docs/*.rst"
+        pass_filenames: false
+        always_run: true
 -   repo: local
     hooks:
       - id: coverage
         name: coverage
         language: system
-        entry: bash -c "python -m coverage run -m pytest tests && python -m coverage report --fail-under=100"
+        entry: bash -c "source .venv/bin/activate && python -m coverage run -m pytest tests && python -m coverage report --fail-under=100"
         always_run: true
         pass_filenames: false

@@ -7,7 +7,7 @@ Features
 --------
 
 * **Function Organization**: Enforces alphabetical sorting of functions within modules
-* **Method Organization**: Enforces alphabetical sorting of methods within classes  
+* **Method Organization**: Enforces alphabetical sorting of methods within classes
 * **Public/Private Separation**: Ensures public functions/methods come before private ones (underscore prefix)
 * **Configurable Rules**: Customizable message codes (W9001-W9003) for different violations
 * **Clear Error Messages**: Helpful messages indicating exactly what needs to be reordered
@@ -43,5 +43,5 @@ Message Codes
 The plugin defines these message types:
 
 * **W9001**: ``unsorted-functions`` - Functions not sorted alphabetically within their scope
-* **W9002**: ``unsorted-methods`` - Class methods not sorted alphabetically within their scope  
+* **W9002**: ``unsorted-methods`` - Class methods not sorted alphabetically within their scope
 * **W9003**: ``mixed-function-visibility`` - Public and private functions not properly separated
