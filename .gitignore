@@ -1,0 +1,10 @@
+__pycache__/
+/docs/_build/
+.vscode/
+/dist
+/.coverage
+*.pyc
+/.tox
+.claude/
+.venv/
+.venv-linux/
