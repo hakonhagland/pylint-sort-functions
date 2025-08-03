@@ -39,6 +39,15 @@ repos:
         always_run: true
 -   repo: local
     hooks:
+      - id: pylint-sort-functions
+        name: pylint-sort-functions self-check
+        language: system
+        entry: bash -c "source .venv/bin/activate && pylint --load-plugins=pylint_sort_functions --disable=all --enable=unsorted-functions,unsorted-methods,mixed-function-visibility src/"
+        types: [python]
+        pass_filenames: false
+        always_run: true
+-   repo: local
+    hooks:
       - id: coverage
         name: coverage
         language: system

@@ -50,6 +50,9 @@ jobs:
       - name: Check types with mypy
         run: uv run mypy src/ tests/
 
+      - name: Plugin self-check
+        run: uv run pylint --load-plugins=pylint_sort_functions --disable=all --enable=unsorted-functions,unsorted-methods,mixed-function-visibility src/
+
       - name: Code coverage
         run: |
           uv run coverage run -m pytest tests
