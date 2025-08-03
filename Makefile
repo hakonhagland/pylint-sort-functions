@@ -44,8 +44,8 @@ test:
 	pytest tests/
 
 test-plugin:
-	pylint --load-plugins=pylint_sort_functions src/
-	pylint --load-plugins=pylint_sort_functions tests/
+	pylint --load-plugins=pylint_sort_functions --disable=fixme,unnecessary-pass src/
+	pylint --load-plugins=pylint_sort_functions --disable=fixme,unnecessary-pass tests/
 
 tox:
 	tox
