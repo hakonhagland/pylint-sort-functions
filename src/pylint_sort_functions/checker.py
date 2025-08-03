@@ -35,16 +35,6 @@ class FunctionSortChecker(BaseChecker):
     name = "function-sort"
     msgs: dict[str, Any] = messages.MESSAGES
 
-    def visit_module(self, node: nodes.Module) -> None:
-        """Visit a module node to check function sorting.
-
-        :param node: The module AST node to analyze
-        :type node: nodes.Module
-        """
-        functions = utils.get_functions_from_node(node)
-        if not utils.are_functions_sorted(functions):
-            self.add_message("unsorted-functions", node=node, args=("module",))
-
     def visit_classdef(self, node: nodes.ClassDef) -> None:
         """Visit a class definition to check method sorting.
 
@@ -61,3 +51,13 @@ class FunctionSortChecker(BaseChecker):
                 node=node,
                 args=(f"class {node.name}",),
             )
+
+    def visit_module(self, node: nodes.Module) -> None:
+        """Visit a module node to check function sorting.
+
+        :param node: The module AST node to analyze
+        :type node: nodes.Module
+        """
+        functions = utils.get_functions_from_node(node)
+        if not utils.are_functions_sorted(functions):
+            self.add_message("unsorted-functions", node=node, args=("module",))
