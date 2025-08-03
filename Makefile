@@ -38,7 +38,8 @@ ruff-format:
 	ruff format src tests
 
 self-check:
-	pylint --load-plugins=pylint_sort_functions --disable=all --enable=unsorted-functions,unsorted-methods,mixed-function-visibility src/
+	pylint --load-plugins=pylint_sort_functions --disable=fixme,unnecessary-pass src/
+	pylint --load-plugins=pylint_sort_functions --disable=fixme,unnecessary-pass tests/
 
 test:
 	pytest tests/
