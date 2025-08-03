@@ -275,6 +275,12 @@ Follow the Python style guide in `.cursor/rules/python.mdc`:
 - **Function organization**: Organize functions with public functions first (no underscore prefix), followed by private functions (underscore prefix), each section alphabetically sorted and clearly separated with comment blocks (e.g., `# Public functions` and `# Private functions`)
 - **Class method organization**: Apply the same organization principle to class methods - organize with public methods first, followed by private methods (underscore prefix), each section alphabetically sorted and clearly separated with comment blocks (e.g., `# Public methods` and `# Private methods`). This provides predictable structure regardless of class size and makes method lookup efficient.
 
+### Type Hints
+- Always include type hints for all function parameters and return types
+- Use built-in types (`list`, `dict`, `tuple`) instead of `typing` equivalents (Python 3.11+)
+- Use `typing.TYPE_CHECKING` for forward references to avoid import cycles
+- Example: `def process_items(items: list[str]) -> dict[str, int]:`
+
 ### Import Guidelines
 
 **Avoid inline imports** - Place all imports at the top of the file for better readability and maintainability:
