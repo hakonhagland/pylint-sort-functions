@@ -1,0 +1,152 @@
+---
+alwaysApply: true
+---
+
+# Python Style Guide for Cursor AI
+
+## Quick Reference
+- **Line length**: 88 characters (Black compatible)
+- **Indentation**: 4 spaces, never tabs
+- **Naming**: `snake_case` for variables/functions, `PascalCase` for classes, `UPPER_CASE` for constants
+- **Strings**: Use f-strings for interpolation
+- **Imports**: Standard library → third-party → local (alphabetically sorted within groups)
+- **Documentation**: reStructuredText docstrings for all public APIs
+
+## Core Philosophy
+- Assume readers know Python but not your specific project
+- Prioritize readability over cleverness
+- Be explicit, not implicit
+- One function = one responsibility
+
+## Documentation
+- All public classes, functions, and methods must include reStructuredText docstrings
+- Use reST field lists: `:param name: description`, `:returns: description`, `:raises Exception: when`
+- Update .rst files in docs/ when adding/changing public APIs
+- For private/one-liner methods, short inline comments suffice
+
+```python
+def process_data(items, threshold=10):
+    """
+    Process items above the given threshold.
+
+    :param items: List of items to process
+    :type items: list
+    :param threshold: Minimum value to process (default: 10)
+    :type threshold: int
+    :returns: Processed items
+    :rtype: list
+    :raises ValueError: If threshold is negative
+    """
+```
+
+## Code Structure
+
+### Functions and Methods
+- Keep functions short and focused (single responsibility)
+- Use early returns to avoid deep nesting
+- Extract complex logic into helper functions
+- Prefer pure functions over stateful ones
+
+### File Organization
+```python
+# Standard library imports (alphabetical)
+import os
+import sys
+
+# Third-party imports (alphabetical)
+import click
+import requests
+
+# Local imports (alphabetical)
+from mypackage import helpers
+from mypackage.config import Config
+
+# Public functions (alphabetical)
+def public_function_a():
+    pass
+
+def public_function_b():
+    pass
+
+# Private functions (alphabetical)
+def _private_function_a():
+    pass
+
+# Classes (alphabetical)
+class MyClass:
+    def __init__(self):
+        pass
+
+    # Public methods (alphabetical)
+    def public_method(self):
+        pass
+
+    # Private methods (alphabetical)
+    def _private_method(self):
+        pass
+```
+
+## Formatting Rules
+
+### Strings
+- Use f-strings: `f"Value: {x}"`
+- Avoid old-style `%` formatting
+- Use `str.format()` only for compatibility
+
+### Collections
+- Use comprehensions for simple transformations
+- Switch to explicit loops for complex multi-line operations
+- Prefer `collections` module for specialized needs
+
+### Whitespace
+- 2 blank lines between top-level functions/classes
+- 1 blank line between class methods
+- Spaces around operators: `a = b + c`
+- No spaces inside brackets: `[1, 2, 3]`
+
+## Modern Python Features
+
+### Type Hints
+- Always include type hints for function parameters and return types
+- For Python 3.9+: Use built-in types (`list`, `dict`, `tuple`) instead of `typing` equivalents
+- For Python 3.8 and below: Use `List`, `Dict`, `Tuple` from `typing` module
+- Use `Optional`, `Union` from `typing` for complex type combinations
+- Prefer strict typing for clarity
+
+### Async Code
+- Use `async def` and `await` consistently
+- Don't mix sync and async without proper handling
+- Use `asyncio.run()` for top-level async entry points
+
+### Resource Management
+- Use context managers (`with` statements) for files and resources
+- Prefer `pathlib.Path` over `os.path`
+- Use `dataclasses` for data containers
+
+## Error Handling
+- Use exceptions instead of error codes
+- Catch specific exceptions, never bare `except:`
+- Provide informative exception messages
+
+## Testing
+- All new code should have unit tests using `pytest`
+- Test names should describe what they verify
+- Prefer small, focused test functions
+
+## Tools and Compliance
+- Use `ruff` for formatting and linting
+- Use `mypy` for static type checking
+- Use `pylint-sort-functions` plugin to enforce function/method organization
+- Generate code that produces no warnings from these tools
+- Follow PEP8 standards
+
+## Performance Tips
+- Use generators for large datasets
+- Prefer `any()` and `all()` over manual loops for boolean checks
+- Use `dict.get()` with defaults instead of `try/except KeyError`
+
+## Comments
+- Explain **why**, not **what**
+- Use `# TODO:`, `# FIXME:`, `# NOTE:` tags consistently
+- Don't over-comment obvious code
+- Place important reasoning above the code, not inline
