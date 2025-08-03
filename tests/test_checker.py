@@ -1,11 +1,16 @@
 """Tests for the FunctionSortChecker."""
 
+from pathlib import Path
 from unittest.mock import Mock, patch
 
-from astroid import nodes  # type: ignore[import-untyped]
-from pylint.testutils import CheckerTestCase
+import astroid  # type: ignore[import-untyped]
+from astroid import nodes
+from pylint.testutils import CheckerTestCase, MessageTest
 
 from pylint_sort_functions.checker import FunctionSortChecker
+
+# Path to test files directory
+TEST_FILES_DIR = Path(__file__).parent / "files"
 
 
 class TestFunctionSortChecker(CheckerTestCase):
@@ -30,8 +35,28 @@ class TestFunctionSortChecker(CheckerTestCase):
 
     def test_unsorted_functions_fail(self) -> None:
         """Test that unsorted functions trigger warnings."""
-        # TODO: Implement test for incorrectly sorted functions
-        pass
+        # Integration test: Run pylint on real file with unsorted functions
+        test_file = TEST_FILES_DIR / "modules" / "unsorted_functions.py"
+
+        # Read and parse the test file
+        with open(test_file, encoding="utf-8") as f:
+            content = f.read()
+
+        # Parse file into AST
+        module = astroid.parse(content, module_name="unsorted_functions")
+
+        # Use pylint testing framework to verify checker generates expected message
+        with self.assertAddsMessages(
+            MessageTest(
+                msg_id="unsorted-functions",
+                line=0,  # Module-level message appears on line 0 in pylint
+                node=module,  # The actual AST node
+                args=("module",),
+                col_offset=0,  # Column offset for module-level messages
+            )
+        ):
+            # Run our checker on the parsed module
+            self.checker.visit_module(module)
 
     def test_unsorted_methods_fail(self) -> None:
         """Test that unsorted methods trigger warnings."""
