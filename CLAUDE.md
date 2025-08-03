@@ -112,6 +112,11 @@ make view-docs  # Opens docs in browser
 # Test the plugin with pylint
 pylint --load-plugins=pylint_sort_functions src/
 pylint --load-plugins=pylint_sort_functions tests/
+make test-plugin
+
+# Plugin self-check (focused on sorting violations only)
+pylint --load-plugins=pylint_sort_functions --disable=all --enable=unsorted-functions,unsorted-methods,mixed-function-visibility src/
+make self-check
 
 # Build and publish
 uv build

@@ -1,7 +1,7 @@
 ROOT := $(shell pwd)
 
 .PHONY: coverage docs mypy ruff-check ruff-fix ruff-format test test-plugin tox
-.PHONY: publish-to-pypi rstcheck
+.PHONY: publish-to-pypi rstcheck self-check
 
 coverage:
 	coverage run -m pytest tests
@@ -36,6 +36,9 @@ ruff-fix:
 
 ruff-format:
 	ruff format src tests
+
+self-check:
+	pylint --load-plugins=pylint_sort_functions --disable=all --enable=unsorted-functions,unsorted-methods,mixed-function-visibility src/
 
 test:
 	pytest tests/
