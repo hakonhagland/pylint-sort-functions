@@ -49,21 +49,21 @@
 <li class="toctree-l3"><a class="reference internal" href="#pylint_sort_functions.checker.FunctionSortChecker"><code class="docutils literal notranslate"><span class="pre">FunctionSortChecker</span></code></a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#pylint_sort_functions.checker.FunctionSortChecker.name"><code class="docutils literal notranslate"><span class="pre">FunctionSortChecker.name</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#pylint_sort_functions.checker.FunctionSortChecker.msgs"><code class="docutils literal notranslate"><span class="pre">FunctionSortChecker.msgs</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#pylint_sort_functions.checker.FunctionSortChecker.visit_module"><code class="docutils literal notranslate"><span class="pre">FunctionSortChecker.visit_module()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#pylint_sort_functions.checker.FunctionSortChecker.visit_classdef"><code class="docutils literal notranslate"><span class="pre">FunctionSortChecker.visit_classdef()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pylint_sort_functions.checker.FunctionSortChecker.visit_module"><code class="docutils literal notranslate"><span class="pre">FunctionSortChecker.visit_module()</span></code></a></li>
 </ul>
 </li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#module-pylint_sort_functions.messages">Messages Module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-pylint_sort_functions.utils">Utilities Module</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#pylint_sort_functions.utils.get_functions_from_node"><code class="docutils literal notranslate"><span class="pre">get_functions_from_node()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#pylint_sort_functions.utils.get_methods_from_class"><code class="docutils literal notranslate"><span class="pre">get_methods_from_class()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pylint_sort_functions.utils.are_functions_properly_separated"><code class="docutils literal notranslate"><span class="pre">are_functions_properly_separated()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pylint_sort_functions.utils.are_functions_sorted"><code class="docutils literal notranslate"><span class="pre">are_functions_sorted()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pylint_sort_functions.utils.are_methods_sorted"><code class="docutils literal notranslate"><span class="pre">are_methods_sorted()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#pylint_sort_functions.utils.are_functions_properly_separated"><code class="docutils literal notranslate"><span class="pre">are_functions_properly_separated()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#pylint_sort_functions.utils.is_private_function"><code class="docutils literal notranslate"><span class="pre">is_private_function()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pylint_sort_functions.utils.get_function_groups"><code class="docutils literal notranslate"><span class="pre">get_function_groups()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pylint_sort_functions.utils.get_functions_from_node"><code class="docutils literal notranslate"><span class="pre">get_functions_from_node()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pylint_sort_functions.utils.get_methods_from_class"><code class="docutils literal notranslate"><span class="pre">get_methods_from_class()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pylint_sort_functions.utils.is_private_function"><code class="docutils literal notranslate"><span class="pre">is_private_function()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#module-pylint_sort_functions">Plugin Registration</a><ul>
@@ -138,12 +138,12 @@ for class definitions. Each method analyzes the code structure and reports issue
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="pylint_sort_functions.checker.FunctionSortChecker.visit_module">
-<span class="sig-name descname"><span class="pre">visit_module</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pylint_sort_functions.checker.FunctionSortChecker.visit_module" title="Link to this definition"></a></dt>
-<dd><p>Visit a module node to check function sorting.</p>
+<dt class="sig sig-object py" id="pylint_sort_functions.checker.FunctionSortChecker.visit_classdef">
+<span class="sig-name descname"><span class="pre">visit_classdef</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pylint_sort_functions.checker.FunctionSortChecker.visit_classdef" title="Link to this definition"></a></dt>
+<dd><p>Visit a class definition to check method sorting.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>node</strong> (<em>nodes.Module</em>) – The module AST node to analyze</p>
+<dd class="field-odd"><p><strong>node</strong> (<em>nodes.ClassDef</em>) – The class definition AST node to analyze</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
@@ -152,12 +152,12 @@ for class definitions. Each method analyzes the code structure and reports issue
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="pylint_sort_functions.checker.FunctionSortChecker.visit_classdef">
-<span class="sig-name descname"><span class="pre">visit_classdef</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pylint_sort_functions.checker.FunctionSortChecker.visit_classdef" title="Link to this definition"></a></dt>
-<dd><p>Visit a class definition to check method sorting.</p>
+<dt class="sig sig-object py" id="pylint_sort_functions.checker.FunctionSortChecker.visit_module">
+<span class="sig-name descname"><span class="pre">visit_module</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pylint_sort_functions.checker.FunctionSortChecker.visit_module" title="Link to this definition"></a></dt>
+<dd><p>Visit a module node to check function sorting.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>node</strong> (<em>nodes.ClassDef</em>) – The class definition AST node to analyze</p>
+<dd class="field-odd"><p><strong>node</strong> (<em>nodes.Module</em>) – The module AST node to analyze</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
@@ -199,35 +199,18 @@ User disabling: # pylint: disable=unsorted-functions</p>
 <span id="utilities-module"></span><h2>Utilities Module<a class="headerlink" href="#module-pylint_sort_functions.utils" title="Link to this heading"></a></h2>
 <p>Utility functions for AST analysis and sorting logic.</p>
 <dl class="py function">
-<dt class="sig sig-object py" id="pylint_sort_functions.utils.get_functions_from_node">
-<span class="sig-prename descclassname"><span class="pre">pylint_sort_functions.utils.</span></span><span class="sig-name descname"><span class="pre">get_functions_from_node</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pylint_sort_functions.utils.get_functions_from_node" title="Link to this definition"></a></dt>
-<dd><p>Extract function definitions from a module node.</p>
+<dt class="sig sig-object py" id="pylint_sort_functions.utils.are_functions_properly_separated">
+<span class="sig-prename descclassname"><span class="pre">pylint_sort_functions.utils.</span></span><span class="sig-name descname"><span class="pre">are_functions_properly_separated</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">functions</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pylint_sort_functions.utils.are_functions_properly_separated" title="Link to this definition"></a></dt>
+<dd><p>Check if public and private functions are properly separated.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>node</strong> (<em>nodes.Module</em>) – The module AST node to analyze</p>
+<dd class="field-odd"><p><strong>functions</strong> (<em>list</em><em>[</em><em>nodes.FunctionDef</em><em>]</em>) – List of function definition nodes</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>List of function definition nodes</p>
+<dd class="field-even"><p>True if public functions come before private functions</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>list[nodes.FunctionDef]</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="pylint_sort_functions.utils.get_methods_from_class">
-<span class="sig-prename descclassname"><span class="pre">pylint_sort_functions.utils.</span></span><span class="sig-name descname"><span class="pre">get_methods_from_class</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pylint_sort_functions.utils.get_methods_from_class" title="Link to this definition"></a></dt>
-<dd><p>Extract method definitions from a class node.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>node</strong> (<em>nodes.ClassDef</em>) – The class definition AST node to analyze</p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>List of method definition nodes</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>list[nodes.FunctionDef]</p>
+<dd class="field-odd"><p>bool</p>
 </dd>
 </dl>
 </dd></dl>
@@ -267,18 +250,52 @@ User disabling: # pylint: disable=unsorted-functions</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="pylint_sort_functions.utils.are_functions_properly_separated">
-<span class="sig-prename descclassname"><span class="pre">pylint_sort_functions.utils.</span></span><span class="sig-name descname"><span class="pre">are_functions_properly_separated</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">functions</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pylint_sort_functions.utils.are_functions_properly_separated" title="Link to this definition"></a></dt>
-<dd><p>Check if public and private functions are properly separated.</p>
+<dt class="sig sig-object py" id="pylint_sort_functions.utils.get_function_groups">
+<span class="sig-prename descclassname"><span class="pre">pylint_sort_functions.utils.</span></span><span class="sig-name descname"><span class="pre">get_function_groups</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">functions</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pylint_sort_functions.utils.get_function_groups" title="Link to this definition"></a></dt>
+<dd><p>Split functions into public and private groups.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>functions</strong> (<em>list</em><em>[</em><em>nodes.FunctionDef</em><em>]</em>) – List of function definition nodes</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>True if public functions come before private functions</p>
+<dd class="field-even"><p>Tuple of (public_functions, private_functions)</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>bool</p>
+<dd class="field-odd"><p>tuple[list[nodes.FunctionDef], list[nodes.FunctionDef]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pylint_sort_functions.utils.get_functions_from_node">
+<span class="sig-prename descclassname"><span class="pre">pylint_sort_functions.utils.</span></span><span class="sig-name descname"><span class="pre">get_functions_from_node</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pylint_sort_functions.utils.get_functions_from_node" title="Link to this definition"></a></dt>
+<dd><p>Extract function definitions from a module node.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>node</strong> (<em>nodes.Module</em>) – The module AST node to analyze</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>List of function definition nodes</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list[nodes.FunctionDef]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pylint_sort_functions.utils.get_methods_from_class">
+<span class="sig-prename descclassname"><span class="pre">pylint_sort_functions.utils.</span></span><span class="sig-name descname"><span class="pre">get_methods_from_class</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pylint_sort_functions.utils.get_methods_from_class" title="Link to this definition"></a></dt>
+<dd><p>Extract method definitions from a class node.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>node</strong> (<em>nodes.ClassDef</em>) – The class definition AST node to analyze</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>List of method definition nodes</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list[nodes.FunctionDef]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -296,23 +313,6 @@ User disabling: # pylint: disable=unsorted-functions</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>bool</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="pylint_sort_functions.utils.get_function_groups">
-<span class="sig-prename descclassname"><span class="pre">pylint_sort_functions.utils.</span></span><span class="sig-name descname"><span class="pre">get_function_groups</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">functions</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pylint_sort_functions.utils.get_function_groups" title="Link to this definition"></a></dt>
-<dd><p>Split functions into public and private groups.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>functions</strong> (<em>list</em><em>[</em><em>nodes.FunctionDef</em><em>]</em>) – List of function definition nodes</p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Tuple of (public_functions, private_functions)</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>tuple[list[nodes.FunctionDef], list[nodes.FunctionDef]]</p>
 </dd>
 </dl>
 </dd></dl>
