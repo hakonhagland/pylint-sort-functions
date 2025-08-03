@@ -18,9 +18,9 @@ The visitor pattern: PyLint calls visit_module() for modules and visit_classdef(
 for class definitions. Each method analyzes the code structure and reports issues.
 """
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
-from astroid import nodes
+from astroid import nodes  # type: ignore[import-untyped]
 from pylint.checkers import BaseChecker
 
 from pylint_sort_functions import messages, utils
@@ -33,7 +33,7 @@ class FunctionSortChecker(BaseChecker):
     """Checker to enforce alphabetical sorting of functions and methods."""
 
     name = "function-sort"
-    msgs = messages.MESSAGES
+    msgs: dict[str, Any] = messages.MESSAGES
 
     def visit_module(self, node: nodes.Module) -> None:
         """Visit a module node to check function sorting.

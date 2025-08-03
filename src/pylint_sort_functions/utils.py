@@ -1,6 +1,6 @@
 """Utility functions for AST analysis and sorting logic."""
 
-from astroid import nodes
+from astroid import nodes  # type: ignore[import-untyped]
 
 
 def get_functions_from_node(node: nodes.Module) -> list[nodes.FunctionDef]:
@@ -71,7 +71,7 @@ def is_private_function(func: nodes.FunctionDef) -> bool:
     :returns: True if function name starts with underscore
     :rtype: bool
     """
-    return func.name.startswith("_")
+    return bool(func.name.startswith("_"))
 
 
 def get_function_groups(functions: list[nodes.FunctionDef]) -> tuple[list[nodes.FunctionDef], list[nodes.FunctionDef]]:
