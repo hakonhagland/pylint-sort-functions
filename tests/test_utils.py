@@ -1,6 +1,6 @@
 """Tests for utility functions."""
 
-from pylint_sort_functions import utils
+from pylint_sort_functions import utils  # noqa: F401
 
 
 class TestUtils:

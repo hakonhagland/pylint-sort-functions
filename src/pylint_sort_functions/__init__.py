@@ -10,10 +10,10 @@ if TYPE_CHECKING:
 
 def register(linter: "PyLinter") -> None:
     """Register the plugin with PyLint.
-    
+
     This function is called by PyLint when the plugin is loaded.
     It registers the FunctionSortChecker with the linter.
-    
+
     :param linter: The PyLint linter instance
     :type linter: PyLinter
     """

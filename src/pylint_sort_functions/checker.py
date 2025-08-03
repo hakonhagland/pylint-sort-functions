@@ -14,7 +14,7 @@ User Experience:
     $ pylint --load-plugins=pylint_sort_functions mycode.py
     # PyLint automatically uses this checker and reports any sorting violations
 
-The visitor pattern: PyLint calls visit_module() for modules and visit_classdef() 
+The visitor pattern: PyLint calls visit_module() for modules and visit_classdef()
 for class definitions. Each method analyzes the code structure and reports issues.
 """
 
@@ -26,7 +26,7 @@ from pylint.checkers import BaseChecker
 from pylint_sort_functions import messages, utils
 
 if TYPE_CHECKING:
-    from pylint.lint import PyLinter
+    pass
 
 
 class FunctionSortChecker(BaseChecker):
@@ -37,7 +37,7 @@ class FunctionSortChecker(BaseChecker):
 
     def visit_module(self, node: nodes.Module) -> None:
         """Visit a module node to check function sorting.
-        
+
         :param node: The module AST node to analyze
         :type node: nodes.Module
         """
@@ -47,13 +47,17 @@ class FunctionSortChecker(BaseChecker):
 
     def visit_classdef(self, node: nodes.ClassDef) -> None:
         """Visit a class definition to check method sorting.
-        
-        :param node: The class definition AST node to analyze  
+
+        :param node: The class definition AST node to analyze
         :type node: nodes.ClassDef
         """
         methods = utils.get_methods_from_class(node)
         if not utils.are_methods_sorted(methods):
             self.add_message("unsorted-methods", node=node, args=(node.name,))
-        
+
         if not utils.are_functions_properly_separated(methods):
-            self.add_message("mixed-function-visibility", node=node, args=(f"class {node.name}",))
+            self.add_message(
+                "mixed-function-visibility",
+                node=node,
+                args=(f"class {node.name}",),
+            )

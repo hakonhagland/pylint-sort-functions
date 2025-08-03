@@ -7,7 +7,7 @@ from pylint_sort_functions.checker import FunctionSortChecker
 
 class TestFunctionSortChecker(CheckerTestCase):
     """Test cases for FunctionSortChecker."""
-    
+
     CHECKER_CLASS = FunctionSortChecker
 
     def test_sorted_functions_pass(self) -> None:
