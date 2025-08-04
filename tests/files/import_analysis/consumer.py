@@ -1,6 +1,6 @@
 """Consumer module that imports from library."""
 
-from library import get_config, public_api_function
+from library import get_config, public_api_function  # type: ignore[import-not-found]
 
 
 def use_library() -> None:

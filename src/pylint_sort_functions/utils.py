@@ -121,7 +121,7 @@ def get_methods_from_class(node: nodes.ClassDef) -> list[nodes.FunctionDef]:
     return methods
 
 
-def should_function_be_private(func: nodes.FunctionDef, module: nodes.Module) -> bool:
+def should_function_be_private(func: nodes.FunctionDef, module: nodes.Module) -> bool:  # pylint: disable=too-many-return-statements,too-many-branches
     """Determine if a function should be marked as private using heuristics.
 
     This is the original heuristic-based approach that analyzes:
