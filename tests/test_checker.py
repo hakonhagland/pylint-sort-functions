@@ -161,6 +161,52 @@ class SimpleClass:
             # Run our checker on the parsed class
             self.checker.visit_classdef(class_node)
 
+    def test_function_should_be_private_fail(self) -> None:
+        """Test that functions that should be private trigger warnings."""
+        # Integration test: Run pylint on real file with functions that should be private
+        test_file = TEST_FILES_DIR / "modules" / "should_be_private.py"
+
+        # Read and parse the test file
+        with open(test_file, encoding="utf-8") as f:
+            content = f.read()
+
+        # Parse file into AST
+        module = astroid.parse(content, module_name="should_be_private")
+
+        # Use pylint testing framework to verify expected messages are generated
+        # We expect multiple functions to be flagged as should be private
+        with self.assertAddsMessages(
+            MessageTest(
+                msg_id="function-should-be-private",
+                line=14,  # helper_function
+                node=module.body[2],  # Third function definition
+                args=("helper_function",),
+                col_offset=0,
+                end_line=14,
+                end_col_offset=19,
+            ),
+            MessageTest(
+                msg_id="function-should-be-private",
+                line=25,  # process_data
+                node=module.body[4],  # Fifth function definition
+                args=("process_data",),
+                col_offset=0,
+                end_line=25,
+                end_col_offset=16,
+            ),
+            MessageTest(
+                msg_id="function-should-be-private",
+                line=35,  # validate_numbers
+                node=module.body[6],  # Seventh function definition
+                args=("validate_numbers",),
+                col_offset=0,
+                end_line=35,
+                end_col_offset=20,
+            ),
+        ):
+            # Run our checker on the parsed module
+            self.checker.visit_module(module)
+
     def test_visit_classdef_calls_utils(self) -> None:
         """Test that visit_classdef calls utility functions and adds messages."""
         mock_node = Mock(spec=nodes.ClassDef)

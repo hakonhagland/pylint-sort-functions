@@ -218,3 +218,21 @@ class TestUtils:
         result = utils.is_private_function(mock_func)
 
         assert result is False
+
+    def test_should_function_be_private_dunder_methods(self) -> None:
+        """Test that dunder methods are not flagged as should be private."""
+        file_path = TEST_FILES_DIR / "modules" / "dunder_methods.py"
+        with open(file_path, encoding="utf-8") as f:
+            content = f.read()
+
+        module = astroid.parse(content)
+        
+        # Test __get_something__ method (first function)
+        dunder_func = module.body[0]
+        assert isinstance(dunder_func, nodes.FunctionDef)
+        assert dunder_func.name == "__get_something__"
+        
+        result = utils.should_function_be_private(dunder_func, module)
+        
+        # Dunder methods should never be flagged as should be private
+        assert result is False

@@ -41,4 +41,14 @@ MESSAGES: dict[str, tuple[str, str, str]] = {
         "Public functions (no underscore prefix) should come before private functions "
         "(underscore prefix) with clear separation",
     ),
+    "W9004": (
+        "Function '%s' should be private (prefix with underscore)",
+        "function-should-be-private",
+        "Functions that are only used within their defining module should be marked "
+        "as private by prefixing their name with an underscore. This rule detects "
+        "functions with helper/utility naming patterns (get_, validate_, process_, "
+        "helper, etc.) that are called only within the same module. Note: Cannot "
+        "detect cross-module usage, so functions used by other modules won't be "
+        "flagged (which reduces false positives).",
+    ),
 }

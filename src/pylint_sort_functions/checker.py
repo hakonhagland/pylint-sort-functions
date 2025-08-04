@@ -53,7 +53,7 @@ class FunctionSortChecker(BaseChecker):
             )
 
     def visit_module(self, node: nodes.Module) -> None:
-        """Visit a module node to check function sorting.
+        """Visit a module node to check function sorting and privacy.
 
         :param node: The module AST node to analyze
         :type node: nodes.Module
@@ -61,3 +61,10 @@ class FunctionSortChecker(BaseChecker):
         functions = utils.get_functions_from_node(node)
         if not utils.are_functions_sorted(functions):
             self.add_message("unsorted-functions", node=node, args=("module",))
+
+        # Check if any public functions should be private
+        for func in functions:
+            if utils.should_function_be_private(func, node):
+                self.add_message(
+                    "function-should-be-private", node=func, args=(func.name,)
+                )

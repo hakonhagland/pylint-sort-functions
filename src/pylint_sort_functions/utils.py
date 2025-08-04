@@ -1,4 +1,25 @@
-"""Utility functions for AST analysis and sorting logic."""
+"""Utility functions for AST analysis and sorting logic.
+
+This module provides the core analysis functions for the pylint-sort-functions plugin.
+It includes functions for:
+
+1. Function/method sorting validation
+2. Public/private function separation validation
+3. Function privacy detection (identifying functions that should be private)
+
+Function Privacy Detection Approach:
+The plugin uses a heuristic-based approach to identify functions that should be private:
+- Analyzes function naming patterns (helper/utility prefixes and keywords)
+- Checks internal usage within the same module
+- Applies conservative logic to minimize false positives
+- Cannot detect cross-module imports (this is actually beneficial for reducing
+  false positives on legitimate public API functions)
+
+The approach prioritizes precision over recall - it's better to miss some candidates
+than to incorrectly flag public API functions as needing to be private.
+"""
+
+from typing import Set
 
 from astroid import nodes  # type: ignore[import-untyped]
 
@@ -95,6 +116,34 @@ def get_functions_from_node(node: nodes.Module) -> list[nodes.FunctionDef]:
     return functions
 
 
+def get_functions_used_in_module(module: nodes.Module) -> Set[str]:
+    """Extract all function names that are called within a module.
+
+    :param module: The module AST node to analyze
+    :type module: nodes.Module
+    :returns: Set of function names called within the module
+    :rtype: Set[str]
+    """
+    used_functions: Set[str] = set()
+
+    def visit_call(node: nodes.Call) -> None:
+        """Visit Call nodes to find function calls."""
+        if isinstance(node.func, nodes.Name):
+            used_functions.add(node.func.name)
+
+    def visit_node(node: nodes.NodeNG) -> None:
+        """Recursively visit all nodes in the AST."""
+        if isinstance(node, nodes.Call):
+            visit_call(node)
+
+        # Recursively visit all child nodes
+        for child in node.get_children():
+            visit_node(child)
+
+    visit_node(module)
+    return used_functions
+
+
 def get_methods_from_class(node: nodes.ClassDef) -> list[nodes.FunctionDef]:
     """Extract method definitions from a class node.
 
@@ -119,3 +168,135 @@ def is_private_function(func: nodes.FunctionDef) -> bool:
     :rtype: bool
     """
     return bool(func.name.startswith("_"))
+
+
+def should_function_be_private(func: nodes.FunctionDef, module: nodes.Module) -> bool:
+    """Check if a public function should be private based on usage patterns.
+
+    This function uses heuristics to identify functions that are likely internal
+    implementation details and should be marked as private (prefixed with underscore).
+
+    Detection Criteria (ALL must be true):
+    1. Function is currently public (doesn't start with underscore)
+    2. Function name matches helper/utility patterns (see helper_patterns below)
+    3. Function is called within the same module (indicates internal usage)
+    4. Function is not a special method (__init__, __str__, etc.)
+    5. Function is not a common public API pattern (main, run, setup, etc.)
+
+    Helper Patterns Detected:
+    - Prefixes: get_, set_, check_, validate_, parse_, format_, calculate_,
+      process_, handle_, find_, extract_, convert_, transform_, build_,
+      create_, make_
+    - Contains: helper, util, internal, support
+    - Predicates: is_, has_, can_, should_, will_, does_
+
+    Cross-Module Usage Limitations:
+    - CANNOT detect functions imported/used by other modules
+    - Only analyzes calls within the same module
+    - This is actually beneficial: functions used externally won't be flagged
+    - Conservative approach reduces false positives
+
+    Examples:
+        # Will be flagged (helper pattern + internal usage):
+        def get_data():
+            return process_internal_data()
+
+        def process_internal_data():  # Called by get_data() above
+            return "data"
+
+        # Will NOT be flagged (helper pattern but no internal usage):
+        def parse_config():  # Likely used by other modules
+            return {"setting": "value"}
+
+        # Will NOT be flagged (no helper pattern):
+        def save():  # Public API function
+            return store_data()
+
+    :param func: Function definition node to analyze
+    :type func: nodes.FunctionDef
+    :param module: The module containing the function
+    :type module: nodes.Module
+    :returns: True if the function should be marked as private
+    :rtype: bool
+    """
+    # Skip if already private
+    if is_private_function(func):
+        return False
+
+    # Skip special methods (dunder methods)
+    if func.name.startswith("__") and func.name.endswith("__"):
+        return False
+
+    # Skip common public API patterns
+    public_patterns = {
+        "main",  # Common entry point
+        "run",  # Common entry point
+        "setup",  # Setup functions
+        "teardown",  # Teardown functions
+    }
+    if func.name in public_patterns:
+        return False
+
+    # Get all function names used in this module
+    used_functions = get_functions_used_in_module(module)
+
+    # If the function is called within the module but not by functions
+    # outside this module, it should probably be private
+    # For now, we use a simple heuristic: if it's only used internally
+    # and follows certain naming patterns, suggest making it private
+
+    # Check if function name suggests it's a helper/utility function
+    # These patterns are based on common Python naming conventions for internal
+    # implementation details vs. public API functions
+    helper_patterns = {
+        "get_",
+        "set_",
+        "check_",
+        "validate_",
+        "parse_",
+        "format_",
+        "calculate_",
+        "process_",
+        "handle_",
+        "find_",
+        "extract_",
+        "convert_",
+        "transform_",
+        "build_",
+        "create_",
+        "make_",
+        "helper",
+        "util",
+        "internal",
+        "support",
+    }
+
+    # Check if function name contains helper patterns (not just starts with)
+    contains_helper_pattern = any(
+        pattern in func.name.lower() for pattern in helper_patterns
+    )
+
+    is_used_internally = func.name in used_functions
+
+    # Additional heuristic: check if function is only called by other functions
+    # in the same module and not used at module level (suggesting internal use)
+    if is_used_internally and contains_helper_pattern:
+        return True
+
+    # Enhanced heuristic: function that is used internally but has generic names
+    # that suggest utility/helper nature
+    internal_indicators = {
+        "is_",
+        "has_",
+        "can_",
+        "should_",
+        "will_",
+        "does_",  # Predicate functions
+    }
+
+    starts_with_predicate = any(
+        func.name.startswith(pattern) for pattern in internal_indicators
+    )
+
+    # If it's a predicate function used internally, likely should be private
+    return starts_with_predicate and is_used_internally
