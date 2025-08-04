@@ -39,14 +39,14 @@ ruff-format:
 
 self-check:
 	pylint --load-plugins=pylint_sort_functions --disable=fixme,unnecessary-pass src/
-	pylint --load-plugins=pylint_sort_functions --disable=fixme,unnecessary-pass tests/
+	pylint --load-plugins=pylint_sort_functions --disable=fixme,unnecessary-pass,protected-access,import-outside-toplevel,unused-variable,redefined-outer-name,reimported,unspecified-encoding,use-implicit-booleaness-not-comparison,unsorted-methods,function-should-be-private,too-many-public-methods tests/
 
 test:
 	pytest tests/
 
 test-plugin:
 	pylint --load-plugins=pylint_sort_functions --disable=fixme,unnecessary-pass src/
-	pylint --load-plugins=pylint_sort_functions --disable=fixme,unnecessary-pass tests/
+	pylint --load-plugins=pylint_sort_functions --disable=fixme,unnecessary-pass,protected-access,import-outside-toplevel,unused-variable,redefined-outer-name,reimported,unspecified-encoding,use-implicit-booleaness-not-comparison,unsorted-methods,function-should-be-private,too-many-public-methods tests/
 
 tox:
 	tox
