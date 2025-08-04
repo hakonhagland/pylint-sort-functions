@@ -62,9 +62,43 @@ class FunctionSortChecker(BaseChecker):
         if not utils.are_functions_sorted(functions):
             self.add_message("unsorted-functions", node=node, args=("module",))
 
-        # Check if any public functions should be private
+        # Check if any public functions should be private using import analysis
+        # Get module file path from the linter
+        module_path = None
+        project_root = None
+        
+        if hasattr(self.linter, 'current_file') and self.linter.current_file:
+            from pathlib import Path
+            module_path = Path(self.linter.current_file).resolve()
+            
+            # Try to find project root by looking for common project markers
+            current = module_path.parent
+            while current != current.parent:
+                # Look for project markers
+                if any((current / marker).exists() for marker in [
+                    'pyproject.toml', 'setup.py', 'setup.cfg', '.git', 
+                    'requirements.txt', 'Pipfile', 'poetry.lock'
+                ]):
+                    project_root = current
+                    break
+                current = current.parent
+            
+            # Fallback: if no project markers found, use the directory containing the file
+            # This handles cases where we're testing in isolated directories
+            if project_root is None:
+                project_root = module_path.parent
+        
         for func in functions:
-            if utils.should_function_be_private(func, node):
+            # Use import analysis if we have the necessary path information
+            if module_path and project_root:
+                should_be_private = utils.should_function_be_private_with_import_analysis(
+                    func, node, module_path, project_root
+                )
+            else:
+                # Fallback to heuristic approach if path info unavailable
+                should_be_private = utils.should_function_be_private(func, node)
+                
+            if should_be_private:
                 self.add_message(
                     "function-should-be-private", node=func, args=(func.name,)
                 )
