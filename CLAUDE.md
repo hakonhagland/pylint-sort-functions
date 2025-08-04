@@ -118,9 +118,15 @@ make test-plugin
 pylint --load-plugins=pylint_sort_functions --disable=all --enable=unsorted-functions,unsorted-methods,mixed-function-visibility src/
 make self-check
 
-# Build and publish
-uv build
-make publish-to-pypi
+# Build and publish (with automatic version bumping)
+make publish-to-pypi        # Patch release (0.1.0 → 0.1.1) for bug fixes
+make publish-to-pypi-minor  # Minor release (0.1.0 → 0.2.0) for new features
+make publish-to-pypi-major  # Major release (0.1.0 → 1.0.0) for breaking changes
+
+# Manual version bumping (for testing)
+python scripts/bump-version.py --dry-run patch  # Test version bump
+python scripts/bump-version.py patch            # Actual version bump with commit
+python scripts/bump-version.py --no-commit patch  # Version bump without commit
 
 # Run all tests across Python versions
 tox
