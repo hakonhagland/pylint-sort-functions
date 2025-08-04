@@ -29,6 +29,9 @@ dev-dependencies = [
     "sphinx-autodoc-typehints>=2.3.0",
 ]
 
+[project.scripts]
+pylint-sort-functions = "pylint_sort_functions.cli:main"
+
 [project.entry-points."pylint.checkers"]
 pylint_sort_functions = "pylint_sort_functions"
 
