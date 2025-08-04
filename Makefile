@@ -63,32 +63,15 @@ ruff-format:
 
 # Self-check using plugin (same as test-plugin for consistency)
 self-check:
-	pylint --load-plugins=pylint_sort_functions --disable=fixme,unnecessary-pass src/
-	pylint --load-plugins=pylint_sort_functions --disable=fixme,unnecessary-pass,protected-access,import-outside-toplevel,unused-variable,redefined-outer-name,reimported,unspecified-encoding,use-implicit-booleaness-not-comparison,unsorted-methods,function-should-be-private,too-many-public-methods tests/
+	@bash -c "source scripts/pylint-config.sh && pylint_check_relaxed"
 
 test:
 	pytest tests/
 
-# Pylint disable arguments explanation:
+# Pylint configuration is centralized in scripts/pylint-config.sh
+# This eliminates duplication across Makefile, pre-commit, and CI configurations.
 #
-# UNIVERSAL DISABLES (src/ and tests/):
-#   fixme              - Allow TODO/FIXME comments during development
-#   unnecessary-pass   - Allow explicit pass statements for clarity
-#
-# TEST-SPECIFIC DISABLES (tests/ only):
-#   protected-access                    - Tests must access private members for comprehensive coverage
-#   import-outside-toplevel             - Tests use dynamic imports for isolation and setup
-#   unused-variable                     - Tests often unpack tuples but only assert on specific values
-#   redefined-outer-name               - Tests shadow outer scope for local imports and fixtures
-#   reimported                         - Tests re-import modules in different scopes for isolation
-#   unspecified-encoding               - Test files often use default encoding for simplicity
-#   use-implicit-booleaness-not-comparison - Test assertions benefit from explicit comparisons
-#   unsorted-methods                   - Tests organized by logic/workflow, not alphabetically
-#   function-should-be-private         - Test functions are inherently scoped to their files
-#   too-many-public-methods            - Test classes naturally have many test methods
-#
-# PHILOSOPHY: Production code (src/) uses strict rules for maintainability and API design.
-# Test code (tests/) uses relaxed rules to enable comprehensive testing without artificial constraints.
+# For detailed explanation of disable arguments, see scripts/pylint-config.sh
 #
 # QUICK REFERENCE:
 #   make test-plugin        - Clean output, matches pre-commit (for daily development)
@@ -97,13 +80,11 @@ test:
 
 # Test plugin with relaxed rules for test files (matches pre-commit behavior)
 test-plugin:
-	pylint --load-plugins=pylint_sort_functions --disable=fixme,unnecessary-pass src/
-	pylint --load-plugins=pylint_sort_functions --disable=fixme,unnecessary-pass,protected-access,import-outside-toplevel,unused-variable,redefined-outer-name,reimported,unspecified-encoding,use-implicit-booleaness-not-comparison,unsorted-methods,function-should-be-private,too-many-public-methods tests/
+	@bash -c "source scripts/pylint-config.sh && pylint_check_relaxed"
 
 # Test plugin with strict rules for both src and test files (shows all warnings)
 test-plugin-strict:
-	pylint --load-plugins=pylint_sort_functions --disable=fixme,unnecessary-pass src/
-	pylint --load-plugins=pylint_sort_functions --disable=fixme,unnecessary-pass tests/
+	@bash -c "source scripts/pylint-config.sh && pylint_check_strict"
 
 tox:
 	tox

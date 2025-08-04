@@ -52,8 +52,8 @@ jobs:
 
       - name: Plugin full check
         run: |
-          uv run pylint --load-plugins=pylint_sort_functions --disable=fixme,unnecessary-pass src/
-          uv run pylint --load-plugins=pylint_sort_functions --disable=fixme,unnecessary-pass tests/
+          source scripts/pylint-config.sh
+          uv run bash -c "source scripts/pylint-config.sh && pylint_check_relaxed"
 
       - name: Code coverage
         run: |
