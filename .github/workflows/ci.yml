@@ -57,7 +57,7 @@ jobs:
         run: |
           source scripts/pylint-config.sh
           echo "Checking src/ with strict rules..."
-          uv run pylint --load-plugins=pylint_sort_functions --disable="$PYLINT_UNIVERSAL_DISABLES" src/
+          uv run pylint --load-plugins=pylint_sort_functions --disable="$PYLINT_UNIVERSAL_DISABLES" --fail-on=unsorted-functions,unsorted-methods,mixed-function-visibility,function-should-be-private src/
           echo "Checking tests/ with relaxed rules..."
           uv run pylint --load-plugins=pylint_sort_functions --disable="$PYLINT_TEST_DISABLES" tests/
 
