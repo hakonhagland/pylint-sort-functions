@@ -355,14 +355,10 @@ sorting by excluding functions with specific decorators that create dependencies
 <dl class="py function">
 <dt class="sig sig-object py" id="pylint_sort_functions.utils.should_function_be_private">
 <span class="sig-prename descclassname"><span class="pre">pylint_sort_functions.utils.</span></span><span class="sig-name descname"><span class="pre">should_function_be_private</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pylint_sort_functions.utils.should_function_be_private" title="Link to this definition"></a></dt>
-<dd><p>Determine if a function should be marked as private using heuristics.</p>
-<p>This is the original heuristic-based approach that analyzes:
-1. Function naming patterns (helper/utility prefixes and keywords)
-2. Internal usage within the same module</p>
-<p>Limitations:
-- Cannot detect cross-module imports (by design, to reduce false positives)
-- May miss some functions that should be private
-- Conservative approach prioritizes precision over recall</p>
+<dd><p>Legacy heuristic-based privacy detection (deprecated).</p>
+<p>This function is kept for backward compatibility but always returns False.
+The preferred approach is should_function_be_private_with_import_analysis()
+which provides more accurate detection based on actual usage patterns.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -371,7 +367,7 @@ sorting by excluding functions with specific decorators that create dependencies
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>True if the function should be marked as private</p>
+<dd class="field-even"><p>Always returns False (heuristics disabled)</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>bool</p>
