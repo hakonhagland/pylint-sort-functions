@@ -128,7 +128,7 @@ class TestUtils:
 
         functions = [public_func, private_func]
 
-        public_functions, private_functions = utils.get_function_groups(functions)
+        public_functions, private_functions = utils._get_function_groups(functions)
 
         assert len(public_functions) == 1
         assert len(private_functions) == 1
@@ -139,7 +139,7 @@ class TestUtils:
         """Test function grouping with empty list."""
         functions: list[nodes.FunctionDef] = []
 
-        public_functions, private_functions = utils.get_function_groups(functions)
+        public_functions, private_functions = utils._get_function_groups(functions)
 
         assert public_functions == []
         assert private_functions == []
@@ -206,7 +206,7 @@ class TestUtils:
         mock_func = Mock(spec=nodes.FunctionDef)
         mock_func.name = "_private_function"
 
-        result = utils.is_private_function(mock_func)
+        result = utils._is_private_function(mock_func)
 
         assert result is True
 
@@ -215,7 +215,7 @@ class TestUtils:
         mock_func = Mock(spec=nodes.FunctionDef)
         mock_func.name = "public_function"
 
-        result = utils.is_private_function(mock_func)
+        result = utils._is_private_function(mock_func)
 
         assert result is False
 
@@ -273,7 +273,7 @@ class TestUtils:
             skip_dir.mkdir()
             (skip_dir / "cached.py").write_text("# Should be skipped")
 
-            files = utils.find_python_files(temp_path)
+            files = utils._find_python_files(temp_path)
 
             # Should find 3 Python files
             assert len(files) == 3
@@ -293,7 +293,7 @@ class TestUtils:
             test_file = temp_path / "test_imports.py"
 
             # Create test file with various import patterns
-            content = '''
+            content = """
 import os
 import sys as system
 from typing import Dict, List
@@ -306,11 +306,12 @@ def test_function():
     helper_function()
     # PathLib is a class, not a module, so no attribute access detected
     PathLib("/tmp")
-'''
+"""
             test_file.write_text(content)
 
-            (module_imports, function_imports,
-             attribute_accesses) = utils.extract_imports_from_file(test_file)
+            (module_imports, function_imports, attribute_accesses) = (
+                utils._extract_imports_from_file(test_file)
+            )
 
             # Test module imports
             assert "os" in module_imports
@@ -344,8 +345,9 @@ def test_function():
             # Create file with syntax error
             test_file.write_text("def broken(:\n    pass")
 
-            (module_imports, function_imports,
-             attribute_accesses) = utils.extract_imports_from_file(test_file)
+            (module_imports, function_imports, attribute_accesses) = (
+                utils._extract_imports_from_file(test_file)
+            )
 
             # Should return empty sets for unparseable files
             assert len(module_imports) == 0
@@ -362,24 +364,24 @@ def test_function():
 
             # Create library module
             library_file = temp_path / "library.py"
-            library_file.write_text('''
+            library_file.write_text("""
 def public_function():
     return "public"
 
 def internal_function():
     return "internal"
-''')
+""")
 
             # Create consumer module
             consumer_file = temp_path / "consumer.py"
-            consumer_file.write_text('''
+            consumer_file.write_text("""
 from library import public_function
 
 def use_library():
     return public_function()
-''')
+""")
 
-            usage_graph = utils.build_cross_module_usage_graph(temp_path)
+            usage_graph = utils._build_cross_module_usage_graph(temp_path)
 
             # public_function should be in the graph (imported by consumer)
             assert "public_function" in usage_graph
@@ -398,32 +400,38 @@ def use_library():
 
             # Create library module
             library_file = temp_path / "library.py"
-            library_file.write_text('''
+            library_file.write_text("""
 def external_func():
     return "external"
 
 def internal_func():
     return "internal"
-''')
+""")
 
             # Create consumer module
             consumer_file = temp_path / "consumer.py"
-            consumer_file.write_text('''
+            consumer_file.write_text("""
 from library import external_func
 
 def use_library():
     return external_func()
-''')
+""")
 
             # external_func should be detected as used externally
-            assert utils.is_function_used_externally(
-                "external_func", library_file, temp_path
-            ) is True
+            assert (
+                utils._is_function_used_externally(
+                    "external_func", library_file, temp_path
+                )
+                is True
+            )
 
             # internal_func should not be detected as used externally
-            assert utils.is_function_used_externally(
-                "internal_func", library_file, temp_path
-            ) is False
+            assert (
+                utils._is_function_used_externally(
+                    "internal_func", library_file, temp_path
+                )
+                is False
+            )
 
     def test_should_function_be_private_with_import_analysis(self) -> None:
         """Test enhanced privacy detection with import analysis."""
@@ -435,7 +443,7 @@ def use_library():
 
             # Create library module
             library_file = temp_path / "library.py"
-            library_content = '''
+            library_content = """
 def public_api():
     return "public"
 
@@ -447,17 +455,17 @@ def main():
 
 def __special__():
     return "special"
-'''
+"""
             library_file.write_text(library_content)
 
             # Create consumer module
             consumer_file = temp_path / "consumer.py"
-            consumer_file.write_text('''
+            consumer_file.write_text("""
 from library import public_api
 
 def use_library():
     return public_api()
-''')
+""")
 
             # Parse the library module
             module = astroid.parse(library_content)
@@ -471,24 +479,24 @@ def use_library():
 
             # public_api should not be flagged (used externally)
             result = utils.should_function_be_private_with_import_analysis(
-                public_api_func, module, library_file, temp_path
+                public_api_func, library_file, temp_path
             )
             assert result is False
 
             # internal_helper should be flagged (not used externally)
             result = utils.should_function_be_private_with_import_analysis(
-                internal_helper_func, module, library_file, temp_path
+                internal_helper_func, library_file, temp_path
             )
             assert result is True
 
             # main should not be flagged (public pattern)
             result = utils.should_function_be_private_with_import_analysis(
-                main_func, module, library_file, temp_path
+                main_func, library_file, temp_path
             )
             assert result is False
 
             # __special__ should not be flagged (dunder method)
             result = utils.should_function_be_private_with_import_analysis(
-                special_func, module, library_file, temp_path
+                special_func, library_file, temp_path
             )
             assert result is False

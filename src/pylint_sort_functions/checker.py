@@ -18,6 +18,7 @@ The visitor pattern: PyLint calls visit_module() for modules and visit_classdef(
 for class definitions. Each method analyzes the code structure and reports issues.
 """
 
+from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 from astroid import nodes  # type: ignore[import-untyped]
@@ -68,8 +69,6 @@ class FunctionSortChecker(BaseChecker):
         project_root = None
 
         if hasattr(self.linter, "current_file") and self.linter.current_file:
-            from pathlib import Path
-
             module_path = Path(self.linter.current_file).resolve()
 
             # Try to find project root by looking for common project markers
@@ -102,7 +101,7 @@ class FunctionSortChecker(BaseChecker):
             if module_path and project_root:
                 should_be_private = (
                     utils.should_function_be_private_with_import_analysis(
-                        func, node, module_path, project_root
+                        func, module_path, project_root
                     )
                 )
             else:

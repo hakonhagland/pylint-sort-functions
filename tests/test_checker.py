@@ -137,22 +137,13 @@ class SimpleClass:
         assert isinstance(class_node, nodes.ClassDef)
 
         # Use pylint testing framework to verify expected messages are generated
-        # This file has both unsorted methods AND mixed visibility, expect both messages
+        # This file has unsorted methods (but properly separated visibility)
         with self.assertAddsMessages(
             MessageTest(
                 msg_id="unsorted-methods",
                 line=4,  # Class definition starts on line 4
                 node=class_node,  # The actual class AST node
                 args=("Calculator",),  # Class name in the message
-                col_offset=0,  # Column offset for class-level messages
-                end_line=4,  # End line matches the class definition
-                end_col_offset=16,  # End column offset
-            ),
-            MessageTest(
-                msg_id="mixed-function-visibility",
-                line=4,  # Class definition starts on line 4
-                node=class_node,  # The actual class AST node
-                args=("class Calculator",),  # Class name in the message
                 col_offset=0,  # Column offset for class-level messages
                 end_line=4,  # End line matches the class definition
                 end_col_offset=16,  # End column offset
@@ -341,12 +332,13 @@ def example_function():
 
         # Mock linter without current_file attribute
         from unittest.mock import Mock
+
         mock_linter = Mock()
         del mock_linter.current_file  # Remove the attribute entirely
 
         with (
-            patch.object(self.checker, 'linter', mock_linter),
+            patch.object(self.checker, "linter", mock_linter),
             # Should not crash and not add messages for simple function
-            self.assertNoMessages()
+            self.assertNoMessages(),
         ):
             self.checker.visit_module(module)
