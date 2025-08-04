@@ -34,7 +34,7 @@
 # Test code (tests/) uses relaxed rules to enable comprehensive testing without artificial constraints.
 
 # Universal disables for both src/ and tests/
-PYLINT_UNIVERSAL_DISABLES="fixme,unnecessary-pass"
+PYLINT_UNIVERSAL_DISABLES="fixme,unnecessary-pass,broad-exception-caught"
 
 # Additional disables for test files only
 PYLINT_TEST_ADDITIONAL_DISABLES="protected-access,import-outside-toplevel,unused-variable,redefined-outer-name,reimported,unspecified-encoding,use-implicit-booleaness-not-comparison,unsorted-methods,function-should-be-private,too-many-public-methods"

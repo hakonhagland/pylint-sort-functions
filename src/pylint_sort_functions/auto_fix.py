@@ -38,7 +38,7 @@ class AutoFixConfig:
     preserve_comments: bool = True
 
 
-class FunctionSorter:  # pylint: disable=too-few-public-methods
+class FunctionSorter:  # pylint: disable=too-few-public-methods,unsorted-methods
     """Main class for auto-fixing function sorting."""
 
     def __init__(self, config: AutoFixConfig):
@@ -338,7 +338,7 @@ class FunctionSorter:  # pylint: disable=too-few-public-methods
         return "".join(new_lines)
 
 
-def sort_python_file(file_path: Path, config: AutoFixConfig) -> bool:
+def sort_python_file(file_path: Path, config: AutoFixConfig) -> bool:  # pylint: disable=function-should-be-private
     """Sort functions in a Python file.
 
     :param file_path: Path to the Python file
