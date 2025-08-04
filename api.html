@@ -62,8 +62,10 @@
 <li class="toctree-l3"><a class="reference internal" href="#pylint_sort_functions.utils.are_methods_sorted"><code class="docutils literal notranslate"><span class="pre">are_methods_sorted()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pylint_sort_functions.utils.get_function_groups"><code class="docutils literal notranslate"><span class="pre">get_function_groups()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pylint_sort_functions.utils.get_functions_from_node"><code class="docutils literal notranslate"><span class="pre">get_functions_from_node()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pylint_sort_functions.utils.get_functions_used_in_module"><code class="docutils literal notranslate"><span class="pre">get_functions_used_in_module()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pylint_sort_functions.utils.get_methods_from_class"><code class="docutils literal notranslate"><span class="pre">get_methods_from_class()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pylint_sort_functions.utils.is_private_function"><code class="docutils literal notranslate"><span class="pre">is_private_function()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pylint_sort_functions.utils.should_function_be_private"><code class="docutils literal notranslate"><span class="pre">should_function_be_private()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#module-pylint_sort_functions">Plugin Registration</a><ul>
@@ -134,7 +136,7 @@ for class definitions. Each method analyzes the code structure and reports issue
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pylint_sort_functions.checker.FunctionSortChecker.msgs">
-<span class="sig-name descname"><span class="pre">msgs</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">,</span> <code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code><span class="pre">]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'W9001':</span> <span class="pre">('Functions</span> <span class="pre">are</span> <span class="pre">not</span> <span class="pre">sorted</span> <span class="pre">alphabetically</span> <span class="pre">in</span> <span class="pre">%s</span> <span class="pre">scope',</span> <span class="pre">'unsorted-functions',</span> <span class="pre">'Functions</span> <span class="pre">should</span> <span class="pre">be</span> <span class="pre">organized</span> <span class="pre">alphabetically</span> <span class="pre">within</span> <span class="pre">their</span> <span class="pre">scope</span> <span class="pre">(public</span> <span class="pre">functions</span> <span class="pre">first,</span> <span class="pre">then</span> <span class="pre">private</span> <span class="pre">functions</span> <span class="pre">with</span> <span class="pre">underscore</span> <span class="pre">prefix)'),</span> <span class="pre">'W9002':</span> <span class="pre">('Methods</span> <span class="pre">are</span> <span class="pre">not</span> <span class="pre">sorted</span> <span class="pre">alphabetically</span> <span class="pre">in</span> <span class="pre">class</span> <span class="pre">%s',</span> <span class="pre">'unsorted-methods',</span> <span class="pre">'Class</span> <span class="pre">methods</span> <span class="pre">should</span> <span class="pre">be</span> <span class="pre">organized</span> <span class="pre">alphabetically</span> <span class="pre">within</span> <span class="pre">their</span> <span class="pre">visibility</span> <span class="pre">scope</span> <span class="pre">(public</span> <span class="pre">methods</span> <span class="pre">first,</span> <span class="pre">then</span> <span class="pre">private</span> <span class="pre">methods</span> <span class="pre">with</span> <span class="pre">underscore</span> <span class="pre">prefix)'),</span> <span class="pre">'W9003':</span> <span class="pre">('Public</span> <span class="pre">and</span> <span class="pre">private</span> <span class="pre">functions</span> <span class="pre">are</span> <span class="pre">not</span> <span class="pre">properly</span> <span class="pre">separated</span> <span class="pre">in</span> <span class="pre">%s',</span> <span class="pre">'mixed-function-visibility',</span> <span class="pre">'Public</span> <span class="pre">functions</span> <span class="pre">(no</span> <span class="pre">underscore</span> <span class="pre">prefix)</span> <span class="pre">should</span> <span class="pre">come</span> <span class="pre">before</span> <span class="pre">private</span> <span class="pre">functions</span> <span class="pre">(underscore</span> <span class="pre">prefix)</span> <span class="pre">with</span> <span class="pre">clear</span> <span class="pre">separation')}</span></em><a class="headerlink" href="#pylint_sort_functions.checker.FunctionSortChecker.msgs" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">msgs</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">,</span> <code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code><span class="pre">]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'W9001':</span> <span class="pre">('Functions</span> <span class="pre">are</span> <span class="pre">not</span> <span class="pre">sorted</span> <span class="pre">alphabetically</span> <span class="pre">in</span> <span class="pre">%s</span> <span class="pre">scope',</span> <span class="pre">'unsorted-functions',</span> <span class="pre">'Functions</span> <span class="pre">should</span> <span class="pre">be</span> <span class="pre">organized</span> <span class="pre">alphabetically</span> <span class="pre">within</span> <span class="pre">their</span> <span class="pre">scope</span> <span class="pre">(public</span> <span class="pre">functions</span> <span class="pre">first,</span> <span class="pre">then</span> <span class="pre">private</span> <span class="pre">functions</span> <span class="pre">with</span> <span class="pre">underscore</span> <span class="pre">prefix)'),</span> <span class="pre">'W9002':</span> <span class="pre">('Methods</span> <span class="pre">are</span> <span class="pre">not</span> <span class="pre">sorted</span> <span class="pre">alphabetically</span> <span class="pre">in</span> <span class="pre">class</span> <span class="pre">%s',</span> <span class="pre">'unsorted-methods',</span> <span class="pre">'Class</span> <span class="pre">methods</span> <span class="pre">should</span> <span class="pre">be</span> <span class="pre">organized</span> <span class="pre">alphabetically</span> <span class="pre">within</span> <span class="pre">their</span> <span class="pre">visibility</span> <span class="pre">scope</span> <span class="pre">(public</span> <span class="pre">methods</span> <span class="pre">first,</span> <span class="pre">then</span> <span class="pre">private</span> <span class="pre">methods</span> <span class="pre">with</span> <span class="pre">underscore</span> <span class="pre">prefix)'),</span> <span class="pre">'W9003':</span> <span class="pre">('Public</span> <span class="pre">and</span> <span class="pre">private</span> <span class="pre">functions</span> <span class="pre">are</span> <span class="pre">not</span> <span class="pre">properly</span> <span class="pre">separated</span> <span class="pre">in</span> <span class="pre">%s',</span> <span class="pre">'mixed-function-visibility',</span> <span class="pre">'Public</span> <span class="pre">functions</span> <span class="pre">(no</span> <span class="pre">underscore</span> <span class="pre">prefix)</span> <span class="pre">should</span> <span class="pre">come</span> <span class="pre">before</span> <span class="pre">private</span> <span class="pre">functions</span> <span class="pre">(underscore</span> <span class="pre">prefix)</span> <span class="pre">with</span> <span class="pre">clear</span> <span class="pre">separation'),</span> <span class="pre">'W9004':</span> <span class="pre">(&quot;Function</span> <span class="pre">'%s'</span> <span class="pre">should</span> <span class="pre">be</span> <span class="pre">private</span> <span class="pre">(prefix</span> <span class="pre">with</span> <span class="pre">underscore)&quot;,</span> <span class="pre">'function-should-be-private',</span> <span class="pre">&quot;Functions</span> <span class="pre">that</span> <span class="pre">are</span> <span class="pre">only</span> <span class="pre">used</span> <span class="pre">within</span> <span class="pre">their</span> <span class="pre">defining</span> <span class="pre">module</span> <span class="pre">should</span> <span class="pre">be</span> <span class="pre">marked</span> <span class="pre">as</span> <span class="pre">private</span> <span class="pre">by</span> <span class="pre">prefixing</span> <span class="pre">their</span> <span class="pre">name</span> <span class="pre">with</span> <span class="pre">an</span> <span class="pre">underscore.</span> <span class="pre">This</span> <span class="pre">rule</span> <span class="pre">detects</span> <span class="pre">functions</span> <span class="pre">with</span> <span class="pre">helper/utility</span> <span class="pre">naming</span> <span class="pre">patterns</span> <span class="pre">(get_,</span> <span class="pre">validate_,</span> <span class="pre">process_,</span> <span class="pre">helper,</span> <span class="pre">etc.)</span> <span class="pre">that</span> <span class="pre">are</span> <span class="pre">called</span> <span class="pre">only</span> <span class="pre">within</span> <span class="pre">the</span> <span class="pre">same</span> <span class="pre">module.</span> <span class="pre">Note:</span> <span class="pre">Cannot</span> <span class="pre">detect</span> <span class="pre">cross-module</span> <span class="pre">usage,</span> <span class="pre">so</span> <span class="pre">functions</span> <span class="pre">used</span> <span class="pre">by</span> <span class="pre">other</span> <span class="pre">modules</span> <span class="pre">won't</span> <span class="pre">be</span> <span class="pre">flagged</span> <span class="pre">(which</span> <span class="pre">reduces</span> <span class="pre">false</span> <span class="pre">positives).&quot;)}</span></em><a class="headerlink" href="#pylint_sort_functions.checker.FunctionSortChecker.msgs" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -154,7 +156,7 @@ for class definitions. Each method analyzes the code structure and reports issue
 <dl class="py method">
 <dt class="sig sig-object py" id="pylint_sort_functions.checker.FunctionSortChecker.visit_module">
 <span class="sig-name descname"><span class="pre">visit_module</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pylint_sort_functions.checker.FunctionSortChecker.visit_module" title="Link to this definition"></a></dt>
-<dd><p>Visit a module node to check function sorting.</p>
+<dd><p>Visit a module node to check function sorting and privacy.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>node</strong> (<em>nodes.Module</em>) – The module AST node to analyze</p>
@@ -198,6 +200,24 @@ User disabling: # pylint: disable=unsorted-functions</p>
 <section id="module-pylint_sort_functions.utils">
 <span id="utilities-module"></span><h2>Utilities Module<a class="headerlink" href="#module-pylint_sort_functions.utils" title="Link to this heading"></a></h2>
 <p>Utility functions for AST analysis and sorting logic.</p>
+<p>This module provides the core analysis functions for the pylint-sort-functions plugin.
+It includes functions for:</p>
+<ol class="arabic simple">
+<li><p>Function/method sorting validation</p></li>
+<li><p>Public/private function separation validation</p></li>
+<li><p>Function privacy detection (identifying functions that should be private)</p></li>
+</ol>
+<p>Function Privacy Detection Approach:
+The plugin uses a heuristic-based approach to identify functions that should be private:
+- Analyzes function naming patterns (helper/utility prefixes and keywords)
+- Checks internal usage within the same module
+- Applies conservative logic to minimize false positives
+- Cannot detect cross-module imports (this is actually beneficial for reducing</p>
+<blockquote>
+<div><p>false positives on legitimate public API functions)</p>
+</div></blockquote>
+<p>The approach prioritizes precision over recall - it’s better to miss some candidates
+than to incorrectly flag public API functions as needing to be private.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="pylint_sort_functions.utils.are_functions_properly_separated">
 <span class="sig-prename descclassname"><span class="pre">pylint_sort_functions.utils.</span></span><span class="sig-name descname"><span class="pre">are_functions_properly_separated</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">functions</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pylint_sort_functions.utils.are_functions_properly_separated" title="Link to this definition"></a></dt>
@@ -284,6 +304,23 @@ User disabling: # pylint: disable=unsorted-functions</p>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="pylint_sort_functions.utils.get_functions_used_in_module">
+<span class="sig-prename descclassname"><span class="pre">pylint_sort_functions.utils.</span></span><span class="sig-name descname"><span class="pre">get_functions_used_in_module</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">module</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pylint_sort_functions.utils.get_functions_used_in_module" title="Link to this definition"></a></dt>
+<dd><p>Extract all function names that are called within a module.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>module</strong> (<em>nodes.Module</em>) – The module AST node to analyze</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Set of function names called within the module</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Set[str]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="pylint_sort_functions.utils.get_methods_from_class">
 <span class="sig-prename descclassname"><span class="pre">pylint_sort_functions.utils.</span></span><span class="sig-name descname"><span class="pre">get_methods_from_class</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pylint_sort_functions.utils.get_methods_from_class" title="Link to this definition"></a></dt>
 <dd><p>Extract method definitions from a class node.</p>
@@ -310,6 +347,71 @@ User disabling: # pylint: disable=unsorted-functions</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>True if function name starts with underscore</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pylint_sort_functions.utils.should_function_be_private">
+<span class="sig-prename descclassname"><span class="pre">pylint_sort_functions.utils.</span></span><span class="sig-name descname"><span class="pre">should_function_be_private</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pylint_sort_functions.utils.should_function_be_private" title="Link to this definition"></a></dt>
+<dd><p>Check if a public function should be private based on usage patterns.</p>
+<p>This function uses heuristics to identify functions that are likely internal
+implementation details and should be marked as private (prefixed with underscore).</p>
+<p>Detection Criteria (ALL must be true):
+1. Function is currently public (doesn’t start with underscore)
+2. Function name matches helper/utility patterns (see helper_patterns below)
+3. Function is called within the same module (indicates internal usage)
+4. Function is not a special method (__init__, __str__, etc.)
+5. Function is not a common public API pattern (main, run, setup, etc.)</p>
+<p>Helper Patterns Detected:
+- Prefixes: <a href="#id1"><span class="problematic" id="id2">get_</span></a>, <a href="#id3"><span class="problematic" id="id4">set_</span></a>, <a href="#id5"><span class="problematic" id="id6">check_</span></a>, <a href="#id7"><span class="problematic" id="id8">validate_</span></a>, <a href="#id9"><span class="problematic" id="id10">parse_</span></a>, <a href="#id11"><span class="problematic" id="id12">format_</span></a>, <a href="#id13"><span class="problematic" id="id14">calculate_</span></a>,</p>
+<blockquote>
+<div><p><a href="#id15"><span class="problematic" id="id16">process_</span></a>, <a href="#id17"><span class="problematic" id="id18">handle_</span></a>, <a href="#id19"><span class="problematic" id="id20">find_</span></a>, <a href="#id21"><span class="problematic" id="id22">extract_</span></a>, <a href="#id23"><span class="problematic" id="id24">convert_</span></a>, <a href="#id25"><span class="problematic" id="id26">transform_</span></a>, <a href="#id27"><span class="problematic" id="id28">build_</span></a>,
+<a href="#id29"><span class="problematic" id="id30">create_</span></a>, <a href="#id31"><span class="problematic" id="id32">make_</span></a></p>
+</div></blockquote>
+<ul class="simple">
+<li><p>Contains: helper, util, internal, support</p></li>
+<li><p>Predicates: <a href="#id33"><span class="problematic" id="id34">is_</span></a>, <a href="#id35"><span class="problematic" id="id36">has_</span></a>, <a href="#id37"><span class="problematic" id="id38">can_</span></a>, <a href="#id39"><span class="problematic" id="id40">should_</span></a>, <a href="#id41"><span class="problematic" id="id42">will_</span></a>, <a href="#id43"><span class="problematic" id="id44">does_</span></a></p></li>
+</ul>
+<p>Cross-Module Usage Limitations:
+- CANNOT detect functions imported/used by other modules
+- Only analyzes calls within the same module
+- This is actually beneficial: functions used externally won’t be flagged
+- Conservative approach reduces false positives</p>
+<dl>
+<dt>Examples:</dt><dd><p># Will be flagged (helper pattern + internal usage):
+def get_data():</p>
+<blockquote>
+<div><p>return process_internal_data()</p>
+</div></blockquote>
+<dl class="simple">
+<dt>def process_internal_data():  # Called by get_data() above</dt><dd><p>return “data”</p>
+</dd>
+</dl>
+<p># Will NOT be flagged (helper pattern but no internal usage):
+def parse_config():  # Likely used by other modules</p>
+<blockquote>
+<div><p>return {“setting”: “value”}</p>
+</div></blockquote>
+<p># Will NOT be flagged (no helper pattern):
+def save():  # Public API function</p>
+<blockquote>
+<div><p>return store_data()</p>
+</div></blockquote>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>func</strong> (<em>nodes.FunctionDef</em>) – Function definition node to analyze</p></li>
+<li><p><strong>module</strong> (<em>nodes.Module</em>) – The module containing the function</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if the function should be marked as private</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>bool</p>
