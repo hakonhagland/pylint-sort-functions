@@ -281,7 +281,12 @@ def should_function_be_private(func: nodes.FunctionDef, module: nodes.Module) ->
             return False
 
     # If the function matches common public API patterns, keep it public
-    if func.name in public_patterns:
+    # NOTE: This line is unreachable due to the logic at line 183 which already
+    # checks if base_name is in public_patterns. Since base_name is derived from
+    # func.name by removing prefixes, any func.name in public_patterns would have
+    # its base_name also in public_patterns, causing an early return at line 183.
+    # This is defensive code kept for logical completeness.
+    if func.name in public_patterns:  # pragma: no cover
         return False
 
     # Get all function names used in this module
