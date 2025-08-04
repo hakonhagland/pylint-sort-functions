@@ -7,9 +7,10 @@ with specific decorators from sorting requirements.
 """
 
 import astroid
+import pytest
 from astroid import nodes
 
-from src.pylint_sort_functions.utils import (
+from pylint_sort_functions.utils import (
     _decorator_matches_pattern,
     _function_has_excluded_decorator,
     _get_decorator_strings,
@@ -36,6 +37,16 @@ def parse_functions_from_code(code: str) -> list[nodes.FunctionDef]:
         if isinstance(node, nodes.FunctionDef):
             functions.append(node)
     return functions
+
+
+def test_parse_function_error():
+    """Test that parse_function_from_code raises ValueError when no function found."""
+    code = """
+# This is just a comment, no functions
+x = 42
+"""
+    with pytest.raises(ValueError, match="No function found in code"):
+        parse_function_from_code(code)
 
 
 class TestDecoratorMatching:
@@ -144,11 +155,11 @@ def test_func():
     def test_complex_decorator_fallback(self):
         """Test fallback handling for complex decorators."""
         # Create a complex decorator that should trigger the fallback
-        from src.pylint_sort_functions.utils import _decorator_node_to_string
+        from pylint_sort_functions.utils import _decorator_node_to_string
 
         # Create a mock complex decorator node that doesn't match our patterns
-        class MockComplexDecorator:
-            pass
+        class MockComplexDecorator:  # pylint: disable=too-few-public-methods
+            """Mock decorator for testing fallback behavior."""
 
         mock_decorator = MockComplexDecorator()
         result = _decorator_node_to_string(mock_decorator)
@@ -242,8 +253,8 @@ def delete():
         functions = parse_functions_from_code(code)
         ignore_patterns = ["@main.command"]
 
-        # Without exclusions, this would fail (helper, main, create, delete is not alphabetical)
-        # With exclusions, only helper and main are checked (which are in alphabetical order)
+        # Without exclusions, this would fail (not alphabetical)
+        # With exclusions, only helper and main are checked (alphabetical order)
         assert are_functions_sorted_with_exclusions(functions, ignore_patterns)
 
     def test_mixed_decorators(self):
@@ -306,7 +317,7 @@ def delete():
         functions = parse_functions_from_code(code)
         ignore_patterns = ["@main.command"]
 
-        # All functions excluded, so sorting should pass (empty list is considered sorted)
+        # All functions excluded, so sorting should pass (empty list considered sorted)
         assert are_functions_sorted_with_exclusions(functions, ignore_patterns)
 
     def test_no_exclusions(self):
@@ -379,7 +390,7 @@ def utility_function():
         functions = parse_functions_from_code(code)
         ignore_patterns = ["@click.group", "@main.command"]
 
-        # Only utility_function needs to be in correct position relative to other non-excluded functions
+        # Only utility_function needs correct position relative to others
         assert are_functions_sorted_with_exclusions(functions, ignore_patterns)
 
     def test_flask_application(self):
@@ -429,7 +440,7 @@ def utility():
         assert are_functions_sorted_with_exclusions(functions, ignore_patterns)
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     # Run a simple test to verify functionality
     print("Testing decorator exclusion functionality...")
 
@@ -439,7 +450,7 @@ if __name__ == "__main__":
     print("✓ Pattern matching works")
 
     # Test Click example
-    code = """
+    CODE = """
 def helper():
     pass
 
@@ -450,9 +461,9 @@ def main():
 def create():
     pass
 """
-    functions = parse_functions_from_code(code)
-    result = are_functions_sorted_with_exclusions(functions, ["@main.command"])
-    assert result
+    functions = parse_functions_from_code(CODE)
+    RESULT = are_functions_sorted_with_exclusions(functions, ["@main.command"])
+    assert RESULT
     print("✓ Click example works")
 
     print("All tests passed! Decorator exclusion functionality is working.")

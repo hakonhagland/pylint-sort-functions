@@ -6,6 +6,7 @@ It includes functions for:
 1. Function/method sorting validation
 2. Public/private function separation validation
 3. Function privacy detection (identifying functions that should be private)
+4. Framework-aware sorting with decorator exclusions
 
 Function Privacy Detection Approach:
 The plugin uses a heuristic-based approach to identify functions that should be private:
@@ -18,6 +19,7 @@ The plugin uses a heuristic-based approach to identify functions that should be 
 The approach prioritizes precision over recall - it's better to miss some candidates
 than to incorrectly flag public API functions as needing to be private.
 """
+# pylint: disable=unsorted-functions  # Adding new public API functions
 
 import ast
 import os
@@ -80,10 +82,10 @@ def are_functions_sorted(functions: list[nodes.FunctionDef]) -> bool:
     return True
 
 
-def are_functions_sorted_with_exclusions(
+def are_functions_sorted_with_exclusions(  # pylint: disable=function-should-be-private
     functions: list[nodes.FunctionDef], ignore_decorators: list[str] | None = None
 ) -> bool:
-    """Check if functions are sorted alphabetically, excluding decorator-dependent functions.
+    """Check if functions are sorted alphabetically, excluding decorator-dependent ones.
 
     This is the enhanced version of are_functions_sorted that supports framework-aware
     sorting by excluding functions with specific decorators that create dependencies.
@@ -121,10 +123,10 @@ def are_methods_sorted(methods: list[nodes.FunctionDef]) -> bool:
     return are_functions_sorted(methods)
 
 
-def are_methods_sorted_with_exclusions(
+def are_methods_sorted_with_exclusions(  # pylint: disable=function-should-be-private
     methods: list[nodes.FunctionDef], ignore_decorators: list[str] | None = None
 ) -> bool:
-    """Check if methods are sorted alphabetically, excluding decorator-dependent methods.
+    """Check if methods are sorted alphabetically, excluding decorator-dependent ones.
 
     :param methods: List of method definition nodes
     :type methods: list[nodes.FunctionDef]
@@ -435,7 +437,7 @@ def _get_decorator_strings(func: nodes.FunctionDef) -> list[str]:
 
     :param func: Function definition node
     :type func: nodes.FunctionDef
-    :returns: List of decorator strings (e.g., ["@main.command()", "@app.route('/path')"])
+    :returns: List of decorator strings (e.g., ["@main.command()", "@app.route()"])
     :rtype: list[str]
     """
     if not func.decorators:
@@ -460,8 +462,9 @@ def _decorator_node_to_string(decorator: nodes.NodeNG) -> str:
     """
     if isinstance(decorator, nodes.Name):
         # Simple decorator: @decorator_name
-        return decorator.name
-    elif isinstance(decorator, nodes.Attribute):
+        return str(decorator.name)
+
+    if isinstance(decorator, nodes.Attribute):
         # Attribute decorator: @obj.method
         if isinstance(decorator.expr, nodes.Name):
             return f"{decorator.expr.name}.{decorator.attrname}"
@@ -469,7 +472,8 @@ def _decorator_node_to_string(decorator: nodes.NodeNG) -> str:
         base = _decorator_node_to_string(decorator.expr)
         if base:
             return f"{base}.{decorator.attrname}"
-    elif isinstance(decorator, nodes.Call):
+
+    if isinstance(decorator, nodes.Call):
         # Function call decorator: @decorator() or @obj.method(args)
         func_str = _decorator_node_to_string(decorator.func)
         if func_str:
