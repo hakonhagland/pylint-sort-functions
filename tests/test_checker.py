@@ -342,3 +342,33 @@ def example_function():
             self.assertNoMessages(),
         ):
             self.checker.visit_module(module)
+
+    def test_visit_module_mixed_function_visibility(self) -> None:
+        """Test that visit_module detects mixed function visibility."""
+        # Code with mixed visibility: public -> private -> public
+        content = '''
+def public_function_1():
+    """First public function."""
+    pass
+
+def _private_function():
+    """A private function."""
+    pass
+
+def public_function_2():
+    """Second public function - should come before private."""
+    pass
+'''
+
+        module = astroid.parse(content)
+
+        with self.assertAddsMessages(
+            MessageTest(
+                msg_id="mixed-function-visibility",
+                line=0,  # Module-level message appears on line 0
+                node=module,
+                args=("module",),
+                col_offset=0,
+            )
+        ):
+            self.checker.visit_module(module)

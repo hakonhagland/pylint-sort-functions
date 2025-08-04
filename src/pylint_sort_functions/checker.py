@@ -63,6 +63,9 @@ class FunctionSortChecker(BaseChecker):
         if not utils.are_functions_sorted(functions):
             self.add_message("unsorted-functions", node=node, args=("module",))
 
+        if not utils.are_functions_properly_separated(functions):
+            self.add_message("mixed-function-visibility", node=node, args=("module",))
+
         # Check if any public functions should be private using import analysis
         # Get module file path from the linter
         module_path = None
