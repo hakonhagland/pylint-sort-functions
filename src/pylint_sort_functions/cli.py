@@ -8,26 +8,6 @@ from typing import List
 from pylint_sort_functions.auto_fix import AutoFixConfig, sort_python_files
 
 
-def _find_python_files(paths: List[Path]) -> List[Path]:
-    """Find all Python files in the given paths.
-
-    :param paths: List of file or directory paths
-    :type paths: List[Path]
-    :returns: List of Python file paths
-    :rtype: List[Path]
-    """
-    python_files = []
-
-    for path in paths:
-        if path.is_file() and path.suffix == ".py":
-            python_files.append(path)
-        elif path.is_dir():
-            # Recursively find Python files
-            python_files.extend(path.rglob("*.py"))
-
-    return python_files
-
-
 def main() -> int:  # pylint: disable=too-many-return-statements,too-many-branches
     """Main CLI entry point.
 
@@ -131,6 +111,26 @@ def main() -> int:  # pylint: disable=too-many-return-statements,too-many-branch
     except Exception as e:  # pylint: disable=broad-exception-caught
         print(f"Error during processing: {e}")
         return 1
+
+
+def _find_python_files(paths: List[Path]) -> List[Path]:
+    """Find all Python files in the given paths.
+
+    :param paths: List of file or directory paths
+    :type paths: List[Path]
+    :returns: List of Python file paths
+    :rtype: List[Path]
+    """
+    python_files = []
+
+    for path in paths:
+        if path.is_file() and path.suffix == ".py":
+            python_files.append(path)
+        elif path.is_dir():
+            # Recursively find Python files
+            python_files.extend(path.rglob("*.py"))
+
+    return python_files
 
 
 if __name__ == "__main__":  # pragma: no cover

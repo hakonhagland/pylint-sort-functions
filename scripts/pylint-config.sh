@@ -49,7 +49,7 @@ export PYLINT_TEST_DISABLES
 
 # Convenience functions for common pylint commands
 pylint_check_src() {
-    pylint --load-plugins=pylint_sort_functions --disable="$PYLINT_UNIVERSAL_DISABLES" src/
+    pylint --load-plugins=pylint_sort_functions --disable="$PYLINT_UNIVERSAL_DISABLES" --fail-on=unsorted-functions,unsorted-methods,mixed-function-visibility,function-should-be-private src/
 }
 
 pylint_check_tests_relaxed() {

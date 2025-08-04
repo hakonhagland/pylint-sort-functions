@@ -351,20 +351,6 @@ def sort_python_file(file_path: Path, config: AutoFixConfig) -> bool:
     return _sort_python_file(file_path, config)
 
 
-def _sort_python_file(file_path: Path, config: AutoFixConfig) -> bool:
-    """Sort functions in a Python file (private implementation).
-
-    :param file_path: Path to the Python file
-    :type file_path: Path
-    :param config: Auto-fix configuration
-    :type config: AutoFixConfig
-    :returns: True if file was modified
-    :rtype: bool
-    """
-    sorter = FunctionSorter(config)
-    return sorter.sort_file(file_path)
-
-
 def sort_python_files(file_paths: List[Path], config: AutoFixConfig) -> Tuple[int, int]:
     """Sort functions in multiple Python files.
 
@@ -385,3 +371,17 @@ def sort_python_files(file_paths: List[Path], config: AutoFixConfig) -> Tuple[in
                 files_modified += 1
 
     return files_processed, files_modified
+
+
+def _sort_python_file(file_path: Path, config: AutoFixConfig) -> bool:
+    """Sort functions in a Python file (private implementation).
+
+    :param file_path: Path to the Python file
+    :type file_path: Path
+    :param config: Auto-fix configuration
+    :type config: AutoFixConfig
+    :returns: True if file was modified
+    :rtype: bool
+    """
+    sorter = FunctionSorter(config)
+    return sorter.sort_file(file_path)
