@@ -51,9 +51,13 @@ jobs:
         run: uv run mypy src/ tests/
 
       - name: Plugin full check
+        shell: bash
         run: |
           source scripts/pylint-config.sh
-          uv run bash -c "source scripts/pylint-config.sh && pylint_check_relaxed"
+          echo "Checking src/ with strict rules..."
+          uv run pylint --load-plugins=pylint_sort_functions --disable="$PYLINT_UNIVERSAL_DISABLES" src/
+          echo "Checking tests/ with relaxed rules..."
+          uv run pylint --load-plugins=pylint_sort_functions --disable="$PYLINT_TEST_DISABLES" tests/
 
       - name: Code coverage
         run: |
