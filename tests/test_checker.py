@@ -152,26 +152,63 @@ class SimpleClass:
             # Run our checker on the parsed class
             self.checker.visit_classdef(class_node)
 
-    def test_function_should_be_private_fail(self) -> None:
-        """Test that functions that should be private trigger warnings."""
-        # Integration test: Run pylint on real file with functions that should be
-        # private
+    def test_function_should_be_private_no_path_info(self) -> None:
+        """Test that no privacy warnings are generated without path information."""
+        # Without path info, the checker falls back to heuristic approach
+        # Since heuristics have been disabled, no functions should be flagged
         test_file = TEST_FILES_DIR / "modules" / "should_be_private.py"
 
         # Read and parse the test file
         with open(test_file, encoding="utf-8") as f:
             content = f.read()
 
-        # Parse file into AST
+        # Parse file into AST without path context
         module = astroid.parse(content, module_name="should_be_private")
 
-        # Use pylint testing framework to verify expected messages are generated
-        # We expect multiple functions to be flagged as should be private
+        # With heuristics disabled, no messages should be generated
+        with self.assertAddsMessages():
+            # Run our checker on the parsed module
+            self.checker.visit_module(module)
+
+    def test_function_should_be_private_with_import_analysis(self) -> None:
+        """Test import analysis correctly identifies should-be-private functions."""
+        # Mock the linter to provide path information so import analysis runs
+        test_file = TEST_FILES_DIR / "modules" / "should_be_private.py"
+
+        # Read and parse the test file
+        with open(test_file, encoding="utf-8") as f:
+            content = f.read()
+
+        module = astroid.parse(content, module_name="should_be_private")
+
+        # Mock linter with current_file to enable import analysis
+        self.checker.linter.current_file = str(test_file)
+
+        # Import analysis should identify functions that should be private
+        # All functions except 'main' should be flagged (main is in public_patterns)
         with self.assertAddsMessages(
             MessageTest(
                 msg_id="function-should-be-private",
+                line=4,  # calculate_sum
+                node=module.body[0],
+                args=("calculate_sum",),
+                col_offset=0,
+                end_line=4,
+                end_col_offset=17,
+            ),
+            MessageTest(
+                msg_id="function-should-be-private",
+                line=9,  # get_data
+                node=module.body[1],
+                args=("get_data",),
+                col_offset=0,
+                end_line=9,
+                end_col_offset=12,
+            ),
+            MessageTest(
+                msg_id="function-should-be-private",
                 line=14,  # helper_function
-                node=module.body[2],  # Third function definition
+                node=module.body[2],
                 args=("helper_function",),
                 col_offset=0,
                 end_line=14,
@@ -180,7 +217,7 @@ class SimpleClass:
             MessageTest(
                 msg_id="function-should-be-private",
                 line=25,  # process_data
-                node=module.body[4],  # Fifth function definition
+                node=module.body[4],
                 args=("process_data",),
                 col_offset=0,
                 end_line=25,
@@ -188,8 +225,17 @@ class SimpleClass:
             ),
             MessageTest(
                 msg_id="function-should-be-private",
+                line=30,  # public_api_function
+                node=module.body[5],
+                args=("public_api_function",),
+                col_offset=0,
+                end_line=30,
+                end_col_offset=23,
+            ),
+            MessageTest(
+                msg_id="function-should-be-private",
                 line=35,  # validate_numbers
-                node=module.body[6],  # Seventh function definition
+                node=module.body[6],
                 args=("validate_numbers",),
                 col_offset=0,
                 end_line=35,
@@ -198,6 +244,9 @@ class SimpleClass:
         ):
             # Run our checker on the parsed module
             self.checker.visit_module(module)
+
+        # Clean up mock
+        self.checker.linter.current_file = None
 
     def test_visit_classdef_calls_utils(self) -> None:
         """Test that visit_classdef calls utility functions and adds messages."""

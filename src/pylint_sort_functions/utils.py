@@ -168,185 +168,22 @@ def get_methods_from_class(node: nodes.ClassDef) -> list[nodes.FunctionDef]:
     return methods
 
 
-def should_function_be_private(func: nodes.FunctionDef, module: nodes.Module) -> bool:  # pylint: disable=too-many-return-statements,too-many-branches
-    """Determine if a function should be marked as private using heuristics.
+def should_function_be_private(func: nodes.FunctionDef, module: nodes.Module) -> bool:  # pylint: disable=unused-argument
+    """Legacy heuristic-based privacy detection (deprecated).
 
-    This is the original heuristic-based approach that analyzes:
-    1. Function naming patterns (helper/utility prefixes and keywords)
-    2. Internal usage within the same module
-
-    Limitations:
-    - Cannot detect cross-module imports (by design, to reduce false positives)
-    - May miss some functions that should be private
-    - Conservative approach prioritizes precision over recall
+    This function is kept for backward compatibility but always returns False.
+    The preferred approach is should_function_be_private_with_import_analysis()
+    which provides more accurate detection based on actual usage patterns.
 
     :param func: Function definition node to analyze
     :type func: nodes.FunctionDef
     :param module: The module containing the function
     :type module: nodes.Module
-    :returns: True if the function should be marked as private
+    :returns: Always returns False (heuristics disabled)
     :rtype: bool
     """
-    # Skip if already private
-    if _is_private_function(func):
-        return False
-
-    # Skip special methods (dunder methods)
-    if func.name.startswith("__") and func.name.endswith("__"):
-        return False
-
-    # Skip common public API patterns
-    public_patterns = {
-        "main",
-        "run",
-        "execute",
-        "start",
-        "stop",
-        "setup",
-        "teardown",
-        "init",
-        "create",
-        "build",
-        "register",
-        "configure",
-        "connect",
-        "disconnect",
-        "open",
-        "close",
-        "load",
-        "save",
-        "export",
-        "import",
-    }
-
-    # Extract base name without get/set/validate prefixes
-    base_name = func.name
-    for prefix in ["get_", "set_", "is_", "has_", "validate_", "check_"]:
-        if func.name.startswith(prefix):
-            base_name = func.name[len(prefix) :]
-            break
-
-    # If the base name matches a public pattern, keep it public
-    if base_name in public_patterns:
-        return False
-
-    # Check for common helper/utility patterns that suggest private usage
-    helper_patterns = [
-        "helper",
-        "util",
-        "internal",
-        "impl",
-        "private",
-        "process",
-        "parse",
-        "format",
-        "convert",
-        "transform",
-        "extract",
-        "build",
-        "create",
-        "make",
-        "compute",
-        "calculate",
-        "determine",
-        "resolve",
-        "handle",
-        "dispatch",
-    ]
-
-    # Check if function has helper/utility naming patterns
-    has_helper_pattern = False
-    lower_name = func.name.lower()
-    for pattern in helper_patterns:
-        if pattern in lower_name:
-            has_helper_pattern = True
-            break
-
-    # Common prefixes that suggest helper functions
-    helper_prefixes = [
-        "_",  # Already handled above, but kept for completeness
-        "do_",
-        "get_",
-        "set_",
-        "is_",
-        "has_",
-        "check_",
-        "validate_",
-        "parse_",
-        "format_",
-        "convert_",
-        "transform_",
-        "process_",
-        "handle_",
-        "extract_",
-        "build_",
-        "create_",
-        "make_",
-        "find_",
-        "search_",
-        "filter_",
-        "sort_",
-        "merge_",
-        "split_",
-        "join_",
-        "encode_",
-        "decode_",
-        "serialize_",
-        "deserialize_",
-        "read_",
-        "write_",
-        "load_",
-        "save_",
-        "fetch_",
-        "store_",
-        "update_",
-        "delete_",
-        "remove_",
-        "clean_",
-        "prepare_",
-        "initialize_",
-        "finalize_",
-        "wrap_",
-        "unwrap_",
-    ]
-
-    for prefix in helper_prefixes:
-        if func.name.startswith(prefix) and len(func.name) > len(prefix):
-            has_helper_pattern = True
-            break
-
-    # If it doesn't have helper patterns, don't flag it
-    if not has_helper_pattern:
-        return False
-
-    # Additional check: Skip if it's clearly a public API method
-    # (e.g., getter/setter for a public attribute)
-    if func.name.startswith(("get_", "set_")) and len(func.name) > 4:
-        # If it looks like a property accessor for a public attribute, keep it public
-        attribute_name = func.name[4:]
-        if not attribute_name.startswith("_"):
-            return False
-
-    # If the function matches common public API patterns, keep it public
-    # NOTE: This line is unreachable due to the logic at line 183 which already
-    # checks if base_name is in public_patterns. Since base_name is derived from
-    # func.name by removing prefixes, any func.name in public_patterns would have
-    # its base_name also in public_patterns, causing an early return at line 183.
-    # This is defensive code kept for logical completeness.
-    if func.name in public_patterns:  # pragma: no cover
-        return False
-
-    # Get all function names used in this module
-    used_functions = _get_functions_used_in_module(module)
-
-    # If the function is called within the module but not by functions
-    # outside this module, it should probably be private
-    # For now, we use a simple heuristic: if it's only used internally
-    # (called within the same module) and has helper patterns, suggest making it private
-    if func.name in used_functions and has_helper_pattern:
-        return True
-
-    # Don't flag functions that aren't used at all (they might be public API)
+    # Heuristic-based detection has been disabled in favor of import analysis
+    # This fallback is only used when path information is unavailable
     return False
 
 
@@ -684,26 +521,29 @@ def _get_function_groups(
     return public_functions, private_functions
 
 
-def _get_functions_used_in_module(module: nodes.Module) -> Set[str]:
-    """Extract all function names that are called within a module.
+def _get_functions_used_in_module(module: nodes.Module) -> Set[str]:  # pragma: no cover
+    """Extract all function names that are called within a module (deprecated).
+
+    This function was part of the legacy heuristic approach and is no longer used.
+    It's kept for backward compatibility but should not be called in normal operation.
 
     :param module: The module AST node to analyze
     :type module: nodes.Module
     :returns: Set of function names that are called in the module
     :rtype: Set[str]
     """
-    used_functions = set()
+    used_functions = set()  # pragma: no cover
 
-    # Walk through all nodes in the module
-    for node in module.nodes_of_class(nodes.Call):
-        # Direct function calls (e.g., my_function())
-        if isinstance(node.func, nodes.Name):
-            used_functions.add(node.func.name)
-        # Method calls (e.g., obj.method())
-        elif isinstance(node.func, nodes.Attribute):
-            used_functions.add(node.func.attrname)
+    # Walk through all nodes in the module  # pragma: no cover
+    for node in module.nodes_of_class(nodes.Call):  # pragma: no cover
+        # Direct function calls (e.g., my_function())  # pragma: no cover
+        if isinstance(node.func, nodes.Name):  # pragma: no cover
+            used_functions.add(node.func.name)  # pragma: no cover
+        # Method calls (e.g., obj.method())  # pragma: no cover
+        elif isinstance(node.func, nodes.Attribute):  # pragma: no cover
+            used_functions.add(node.func.attrname)  # pragma: no cover
 
-    return used_functions
+    return used_functions  # pragma: no cover
 
 
 def _is_function_used_externally(
