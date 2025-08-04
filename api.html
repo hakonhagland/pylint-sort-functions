@@ -64,7 +64,9 @@
 <li class="toctree-l2"><a class="reference internal" href="#module-pylint_sort_functions.utils">Utilities Module</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#pylint_sort_functions.utils.are_functions_properly_separated"><code class="docutils literal notranslate"><span class="pre">are_functions_properly_separated()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pylint_sort_functions.utils.are_functions_sorted"><code class="docutils literal notranslate"><span class="pre">are_functions_sorted()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pylint_sort_functions.utils.are_functions_sorted_with_exclusions"><code class="docutils literal notranslate"><span class="pre">are_functions_sorted_with_exclusions()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pylint_sort_functions.utils.are_methods_sorted"><code class="docutils literal notranslate"><span class="pre">are_methods_sorted()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pylint_sort_functions.utils.are_methods_sorted_with_exclusions"><code class="docutils literal notranslate"><span class="pre">are_methods_sorted_with_exclusions()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pylint_sort_functions.utils.get_functions_from_node"><code class="docutils literal notranslate"><span class="pre">get_functions_from_node()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pylint_sort_functions.utils.get_methods_from_class"><code class="docutils literal notranslate"><span class="pre">get_methods_from_class()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pylint_sort_functions.utils.should_function_be_private"><code class="docutils literal notranslate"><span class="pre">should_function_be_private()</span></code></a></li>
@@ -210,6 +212,7 @@ It includes functions for:</p>
 <li><p>Function/method sorting validation</p></li>
 <li><p>Public/private function separation validation</p></li>
 <li><p>Function privacy detection (identifying functions that should be private)</p></li>
+<li><p>Framework-aware sorting with decorator exclusions</p></li>
 </ol>
 <p>Function Privacy Detection Approach:
 The plugin uses a heuristic-based approach to identify functions that should be private:
@@ -257,6 +260,28 @@ than to incorrectly flag public API functions as needing to be private.</p>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="pylint_sort_functions.utils.are_functions_sorted_with_exclusions">
+<span class="sig-prename descclassname"><span class="pre">pylint_sort_functions.utils.</span></span><span class="sig-name descname"><span class="pre">are_functions_sorted_with_exclusions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">functions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_decorators</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pylint_sort_functions.utils.are_functions_sorted_with_exclusions" title="Link to this definition"></a></dt>
+<dd><p>Check if functions are sorted alphabetically, excluding decorator-dependent ones.</p>
+<p>This is the enhanced version of are_functions_sorted that supports framework-aware
+sorting by excluding functions with specific decorators that create dependencies.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>functions</strong> (<em>list</em><em>[</em><em>nodes.FunctionDef</em><em>]</em>) – List of function definition nodes</p></li>
+<li><p><strong>ignore_decorators</strong> (<em>list</em><em>[</em><em>str</em><em>] </em><em>| </em><em>None</em>) – List of decorator patterns to ignore</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if functions are properly sorted (excluding ignored ones)</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="pylint_sort_functions.utils.are_methods_sorted">
 <span class="sig-prename descclassname"><span class="pre">pylint_sort_functions.utils.</span></span><span class="sig-name descname"><span class="pre">are_methods_sorted</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">methods</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pylint_sort_functions.utils.are_methods_sorted" title="Link to this definition"></a></dt>
 <dd><p>Check if methods are sorted alphabetically within their visibility scope.</p>
@@ -266,6 +291,26 @@ than to incorrectly flag public API functions as needing to be private.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>True if methods are properly sorted</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pylint_sort_functions.utils.are_methods_sorted_with_exclusions">
+<span class="sig-prename descclassname"><span class="pre">pylint_sort_functions.utils.</span></span><span class="sig-name descname"><span class="pre">are_methods_sorted_with_exclusions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">methods</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_decorators</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pylint_sort_functions.utils.are_methods_sorted_with_exclusions" title="Link to this definition"></a></dt>
+<dd><p>Check if methods are sorted alphabetically, excluding decorator-dependent ones.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>methods</strong> (<em>list</em><em>[</em><em>nodes.FunctionDef</em><em>]</em>) – List of method definition nodes</p></li>
+<li><p><strong>ignore_decorators</strong> (<em>list</em><em>[</em><em>str</em><em>] </em><em>| </em><em>None</em>) – List of decorator patterns to ignore</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if methods are properly sorted (excluding ignored ones)</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>bool</p>
