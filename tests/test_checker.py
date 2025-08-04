@@ -163,7 +163,8 @@ class SimpleClass:
 
     def test_function_should_be_private_fail(self) -> None:
         """Test that functions that should be private trigger warnings."""
-        # Integration test: Run pylint on real file with functions that should be private
+        # Integration test: Run pylint on real file with functions that should be
+        # private
         test_file = TEST_FILES_DIR / "modules" / "should_be_private.py"
 
         # Read and parse the test file
@@ -327,3 +328,25 @@ class SimpleClass:
 
             # Verify no message was added
             self.checker.add_message.assert_not_called()
+
+    def test_visit_module_no_path_info(self) -> None:
+        """Test visit_module when linter has no current_file attribute."""
+        content = '''
+def example_function():
+    """A simple function."""
+    return "example"
+'''
+
+        module = astroid.parse(content)
+
+        # Mock linter without current_file attribute
+        from unittest.mock import Mock
+        mock_linter = Mock()
+        del mock_linter.current_file  # Remove the attribute entirely
+
+        with (
+            patch.object(self.checker, 'linter', mock_linter),
+            # Should not crash and not add messages for simple function
+            self.assertNoMessages()
+        ):
+            self.checker.visit_module(module)

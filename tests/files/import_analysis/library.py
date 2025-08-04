@@ -11,8 +11,8 @@ def format_data(data: str) -> str:
     return f"formatted: {data}"
 
 
-def get_config() -> dict:
-    """This looks like helper but is actually used by other modules - should stay public."""
+def get_config() -> dict[str, str]:
+    """This looks like helper but is used by other modules - should stay public."""
     return {"setting": "value"}
 
 
@@ -22,7 +22,7 @@ def internal_helper() -> str:
 
 
 def validate_input(value: str) -> bool:
-    """This looks like helper and is only used internally - should be private."""  
+    """This looks like helper and is only used internally - should be private."""
     result = internal_helper()
     return len(value) > 0 and result == "helper result"
 

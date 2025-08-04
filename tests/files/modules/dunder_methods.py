@@ -7,5 +7,5 @@ def __get_something__() -> str:
 
 
 def get_helper() -> str:
-    """Helper function used internally.""" 
+    """Helper function used internally."""
     return __get_something__()  # Uses dunder method
