@@ -26,8 +26,8 @@ from typing import Dict, List, Set, Tuple
 
 from astroid import nodes  # type: ignore[import-untyped]
 
-
 # Public functions
+
 
 def are_functions_properly_separated(functions: list[nodes.FunctionDef]) -> bool:
     """Check if public and private functions are properly separated.
@@ -351,6 +351,7 @@ def should_function_be_private_with_import_analysis(
 
 # Private functions
 
+
 def _build_cross_module_usage_graph(project_root: Path) -> Dict[str, Set[str]]:
     """Build a graph of which functions are used by which modules.
 
@@ -374,8 +375,8 @@ def _build_cross_module_usage_graph(project_root: Path) -> Dict[str, Set[str]]:
             if module_name.endswith("__init__") or "test" in module_name.lower():
                 continue
 
-            _, function_imports, attribute_accesses = (
-                _extract_imports_from_file(file_path)
+            _, function_imports, attribute_accesses = _extract_imports_from_file(
+                file_path
             )
 
             # Record direct function imports (from module import function)
