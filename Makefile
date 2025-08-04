@@ -1,6 +1,6 @@
 ROOT := $(shell pwd)
 
-.PHONY: coverage docs mypy ruff-check ruff-fix ruff-format test test-plugin tox
+.PHONY: coverage docs mypy ruff-check ruff-fix ruff-format test test-plugin test-plugin-strict tox
 .PHONY: publish-to-pypi rstcheck self-check
 
 coverage:
@@ -44,9 +44,15 @@ self-check:
 test:
 	pytest tests/
 
+# Test plugin with relaxed rules for test files (matches pre-commit behavior)
 test-plugin:
 	pylint --load-plugins=pylint_sort_functions --disable=fixme,unnecessary-pass src/
 	pylint --load-plugins=pylint_sort_functions --disable=fixme,unnecessary-pass,protected-access,import-outside-toplevel,unused-variable,redefined-outer-name,reimported,unspecified-encoding,use-implicit-booleaness-not-comparison,unsorted-methods,function-should-be-private,too-many-public-methods tests/
+
+# Test plugin with strict rules for both src and test files (shows all warnings)
+test-plugin-strict:
+	pylint --load-plugins=pylint_sort_functions --disable=fixme,unnecessary-pass src/
+	pylint --load-plugins=pylint_sort_functions --disable=fixme,unnecessary-pass tests/
 
 tox:
 	tox
