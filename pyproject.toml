@@ -1,6 +1,6 @@
 [project]
 name = "pylint-sort-functions"
-version = "0.1.1"
+version = "0.1.2"
 description = "Pylint plugin to sort functions in Python code"
 authors = [
     { name = "Håkon Hægland", email = "hakon.hagland@gmail.com" }
