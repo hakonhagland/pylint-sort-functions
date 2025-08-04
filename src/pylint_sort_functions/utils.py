@@ -521,31 +521,6 @@ def _get_function_groups(
     return public_functions, private_functions
 
 
-def _get_functions_used_in_module(module: nodes.Module) -> Set[str]:  # pragma: no cover
-    """Extract all function names that are called within a module (deprecated).
-
-    This function was part of the legacy heuristic approach and is no longer used.
-    It's kept for backward compatibility but should not be called in normal operation.
-
-    :param module: The module AST node to analyze
-    :type module: nodes.Module
-    :returns: Set of function names that are called in the module
-    :rtype: Set[str]
-    """
-    used_functions = set()  # pragma: no cover
-
-    # Walk through all nodes in the module  # pragma: no cover
-    for node in module.nodes_of_class(nodes.Call):  # pragma: no cover
-        # Direct function calls (e.g., my_function())  # pragma: no cover
-        if isinstance(node.func, nodes.Name):  # pragma: no cover
-            used_functions.add(node.func.name)  # pragma: no cover
-        # Method calls (e.g., obj.method())  # pragma: no cover
-        elif isinstance(node.func, nodes.Attribute):  # pragma: no cover
-            used_functions.add(node.func.attrname)  # pragma: no cover
-
-    return used_functions  # pragma: no cover
-
-
 def _is_function_used_externally(
     func_name: str, module_path: Path, project_root: Path
 ) -> bool:
