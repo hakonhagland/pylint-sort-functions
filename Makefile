@@ -54,6 +54,8 @@ pre-commit:
 publish-to-pypi:
 	@echo "Publishing to PyPI with automatic version bump..."
 	python scripts/bump-version.py patch
+	@echo "Cleaning old builds..."
+	rm -rf dist/
 	@echo "Building package..."
 	uv build
 	@echo "Uploading to PyPI..."
@@ -63,6 +65,8 @@ publish-to-pypi:
 publish-to-pypi-minor:
 	@echo "Publishing to PyPI with minor version bump..."
 	python scripts/bump-version.py minor
+	@echo "Cleaning old builds..."
+	rm -rf dist/
 	@echo "Building package..."
 	uv build
 	@echo "Uploading to PyPI..."
@@ -72,6 +76,8 @@ publish-to-pypi-minor:
 publish-to-pypi-major:
 	@echo "Publishing to PyPI with major version bump..."
 	python scripts/bump-version.py major
+	@echo "Cleaning old builds..."
+	rm -rf dist/
 	@echo "Building package..."
 	uv build
 	@echo "Uploading to PyPI..."
