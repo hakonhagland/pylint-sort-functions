@@ -1,15 +1,61 @@
-"""Command-line interface for pylint-sort-functions auto-fix."""
+"""Command-line interface for pylint-sort-functions auto-fix.
 
+This module provides the standalone CLI tool that users invoke via:
+    $ pylint-sort-functions [options] <paths>
+
+The entry point is configured in pyproject.toml and maps the 'pylint-sort-functions'
+command to the main() function in this module. This provides auto-fix functionality
+independent of the PyLint plugin integration.
+
+Usage examples:
+    $ pylint-sort-functions --fix src/
+    $ pylint-sort-functions --dry-run --verbose myproject/
+    $ pylint-sort-functions --fix --no-backup --ignore-decorators "@app.route" src/
+"""
+
+# Using argparse (stdlib) instead of click to maintain zero external dependencies.
+# This lightweight approach is sufficient for our flat argument structure.
+# Future: If subcommands are added, consider migrating to click for better UX.
 import argparse
 import sys
 from pathlib import Path
 from typing import List
 
-from pylint_sort_functions.auto_fix import AutoFixConfig, sort_python_files
+from pylint_sort_functions import auto_fix
+from pylint_sort_functions.auto_fix import AutoFixConfig  # Class - direct import OK
+
+# Public functions
 
 
 def main() -> int:  # pylint: disable=too-many-return-statements,too-many-branches
-    """Main CLI entry point.
+    """Main CLI entry point for pylint-sort-functions tool.
+
+    Provides a complete workflow for auto-fixing function and method sorting:
+    1. Parse and validate command-line arguments
+    2. Resolve and validate input paths (files/directories)
+    3. Discover Python files recursively in directories
+    4. Configure auto-fix settings from CLI arguments
+    5. Process files with function/method sorting and comment preservation
+    6. Report results with optional verbose output
+
+    The tool operates in different modes:
+    - Check-only: Default mode, shows help and exits
+    - Dry-run: Shows what would be changed without modifying files
+    - Fix: Actually modifies files with optional backup creation
+
+    Exit codes:
+    - 0: Success (files processed successfully, or check-only mode)
+    - 1: Error (invalid paths, processing failures, user interruption)
+
+    Error handling:
+    - Provides user-friendly error messages instead of stack traces
+    - Handles filesystem errors, permission issues, and processing failures
+    - Graceful handling of keyboard interruption (Ctrl+C)
+
+    Side effects:
+    - May modify Python files when --fix is used
+    - May create .bak backup files unless --no-backup is specified
+    - Outputs progress and results to stdout
 
     :returns: Exit code (0 for success, 1 for error)
     :rtype: int
@@ -18,7 +64,83 @@ def main() -> int:  # pylint: disable=too-many-return-statements,too-many-branch
         prog="pylint-sort-functions",
         description="Auto-fix function and method sorting in Python files",
     )
+    _add_parser_arguments(parser)
 
+    args = parser.parse_args()
+
+    # Validate arguments
+    if not args.fix and not args.dry_run:
+        print(
+            "Note: Running in check-only mode. Use --fix or --dry-run to make changes."
+        )
+        print("Use 'pylint-sort-functions --help' for more options.")
+        return 0
+
+    # Convert paths and find Python files
+    try:
+        paths = [Path(p).resolve() for p in args.paths]
+        for path in paths:
+            if not path.exists():
+                print(f"Error: Path does not exist: {path}")
+                return 1
+
+        python_files = _find_python_files(paths)
+        if not python_files:
+            print("No Python files found in the specified paths.")
+            return 0
+
+    # Catch broad exceptions for CLI robustness - path operations can fail in
+    # many OS-specific ways, and we want clean error messages not stacktraces
+    except Exception as e:  # pragma: no cover  # pylint: disable=broad-exception-caught
+        print(f"Error processing paths: {e}")
+        return 1
+
+    # Configure auto-fix
+    config = AutoFixConfig(
+        dry_run=args.dry_run,
+        backup=not args.no_backup,
+        ignore_decorators=args.ignore_decorators or [],
+        preserve_comments=True,
+    )
+
+    if args.verbose:  # pragma: no cover
+        print(f"Processing {len(python_files)} Python files...")
+        if config.ignore_decorators:
+            print(f"Ignoring decorators: {', '.join(config.ignore_decorators)}")
+
+    # Process files
+    try:
+        files_processed, files_modified = auto_fix.sort_python_files(
+            python_files, config
+        )
+
+        if args.verbose or files_modified > 0:  # pragma: no cover
+            if config.dry_run:
+                print(f"Would modify {files_modified} of {files_processed} files")
+            else:
+                print(f"Modified {files_modified} of {files_processed} files")
+                if config.backup and files_modified > 0:
+                    print("Backup files created with .bak extension")
+
+        return 0
+
+    except KeyboardInterrupt:
+        print("\nOperation cancelled by user.")
+        return 1
+    except Exception as e:  # pylint: disable=broad-exception-caught
+        print(f"Error during processing: {e}")
+        return 1
+
+
+# Private functions
+
+
+def _add_parser_arguments(parser: argparse.ArgumentParser) -> None:
+    """Configure CLI argument parser with all supported options.
+
+    :param parser: The argument parser to configure
+    :type parser: argparse.ArgumentParser
+    """
     parser.add_argument(
         "paths", nargs="+", type=Path, help="Python files or directories to process"
     )
@@ -50,67 +172,6 @@ def main() -> int:  # pylint: disable=too-many-return-statements,too-many-branch
     )
 
     parser.add_argument("--verbose", "-v", action="store_true", help="Verbose output")
-
-    args = parser.parse_args()
-
-    # Validate arguments
-    if not args.fix and not args.dry_run:
-        print(
-            "Note: Running in check-only mode. Use --fix or --dry-run to make changes."
-        )
-        print("Use 'pylint-sort-functions --help' for more options.")
-        return 0
-
-    # Convert paths and find Python files
-    try:
-        paths = [Path(p).resolve() for p in args.paths]
-        for path in paths:
-            if not path.exists():
-                print(f"Error: Path does not exist: {path}")
-                return 1
-
-        python_files = _find_python_files(paths)
-        if not python_files:
-            print("No Python files found in the specified paths.")
-            return 0
-
-    except Exception as e:  # pragma: no cover  # pylint: disable=broad-exception-caught
-        print(f"Error processing paths: {e}")
-        return 1
-
-    # Configure auto-fix
-    config = AutoFixConfig(
-        dry_run=args.dry_run,
-        backup=not args.no_backup,
-        ignore_decorators=args.ignore_decorators or [],
-        preserve_comments=True,
-    )
-
-    if args.verbose:  # pragma: no cover
-        print(f"Processing {len(python_files)} Python files...")
-        if config.ignore_decorators:
-            print(f"Ignoring decorators: {', '.join(config.ignore_decorators)}")
-
-    # Process files
-    try:
-        files_processed, files_modified = sort_python_files(python_files, config)
-
-        if args.verbose or files_modified > 0:  # pragma: no cover
-            if config.dry_run:
-                print(f"Would modify {files_modified} of {files_processed} files")
-            else:
-                print(f"Modified {files_modified} of {files_processed} files")
-                if config.backup and files_modified > 0:
-                    print("Backup files created with .bak extension")
-
-        return 0
-
-    except KeyboardInterrupt:
-        print("\nOperation cancelled by user.")
-        return 1
-    except Exception as e:  # pylint: disable=broad-exception-caught
-        print(f"Error during processing: {e}")
-        return 1
 
 
 def _find_python_files(paths: List[Path]) -> List[Path]:

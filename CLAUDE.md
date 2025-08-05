@@ -282,7 +282,9 @@ Follow the Python style guide in `.cursor/rules/python.mdc`:
 - Import order: standard library → third-party → local (alphabetically sorted)
 - **Avoid inline imports**: Move all imports to the top of the file for better readability and maintainability
 - Functions/methods organized alphabetically within their scope
-- **Module imports**: Prefer `from package import module` over `from package.module import function` for better readability and explicit provenance (e.g., `from pylint_sort_functions import utils` then use `utils.function()` instead of importing `function` directly)
+- **Module imports**:
+  - **Functions**: Prefer `from package import module` over `from package.module import function` for better readability and explicit provenance (e.g., `from pylint_sort_functions import utils` then use `utils.function()` instead of importing `function` directly)
+  - **Classes**: Use author's judgment based on context - consider number of classes, name clarity, and usage patterns. Direct import of classes is acceptable when it improves readability (e.g., `from package.module import ClassName` is fine for clear configuration classes)
 - **Function organization**: Organize functions with public functions first (no underscore prefix), followed by private functions (underscore prefix), each section alphabetically sorted and clearly separated with comment blocks (e.g., `# Public functions` and `# Private functions`)
 - **Class method organization**: Apply the same organization principle to class methods - organize with public methods first, followed by private methods (underscore prefix), each section alphabetically sorted and clearly separated with comment blocks (e.g., `# Public methods` and `# Private methods`). This provides predictable structure regardless of class size and makes method lookup efficient.
 

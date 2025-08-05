@@ -90,7 +90,7 @@ class TestCLI:
 
             with patch("sys.argv", ["pylint-sort-functions"] + test_args):
                 with patch(
-                    "pylint_sort_functions.cli.sort_python_files",
+                    "pylint_sort_functions.auto_fix.sort_python_files",
                     side_effect=KeyboardInterrupt,
                 ):
                     result = main()
@@ -109,7 +109,7 @@ class TestCLI:
 
             with patch("sys.argv", ["pylint-sort-functions"] + test_args):
                 with patch(
-                    "pylint_sort_functions.cli.sort_python_files",
+                    "pylint_sort_functions.auto_fix.sort_python_files",
                     side_effect=RuntimeError("Test error"),
                 ):
                     result = main()
