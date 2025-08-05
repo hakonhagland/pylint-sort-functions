@@ -54,7 +54,7 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Development Roadmap</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#version-0-2-0-framework-awareness-configuration">Version 0.2.0 - Framework Awareness &amp; Configuration</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#high-priority-features">High Priority Features</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#framework-aware-sorting">1. Framework-Aware Sorting 🎯</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#framework-aware-sorting-completed">1. ✅ Framework-Aware Sorting (Completed)</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#enhanced-error-messages">2. Enhanced Error Messages 📝</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#pyproject-toml-configuration-support">3. pyproject.toml Configuration Support 🔧</a></li>
 </ul>
@@ -65,6 +65,10 @@
 <li class="toctree-l4"><a class="reference internal" href="#granular-disable-comments">6. Granular Disable Comments 🔇</a></li>
 </ul>
 </li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#version-0-2-1-auto-fix-improvements">Version 0.2.1 - Auto-fix Improvements</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#class-method-sorting-in-auto-fix">1. Class Method Sorting in Auto-fix 🔧</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#version-0-3-0-advanced-features">Version 0.3.0 - Advanced Features</a><ul>
@@ -126,20 +130,22 @@
 <p><strong>Target</strong>: Minor release with framework-specific handling</p>
 <section id="high-priority-features">
 <h3>High Priority Features<a class="headerlink" href="#high-priority-features" title="Link to this heading"></a></h3>
-<section id="framework-aware-sorting">
-<h4>1. Framework-Aware Sorting 🎯<a class="headerlink" href="#framework-aware-sorting" title="Link to this heading"></a></h4>
-<p><strong>Issue</strong>: <a class="reference external" href="https://github.com/hakonhagland/pylint-sort-functions/issues/1">#1</a> - Click decorators require functions to be defined before they can be referenced</p>
-<p><strong>Impact</strong>: High - breaks functional code</p>
-<p><strong>Complexity</strong>: Medium</p>
+<section id="framework-aware-sorting-completed">
+<h4>1. ✅ Framework-Aware Sorting (Completed)<a class="headerlink" href="#framework-aware-sorting-completed" title="Link to this heading"></a></h4>
+<p><strong>Issue</strong>: <a class="reference external" href="https://github.com/hakonhagland/pylint-sort-functions/issues/1">#1</a> - Click decorators require functions to be defined before they can be referenced <strong>(Closed)</strong></p>
+<p><strong>Status</strong>: ✅ <strong>Implemented</strong> - The <code class="docutils literal notranslate"><span class="pre">ignore_decorators</span></code> option is now available in both the PyLint plugin and auto-fix tool.</p>
 <p><strong>Implementation</strong>:</p>
 <ul class="simple">
-<li><p>Add <code class="docutils literal notranslate"><span class="pre">ignore_decorators</span></code> configuration option</p></li>
-<li><p>Parse decorator patterns and skip sorting requirements</p></li>
-<li><p>Support common frameworks: Click, Flask, FastAPI, Celery</p></li>
+<li><p>✅ Added <code class="docutils literal notranslate"><span class="pre">ignore_decorators</span></code> configuration option</p></li>
+<li><p>✅ Parse decorator patterns and skip sorting requirements</p></li>
+<li><p>✅ Support for any decorator pattern including Click, Flask, FastAPI, Celery</p></li>
 </ul>
 <p><strong>Configuration Example</strong>:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">tool</span><span class="o">.</span><span class="n">pylint</span><span class="o">.</span><span class="n">sort</span><span class="o">-</span><span class="n">functions</span><span class="p">]</span>
-<span class="n">ignore_decorators</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;@main.command&quot;</span><span class="p">,</span> <span class="s2">&quot;@app.route&quot;</span><span class="p">,</span> <span class="s2">&quot;@celery.task&quot;</span><span class="p">]</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># In CLI:</span>
+<span class="n">pylint</span><span class="o">-</span><span class="n">sort</span><span class="o">-</span><span class="n">functions</span> <span class="o">--</span><span class="n">ignore</span><span class="o">-</span><span class="n">decorators</span> <span class="s2">&quot;@main.command&quot;</span> <span class="s2">&quot;@app.route&quot;</span>
+
+<span class="c1"># In auto-fix config:</span>
+<span class="n">config</span> <span class="o">=</span> <span class="n">AutoFixConfig</span><span class="p">(</span><span class="n">ignore_decorators</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;@main.command&quot;</span><span class="p">,</span> <span class="s2">&quot;@app.route&quot;</span><span class="p">])</span>
 </pre></div>
 </div>
 </section>
@@ -212,6 +218,22 @@
 </pre></div>
 </div>
 </section>
+</section>
+</section>
+<section id="version-0-2-1-auto-fix-improvements">
+<h2>Version 0.2.1 - Auto-fix Improvements<a class="headerlink" href="#version-0-2-1-auto-fix-improvements" title="Link to this heading"></a></h2>
+<p><strong>Target</strong>: Patch release for auto-fix enhancements</p>
+<section id="class-method-sorting-in-auto-fix">
+<h3>1. Class Method Sorting in Auto-fix 🔧<a class="headerlink" href="#class-method-sorting-in-auto-fix" title="Link to this heading"></a></h3>
+<p><strong>Issue</strong>: Auto-fix tool currently only sorts module-level functions, not class methods</p>
+<p><strong>Impact</strong>: High - feature parity with PyLint plugin</p>
+<p><strong>Complexity</strong>: Medium</p>
+<p><strong>Implementation</strong>:</p>
+<ul class="simple">
+<li><p>Implement <code class="docutils literal notranslate"><span class="pre">_sort_class_methods()</span></code> in auto_fix.py</p></li>
+<li><p>Handle method extraction and sorting within classes</p></li>
+<li><p>Preserve class structure and indentation</p></li>
+</ul>
 </section>
 </section>
 <section id="version-0-3-0-advanced-features">
