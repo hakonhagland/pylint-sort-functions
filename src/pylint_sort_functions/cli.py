@@ -100,7 +100,6 @@ def main() -> int:  # pylint: disable=too-many-return-statements,too-many-branch
         dry_run=args.dry_run,
         backup=not args.no_backup,
         ignore_decorators=args.ignore_decorators or [],
-        preserve_comments=True,
     )
 
     if args.verbose:  # pragma: no cover

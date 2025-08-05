@@ -28,6 +28,9 @@ class AutoFixConfig:
 
     Controls how the auto-fix feature behaves when reordering functions
     and methods in Python source files.
+
+    Note: Comment preservation is always enabled as it's essential for
+    maintaining code intent and documentation during reorganization.
     """
 
     dry_run: bool = False  # Show what would be changed without modifying files
@@ -35,7 +38,6 @@ class AutoFixConfig:
     ignore_decorators: Optional[List[str]] = (
         None  # Decorator patterns to exclude from sorting
     )
-    preserve_comments: bool = True  # Keep comments with their associated functions
 
 
 # Note: This class intentionally has only one public method as it encapsulates
