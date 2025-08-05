@@ -81,7 +81,7 @@ def are_functions_sorted(functions: list[nodes.FunctionDef]) -> bool:
     return True
 
 
-def are_functions_sorted_with_exclusions(  # pylint: disable=function-should-be-private
+def are_functions_sorted_with_exclusions(
     functions: list[nodes.FunctionDef], ignore_decorators: list[str] | None = None
 ) -> bool:
     """Check if functions are sorted alphabetically, excluding decorator-dependent ones.
@@ -122,7 +122,7 @@ def are_methods_sorted(methods: list[nodes.FunctionDef]) -> bool:
     return are_functions_sorted(methods)
 
 
-def are_methods_sorted_with_exclusions(  # pylint: disable=function-should-be-private
+def are_methods_sorted_with_exclusions(
     methods: list[nodes.FunctionDef], ignore_decorators: list[str] | None = None
 ) -> bool:
     """Check if methods are sorted alphabetically, excluding decorator-dependent ones.
@@ -136,6 +136,33 @@ def are_methods_sorted_with_exclusions(  # pylint: disable=function-should-be-pr
     """
     # Methods follow the same sorting rules as functions
     return are_functions_sorted_with_exclusions(methods, ignore_decorators)
+
+
+def function_has_excluded_decorator(
+    func: nodes.FunctionDef, ignore_decorators: list[str]
+) -> bool:
+    """Check if a function has any decorators that should be excluded from sorting.
+
+    :param func: Function definition node to check
+    :type func: nodes.FunctionDef
+    :param ignore_decorators: List of decorator patterns to match against
+    :type ignore_decorators: list[str]
+    :returns: True if function has any excluded decorators
+    :rtype: bool
+    """
+    if not ignore_decorators or not func.decorators:
+        return False
+
+    # Get string representations of all decorators on this function
+    function_decorators = _get_decorator_strings(func)
+
+    # Check if any decorator matches any ignore pattern
+    for decorator_str in function_decorators:
+        for ignore_pattern in ignore_decorators:
+            if _decorator_matches_pattern(decorator_str, ignore_pattern):
+                return True
+
+    return False
 
 
 def get_functions_from_node(node: nodes.Module) -> list[nodes.FunctionDef]:
@@ -166,6 +193,17 @@ def get_methods_from_class(node: nodes.ClassDef) -> list[nodes.FunctionDef]:
         if isinstance(child, nodes.FunctionDef):
             methods.append(child)
     return methods
+
+
+def is_private_function(func: nodes.FunctionDef) -> bool:
+    """Check if a function is private (starts with underscore).
+
+    :param func: Function definition node
+    :type func: nodes.FunctionDef
+    :returns: True if function name starts with underscore
+    :rtype: bool
+    """
+    return func.name.startswith("_") and not func.name.startswith("__")
 
 
 def should_function_be_private(func: nodes.FunctionDef, module: nodes.Module) -> bool:  # pylint: disable=unused-argument
@@ -459,33 +497,6 @@ def _find_python_files(root_path: Path) -> List[Path]:
     return python_files
 
 
-def function_has_excluded_decorator(
-    func: nodes.FunctionDef, ignore_decorators: list[str]
-) -> bool:
-    """Check if a function has any decorators that should be excluded from sorting.
-
-    :param func: Function definition node to check
-    :type func: nodes.FunctionDef
-    :param ignore_decorators: List of decorator patterns to match against
-    :type ignore_decorators: list[str]
-    :returns: True if function has any excluded decorators
-    :rtype: bool
-    """
-    if not ignore_decorators or not func.decorators:
-        return False
-
-    # Get string representations of all decorators on this function
-    function_decorators = _get_decorator_strings(func)
-
-    # Check if any decorator matches any ignore pattern
-    for decorator_str in function_decorators:
-        for ignore_pattern in ignore_decorators:
-            if _decorator_matches_pattern(decorator_str, ignore_pattern):
-                return True
-
-    return False
-
-
 def _get_decorator_strings(func: nodes.FunctionDef) -> list[str]:
     """Extract string representations of all decorators on a function.
 
@@ -553,14 +564,3 @@ def _is_function_used_externally(
     external_usage = [m for m in using_modules if m != current_module]
 
     return len(external_usage) > 0
-
-
-def is_private_function(func: nodes.FunctionDef) -> bool:
-    """Check if a function is private (starts with underscore).
-
-    :param func: Function definition node
-    :type func: nodes.FunctionDef
-    :returns: True if function name starts with underscore
-    :rtype: bool
-    """
-    return func.name.startswith("_") and not func.name.startswith("__")

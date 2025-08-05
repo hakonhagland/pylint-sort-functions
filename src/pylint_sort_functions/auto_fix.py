@@ -106,118 +106,6 @@ class FunctionSorter:  # pylint: disable=too-few-public-methods
             print(f"Error processing {file_path}: {e}")
             return False
 
-    def _file_needs_sorting(self, content: str) -> bool:
-        """Check if a file needs function sorting.
-
-        :param content: File content as string
-        :type content: str
-        :returns: True if file needs sorting
-        :rtype: bool
-        """
-        try:
-            # Parse with astroid for consistency with the checker
-            module = astroid.parse(content)
-
-            # Check module-level functions
-            functions = utils.get_functions_from_node(module)
-            if functions and not utils.are_functions_sorted_with_exclusions(
-                functions, self.config.ignore_decorators
-            ):
-                return True
-
-            # Check class methods
-            for node in module.body:
-                if isinstance(node, nodes.ClassDef):
-                    methods = utils.get_methods_from_class(node)
-                    if methods and not utils.are_methods_sorted_with_exclusions(
-                        methods, self.config.ignore_decorators
-                    ):
-                        return True
-
-            return False
-
-        except Exception:  # pylint: disable=broad-exception-caught
-            return False
-
-    def _sort_functions_in_content(self, content: str) -> str:
-        """Sort functions in file content and return new content.
-
-        :param content: Original file content
-        :type content: str
-        :returns: Content with sorted functions
-        :rtype: str
-        """
-        try:
-            module = astroid.parse(content)
-            lines = content.splitlines(keepends=True)
-
-            # Process module-level functions
-            content = self._sort_module_functions(content, module, lines)
-
-            # Process class methods
-            content = self._sort_class_methods(content, module, lines)
-
-            return content
-
-        except (
-            Exception
-        ) as e:  # pragma: no cover  # pylint: disable=broad-exception-caught
-            print(f"Error sorting content: {e}")
-            return content
-
-    def _sort_class_methods(  # pylint: disable=unused-argument
-        self, content: str, module: nodes.Module, lines: List[str]
-    ) -> str:
-        """Sort methods within classes.
-
-        :param content: File content
-        :type content: str
-        :param module: Parsed module
-        :type module: nodes.Module
-        :param lines: Content split into lines
-        :type lines: List[str]
-        :returns: Content with sorted class methods
-        :rtype: str
-        """
-        # For now, focus on module-level functions
-        # Class method sorting can be added in a future iteration
-        return content
-
-    def _sort_module_functions(
-        self, content: str, module: nodes.Module, lines: List[str]
-    ) -> str:
-        """Sort module-level functions.
-
-        :param content: File content
-        :type content: str
-        :param module: Parsed module
-        :type module: nodes.Module
-        :param lines: Content split into lines
-        :type lines: List[str]
-        :returns: Content with sorted module functions
-        :rtype: str
-        """
-        functions = utils.get_functions_from_node(module)
-        if not functions:  # pragma: no cover
-            return content
-
-        # Check if sorting is needed
-        if utils.are_functions_sorted_with_exclusions(  # pragma: no cover
-            functions, self.config.ignore_decorators
-        ):
-            return content
-
-        # Extract function spans
-        function_spans = self._extract_function_spans(functions, lines)
-
-        # Sort the functions
-        sorted_spans = self._sort_function_spans(function_spans)
-
-        # Reconstruct content
-        return self._reconstruct_content_with_sorted_functions(
-            content, function_spans, sorted_spans
-        )
-
     def _extract_function_spans(
         self, functions: List[nodes.FunctionDef], lines: List[str]
     ) -> List[FunctionSpan]:
@@ -269,37 +157,38 @@ class FunctionSorter:  # pylint: disable=too-few-public-methods
 
         return spans
 
-    def _sort_function_spans(self, spans: List[FunctionSpan]) -> List[FunctionSpan]:
-        """Sort function spans according to the plugin rules.
+    def _file_needs_sorting(self, content: str) -> bool:
+        """Check if a file needs function sorting.
 
-        :param spans: List of function spans to sort
-        :type spans: List[FunctionSpan]
-        :returns: Sorted list of function spans
-        :rtype: List[FunctionSpan]
+        :param content: File content as string
+        :type content: str
+        :returns: True if file needs sorting
+        :rtype: bool
         """
-        # Separate functions based on exclusions and visibility
-        excluded = []
-        sortable_public = []
-        sortable_private = []
+        try:
+            # Parse with astroid for consistency with the checker
+            module = astroid.parse(content)
 
-        for span in spans:
-            if utils.function_has_excluded_decorator(
-                span.node, self.config.ignore_decorators or []
+            # Check module-level functions
+            functions = utils.get_functions_from_node(module)
+            if functions and not utils.are_functions_sorted_with_exclusions(
+                functions, self.config.ignore_decorators
             ):
-                excluded.append(span)
-            elif utils.is_private_function(span.node):
-                sortable_private.append(span)
-            else:
-                sortable_public.append(span)
+                return True
 
-        # Sort the sortable functions alphabetically
-        sortable_public.sort(key=lambda s: s.name)
-        sortable_private.sort(key=lambda s: s.name)
+            # Check class methods
+            for node in module.body:
+                if isinstance(node, nodes.ClassDef):
+                    methods = utils.get_methods_from_class(node)
+                    if methods and not utils.are_methods_sorted_with_exclusions(
+                        methods, self.config.ignore_decorators
+                    ):
+                        return True
 
-        # Reconstruct the order: sortable public + sortable private + excluded
-        # For now, use a simple approach: public sorted + private sorted + excluded
-        # Future enhancement: Preserve relative positions of excluded functions
-        return sortable_public + sortable_private + excluded
+            return False
+
+        except Exception:  # pylint: disable=broad-exception-caught
+            return False
 
     def _reconstruct_content_with_sorted_functions(
         self,
@@ -356,8 +245,120 @@ class FunctionSorter:  # pylint: disable=too-few-public-methods
 
         return "".join(new_lines)
 
+    def _sort_class_methods(  # pylint: disable=unused-argument
+        self, content: str, module: nodes.Module, lines: List[str]
+    ) -> str:
+        """Sort methods within classes.
 
-def sort_python_file(file_path: Path, config: AutoFixConfig) -> bool:
+        :param content: File content
+        :type content: str
+        :param module: Parsed module
+        :type module: nodes.Module
+        :param lines: Content split into lines
+        :type lines: List[str]
+        :returns: Content with sorted class methods
+        :rtype: str
+        """
+        # For now, focus on module-level functions
+        # Class method sorting can be added in a future iteration
+        return content
+
+    def _sort_function_spans(self, spans: List[FunctionSpan]) -> List[FunctionSpan]:
+        """Sort function spans according to the plugin rules.
+
+        :param spans: List of function spans to sort
+        :type spans: List[FunctionSpan]
+        :returns: Sorted list of function spans
+        :rtype: List[FunctionSpan]
+        """
+        # Separate functions based on exclusions and visibility
+        excluded = []
+        sortable_public = []
+        sortable_private = []
+
+        for span in spans:
+            if utils.function_has_excluded_decorator(
+                span.node, self.config.ignore_decorators or []
+            ):
+                excluded.append(span)
+            elif utils.is_private_function(span.node):
+                sortable_private.append(span)
+            else:
+                sortable_public.append(span)
+
+        # Sort the sortable functions alphabetically
+        sortable_public.sort(key=lambda s: s.name)
+        sortable_private.sort(key=lambda s: s.name)
+
+        # Reconstruct the order: sortable public + sortable private + excluded
+        # For now, use a simple approach: public sorted + private sorted + excluded
+        # Future enhancement: Preserve relative positions of excluded functions
+        return sortable_public + sortable_private + excluded
+
+    def _sort_functions_in_content(self, content: str) -> str:
+        """Sort functions in file content and return new content.
+
+        :param content: Original file content
+        :type content: str
+        :returns: Content with sorted functions
+        :rtype: str
+        """
+        try:
+            module = astroid.parse(content)
+            lines = content.splitlines(keepends=True)
+
+            # Process module-level functions
+            content = self._sort_module_functions(content, module, lines)
+
+            # Process class methods
+            content = self._sort_class_methods(content, module, lines)
+
+            return content
+
+        except (
+            Exception
+        ) as e:  # pragma: no cover  # pylint: disable=broad-exception-caught
+            print(f"Error sorting content: {e}")
+            return content
+
+    def _sort_module_functions(
+        self, content: str, module: nodes.Module, lines: List[str]
+    ) -> str:
+        """Sort module-level functions.
+
+        :param content: File content
+        :type content: str
+        :param module: Parsed module
+        :type module: nodes.Module
+        :param lines: Content split into lines
+        :type lines: List[str]
+        :returns: Content with sorted module functions
+        :rtype: str
+        """
+        functions = utils.get_functions_from_node(module)
+        if not functions:  # pragma: no cover
+            return content
+
+        # Check if sorting is needed
+        if utils.are_functions_sorted_with_exclusions(  # pragma: no cover
+            functions, self.config.ignore_decorators
+        ):
+            return content
+
+        # Extract function spans
+        function_spans = self._extract_function_spans(functions, lines)
+
+        # Sort the functions
+        sorted_spans = self._sort_function_spans(function_spans)
+
+        # Reconstruct content
+        return self._reconstruct_content_with_sorted_functions(
+            content, function_spans, sorted_spans
+        )
+
+
+# Public API function for sorting a single file
+def sort_python_file(file_path: Path, config: AutoFixConfig) -> bool:  # pylint: disable=function-should-be-private
     """Sort functions in a Python file.
 
     :param file_path: Path to the Python file
