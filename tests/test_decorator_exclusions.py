@@ -12,10 +12,10 @@ from astroid import nodes
 
 from pylint_sort_functions.utils import (
     _decorator_matches_pattern,
-    _function_has_excluded_decorator,
     _get_decorator_strings,
     are_functions_sorted_with_exclusions,
     are_methods_sorted_with_exclusions,
+    function_has_excluded_decorator,
 )
 
 
@@ -179,7 +179,7 @@ def create():
         func = parse_function_from_code(code)
         ignore_patterns = ["@main.command"]
 
-        assert _function_has_excluded_decorator(func, ignore_patterns)
+        assert function_has_excluded_decorator(func, ignore_patterns)
 
     def test_exclude_flask_route(self):
         """Test exclusion of Flask route functions."""
@@ -191,7 +191,7 @@ def index():
         func = parse_function_from_code(code)
         ignore_patterns = ["@app.route"]
 
-        assert _function_has_excluded_decorator(func, ignore_patterns)
+        assert function_has_excluded_decorator(func, ignore_patterns)
 
     def test_exclude_with_wildcard(self):
         """Test exclusion using wildcard patterns."""
@@ -203,7 +203,7 @@ def create():
         func = parse_function_from_code(code)
         ignore_patterns = ["@*.command"]
 
-        assert _function_has_excluded_decorator(func, ignore_patterns)
+        assert function_has_excluded_decorator(func, ignore_patterns)
 
     def test_no_exclusion(self):
         """Test function that should not be excluded."""
@@ -215,7 +215,7 @@ def some_property():
         func = parse_function_from_code(code)
         ignore_patterns = ["@main.command"]
 
-        assert not _function_has_excluded_decorator(func, ignore_patterns)
+        assert not function_has_excluded_decorator(func, ignore_patterns)
 
     def test_empty_ignore_list(self):
         """Test with empty ignore list."""
@@ -227,7 +227,7 @@ def create():
         func = parse_function_from_code(code)
         ignore_patterns = []
 
-        assert not _function_has_excluded_decorator(func, ignore_patterns)
+        assert not function_has_excluded_decorator(func, ignore_patterns)
 
 
 class TestSortingWithExclusions:

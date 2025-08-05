@@ -11,25 +11,26 @@ Version 0.2.0 - Framework Awareness & Configuration
 High Priority Features
 ~~~~~~~~~~~~~~~~~~~~~~
 
-1. Framework-Aware Sorting 🎯
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+1. ✅ Framework-Aware Sorting (Completed)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-**Issue**: `#1 <https://github.com/hakonhagland/pylint-sort-functions/issues/1>`_ - Click decorators require functions to be defined before they can be referenced
+**Issue**: `#1 <https://github.com/hakonhagland/pylint-sort-functions/issues/1>`_ - Click decorators require functions to be defined before they can be referenced **(Closed)**
 
-**Impact**: High - breaks functional code
-
-**Complexity**: Medium
+**Status**: ✅ **Implemented** - The ``ignore_decorators`` option is now available in both the PyLint plugin and auto-fix tool.
 
 **Implementation**:
 
-- Add ``ignore_decorators`` configuration option
-- Parse decorator patterns and skip sorting requirements
-- Support common frameworks: Click, Flask, FastAPI, Celery
+- ✅ Added ``ignore_decorators`` configuration option
+- ✅ Parse decorator patterns and skip sorting requirements
+- ✅ Support for any decorator pattern including Click, Flask, FastAPI, Celery
 
 **Configuration Example**::
 
-    [tool.pylint.sort-functions]
-    ignore_decorators = ["@main.command", "@app.route", "@celery.task"]
+    # In CLI:
+    pylint-sort-functions --ignore-decorators "@main.command" "@app.route"
+
+    # In auto-fix config:
+    config = AutoFixConfig(ignore_decorators=["@main.command", "@app.route"])
 
 2. Enhanced Error Messages 📝
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -114,6 +115,26 @@ Medium Priority Features
 
         def first_method(self):
             pass
+
+Version 0.2.1 - Auto-fix Improvements
+--------------------------------------
+
+**Target**: Patch release for auto-fix enhancements
+
+1. Class Method Sorting in Auto-fix 🔧
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+**Issue**: Auto-fix tool currently only sorts module-level functions, not class methods
+
+**Impact**: High - feature parity with PyLint plugin
+
+**Complexity**: Medium
+
+**Implementation**:
+
+- Implement ``_sort_class_methods()`` in auto_fix.py
+- Handle method extraction and sorting within classes
+- Preserve class structure and indentation
 
 Version 0.3.0 - Advanced Features
 ---------------------------------

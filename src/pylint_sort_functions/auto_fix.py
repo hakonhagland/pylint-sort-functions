@@ -5,16 +5,10 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import List, Optional, Tuple
 
-from astroid import nodes  # type: ignore[import-untyped]
+import astroid  # type: ignore[import-untyped]
+from astroid import nodes
 
-from pylint_sort_functions.utils import (
-    _function_has_excluded_decorator,
-    _is_private_function,
-    are_functions_sorted_with_exclusions,
-    are_methods_sorted_with_exclusions,
-    get_functions_from_node,
-    get_methods_from_class,
-)
+from pylint_sort_functions import utils
 
 
 @dataclass
@@ -24,22 +18,41 @@ class FunctionSpan:
     node: nodes.FunctionDef
     start_line: int
     end_line: int
-    text: str
+    text: str  # Complete source text from start_line to end_line (inclusive)
     name: str
 
 
 @dataclass
 class AutoFixConfig:
-    """Configuration for auto-fix functionality."""
+    """Configuration for the automatic function sorting tool.
 
-    dry_run: bool = False
-    backup: bool = True
-    ignore_decorators: Optional[List[str]] = None
-    preserve_comments: bool = True
+    Controls how the auto-fix feature behaves when reordering functions
+    and methods in Python source files.
+    """
+
+    dry_run: bool = False  # Show what would be changed without modifying files
+    backup: bool = True  # Create .bak files before making changes
+    ignore_decorators: Optional[List[str]] = (
+        None  # Decorator patterns to exclude from sorting
+    )
+    preserve_comments: bool = True  # Keep comments with their associated functions
 
 
-class FunctionSorter:  # pylint: disable=too-few-public-methods,unsorted-methods
-    """Main class for auto-fixing function sorting."""
+# Note: This class intentionally has only one public method as it encapsulates
+# the configuration state and provides a clean interface for file processing.
+class FunctionSorter:  # pylint: disable=too-few-public-methods
+    """Main class for auto-fixing function sorting.
+
+    This class provides the core functionality for automatically reordering
+    functions and methods in Python source files to comply with sorting rules.
+
+    Usage:
+        Used by the CLI tool (cli.py) and can be used programmatically:
+
+        config = AutoFixConfig(dry_run=True, backup=True)
+        sorter = FunctionSorter(config)
+        was_modified = sorter.sort_file(Path("my_file.py"))
+    """
 
     def __init__(self, config: AutoFixConfig):
         """Initialize the function sorter.
@@ -86,6 +99,7 @@ class FunctionSorter:  # pylint: disable=too-few-public-methods,unsorted-methods
             file_path.write_text(new_content, encoding="utf-8")
             return True
 
+        # Broad exception catch ensures tool never crashes when modifying user files
         except (
             Exception
         ) as e:  # pragma: no cover  # pylint: disable=broad-exception-caught
@@ -102,13 +116,11 @@ class FunctionSorter:  # pylint: disable=too-few-public-methods,unsorted-methods
         """
         try:
             # Parse with astroid for consistency with the checker
-            import astroid  # pylint: disable=import-outside-toplevel
-
             module = astroid.parse(content)
 
             # Check module-level functions
-            functions = get_functions_from_node(module)
-            if functions and not are_functions_sorted_with_exclusions(
+            functions = utils.get_functions_from_node(module)
+            if functions and not utils.are_functions_sorted_with_exclusions(
                 functions, self.config.ignore_decorators
             ):
                 return True
@@ -116,8 +128,8 @@ class FunctionSorter:  # pylint: disable=too-few-public-methods,unsorted-methods
             # Check class methods
             for node in module.body:
                 if isinstance(node, nodes.ClassDef):
-                    methods = get_methods_from_class(node)
-                    if methods and not are_methods_sorted_with_exclusions(
+                    methods = utils.get_methods_from_class(node)
+                    if methods and not utils.are_methods_sorted_with_exclusions(
                         methods, self.config.ignore_decorators
                     ):
                         return True
@@ -135,8 +147,6 @@ class FunctionSorter:  # pylint: disable=too-few-public-methods,unsorted-methods
         :returns: Content with sorted functions
         :rtype: str
         """
-        import astroid  # pylint: disable=import-outside-toplevel
-
         try:
             module = astroid.parse(content)
             lines = content.splitlines(keepends=True)
@@ -187,12 +197,12 @@ class FunctionSorter:  # pylint: disable=too-few-public-methods,unsorted-methods
         :returns: Content with sorted module functions
         :rtype: str
         """
-        functions = get_functions_from_node(module)
+        functions = utils.get_functions_from_node(module)
         if not functions:  # pragma: no cover
             return content
 
         # Check if sorting is needed
-        if are_functions_sorted_with_exclusions(  # pragma: no cover
+        if utils.are_functions_sorted_with_exclusions(  # pragma: no cover
             functions, self.config.ignore_decorators
         ):
             return content
@@ -273,11 +283,11 @@ class FunctionSorter:  # pylint: disable=too-few-public-methods,unsorted-methods
         sortable_private = []
 
         for span in spans:
-            if _function_has_excluded_decorator(
+            if utils.function_has_excluded_decorator(
                 span.node, self.config.ignore_decorators or []
             ):
                 excluded.append(span)
-            elif _is_private_function(span.node):
+            elif utils.is_private_function(span.node):
                 sortable_private.append(span)
             else:
                 sortable_public.append(span)
@@ -299,11 +309,20 @@ class FunctionSorter:  # pylint: disable=too-few-public-methods,unsorted-methods
     ) -> str:
         """Reconstruct file content with sorted functions.
 
+        Strategy:
+        1. Preserve everything before the first function (imports, module docstrings)
+        2. Replace the function block with sorted functions
+        3. Preserve everything after the last function
+        4. Add blank lines between functions if not already present
+
+        This approach ensures non-function content (imports, constants, etc.)
+        remains in its original position while only reordering functions.
+
         :param original_content: Original file content
         :type original_content: str
-        :param original_spans: Original function spans
+        :param original_spans: Original function spans in order of appearance
         :type original_spans: List[FunctionSpan]
-        :param sorted_spans: Sorted function spans
+        :param sorted_spans: Function spans in sorted order
         :type sorted_spans: List[FunctionSpan]
         :returns: Reconstructed content with sorted functions
         :rtype: str
@@ -338,7 +357,7 @@ class FunctionSorter:  # pylint: disable=too-few-public-methods,unsorted-methods
         return "".join(new_lines)
 
 
-def sort_python_file(file_path: Path, config: AutoFixConfig) -> bool:  # pylint: disable=function-should-be-private
+def sort_python_file(file_path: Path, config: AutoFixConfig) -> bool:
     """Sort functions in a Python file.
 
     :param file_path: Path to the Python file
@@ -371,6 +390,9 @@ def sort_python_files(file_paths: List[Path], config: AutoFixConfig) -> Tuple[in
                 files_modified += 1
 
     return files_processed, files_modified
+
+
+# Private functions
 
 
 def _sort_python_file(file_path: Path, config: AutoFixConfig) -> bool:

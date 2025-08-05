@@ -46,7 +46,7 @@ def are_functions_properly_separated(functions: list[nodes.FunctionDef]) -> bool
     seen_private = False
 
     for func in functions:
-        if _is_private_function(func):
+        if is_private_function(func):
             seen_private = True
         elif seen_private:
             # Found a public function after a private function
@@ -103,7 +103,7 @@ def are_functions_sorted_with_exclusions(  # pylint: disable=function-should-be-
     sortable_functions = [
         func
         for func in functions
-        if not _function_has_excluded_decorator(func, ignore_decorators)
+        if not function_has_excluded_decorator(func, ignore_decorators)
     ]
 
     # Use existing sorting logic on the filtered functions
@@ -217,7 +217,7 @@ def should_function_be_private_with_import_analysis(
     :rtype: bool
     """
     # Skip if already private
-    if _is_private_function(func):
+    if is_private_function(func):
         return False
 
     # Skip special methods (dunder methods)
@@ -459,7 +459,7 @@ def _find_python_files(root_path: Path) -> List[Path]:
     return python_files
 
 
-def _function_has_excluded_decorator(
+def function_has_excluded_decorator(
     func: nodes.FunctionDef, ignore_decorators: list[str]
 ) -> bool:
     """Check if a function has any decorators that should be excluded from sorting.
@@ -516,8 +516,8 @@ def _get_function_groups(
     :returns: Tuple of (public_functions, private_functions)
     :rtype: tuple[list[nodes.FunctionDef], list[nodes.FunctionDef]]
     """
-    public_functions = [f for f in functions if not _is_private_function(f)]
-    private_functions = [f for f in functions if _is_private_function(f)]
+    public_functions = [f for f in functions if not is_private_function(f)]
+    private_functions = [f for f in functions if is_private_function(f)]
     return public_functions, private_functions
 
 
@@ -555,7 +555,7 @@ def _is_function_used_externally(
     return len(external_usage) > 0
 
 
-def _is_private_function(func: nodes.FunctionDef) -> bool:
+def is_private_function(func: nodes.FunctionDef) -> bool:
     """Check if a function is private (starts with underscore).
 
     :param func: Function definition node

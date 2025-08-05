@@ -206,7 +206,7 @@ class TestUtils:
         mock_func = Mock(spec=nodes.FunctionDef)
         mock_func.name = "_private_function"
 
-        result = utils._is_private_function(mock_func)
+        result = utils.is_private_function(mock_func)
 
         assert result is True
 
@@ -215,7 +215,7 @@ class TestUtils:
         mock_func = Mock(spec=nodes.FunctionDef)
         mock_func.name = "public_function"
 
-        result = utils._is_private_function(mock_func)
+        result = utils.is_private_function(mock_func)
 
         assert result is False
 
