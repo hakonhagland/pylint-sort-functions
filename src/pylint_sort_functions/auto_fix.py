@@ -245,7 +245,7 @@ class FunctionSorter:  # pylint: disable=too-few-public-methods
 
         return "".join(new_lines)
 
-    def _sort_class_methods(  # pylint: disable=unused-argument
+    def _sort_class_methods(
         self, content: str, module: nodes.Module, lines: List[str]
     ) -> str:
         """Sort methods within classes.
@@ -259,9 +259,143 @@ class FunctionSorter:  # pylint: disable=too-few-public-methods
         :returns: Content with sorted class methods
         :rtype: str
         """
-        # For now, focus on module-level functions
-        # Class method sorting can be added in a future iteration
+        # Find all classes that need method sorting
+        classes_to_sort = []
+        for node in module.body:
+            if isinstance(node, nodes.ClassDef):
+                methods = utils.get_methods_from_class(node)
+                if methods and not utils.are_methods_sorted_with_exclusions(
+                    methods, self.config.ignore_decorators
+                ):
+                    classes_to_sort.append((node, methods))
+
+        if not classes_to_sort:
+            return content
+
+        # Sort each class's methods
+        for class_node, methods in classes_to_sort:
+            # Extract method spans for this class
+            method_spans = self._extract_method_spans(methods, lines, class_node)
+
+            # Sort the method spans
+            sorted_spans = self._sort_function_spans(method_spans)
+
+            # Reconstruct the class content with sorted methods
+            content = self._reconstruct_class_with_sorted_methods(
+                content, class_node, method_spans, sorted_spans, lines
+            )
+
         return content
+
+    def _extract_method_spans(
+        self,
+        methods: List[nodes.FunctionDef],
+        lines: List[str],
+        class_node: nodes.ClassDef,
+    ) -> List[FunctionSpan]:
+        """Extract method text spans from a class.
+
+        :param methods: List of method nodes from the class
+        :type methods: List[nodes.FunctionDef]
+        :param lines: Source file lines
+        :type lines: List[str]
+        :param class_node: The class containing these methods
+        :type class_node: nodes.ClassDef
+        :returns: List of method spans with text
+        :rtype: List[FunctionSpan]
+        """
+        spans = []
+
+        for i, method in enumerate(methods):
+            start_line = method.lineno - 1  # Convert to 0-based indexing
+
+            # Find the end line (start of next method, or end of class)
+            if i + 1 < len(methods):
+                # Find decorators of next method
+                next_method = methods[i + 1]
+                if hasattr(next_method, "decorators") and next_method.decorators:
+                    # Next method has decorators, use the first decorator's line
+                    end_line = next_method.decorators.lineno - 1
+                else:
+                    # No decorators, use the method definition line
+                    end_line = next_method.lineno - 1
+            else:
+                # Last method in class, find end of class
+                end_line = (
+                    class_node.end_lineno
+                    if hasattr(class_node, "end_lineno")
+                    else len(lines)
+                )
+
+            # Include decorators in the span
+            actual_start = start_line
+            if hasattr(method, "decorators") and method.decorators:
+                actual_start = method.decorators.lineno - 1
+
+            # Extract the text
+            text = "".join(lines[actual_start:end_line])
+
+            spans.append(
+                FunctionSpan(
+                    node=method,
+                    start_line=actual_start,
+                    end_line=end_line,
+                    text=text,
+                    name=method.name,
+                )
+            )
+
+        return spans
+
+    def _reconstruct_class_with_sorted_methods(
+        self,
+        content: str,
+        class_node: nodes.ClassDef,
+        original_spans: List[FunctionSpan],
+        sorted_spans: List[FunctionSpan],
+        lines: List[str],
+    ) -> str:
+        """Reconstruct class content with sorted methods.
+
+        :param content: Original file content
+        :type content: str
+        :param class_node: The class node being modified
+        :type class_node: nodes.ClassDef
+        :param original_spans: Original method spans in order of appearance
+        :type original_spans: List[FunctionSpan]
+        :param sorted_spans: Method spans in sorted order
+        :type sorted_spans: List[FunctionSpan]
+        :param lines: Content split into lines
+        :type lines: List[str]
+        :returns: Reconstructed content with sorted methods
+        :rtype: str
+        """
+        if not original_spans:  # pragma: no cover
+            return content
+
+        # Find the region that contains all methods within the class
+        first_method_start = min(span.start_line for span in original_spans)
+        last_method_end = max(span.end_line for span in original_spans)
+
+        # Split content into lines for manipulation
+        content_lines = content.splitlines(keepends=True)
+
+        # Build new content
+        new_lines = []
+
+        # Add everything before the first method
+        new_lines.extend(content_lines[:first_method_start])
+
+        # Add sorted methods
+        for i, span in enumerate(sorted_spans):
+            # Method text already includes proper spacing
+            new_lines.append(span.text)
+
+        # Add everything after the last method
+        if last_method_end < len(content_lines):
+            new_lines.extend(content_lines[last_method_end:])
+
+        return "".join(new_lines)
 
     def _sort_function_spans(self, spans: List[FunctionSpan]) -> List[FunctionSpan]:
         """Sort function spans according to the plugin rules.

@@ -452,3 +452,269 @@ def alpha_function():
 
         finally:
             temp_file.unlink()
+
+    def test_class_method_sorting_basic(self) -> None:
+        """Test basic class method sorting functionality."""
+        code_with_unsorted_methods = '''"""Test module with unsorted class methods."""
+
+class Calculator:
+    """Calculator with unsorted methods."""
+
+    def __init__(self, precision: int = 2) -> None:
+        """Initialize calculator."""
+        self.precision = precision
+
+    def subtract(self, a: float, b: float) -> float:
+        """Subtract two numbers."""
+        return round(a - b, self.precision)
+
+    def add(self, a: float, b: float) -> float:
+        """Add two numbers."""
+        return round(a + b, self.precision)
+
+    def _validate_input(self, value: float) -> bool:
+        """Validate numeric input."""
+        return isinstance(value, (int, float))
+
+    def _format_result(self, value: float) -> str:
+        """Format calculation result."""
+        return f"{value:.{self.precision}f}"
+'''
+
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False) as f:
+            f.write(code_with_unsorted_methods)
+            temp_file = Path(f.name)
+
+        try:
+            config = AutoFixConfig(dry_run=False, backup=False)
+            result = sort_python_file(temp_file, config)
+
+            assert result is True
+
+            # Check the sorted content
+            sorted_content = temp_file.read_text()
+            lines = sorted_content.strip().split("\n")
+
+            # Find method definitions
+            method_lines = [
+                line.strip() for line in lines if line.strip().startswith("def ")
+            ]
+
+            # Should be: __init__, add, subtract, _format_result, _validate_input
+            expected_methods = [
+                "def __init__(self, precision: int = 2) -> None:",
+                "def add(self, a: float, b: float) -> float:",
+                "def subtract(self, a: float, b: float) -> float:",
+                "def _format_result(self, value: float) -> str:",
+                "def _validate_input(self, value: float) -> bool:",
+            ]
+
+            assert method_lines == expected_methods
+
+        finally:
+            temp_file.unlink()
+
+    def test_class_method_sorting_multiple_classes(self) -> None:
+        """Test sorting methods in multiple classes."""
+        code_with_multiple_classes = '''"""Test module with multiple classes."""
+
+class SortedClass:
+    """Already sorted class."""
+
+    def __init__(self) -> None:
+        pass
+
+    def method_a(self) -> str:
+        return "a"
+
+    def method_b(self) -> str:
+        return "b"
+
+class UnsortedClass:
+    """Class with unsorted methods."""
+
+    def __init__(self) -> None:
+        pass
+
+    def method_z(self) -> str:
+        return "z"
+
+    def method_a(self) -> str:
+        return "a"
+
+    def _private_z(self) -> str:
+        return "_z"
+
+    def _private_a(self) -> str:
+        return "_a"
+'''
+
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False) as f:
+            f.write(code_with_multiple_classes)
+            temp_file = Path(f.name)
+
+        try:
+            config = AutoFixConfig(dry_run=False, backup=False)
+            result = sort_python_file(temp_file, config)
+
+            assert result is True
+
+            sorted_content = temp_file.read_text()
+
+            # UnsortedClass should be sorted, SortedClass unchanged
+            assert "def method_a(self) -> str:" in sorted_content
+            assert "def method_z(self) -> str:" in sorted_content
+
+            # Check that method_a comes before method_z in UnsortedClass
+            # Find the UnsortedClass section first
+            unsorted_class_start = sorted_content.find("class UnsortedClass:")
+
+            # Find method_a and method_z within UnsortedClass (after its start)
+            method_a_pos = sorted_content.find(
+                "def method_a(self) -> str:", unsorted_class_start
+            )
+            method_z_pos = sorted_content.find(
+                "def method_z(self) -> str:", unsorted_class_start
+            )
+
+            # method_a should come before method_z in UnsortedClass
+            assert unsorted_class_start < method_a_pos < method_z_pos
+
+        finally:
+            temp_file.unlink()
+
+    def test_class_method_sorting_with_decorators(self) -> None:
+        """Test class method sorting with decorated methods."""
+        code_with_decorated_methods = '''"""Test module with decorated class methods."""
+
+class APIClass:
+    """Class with decorated methods."""
+
+    def __init__(self) -> None:
+        pass
+
+    @property
+    def zebra_property(self) -> str:
+        return "zebra"
+
+    @property
+    def apple_property(self) -> str:
+        return "apple"
+
+    def zebra_method(self) -> str:
+        return "zebra"
+
+    def apple_method(self) -> str:
+        return "apple"
+'''
+
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False) as f:
+            f.write(code_with_decorated_methods)
+            temp_file = Path(f.name)
+
+        try:
+            config = AutoFixConfig(dry_run=False, backup=False)
+            result = sort_python_file(temp_file, config)
+
+            assert result is True
+
+            sorted_content = temp_file.read_text()
+
+            # Check that methods are sorted alphabetically, including decorated ones
+            # Expected: __init__, apple_method, apple_property, zebra_method,
+            # zebra_property
+            lines = [
+                line.strip()
+                for line in sorted_content.split("\n")
+                if "def " in line and "class" not in line
+            ]
+
+            # Extract just the method names for easier assertion
+            method_names = []
+            for line in lines:
+                if "def " in line:
+                    method_name = line.split("def ")[1].split("(")[0]
+                    method_names.append(method_name)
+
+            expected_order = [
+                "__init__",
+                "apple_method",
+                "apple_property",
+                "zebra_method",
+                "zebra_property",
+            ]
+            assert method_names == expected_order
+
+        finally:
+            temp_file.unlink()
+
+    def test_class_method_sorting_no_change_when_sorted(self) -> None:
+        """Test that already sorted class methods are not modified."""
+        # Use the already sorted test file
+        sorted_content = Path("tests/files/classes/sorted_methods.py").read_text()
+
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False) as f:
+            f.write(sorted_content)
+            temp_file = Path(f.name)
+
+        try:
+            config = AutoFixConfig(dry_run=False, backup=False)
+            result = sort_python_file(temp_file, config)
+
+            # Should return False because methods are already sorted
+            assert result is False
+
+            # Content should remain unchanged
+            final_content = temp_file.read_text()
+            assert final_content == sorted_content
+
+        finally:
+            temp_file.unlink()
+
+    def test_class_method_sorting_with_content_after_methods(self) -> None:
+        """Test class method sorting when there's content after the last method."""
+        code_with_content_after = '''"""Test module with content after class methods."""
+
+class TestClass:
+    """Class with content after methods."""
+
+    def zebra_method(self) -> str:
+        """Last method alphabetically."""
+        return "zebra"
+
+    def apple_method(self) -> str:
+        """First method alphabetically."""
+        return "apple"
+
+    # Class constant after methods (non-method content)
+    CLASS_CONSTANT = "test"
+
+# Module-level code after class
+MODULE_CONSTANT = "module level"
+'''
+
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False) as f:
+            f.write(code_with_content_after)
+            temp_file = Path(f.name)
+
+        try:
+            config = AutoFixConfig(dry_run=False, backup=False)
+            result = sort_python_file(temp_file, config)
+
+            assert result is True
+
+            sorted_content = temp_file.read_text()
+
+            # Verify methods are sorted but content after methods is preserved
+            assert "def apple_method(self) -> str:" in sorted_content
+            assert "def zebra_method(self) -> str:" in sorted_content
+            assert 'CLASS_CONSTANT = "test"' in sorted_content
+            assert 'MODULE_CONSTANT = "module level"' in sorted_content
+
+            # Check that apple_method comes before zebra_method
+            apple_pos = sorted_content.find("def apple_method(self) -> str:")
+            zebra_pos = sorted_content.find("def zebra_method(self) -> str:")
+            assert apple_pos < zebra_pos
+
+        finally:
+            temp_file.unlink()
