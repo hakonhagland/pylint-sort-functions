@@ -70,13 +70,31 @@ pylint_check_tests_strict() {
 pylint_check_relaxed() {
     echo "Checking src/ with strict rules..."
     pylint_check_src
+    local src_exit_code=$?
+
     echo "Checking tests/ with relaxed rules..."
     pylint_check_tests_relaxed
+    local tests_exit_code=$?
+
+    # Return non-zero if either check failed
+    if [ $src_exit_code -ne 0 ] || [ $tests_exit_code -ne 0 ]; then
+        return 1
+    fi
+    return 0
 }
 
 pylint_check_strict() {
     echo "Checking src/ with strict rules..."
     pylint_check_src
+    local src_exit_code=$?
+
     echo "Checking tests/ with strict rules..."
     pylint_check_tests_strict
+    local tests_exit_code=$?
+
+    # Return non-zero if either check failed
+    if [ $src_exit_code -ne 0 ] || [ $tests_exit_code -ne 0 ]; then
+        return 1
+    fi
+    return 0
 }
