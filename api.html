@@ -68,12 +68,12 @@
 <li class="toctree-l3"><a class="reference internal" href="#pylint_sort_functions.utils.are_functions_sorted_with_exclusions"><code class="docutils literal notranslate"><span class="pre">are_functions_sorted_with_exclusions()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pylint_sort_functions.utils.are_methods_sorted"><code class="docutils literal notranslate"><span class="pre">are_methods_sorted()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pylint_sort_functions.utils.are_methods_sorted_with_exclusions"><code class="docutils literal notranslate"><span class="pre">are_methods_sorted_with_exclusions()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pylint_sort_functions.utils.function_has_excluded_decorator"><code class="docutils literal notranslate"><span class="pre">function_has_excluded_decorator()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pylint_sort_functions.utils.get_functions_from_node"><code class="docutils literal notranslate"><span class="pre">get_functions_from_node()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pylint_sort_functions.utils.get_methods_from_class"><code class="docutils literal notranslate"><span class="pre">get_methods_from_class()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pylint_sort_functions.utils.is_private_function"><code class="docutils literal notranslate"><span class="pre">is_private_function()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pylint_sort_functions.utils.should_function_be_private"><code class="docutils literal notranslate"><span class="pre">should_function_be_private()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pylint_sort_functions.utils.should_function_be_private_with_import_analysis"><code class="docutils literal notranslate"><span class="pre">should_function_be_private_with_import_analysis()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#pylint_sort_functions.utils.function_has_excluded_decorator"><code class="docutils literal notranslate"><span class="pre">function_has_excluded_decorator()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#pylint_sort_functions.utils.is_private_function"><code class="docutils literal notranslate"><span class="pre">is_private_function()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#module-pylint_sort_functions">Plugin Registration</a><ul>
@@ -330,6 +330,26 @@ sorting by excluding functions with specific decorators that create dependencies
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="pylint_sort_functions.utils.function_has_excluded_decorator">
+<span class="sig-prename descclassname"><span class="pre">pylint_sort_functions.utils.</span></span><span class="sig-name descname"><span class="pre">function_has_excluded_decorator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_decorators</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pylint_sort_functions.utils.function_has_excluded_decorator" title="Link to this definition"></a></dt>
+<dd><p>Check if a function has any decorators that should be excluded from sorting.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>func</strong> (<em>nodes.FunctionDef</em>) – Function definition node to check</p></li>
+<li><p><strong>ignore_decorators</strong> (<em>list</em><em>[</em><em>str</em><em>]</em>) – List of decorator patterns to match against</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if function has any excluded decorators</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="pylint_sort_functions.utils.get_functions_from_node">
 <span class="sig-prename descclassname"><span class="pre">pylint_sort_functions.utils.</span></span><span class="sig-name descname"><span class="pre">get_functions_from_node</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pylint_sort_functions.utils.get_functions_from_node" title="Link to this definition"></a></dt>
 <dd><p>Extract all function definitions from a module.</p>
@@ -359,6 +379,23 @@ sorting by excluding functions with specific decorators that create dependencies
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>list[nodes.FunctionDef]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pylint_sort_functions.utils.is_private_function">
+<span class="sig-prename descclassname"><span class="pre">pylint_sort_functions.utils.</span></span><span class="sig-name descname"><span class="pre">is_private_function</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pylint_sort_functions.utils.is_private_function" title="Link to this definition"></a></dt>
+<dd><p>Check if a function is private (starts with underscore).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>func</strong> (<em>nodes.FunctionDef</em>) – Function definition node</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if function name starts with underscore</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
 </dd>
 </dl>
 </dd></dl>
@@ -412,43 +449,6 @@ patterns across the entire project, rather than just heuristics.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>True if the function should be marked as private</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>bool</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="pylint_sort_functions.utils.function_has_excluded_decorator">
-<span class="sig-prename descclassname"><span class="pre">pylint_sort_functions.utils.</span></span><span class="sig-name descname"><span class="pre">function_has_excluded_decorator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_decorators</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pylint_sort_functions.utils.function_has_excluded_decorator" title="Link to this definition"></a></dt>
-<dd><p>Check if a function has any decorators that should be excluded from sorting.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>func</strong> (<em>nodes.FunctionDef</em>) – Function definition node to check</p></li>
-<li><p><strong>ignore_decorators</strong> (<em>list</em><em>[</em><em>str</em><em>]</em>) – List of decorator patterns to match against</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>True if function has any excluded decorators</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>bool</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="pylint_sort_functions.utils.is_private_function">
-<span class="sig-prename descclassname"><span class="pre">pylint_sort_functions.utils.</span></span><span class="sig-name descname"><span class="pre">is_private_function</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pylint_sort_functions.utils.is_private_function" title="Link to this definition"></a></dt>
-<dd><p>Check if a function is private (starts with underscore).</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>func</strong> (<em>nodes.FunctionDef</em>) – Function definition node</p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>True if function name starts with underscore</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>bool</p>
