@@ -47,17 +47,23 @@ export PYLINT_UNIVERSAL_DISABLES
 export PYLINT_TEST_ADDITIONAL_DISABLES
 export PYLINT_TEST_DISABLES
 
+# Determine pylint runner (uv run for CI, direct for local development)
+PYLINT_RUNNER=""
+if command -v uv >/dev/null 2>&1 && [ -f "pyproject.toml" ]; then
+    PYLINT_RUNNER="uv run "
+fi
+
 # Convenience functions for common pylint commands
 pylint_check_src() {
-    pylint --load-plugins=pylint_sort_functions --disable="$PYLINT_UNIVERSAL_DISABLES" --fail-on=unsorted-functions,unsorted-methods,mixed-function-visibility,function-should-be-private src/
+    ${PYLINT_RUNNER}pylint --load-plugins=pylint_sort_functions --disable="$PYLINT_UNIVERSAL_DISABLES" --fail-on=unsorted-functions,unsorted-methods,mixed-function-visibility,function-should-be-private src/
 }
 
 pylint_check_tests_relaxed() {
-    pylint --load-plugins=pylint_sort_functions --disable="$PYLINT_TEST_DISABLES" tests/
+    ${PYLINT_RUNNER}pylint --load-plugins=pylint_sort_functions --disable="$PYLINT_TEST_DISABLES" tests/
 }
 
 pylint_check_tests_strict() {
-    pylint --load-plugins=pylint_sort_functions --disable="$PYLINT_UNIVERSAL_DISABLES" tests/
+    ${PYLINT_RUNNER}pylint --load-plugins=pylint_sort_functions --disable="$PYLINT_UNIVERSAL_DISABLES" tests/
 }
 
 # Full check functions

@@ -42,7 +42,7 @@ repos:
       - id: pylint-sort-functions
         name: pylint-sort-functions full check
         language: system
-        entry: bash -c "source .venv/bin/activate && source scripts/pylint-config.sh && pylint_check_relaxed"
+        entry: bash -c "source scripts/pylint-config.sh && pylint_check_relaxed"
         types: [python]
         pass_filenames: false
         always_run: true
