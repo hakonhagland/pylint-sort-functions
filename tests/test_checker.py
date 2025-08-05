@@ -421,3 +421,112 @@ def public_function_2():
             )
         ):
             self.checker.visit_module(module)
+
+    def test_get_module_path_with_current_file(self) -> None:
+        """Test _get_module_path when linter has current_file."""
+        # Set up the linter with a current_file
+        test_path = "/path/to/test.py"
+        self.checker.linter.current_file = test_path
+
+        result = self.checker._get_module_path()
+
+        assert result is not None
+        assert result == Path(test_path).resolve()
+
+    def test_get_module_path_without_current_file(self) -> None:
+        """Test _get_module_path when linter has no current_file."""
+        # Remove current_file attribute if it exists
+        if hasattr(self.checker.linter, "current_file"):
+            delattr(self.checker.linter, "current_file")
+
+        result = self.checker._get_module_path()
+
+        assert result is None
+
+    def test_get_project_root_with_markers(self) -> None:
+        """Test _get_project_root finding project markers."""
+        # Use a temporary directory for testing
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            # Create project structure
+            project_dir = Path(temp_dir) / "project"
+            src_dir = project_dir / "src"
+            src_dir.mkdir(parents=True)
+
+            # Create a project marker
+            (project_dir / "pyproject.toml").touch()
+
+            # Test file path
+            test_file = src_dir / "module.py"
+
+            result = self.checker._get_project_root(test_file)
+
+            # Should find project_dir as the root
+            assert result == project_dir
+
+    def test_get_project_root_fallback(self) -> None:
+        """Test _get_project_root fallback when no markers found."""
+        # Use a path without project markers
+        test_file = Path("/tmp/isolated/module.py")
+
+        result = self.checker._get_project_root(test_file)
+
+        # Should fallback to parent directory
+        assert result == test_file.parent
+
+    def test_check_function_privacy_heuristic(self) -> None:
+        """Test _check_function_privacy_heuristic method."""
+        # Create a mock function and module
+        mock_func = Mock(spec=nodes.FunctionDef)
+        mock_func.name = "test_function"
+        mock_module = Mock(spec=nodes.Module)
+
+        functions = [mock_func]
+
+        # Mock the utils.should_function_be_private to return True
+        with patch(
+            "pylint_sort_functions.utils.should_function_be_private"
+        ) as mock_should_be_private:
+            mock_should_be_private.return_value = True
+
+            # Mock add_message
+            self.checker.add_message = Mock()
+
+            # Call the method
+            self.checker._check_function_privacy_heuristic(functions, mock_module)
+
+            # Verify should_function_be_private was called
+            mock_should_be_private.assert_called_once_with(mock_func, mock_module)
+
+            # Verify add_message was called
+            self.checker.add_message.assert_called_once_with(
+                "function-should-be-private", node=mock_func, args=("test_function",)
+            )
+
+    def test_check_function_privacy_no_project_root(self) -> None:
+        """Test _check_function_privacy when project root cannot be determined."""
+        # Create a mock function and module
+        mock_func = Mock(spec=nodes.FunctionDef)
+        mock_func.name = "test_function"
+        mock_module = Mock(spec=nodes.Module)
+
+        functions = [mock_func]
+
+        # Mock _get_module_path to return a path
+        with patch.object(self.checker, "_get_module_path") as mock_get_path:
+            mock_get_path.return_value = Path("/some/path/module.py")
+
+            # Mock _get_project_root to return None (project root not found)
+            with patch.object(self.checker, "_get_project_root") as mock_get_root:
+                mock_get_root.return_value = None
+
+                # Mock _check_function_privacy_heuristic
+                with patch.object(
+                    self.checker, "_check_function_privacy_heuristic"
+                ) as mock_heuristic:
+                    # Call the method
+                    self.checker._check_function_privacy(functions, mock_module)
+
+                    # Verify the heuristic method was called as fallback
+                    mock_heuristic.assert_called_once_with(functions, mock_module)

@@ -8,6 +8,7 @@ A pylint plugin that enforces alphabetical sorting of functions and methods with
     :caption: Getting Started:
 
     introduction
+    usage
     workarounds
 
 .. toctree::
@@ -15,6 +16,7 @@ A pylint plugin that enforces alphabetical sorting of functions and methods with
     :caption: Reference:
 
     api
+    developer
     roadmap
 
 Quick Links
