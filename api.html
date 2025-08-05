@@ -19,7 +19,7 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Development Roadmap" href="roadmap.html" />
+    <link rel="next" title="Developer Guide" href="developer.html" />
     <link rel="prev" title="Known Issues &amp; Workarounds" href="workarounds.html" /> 
 </head>
 
@@ -45,6 +45,7 @@
               <p class="caption" role="heading"><span class="caption-text">Getting Started:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">User Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="workarounds.html">Known Issues &amp; Workarounds</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Reference:</span></p>
@@ -79,6 +80,7 @@
 </li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="developer.html">Developer Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="roadmap.html">Development Roadmap</a></li>
 </ul>
 
@@ -116,10 +118,12 @@
 PyLint discovers this checker via the plugin entry point and manages its lifecycle.</p>
 <dl class="simple">
 <dt>How it works:</dt><dd><ol class="arabic simple">
-<li><p>PyLint loads the plugin and calls register() function</p></li>
+<li><p>PyLint loads the plugin and calls register() function (the plugin entry point
+defined in __init__.py and configured in pyproject.toml)</p></li>
 <li><p>register() creates a FunctionSortChecker instance and gives it to PyLint</p></li>
 <li><p>PyLint walks the AST (Abstract Syntax Tree) of user code</p></li>
-<li><p>For each AST node, PyLint calls corresponding visit_* methods on this checker</p></li>
+<li><p>For each AST node, PyLint calls corresponding visit_* methods on this checker
+(we only implement visit_module and visit_classdef from the many available)</p></li>
 <li><p>The checker analyzes nodes and calls self.add_message() when issues are found</p></li>
 </ol>
 </dd>
@@ -134,6 +138,9 @@ for class definitions. Each method analyzes the code structure and reports issue
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pylint_sort_functions.checker.</span></span><span class="sig-name descname"><span class="pre">FunctionSortChecker</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">linter</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pylint_sort_functions.checker.FunctionSortChecker" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseChecker</span></code></p>
 <p>Checker to enforce alphabetical sorting of functions and methods.</p>
+<p>Inherits from PyLint’s BaseChecker which provides the visitor pattern
+infrastructure. PyLint will automatically call our visit_* methods as it
+traverses the AST.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pylint_sort_functions.checker.FunctionSortChecker.name">
 <span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'function-sort'</span></em><a class="headerlink" href="#pylint_sort_functions.checker.FunctionSortChecker.name" title="Link to this definition"></a></dt>
@@ -149,6 +156,7 @@ for class definitions. Each method analyzes the code structure and reports issue
 <dt class="sig sig-object py" id="pylint_sort_functions.checker.FunctionSortChecker.visit_classdef">
 <span class="sig-name descname"><span class="pre">visit_classdef</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pylint_sort_functions.checker.FunctionSortChecker.visit_classdef" title="Link to this definition"></a></dt>
 <dd><p>Visit a class definition to check method sorting.</p>
+<p>Called by PyLint for each class definition in the code.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>node</strong> (<em>nodes.ClassDef</em>) – The class definition AST node to analyze</p>
@@ -163,6 +171,7 @@ for class definitions. Each method analyzes the code structure and reports issue
 <dt class="sig sig-object py" id="pylint_sort_functions.checker.FunctionSortChecker.visit_module">
 <span class="sig-name descname"><span class="pre">visit_module</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pylint_sort_functions.checker.FunctionSortChecker.visit_module" title="Link to this definition"></a></dt>
 <dd><p>Visit a module node to check function sorting and privacy.</p>
+<p>Called by PyLint once for each Python module (file) being analyzed.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>node</strong> (<em>nodes.Module</em>) – The module AST node to analyze</p>
@@ -437,7 +446,7 @@ It registers the FunctionSortChecker with the linter.</p>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="workarounds.html" class="btn btn-neutral float-left" title="Known Issues &amp; Workarounds" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="roadmap.html" class="btn btn-neutral float-right" title="Development Roadmap" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="developer.html" class="btn btn-neutral float-right" title="Developer Guide" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

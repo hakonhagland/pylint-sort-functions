@@ -1,0 +1,568 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>User Guide &mdash; pylint-sort-functions 0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=2709fde1"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Known Issues &amp; Workarounds" href="workarounds.html" />
+    <link rel="prev" title="Introduction" href="introduction.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            pylint-sort-functions
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">User Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#installation">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#quick-start">Quick Start</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#configuration">Configuration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#using-pylintrc">Using .pylintrc</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#using-pyproject-toml">Using pyproject.toml</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#using-setup-cfg">Using setup.cfg</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#message-types">Message Types</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#w9001-unsorted-functions">W9001: unsorted-functions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#w9002-unsorted-methods">W9002: unsorted-methods</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#w9003-mixed-function-visibility">W9003: mixed-function-visibility</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#w9004-function-should-be-private">W9004: function-should-be-private</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#sorting-rules">Sorting Rules</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#complete-example">Complete Example</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#disabling-messages">Disabling Messages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#file-level">File Level</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#function-level">Function Level</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#inline-comments">Inline Comments</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#configuration-in-pylintrc">Configuration in .pylintrc</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#command-line-options">Command Line Options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#integration-with-ides">Integration with IDEs</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#vs-code">VS Code</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pycharm">PyCharm</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#vim-with-ale">Vim (with ALE)</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#best-practices">Best Practices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#troubleshooting">Troubleshooting</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#plugin-not-loading">Plugin Not Loading</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#false-positives">False Positives</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#performance-issues">Performance Issues</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#output-format">Output Format</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#exit-codes">Exit Codes</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#summary">Summary</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="workarounds.html">Known Issues &amp; Workarounds</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="developer.html">Developer Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="roadmap.html">Development Roadmap</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">pylint-sort-functions</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">User Guide</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/hakonhagland/pylint-sort-functions/blob/main/docs/usage.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="user-guide">
+<h1>User Guide<a class="headerlink" href="#user-guide" title="Link to this heading"></a></h1>
+<p>This guide explains how to use the <code class="docutils literal notranslate"><span class="pre">pylint-sort-functions</span></code> plugin to enforce function and method sorting in your Python code.</p>
+<section id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Link to this heading"></a></h2>
+<p>Install the plugin using pip:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>pylint-sort-functions
+</pre></div>
+</div>
+</section>
+<section id="quick-start">
+<h2>Quick Start<a class="headerlink" href="#quick-start" title="Link to this heading"></a></h2>
+<p>Run PyLint with the plugin enabled:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pylint<span class="w"> </span>--load-plugins<span class="o">=</span>pylint_sort_functions<span class="w"> </span>your_module.py
+</pre></div>
+</div>
+</section>
+<section id="configuration">
+<h2>Configuration<a class="headerlink" href="#configuration" title="Link to this heading"></a></h2>
+<p>There are several ways to enable the plugin permanently in your project:</p>
+<section id="using-pylintrc">
+<h3>Using .pylintrc<a class="headerlink" href="#using-pylintrc" title="Link to this heading"></a></h3>
+<p>Add to your <code class="docutils literal notranslate"><span class="pre">.pylintrc</span></code> file:</p>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[MASTER]</span>
+<span class="na">load-plugins</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">pylint_sort_functions</span>
+</pre></div>
+</div>
+</section>
+<section id="using-pyproject-toml">
+<h3>Using pyproject.toml<a class="headerlink" href="#using-pyproject-toml" title="Link to this heading"></a></h3>
+<p>Add to your <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code>:</p>
+<div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span class="k">[tool.pylint.MASTER]</span>
+<span class="n">load-plugins</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;pylint_sort_functions&quot;</span><span class="p">]</span>
+</pre></div>
+</div>
+</section>
+<section id="using-setup-cfg">
+<h3>Using setup.cfg<a class="headerlink" href="#using-setup-cfg" title="Link to this heading"></a></h3>
+<p>Add to your <code class="docutils literal notranslate"><span class="pre">setup.cfg</span></code>:</p>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[pylint]</span>
+<span class="na">load-plugins</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">pylint_sort_functions</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="message-types">
+<h2>Message Types<a class="headerlink" href="#message-types" title="Link to this heading"></a></h2>
+<p>The plugin reports four types of violations:</p>
+<section id="w9001-unsorted-functions">
+<h3>W9001: unsorted-functions<a class="headerlink" href="#w9001-unsorted-functions" title="Link to this heading"></a></h3>
+<p><strong>Description</strong>: Functions are not sorted alphabetically in module scope</p>
+<p><strong>When triggered</strong>: Module-level functions are not in alphabetical order within their visibility scope</p>
+<p><strong>Example violation</strong>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Bad: Functions out of order</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">zebra_function</span><span class="p">():</span>
+    <span class="k">pass</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">alpha_function</span><span class="p">():</span>  <span class="c1"># Should come before zebra_function</span>
+    <span class="k">pass</span>
+</pre></div>
+</div>
+<p><strong>How to fix</strong>: Reorder functions alphabetically:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Good: Functions sorted alphabetically</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">alpha_function</span><span class="p">():</span>
+    <span class="k">pass</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">zebra_function</span><span class="p">():</span>
+    <span class="k">pass</span>
+</pre></div>
+</div>
+</section>
+<section id="w9002-unsorted-methods">
+<h3>W9002: unsorted-methods<a class="headerlink" href="#w9002-unsorted-methods" title="Link to this heading"></a></h3>
+<p><strong>Description</strong>: Methods are not sorted alphabetically in class</p>
+<p><strong>When triggered</strong>: Class methods are not in alphabetical order within their visibility scope</p>
+<p><strong>Example violation</strong>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">MyClass</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">method_z</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">method_a</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>  <span class="c1"># Should come before method_z</span>
+        <span class="k">pass</span>
+</pre></div>
+</div>
+<p><strong>How to fix</strong>: Reorder methods alphabetically:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">MyClass</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">method_a</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">method_z</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+</pre></div>
+</div>
+</section>
+<section id="w9003-mixed-function-visibility">
+<h3>W9003: mixed-function-visibility<a class="headerlink" href="#w9003-mixed-function-visibility" title="Link to this heading"></a></h3>
+<p><strong>Description</strong>: Public and private functions are not properly separated</p>
+<p><strong>When triggered</strong>: Private functions (with underscore prefix) appear before public functions</p>
+<p><strong>Example violation</strong>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Bad: Private function before public function</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_private_helper</span><span class="p">():</span>
+    <span class="k">pass</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">public_function</span><span class="p">():</span>  <span class="c1"># Public functions should come first</span>
+    <span class="k">pass</span>
+</pre></div>
+</div>
+<p><strong>How to fix</strong>: Place all public functions before private functions:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Good: Public functions first, then private</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">public_function</span><span class="p">():</span>
+    <span class="k">pass</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_private_helper</span><span class="p">():</span>
+    <span class="k">pass</span>
+</pre></div>
+</div>
+</section>
+<section id="w9004-function-should-be-private">
+<h3>W9004: function-should-be-private<a class="headerlink" href="#w9004-function-should-be-private" title="Link to this heading"></a></h3>
+<p><strong>Description</strong>: Function should be private (prefix with underscore)</p>
+<p><strong>When triggered</strong>: A function is only used within its defining module and should be marked as private</p>
+<p><strong>Example violation</strong>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Bad: Internal helper not marked as private</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">validate_internal_state</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>  <span class="c1"># Only used in this module</span>
+    <span class="k">return</span> <span class="n">data</span><span class="o">.</span><span class="n">is_valid</span><span class="p">()</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">public_api</span><span class="p">():</span>
+    <span class="k">if</span> <span class="n">validate_internal_state</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+        <span class="n">process</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>How to fix</strong>: Add underscore prefix to make it private:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Good: Internal function marked as private</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_validate_internal_state</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">data</span><span class="o">.</span><span class="n">is_valid</span><span class="p">()</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">public_api</span><span class="p">():</span>
+    <span class="k">if</span> <span class="n">_validate_internal_state</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+        <span class="n">process</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>Note</strong>: This detection uses import analysis when possible to avoid false positives. Functions that are imported by other modules won’t be flagged.</p>
+</section>
+</section>
+<section id="sorting-rules">
+<h2>Sorting Rules<a class="headerlink" href="#sorting-rules" title="Link to this heading"></a></h2>
+<p>The plugin enforces these sorting rules:</p>
+<ol class="arabic simple">
+<li><p><strong>Visibility Separation</strong>: Public functions/methods (no underscore) must come before private ones (underscore prefix)</p></li>
+<li><p><strong>Alphabetical Order</strong>: Within each visibility group, items must be sorted alphabetically</p></li>
+<li><p><strong>Case Sensitive</strong>: Sorting is case-sensitive (uppercase comes before lowercase)</p></li>
+</ol>
+<section id="complete-example">
+<h3>Complete Example<a class="headerlink" href="#complete-example" title="Link to this heading"></a></h3>
+<p>Here’s a properly organized module:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;Example module with proper function organization.&quot;&quot;&quot;</span>
+
+<span class="c1"># Public functions (alphabetically sorted)</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">calculate_total</span><span class="p">(</span><span class="n">items</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate the total of all items.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">items</span><span class="p">)</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">process_data</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Process the input data.&quot;&quot;&quot;</span>
+    <span class="n">validated</span> <span class="o">=</span> <span class="n">_validate_data</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">_transform_data</span><span class="p">(</span><span class="n">validated</span><span class="p">)</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">save_results</span><span class="p">(</span><span class="n">results</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Save results to storage.&quot;&quot;&quot;</span>
+    <span class="n">formatted</span> <span class="o">=</span> <span class="n">_format_results</span><span class="p">(</span><span class="n">results</span><span class="p">)</span>
+    <span class="n">_write_to_disk</span><span class="p">(</span><span class="n">formatted</span><span class="p">)</span>
+
+<span class="c1"># Private functions (alphabetically sorted)</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_format_results</span><span class="p">(</span><span class="n">results</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Format results for storage.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">results</span><span class="p">)</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_transform_data</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Transform validated data.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">d</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">data</span><span class="p">]</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_validate_data</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Validate input data.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">d</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">data</span> <span class="k">if</span> <span class="n">d</span><span class="p">]</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_write_to_disk</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Write data to disk.&quot;&quot;&quot;</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;output.json&quot;</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="disabling-messages">
+<h2>Disabling Messages<a class="headerlink" href="#disabling-messages" title="Link to this heading"></a></h2>
+<p>You can disable specific messages for a file, class, or function:</p>
+<section id="file-level">
+<h3>File Level<a class="headerlink" href="#file-level" title="Link to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># pylint: disable=unsorted-functions</span>
+<span class="sd">&quot;&quot;&quot;This module intentionally has unsorted functions.&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+</section>
+<section id="function-level">
+<h3>Function Level<a class="headerlink" href="#function-level" title="Link to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">zebra</span><span class="p">():</span>  <span class="c1"># pylint: disable=unsorted-functions</span>
+    <span class="k">pass</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">alpha</span><span class="p">():</span>  <span class="c1"># Order required by framework</span>
+    <span class="k">pass</span>
+</pre></div>
+</div>
+</section>
+<section id="inline-comments">
+<h3>Inline Comments<a class="headerlink" href="#inline-comments" title="Link to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">MyClass</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">z_method</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">a_method</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>  <span class="c1"># pylint: disable=unsorted-methods</span>
+        <span class="k">pass</span>
+</pre></div>
+</div>
+</section>
+<section id="configuration-in-pylintrc">
+<h3>Configuration in .pylintrc<a class="headerlink" href="#configuration-in-pylintrc" title="Link to this heading"></a></h3>
+<p>Disable specific messages project-wide:</p>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[MESSAGES CONTROL]</span>
+<span class="na">disable</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">unsorted-functions,</span>
+<span class="w">          </span><span class="na">unsorted-methods</span>
+</pre></div>
+</div>
+<p>Or enable only specific messages:</p>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[MESSAGES CONTROL]</span>
+<span class="na">enable</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">unsorted-functions,</span>
+<span class="w">         </span><span class="na">unsorted-methods,</span>
+<span class="w">         </span><span class="na">mixed-function-visibility,</span>
+<span class="w">         </span><span class="na">function-should-be-private</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="command-line-options">
+<h2>Command Line Options<a class="headerlink" href="#command-line-options" title="Link to this heading"></a></h2>
+<p>Run with specific messages enabled:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Check only function sorting</span>
+pylint<span class="w"> </span>--load-plugins<span class="o">=</span>pylint_sort_functions<span class="w"> </span><span class="se">\</span>
+<span class="w">       </span>--disable<span class="o">=</span>all<span class="w"> </span><span class="se">\</span>
+<span class="w">       </span>--enable<span class="o">=</span>unsorted-functions,unsorted-methods<span class="w"> </span><span class="se">\</span>
+<span class="w">       </span>mymodule.py
+</pre></div>
+</div>
+<p>Run with increased verbosity:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># See which files are being checked</span>
+pylint<span class="w"> </span>--load-plugins<span class="o">=</span>pylint_sort_functions<span class="w"> </span>--verbose<span class="w"> </span>mymodule.py
+</pre></div>
+</div>
+<p>Generate a full report:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Get detailed statistics</span>
+pylint<span class="w"> </span>--load-plugins<span class="o">=</span>pylint_sort_functions<span class="w"> </span>--reports<span class="o">=</span>yes<span class="w"> </span>mymodule.py
+</pre></div>
+</div>
+</section>
+<section id="integration-with-ides">
+<h2>Integration with IDEs<a class="headerlink" href="#integration-with-ides" title="Link to this heading"></a></h2>
+<section id="vs-code">
+<h3>VS Code<a class="headerlink" href="#vs-code" title="Link to this heading"></a></h3>
+<p>Add to <code class="docutils literal notranslate"><span class="pre">.vscode/settings.json</span></code>:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;pylint.args&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="s2">&quot;--load-plugins=pylint_sort_functions&quot;</span>
+<span class="w">    </span><span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="pycharm">
+<h3>PyCharm<a class="headerlink" href="#pycharm" title="Link to this heading"></a></h3>
+<ol class="arabic simple">
+<li><p>Go to Settings → Tools → External Tools</p></li>
+<li><p>Add PyLint with arguments: <code class="docutils literal notranslate"><span class="pre">--load-plugins=pylint_sort_functions</span></code></p></li>
+</ol>
+</section>
+<section id="vim-with-ale">
+<h3>Vim (with ALE)<a class="headerlink" href="#vim-with-ale" title="Link to this heading"></a></h3>
+<p>Add to your <code class="docutils literal notranslate"><span class="pre">.vimrc</span></code>:</p>
+<div class="highlight-vim notranslate"><div class="highlight"><pre><span></span><span class="k">let</span> <span class="k">g</span>:ale_python_pylint_options <span class="p">=</span> <span class="s1">&#39;--load-plugins=pylint_sort_functions&#39;</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="best-practices">
+<h2>Best Practices<a class="headerlink" href="#best-practices" title="Link to this heading"></a></h2>
+<ol class="arabic">
+<li><p><strong>Use Section Comments</strong>: Clearly separate public and private sections:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Public functions</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">public_one</span><span class="p">():</span>
+    <span class="k">pass</span>
+
+<span class="c1"># Private functions</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_private_one</span><span class="p">():</span>
+    <span class="k">pass</span>
+</pre></div>
+</div>
+</li>
+<li><p><strong>Framework Exceptions</strong>: Some frameworks require specific ordering. In these cases:</p>
+<ul class="simple">
+<li><p>Document why the order is required</p></li>
+<li><p>Disable the check for those specific functions</p></li>
+<li><p>Consider using the decorator exclusion feature (future enhancement)</p></li>
+</ul>
+</li>
+<li><p><strong>Test Organization</strong>: Apply the same principles to test files for consistency:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">TestMyClass</span><span class="p">:</span>
+    <span class="c1"># Test methods (alphabetically sorted)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_feature_a</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_feature_b</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="c1"># Helper methods</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_create_fixture</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+</pre></div>
+</div>
+</li>
+<li><p><strong>Gradual Adoption</strong>: When adding to an existing project:</p>
+<ul class="simple">
+<li><p>Start by enabling only in new modules</p></li>
+<li><p>Gradually fix existing modules</p></li>
+<li><p>Use file-level disables during transition</p></li>
+</ul>
+</li>
+</ol>
+</section>
+<section id="troubleshooting">
+<h2>Troubleshooting<a class="headerlink" href="#troubleshooting" title="Link to this heading"></a></h2>
+<section id="plugin-not-loading">
+<h3>Plugin Not Loading<a class="headerlink" href="#plugin-not-loading" title="Link to this heading"></a></h3>
+<p>If the plugin isn’t loading, verify:</p>
+<ol class="arabic simple">
+<li><p>Installation: <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">show</span> <span class="pre">pylint-sort-functions</span></code></p></li>
+<li><p>Python path: <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">-c</span> <span class="pre">&quot;import</span> <span class="pre">pylint_sort_functions&quot;</span></code></p></li>
+<li><p>PyLint version: <code class="docutils literal notranslate"><span class="pre">pylint</span> <span class="pre">--version</span></code> (requires PyLint 2.0+)</p></li>
+</ol>
+</section>
+<section id="false-positives">
+<h3>False Positives<a class="headerlink" href="#false-positives" title="Link to this heading"></a></h3>
+<p>If you get false positives for <code class="docutils literal notranslate"><span class="pre">function-should-be-private</span></code>:</p>
+<ol class="arabic simple">
+<li><p>Ensure your <code class="docutils literal notranslate"><span class="pre">__init__.py</span></code> files properly export public APIs</p></li>
+<li><p>The detection is conservative and won’t flag functions used across modules</p></li>
+<li><p>Use inline disables for legitimate cases</p></li>
+</ol>
+</section>
+<section id="performance-issues">
+<h3>Performance Issues<a class="headerlink" href="#performance-issues" title="Link to this heading"></a></h3>
+<p>For large codebases:</p>
+<ol class="arabic simple">
+<li><p>The import analysis feature may add overhead</p></li>
+<li><p>Consider running the plugin separately from other checks</p></li>
+<li><p>Use file/directory exclusions for generated code</p></li>
+</ol>
+</section>
+</section>
+<section id="output-format">
+<h2>Output Format<a class="headerlink" href="#output-format" title="Link to this heading"></a></h2>
+<p>The plugin produces standard PyLint output:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>************* Module mymodule
+mymodule.py:10:0: W9001: Functions are not sorted alphabetically in module scope (unsorted-functions)
+mymodule.py:25:0: W9002: Methods are not sorted alphabetically in class MyClass (unsorted-methods)
+mymodule.py:30:0: W9003: Public and private functions are not properly separated in module (mixed-function-visibility)
+mymodule.py:35:0: W9004: Function &#39;helper_function&#39; should be private (prefix with underscore) (function-should-be-private)
+</pre></div>
+</div>
+<section id="exit-codes">
+<h3>Exit Codes<a class="headerlink" href="#exit-codes" title="Link to this heading"></a></h3>
+<p>The plugin follows PyLint’s exit code convention:</p>
+<ul class="simple">
+<li><p>0: No issues found</p></li>
+<li><p>1: Fatal error occurred</p></li>
+<li><p>2: Error messages issued</p></li>
+<li><p>4: Warning messages issued</p></li>
+<li><p>8: Refactor messages issued</p></li>
+<li><p>16: Convention messages issued</p></li>
+</ul>
+<p>Since this plugin issues warnings (W codes), expect exit code 4 when violations are found.</p>
+</section>
+</section>
+<section id="summary">
+<h2>Summary<a class="headerlink" href="#summary" title="Link to this heading"></a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">pylint-sort-functions</span></code> plugin helps maintain consistent code organization by enforcing:</p>
+<ul class="simple">
+<li><p>Alphabetical sorting of functions and methods</p></li>
+<li><p>Proper separation of public and private functions</p></li>
+<li><p>Clear identification of internal helper functions</p></li>
+</ul>
+<p>This leads to more maintainable and navigable codebases where developers can quickly locate functions and understand the public API surface.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="introduction.html" class="btn btn-neutral float-left" title="Introduction" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="workarounds.html" class="btn btn-neutral float-right" title="Known Issues &amp; Workarounds" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Håkon Hægland.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,544 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Developer Guide &mdash; pylint-sort-functions 0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=2709fde1"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Development Roadmap" href="roadmap.html" />
+    <link rel="prev" title="API Reference" href="api.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            pylint-sort-functions
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="workarounds.html">Known Issues &amp; Workarounds</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Developer Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pylint-plugin-architecture">PyLint Plugin Architecture</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pylint-plugin-system">PyLint Plugin System</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#plugin-entry-point">Plugin Entry Point</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#core-components">Core Components</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#plugin-registration-init-py">1. Plugin Registration (<code class="docutils literal notranslate"><span class="pre">__init__.py</span></code>)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#message-definitions-messages-py">2. Message Definitions (<code class="docutils literal notranslate"><span class="pre">messages.py</span></code>)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#main-checker-checker-py">3. Main Checker (<code class="docutils literal notranslate"><span class="pre">checker.py</span></code>)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#utility-functions-utils-py">4. Utility Functions (<code class="docutils literal notranslate"><span class="pre">utils.py</span></code>)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#auto-fix-tool-auto-fix-py">5. Auto-fix Tool (<code class="docutils literal notranslate"><span class="pre">auto_fix.py</span></code>)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#command-line-interface-cli-py">6. Command-line Interface (<code class="docutils literal notranslate"><span class="pre">cli.py</span></code>)</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#ast-and-pylint-integration-details">AST and PyLint Integration Details</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#abstract-syntax-tree-ast">Abstract Syntax Tree (AST)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#visitor-pattern">Visitor Pattern</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#message-reporting">Message Reporting</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#sorting-logic">Sorting Logic</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#function-organization-rules">Function Organization Rules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#framework-integration">Framework Integration</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#advanced-features">Advanced Features</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#import-analysis">Import Analysis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#testing-strategy">Testing Strategy</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#extending-the-plugin">Extending the Plugin</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#adding-new-messages">Adding New Messages</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#adding-new-validation-rules">Adding New Validation Rules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#framework-support">Framework Support</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#development-workflow">Development Workflow</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#setting-up-development-environment">Setting Up Development Environment</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#testing-the-plugin">Testing the Plugin</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#code-quality-checks">Code Quality Checks</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#debugging-tips">Debugging Tips</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#ast-inspection">AST Inspection</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pylint-integration-debug">PyLint Integration Debug</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#performance-considerations">Performance Considerations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#conclusion">Conclusion</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="roadmap.html">Development Roadmap</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">pylint-sort-functions</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Developer Guide</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/hakonhagland/pylint-sort-functions/blob/main/docs/developer.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="developer-guide">
+<h1>Developer Guide<a class="headerlink" href="#developer-guide" title="Link to this heading"></a></h1>
+<p>This guide explains the internal architecture of the <code class="docutils literal notranslate"><span class="pre">pylint-sort-functions</span></code> plugin and how it integrates with PyLint to enforce function and method sorting.</p>
+<section id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Link to this heading"></a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">pylint-sort-functions</span></code> plugin is a PyLint checker that enforces alphabetical sorting of functions and methods within Python modules and classes. It consists of two main components:</p>
+<ol class="arabic simple">
+<li><p><strong>PyLint Plugin</strong>: Integrates with PyLint’s checking framework to report sorting violations</p></li>
+<li><p><strong>Auto-fix Tool</strong>: Standalone tool that can automatically reorder functions to fix violations</p></li>
+</ol>
+</section>
+<section id="pylint-plugin-architecture">
+<h2>PyLint Plugin Architecture<a class="headerlink" href="#pylint-plugin-architecture" title="Link to this heading"></a></h2>
+<section id="pylint-plugin-system">
+<h3>PyLint Plugin System<a class="headerlink" href="#pylint-plugin-system" title="Link to this heading"></a></h3>
+<p>PyLint uses a plugin system where external checkers can be loaded and integrated into the linting process. The plugin system works as follows:</p>
+<ol class="arabic simple">
+<li><p><strong>Plugin Discovery</strong>: PyLint discovers plugins through entry points defined in <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code></p></li>
+<li><p><strong>Registration</strong>: PyLint calls the plugin’s <code class="docutils literal notranslate"><span class="pre">register()</span></code> function to register checkers</p></li>
+<li><p><strong>AST Traversal</strong>: PyLint parses Python code into an Abstract Syntax Tree (AST) using <code class="docutils literal notranslate"><span class="pre">astroid</span></code></p></li>
+<li><p><strong>Visitor Pattern</strong>: PyLint calls <code class="docutils literal notranslate"><span class="pre">visit_*</span></code> methods on registered checkers for each AST node</p></li>
+<li><p><strong>Message Reporting</strong>: Checkers call <code class="docutils literal notranslate"><span class="pre">self.add_message()</span></code> to report violations</p></li>
+</ol>
+</section>
+<section id="plugin-entry-point">
+<h3>Plugin Entry Point<a class="headerlink" href="#plugin-entry-point" title="Link to this heading"></a></h3>
+<p>The plugin entry point is defined in <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code>:</p>
+<div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span class="k">[project.entry-points.</span><span class="s2">&quot;pylint.plugins&quot;</span><span class="k">]</span>
+<span class="n">pylint_sort_functions</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;pylint_sort_functions&quot;</span>
+</pre></div>
+</div>
+<p>When PyLint loads the plugin, it imports the package and calls the <code class="docutils literal notranslate"><span class="pre">register()</span></code> function from <code class="docutils literal notranslate"><span class="pre">__init__.py</span></code>.</p>
+</section>
+</section>
+<section id="core-components">
+<h2>Core Components<a class="headerlink" href="#core-components" title="Link to this heading"></a></h2>
+<section id="plugin-registration-init-py">
+<h3>1. Plugin Registration (<code class="docutils literal notranslate"><span class="pre">__init__.py</span></code>)<a class="headerlink" href="#plugin-registration-init-py" title="Link to this heading"></a></h3>
+<p><strong>Purpose</strong>: Entry point for PyLint plugin system</p>
+<p><strong>Key Function</strong>:
+- <code class="docutils literal notranslate"><span class="pre">register(linter:</span> <span class="pre">PyLinter)</span> <span class="pre">-&gt;</span> <span class="pre">None</span></code>: Required by PyLint, registers the <code class="docutils literal notranslate"><span class="pre">FunctionSortChecker</span></code></p>
+<p><strong>Integration Point</strong>: This is where PyLint discovers and loads our checker.</p>
+</section>
+<section id="message-definitions-messages-py">
+<h3>2. Message Definitions (<code class="docutils literal notranslate"><span class="pre">messages.py</span></code>)<a class="headerlink" href="#message-definitions-messages-py" title="Link to this heading"></a></h3>
+<p><strong>Purpose</strong>: Defines all warning messages that the plugin can report</p>
+<p><strong>Structure</strong>: Each message is a tuple containing:
+- <code class="docutils literal notranslate"><span class="pre">message_template</span></code>: Text shown to users (supports <code class="docutils literal notranslate"><span class="pre">%s</span></code> formatting)
+- <code class="docutils literal notranslate"><span class="pre">message_symbol</span></code>: Human-readable name for disabling (e.g., <code class="docutils literal notranslate"><span class="pre">unsorted-functions</span></code>)
+- <code class="docutils literal notranslate"><span class="pre">message_description</span></code>: Detailed explanation</p>
+<p><strong>Message IDs</strong>:
+- <code class="docutils literal notranslate"><span class="pre">W9001</span></code>: <code class="docutils literal notranslate"><span class="pre">unsorted-functions</span></code> - Functions not sorted alphabetically
+- <code class="docutils literal notranslate"><span class="pre">W9002</span></code>: <code class="docutils literal notranslate"><span class="pre">unsorted-methods</span></code> - Class methods not sorted alphabetically
+- <code class="docutils literal notranslate"><span class="pre">W9003</span></code>: <code class="docutils literal notranslate"><span class="pre">mixed-function-visibility</span></code> - Public/private functions not properly separated
+- <code class="docutils literal notranslate"><span class="pre">W9004</span></code>: <code class="docutils literal notranslate"><span class="pre">function-should-be-private</span></code> - Function should be marked private</p>
+<p><strong>Usage in Checker</strong>: The checker calls <code class="docutils literal notranslate"><span class="pre">self.add_message(&quot;unsorted-functions&quot;,</span> <span class="pre">node=node,</span> <span class="pre">args=(&quot;module&quot;,))</span></code></p>
+</section>
+<section id="main-checker-checker-py">
+<h3>3. Main Checker (<code class="docutils literal notranslate"><span class="pre">checker.py</span></code>)<a class="headerlink" href="#main-checker-checker-py" title="Link to this heading"></a></h3>
+<p><strong>Purpose</strong>: The core PyLint checker that performs sorting validation</p>
+<p><strong>Class</strong>: <code class="docutils literal notranslate"><span class="pre">FunctionSortChecker(BaseChecker)</span></code></p>
+<p><strong>PyLint Integration</strong>:
+- Inherits from <code class="docutils literal notranslate"><span class="pre">pylint.checkers.BaseChecker</span></code>
+- Defines <code class="docutils literal notranslate"><span class="pre">name</span> <span class="pre">=</span> <span class="pre">&quot;function-sort&quot;</span></code> for PyLint identification
+- Uses <code class="docutils literal notranslate"><span class="pre">msgs</span> <span class="pre">=</span> <span class="pre">messages.MESSAGES</span></code> to register available messages</p>
+<p><strong>Visitor Methods</strong>:
+- <code class="docutils literal notranslate"><span class="pre">visit_module(node:</span> <span class="pre">nodes.Module)</span></code>: Called for each module, checks function sorting
+- <code class="docutils literal notranslate"><span class="pre">visit_classdef(node:</span> <span class="pre">nodes.ClassDef)</span></code>: Called for each class, checks method sorting</p>
+<p><strong>AST Analysis Flow</strong>:</p>
+<ol class="arabic simple">
+<li><p>PyLint parses Python code using <code class="docutils literal notranslate"><span class="pre">astroid</span></code> (enhanced AST library)</p></li>
+<li><p>PyLint walks the AST and calls visitor methods on our checker</p></li>
+<li><p>Checker extracts functions/methods from AST nodes</p></li>
+<li><p>Checker validates sorting using utility functions</p></li>
+<li><p>Checker reports violations using <code class="docutils literal notranslate"><span class="pre">self.add_message()</span></code></p></li>
+</ol>
+</section>
+<section id="utility-functions-utils-py">
+<h3>4. Utility Functions (<code class="docutils literal notranslate"><span class="pre">utils.py</span></code>)<a class="headerlink" href="#utility-functions-utils-py" title="Link to this heading"></a></h3>
+<p><strong>Purpose</strong>: Core logic for AST analysis and sorting validation</p>
+<p><strong>Key Functions</strong>:</p>
+<p><strong>Function Extraction</strong>:
+- <code class="docutils literal notranslate"><span class="pre">get_functions_from_node(node:</span> <span class="pre">nodes.Module)</span></code>: Extract module-level functions
+- <code class="docutils literal notranslate"><span class="pre">get_methods_from_class(node:</span> <span class="pre">nodes.ClassDef)</span></code>: Extract class methods</p>
+<p><strong>Sorting Validation</strong>:
+- <code class="docutils literal notranslate"><span class="pre">are_functions_sorted(functions)</span></code>: Check alphabetical sorting within visibility scopes
+- <code class="docutils literal notranslate"><span class="pre">are_methods_sorted(methods)</span></code>: Check method sorting (same logic as functions)
+- <code class="docutils literal notranslate"><span class="pre">are_functions_properly_separated(functions)</span></code>: Check public/private separation</p>
+<p><strong>Advanced Features</strong>:
+- <code class="docutils literal notranslate"><span class="pre">are_functions_sorted_with_exclusions()</span></code>: Framework-aware sorting with decorator exclusions
+- <code class="docutils literal notranslate"><span class="pre">should_function_be_private_with_import_analysis()</span></code>: Detect functions that should be private</p>
+<p><strong>Privacy Detection</strong>:
+The plugin includes heuristic analysis to suggest when public functions should be marked private:
+- Analyzes function naming patterns
+- Checks cross-module usage via import analysis
+- Conservative approach to minimize false positives</p>
+</section>
+<section id="auto-fix-tool-auto-fix-py">
+<h3>5. Auto-fix Tool (<code class="docutils literal notranslate"><span class="pre">auto_fix.py</span></code>)<a class="headerlink" href="#auto-fix-tool-auto-fix-py" title="Link to this heading"></a></h3>
+<p><strong>Purpose</strong>: Standalone tool for automatically reordering functions</p>
+<p><strong>Key Classes</strong>:
+- <code class="docutils literal notranslate"><span class="pre">AutoFixConfig</span></code>: Configuration for auto-fix behavior
+- <code class="docutils literal notranslate"><span class="pre">FunctionSorter</span></code>: Main auto-fix implementation
+- <code class="docutils literal notranslate"><span class="pre">FunctionSpan</span></code>: Represents a function with its text span in source</p>
+<p><strong>Process</strong>:
+1. Parse file content with <code class="docutils literal notranslate"><span class="pre">astroid</span></code> (same as checker)
+2. Extract function text spans from source
+3. Sort functions according to plugin rules
+4. Reconstruct file content with sorted functions</p>
+<p><strong>Integration with Checker</strong>: Uses the same utility functions as the checker for consistency.</p>
+</section>
+<section id="command-line-interface-cli-py">
+<h3>6. Command-line Interface (<code class="docutils literal notranslate"><span class="pre">cli.py</span></code>)<a class="headerlink" href="#command-line-interface-cli-py" title="Link to this heading"></a></h3>
+<p><strong>Purpose</strong>: Provides CLI for the auto-fix tool</p>
+<p><strong>Features</strong>:
+- File/directory processing
+- Dry-run mode
+- Backup creation
+- Decorator exclusion patterns
+- Integration with the auto-fix functionality</p>
+</section>
+</section>
+<section id="ast-and-pylint-integration-details">
+<h2>AST and PyLint Integration Details<a class="headerlink" href="#ast-and-pylint-integration-details" title="Link to this heading"></a></h2>
+<section id="abstract-syntax-tree-ast">
+<h3>Abstract Syntax Tree (AST)<a class="headerlink" href="#abstract-syntax-tree-ast" title="Link to this heading"></a></h3>
+<p>The plugin works with <code class="docutils literal notranslate"><span class="pre">astroid</span></code> nodes, which are enhanced AST nodes:</p>
+<p><strong>Key Node Types</strong>:
+- <code class="docutils literal notranslate"><span class="pre">nodes.Module</span></code>: Represents a Python module
+- <code class="docutils literal notranslate"><span class="pre">nodes.ClassDef</span></code>: Represents a class definition
+- <code class="docutils literal notranslate"><span class="pre">nodes.FunctionDef</span></code>: Represents a function/method definition</p>
+<p><strong>Node Properties</strong>:
+- <code class="docutils literal notranslate"><span class="pre">node.name</span></code>: Function/class name
+- <code class="docutils literal notranslate"><span class="pre">node.lineno</span></code>: Line number in source
+- <code class="docutils literal notranslate"><span class="pre">node.body</span></code>: List of child nodes
+- <code class="docutils literal notranslate"><span class="pre">node.decorators</span></code>: Decorator information</p>
+</section>
+<section id="visitor-pattern">
+<h3>Visitor Pattern<a class="headerlink" href="#visitor-pattern" title="Link to this heading"></a></h3>
+<p>PyLint uses the visitor pattern to traverse AST nodes:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">FunctionSortChecker</span><span class="p">(</span><span class="n">BaseChecker</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">visit_module</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">:</span> <span class="n">nodes</span><span class="o">.</span><span class="n">Module</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># Called once per module</span>
+        <span class="n">functions</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">get_functions_from_node</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+        <span class="c1"># Analyze and report violations</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">visit_classdef</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">:</span> <span class="n">nodes</span><span class="o">.</span><span class="n">ClassDef</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># Called once per class definition</span>
+        <span class="n">methods</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">get_methods_from_class</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+        <span class="c1"># Analyze and report violations</span>
+</pre></div>
+</div>
+</section>
+<section id="message-reporting">
+<h3>Message Reporting<a class="headerlink" href="#message-reporting" title="Link to this heading"></a></h3>
+<p>When violations are found, the checker reports them to PyLint:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="bp">self</span><span class="o">.</span><span class="n">add_message</span><span class="p">(</span>
+    <span class="s2">&quot;unsorted-functions&quot;</span><span class="p">,</span>    <span class="c1"># Message ID (from messages.py)</span>
+    <span class="n">node</span><span class="o">=</span><span class="n">node</span><span class="p">,</span>               <span class="c1"># AST node where violation occurs</span>
+    <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;module&quot;</span><span class="p">,)</span>         <span class="c1"># Arguments for message template</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>This creates output like:
+<code class="docutils literal notranslate"><span class="pre">W9001:</span> <span class="pre">Functions</span> <span class="pre">are</span> <span class="pre">not</span> <span class="pre">sorted</span> <span class="pre">alphabetically</span> <span class="pre">in</span> <span class="pre">module</span> <span class="pre">scope</span> <span class="pre">(unsorted-functions)</span></code></p>
+</section>
+</section>
+<section id="sorting-logic">
+<h2>Sorting Logic<a class="headerlink" href="#sorting-logic" title="Link to this heading"></a></h2>
+<section id="function-organization-rules">
+<h3>Function Organization Rules<a class="headerlink" href="#function-organization-rules" title="Link to this heading"></a></h3>
+<p>The plugin enforces these rules:</p>
+<ol class="arabic simple">
+<li><p><strong>Visibility Separation</strong>: Public functions (no underscore) before private functions (underscore prefix)</p></li>
+<li><p><strong>Alphabetical Sorting</strong>: Within each visibility scope, functions are sorted alphabetically</p></li>
+<li><p><strong>Decorator Awareness</strong>: Functions with certain decorators can be excluded from sorting</p></li>
+</ol>
+<p>Example of correct organization:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Public functions (alphabetically sorted)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">calculate_total</span><span class="p">():</span>
+    <span class="k">pass</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">process_data</span><span class="p">():</span>
+    <span class="k">pass</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">validate_input</span><span class="p">():</span>
+    <span class="k">pass</span>
+
+<span class="c1"># Private functions (alphabetically sorted)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_format_output</span><span class="p">():</span>
+    <span class="k">pass</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_helper_function</span><span class="p">():</span>
+    <span class="k">pass</span>
+</pre></div>
+</div>
+</section>
+<section id="framework-integration">
+<h3>Framework Integration<a class="headerlink" href="#framework-integration" title="Link to this heading"></a></h3>
+<p>The plugin supports framework-aware sorting through decorator exclusions:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># These might need to stay in specific order due to framework requirements</span>
+<span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">home</span><span class="p">():</span>
+    <span class="k">pass</span>
+
+<span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/users&quot;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">users</span><span class="p">():</span>
+    <span class="k">pass</span>
+
+<span class="c1"># Regular functions still get sorted</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">calculate</span><span class="p">():</span>
+    <span class="k">pass</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">validate</span><span class="p">():</span>
+    <span class="k">pass</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="advanced-features">
+<h2>Advanced Features<a class="headerlink" href="#advanced-features" title="Link to this heading"></a></h2>
+<section id="import-analysis">
+<h3>Import Analysis<a class="headerlink" href="#import-analysis" title="Link to this heading"></a></h3>
+<p>The plugin can analyze cross-module imports to detect functions that should be private:</p>
+<ol class="arabic simple">
+<li><p><strong>Project Scanning</strong>: Scans all Python files in the project</p></li>
+<li><p><strong>Import Extraction</strong>: Extracts <code class="docutils literal notranslate"><span class="pre">import</span></code> and <code class="docutils literal notranslate"><span class="pre">from</span> <span class="pre">module</span> <span class="pre">import</span> <span class="pre">function</span></code> statements</p></li>
+<li><p><strong>Usage Detection</strong>: Determines which functions are used outside their defining module</p></li>
+<li><p><strong>Privacy Suggestions</strong>: Suggests making functions private if they’re only used internally</p></li>
+</ol>
+<p>This is more accurate than simple heuristics and reduces false positives.</p>
+</section>
+<section id="testing-strategy">
+<h3>Testing Strategy<a class="headerlink" href="#testing-strategy" title="Link to this heading"></a></h3>
+<p>The plugin uses PyLint’s testing framework:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">TestFunctionSortChecker</span><span class="p">(</span><span class="n">CheckerTestCase</span><span class="p">):</span>
+    <span class="n">CHECKER_CLASS</span> <span class="o">=</span> <span class="n">FunctionSortChecker</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_unsorted_functions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">node</span> <span class="o">=</span> <span class="n">astroid</span><span class="o">.</span><span class="n">extract_node</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">        def zebra(): pass</span>
+<span class="s2">        def alpha(): pass</span>
+<span class="s2">        &quot;&quot;&quot;</span><span class="p">)</span>
+        <span class="c1"># Test that violation is reported</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="extending-the-plugin">
+<h2>Extending the Plugin<a class="headerlink" href="#extending-the-plugin" title="Link to this heading"></a></h2>
+<section id="adding-new-messages">
+<h3>Adding New Messages<a class="headerlink" href="#adding-new-messages" title="Link to this heading"></a></h3>
+<ol class="arabic simple">
+<li><p>Add message definition to <code class="docutils literal notranslate"><span class="pre">messages.py</span></code></p></li>
+<li><p>Use it in checker with <code class="docutils literal notranslate"><span class="pre">self.add_message()</span></code></p></li>
+<li><p>Add tests for the new message</p></li>
+</ol>
+</section>
+<section id="adding-new-validation-rules">
+<h3>Adding New Validation Rules<a class="headerlink" href="#adding-new-validation-rules" title="Link to this heading"></a></h3>
+<ol class="arabic simple">
+<li><p>Add validation logic to <code class="docutils literal notranslate"><span class="pre">utils.py</span></code></p></li>
+<li><p>Call from appropriate visitor method in <code class="docutils literal notranslate"><span class="pre">checker.py</span></code></p></li>
+<li><p>Consider auto-fix support in <code class="docutils literal notranslate"><span class="pre">auto_fix.py</span></code></p></li>
+</ol>
+</section>
+<section id="framework-support">
+<h3>Framework Support<a class="headerlink" href="#framework-support" title="Link to this heading"></a></h3>
+<p>To add support for new frameworks:</p>
+<ol class="arabic simple">
+<li><p>Extend decorator pattern matching in <code class="docutils literal notranslate"><span class="pre">utils.py</span></code></p></li>
+<li><p>Add framework-specific decorator patterns</p></li>
+<li><p>Update configuration options</p></li>
+<li><p>Add tests with framework-specific code</p></li>
+</ol>
+</section>
+</section>
+<section id="development-workflow">
+<h2>Development Workflow<a class="headerlink" href="#development-workflow" title="Link to this heading"></a></h2>
+<section id="setting-up-development-environment">
+<h3>Setting Up Development Environment<a class="headerlink" href="#setting-up-development-environment" title="Link to this heading"></a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create virtual environment</span>
+python<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>.venv
+<span class="nb">source</span><span class="w"> </span>.venv/bin/activate<span class="w">  </span><span class="c1"># or .venv-linux/bin/activate in WSL</span>
+
+<span class="c1"># Install in development mode</span>
+pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.
+
+<span class="c1"># Install development dependencies</span>
+pip<span class="w"> </span>install<span class="w"> </span>pytest<span class="w"> </span>mypy<span class="w"> </span>ruff<span class="w"> </span>coverage
+
+<span class="c1"># Install pre-commit hooks</span>
+pre-commit<span class="w"> </span>install
+</pre></div>
+</div>
+</section>
+<section id="testing-the-plugin">
+<h3>Testing the Plugin<a class="headerlink" href="#testing-the-plugin" title="Link to this heading"></a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Run unit tests</span>
+pytest<span class="w"> </span>tests/
+
+<span class="c1"># Test plugin with PyLint</span>
+pylint<span class="w"> </span>--load-plugins<span class="o">=</span>pylint_sort_functions<span class="w"> </span>src/
+
+<span class="c1"># Test auto-fix tool</span>
+python<span class="w"> </span>-m<span class="w"> </span>pylint_sort_functions.cli<span class="w"> </span>--dry-run<span class="w"> </span>src/
+</pre></div>
+</div>
+</section>
+<section id="code-quality-checks">
+<h3>Code Quality Checks<a class="headerlink" href="#code-quality-checks" title="Link to this heading"></a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Type checking</span>
+mypy<span class="w"> </span>src/<span class="w"> </span>tests/
+
+<span class="c1"># Linting and formatting</span>
+ruff<span class="w"> </span>check<span class="w"> </span>src<span class="w"> </span>tests
+ruff<span class="w"> </span>format<span class="w"> </span>src<span class="w"> </span>tests
+
+<span class="c1"># Coverage (must be 100%)</span>
+coverage<span class="w"> </span>run<span class="w"> </span>-m<span class="w"> </span>pytest<span class="w"> </span>tests
+coverage<span class="w"> </span>report<span class="w"> </span>-m
+</pre></div>
+</div>
+</section>
+</section>
+<section id="debugging-tips">
+<h2>Debugging Tips<a class="headerlink" href="#debugging-tips" title="Link to this heading"></a></h2>
+<section id="ast-inspection">
+<h3>AST Inspection<a class="headerlink" href="#ast-inspection" title="Link to this heading"></a></h3>
+<p>To understand AST structure:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">astroid</span>
+<span class="n">code</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">def function_name():</span>
+<span class="s2">    pass</span>
+<span class="s2">&quot;&quot;&quot;</span>
+<span class="n">tree</span> <span class="o">=</span> <span class="n">astroid</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">tree</span><span class="o">.</span><span class="n">repr_tree</span><span class="p">())</span>  <span class="c1"># Shows AST structure</span>
+</pre></div>
+</div>
+</section>
+<section id="pylint-integration-debug">
+<h3>PyLint Integration Debug<a class="headerlink" href="#pylint-integration-debug" title="Link to this heading"></a></h3>
+<p>To debug PyLint integration:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Run with verbose output</span>
+pylint<span class="w"> </span>--load-plugins<span class="o">=</span>pylint_sort_functions<span class="w"> </span>--verbose<span class="w"> </span>src/
+
+<span class="c1"># Enable specific message types</span>
+pylint<span class="w"> </span>--enable<span class="o">=</span>unsorted-functions<span class="w"> </span>src/
+
+<span class="c1"># Disable other checkers to focus on sorting</span>
+pylint<span class="w"> </span>--load-plugins<span class="o">=</span>pylint_sort_functions<span class="w"> </span>--disable<span class="o">=</span>all<span class="w"> </span>--enable<span class="o">=</span>unsorted-functions<span class="w"> </span>src/
+</pre></div>
+</div>
+</section>
+</section>
+<section id="performance-considerations">
+<h2>Performance Considerations<a class="headerlink" href="#performance-considerations" title="Link to this heading"></a></h2>
+<p>The plugin is designed for good performance:</p>
+<p><strong>AST Parsing</strong>: PyLint handles AST parsing, plugin only analyzes existing nodes
+<strong>Single Pass</strong>: Each file is processed once during PyLint’s normal operation
+<strong>Import Analysis</strong>: Only performed when necessary, with caching opportunities
+<strong>Memory Usage</strong>: Minimal additional memory usage beyond PyLint’s normal operation</p>
+<p>For large projects, the import analysis feature may add some overhead, but it can be disabled if needed.</p>
+</section>
+<section id="conclusion">
+<h2>Conclusion<a class="headerlink" href="#conclusion" title="Link to this heading"></a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">pylint-sort-functions</span></code> plugin demonstrates a complete PyLint plugin implementation with:</p>
+<ul class="simple">
+<li><p>Proper integration with PyLint’s plugin system</p></li>
+<li><p>AST-based code analysis using <code class="docutils literal notranslate"><span class="pre">astroid</span></code></p></li>
+<li><p>Comprehensive message definitions and error reporting</p></li>
+<li><p>Advanced features like import analysis and auto-fixing</p></li>
+<li><p>Framework-aware sorting with decorator exclusions</p></li>
+<li><p>Thorough testing using PyLint’s testing framework</p></li>
+</ul>
+<p>The modular architecture makes it easy to extend and maintain while providing a solid foundation for enforcing code organization standards.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="api.html" class="btn btn-neutral float-left" title="API Reference" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="roadmap.html" class="btn btn-neutral float-right" title="Development Roadmap" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Håkon Hægland.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
