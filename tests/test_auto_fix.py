@@ -400,20 +400,25 @@ def zebra(): return "zebra"
 
     def test_function_span_includes_comments_above_function(self) -> None:
         """Test that FunctionSpan includes comments above the function."""
-        content = '''
+        content = '''"""Test module with comments above functions."""
+
 # This is an important comment about zebra_function
 # It explains the complex logic
 def zebra_function():
     """Zebra function docstring."""
-    pass
+    return "zebra"
 
 def alpha_function():
     """Alpha function docstring."""
-    pass
+    return "alpha"
+
+# Beta function handles special cases
+# It should be used carefully
+def beta_function():
+    """Beta function docstring."""
+    return "beta"
 '''
-        # TODO: This test is a placeholder for the feature to be implemented
-        # When implemented, it should verify that comments move with functions
-        # For now, just test that sorting works without breaking
+
         with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False) as f:
             f.write(content)
             f.flush()
@@ -421,17 +426,41 @@ def alpha_function():
             config = AutoFixConfig(dry_run=False, backup=False)
             sorter = FunctionSorter(config)
 
-            # Currently, this might not preserve comments correctly
-            # This test documents the expected behavior
             result = sorter.sort_file(Path(f.name))
 
             assert result is True  # File was modified
 
-            # When feature is implemented, verify comments moved with zebra_function
-            # sorted_content = Path(f.name).read_text()
-            # comment = "# This is an important comment about zebra_function"
-            # assert comment in sorted_content
-            # Verify it appears before zebra_function in its new position
+            # Verify comments moved with their respective functions
+            sorted_content = Path(f.name).read_text()
+
+            # Check functions and comments are preserved
+            assert "def alpha_function():" in sorted_content
+            assert "def beta_function():" in sorted_content
+            assert "def zebra_function():" in sorted_content
+            assert (
+                "# This is an important comment about zebra_function" in sorted_content
+            )
+            assert "# Beta function handles special cases" in sorted_content
+
+            # Verify functions are sorted alphabetically
+            func_positions = {
+                "alpha": sorted_content.find("def alpha_function():"),
+                "beta": sorted_content.find("def beta_function():"),
+                "zebra": sorted_content.find("def zebra_function():"),
+            }
+            assert (
+                func_positions["alpha"]
+                < func_positions["beta"]
+                < func_positions["zebra"]
+            )
+
+            # Verify comments appear before their functions
+            zebra_comment = "# This is an important comment about zebra_function"
+            beta_comment = "# Beta function handles special cases"
+            zebra_comment_pos = sorted_content.find(zebra_comment)
+            beta_comment_pos = sorted_content.find(beta_comment)
+            assert zebra_comment_pos < func_positions["zebra"]
+            assert beta_comment_pos < func_positions["beta"]
 
             os.unlink(f.name)
 

@@ -120,35 +120,37 @@ class FunctionSorter:  # pylint: disable=too-few-public-methods
         """
         spans = []
 
-        for i, func in enumerate(functions):
+        # First pass: determine where each function (including comments) starts
+        function_boundaries = []
+        for func in functions:
             start_line = func.lineno - 1  # Convert to 0-based indexing
-
-            # Find the end line (start of next function or end of file)
-            if i + 1 < len(functions):
-                # Find decorators of next function
-                next_func = functions[i + 1]
-                if hasattr(next_func, "decorators") and next_func.decorators:
-                    # Next function has decorators, use the first decorator's line
-                    end_line = next_func.decorators.lineno - 1
-                else:
-                    # No decorators, use the function definition line
-                    end_line = next_func.lineno - 1
-            else:
-                # Last function, use end of file
-                end_line = len(lines)
 
             # Include decorators in the span
             actual_start = start_line
             if hasattr(func, "decorators") and func.decorators:
                 actual_start = func.decorators.lineno - 1
 
-            # Extract the text
-            text = "".join(lines[actual_start:end_line])
+            # Include comments above the function/decorators
+            comment_start = self._find_comments_above_function(lines, actual_start)
+            function_boundaries.append((func, comment_start))
+
+        # Second pass: create spans using the boundaries
+        for i, (func, comment_start) in enumerate(function_boundaries):
+            # Find the end line (start of next function or end of file)
+            if i + 1 < len(function_boundaries):
+                # End where the next function's comments start
+                end_line = function_boundaries[i + 1][1]
+            else:
+                # Last function, use end of file
+                end_line = len(lines)
+
+            # Extract the text including comments
+            text = "".join(lines[comment_start:end_line])
 
             spans.append(
                 FunctionSpan(
                     node=func,
-                    start_line=actual_start,
+                    start_line=comment_start,
                     end_line=end_line,
                     text=text,
                     name=func.name,
@@ -176,19 +178,26 @@ class FunctionSorter:  # pylint: disable=too-few-public-methods
         """
         spans = []
 
-        for i, method in enumerate(methods):
+        # First pass: determine where each method (including comments) starts
+        method_boundaries = []
+        for method in methods:
             start_line = method.lineno - 1  # Convert to 0-based indexing
 
-            # Find the end line (start of next method, or end of class)
-            if i + 1 < len(methods):
-                # Find decorators of next method
-                next_method = methods[i + 1]
-                if hasattr(next_method, "decorators") and next_method.decorators:
-                    # Next method has decorators, use the first decorator's line
-                    end_line = next_method.decorators.lineno - 1
-                else:
-                    # No decorators, use the method definition line
-                    end_line = next_method.lineno - 1
+            # Include decorators in the span
+            actual_start = start_line
+            if hasattr(method, "decorators") and method.decorators:
+                actual_start = method.decorators.lineno - 1
+
+            # Include comments above the method/decorators
+            comment_start = self._find_comments_above_function(lines, actual_start)
+            method_boundaries.append((method, comment_start))
+
+        # Second pass: create spans using the boundaries
+        for i, (method, comment_start) in enumerate(method_boundaries):
+            # Find the end line (start of next method or end of class)
+            if i + 1 < len(method_boundaries):
+                # End where the next method's comments start
+                end_line = method_boundaries[i + 1][1]
             else:
                 # Last method in class, find end of class
                 end_line = (
@@ -197,18 +206,13 @@ class FunctionSorter:  # pylint: disable=too-few-public-methods
                     else len(lines)
                 )
 
-            # Include decorators in the span
-            actual_start = start_line
-            if hasattr(method, "decorators") and method.decorators:
-                actual_start = method.decorators.lineno - 1
-
-            # Extract the text
-            text = "".join(lines[actual_start:end_line])
+            # Extract the text including comments
+            text = "".join(lines[comment_start:end_line])
 
             spans.append(
                 FunctionSpan(
                     node=method,
-                    start_line=actual_start,
+                    start_line=comment_start,
                     end_line=end_line,
                     text=text,
                     name=method.name,
@@ -249,6 +253,44 @@ class FunctionSorter:  # pylint: disable=too-few-public-methods
 
         except Exception:  # pylint: disable=broad-exception-caught
             return False
+
+    def _find_comments_above_function(
+        self, lines: List[str], function_start_line: int
+    ) -> int:
+        """Find comments that belong to a function and return the start line.
+
+        Scans backwards from the function definition to find associated comments.
+
+        :param lines: Source file lines
+        :type lines: List[str]
+        :param function_start_line: The line where the function starts (0-based)
+        :type function_start_line: int
+        :returns: The line number where comments start, or function_start_line
+        :rtype: int
+        """
+        comment_start_line = function_start_line
+
+        # Scan backwards from the function start to find comments
+        current_line = function_start_line - 1
+
+        while current_line >= 0:
+            line = lines[current_line].strip()
+
+            # If we find a comment line, this could be part of the function's comments
+            if line.startswith("#"):
+                comment_start_line = current_line
+                current_line -= 1
+                continue
+
+            # If we find an empty line, continue scanning (comments might be separated)
+            if line == "":
+                current_line -= 1
+                continue
+
+            # If we find any other content, stop scanning
+            break
+
+        return comment_start_line
 
     def _reconstruct_class_with_sorted_methods(
         self,
