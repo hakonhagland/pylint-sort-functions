@@ -73,7 +73,6 @@
 <li class="toctree-l3"><a class="reference internal" href="#pylint_sort_functions.utils.get_methods_from_class"><code class="docutils literal notranslate"><span class="pre">get_methods_from_class()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pylint_sort_functions.utils.is_private_function"><code class="docutils literal notranslate"><span class="pre">is_private_function()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pylint_sort_functions.utils.should_function_be_private"><code class="docutils literal notranslate"><span class="pre">should_function_be_private()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#pylint_sort_functions.utils.should_function_be_private_with_import_analysis"><code class="docutils literal notranslate"><span class="pre">should_function_be_private_with_import_analysis()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#module-pylint_sort_functions">Plugin Registration</a><ul>
@@ -225,21 +224,21 @@ It includes functions for:</p>
 <li><p>Function privacy detection (identifying functions that should be private)</p></li>
 <li><p>Framework-aware sorting with decorator exclusions</p></li>
 </ol>
-<p>Function Privacy Detection Approach:
-The plugin uses a heuristic-based approach to identify functions that should be private:
-- Analyzes function naming patterns (helper/utility prefixes and keywords)
-- Checks internal usage within the same module
-- Applies conservative logic to minimize false positives
-- Cannot detect cross-module imports (this is actually beneficial for reducing</p>
-<blockquote>
-<div><p>false positives on legitimate public API functions)</p>
-</div></blockquote>
-<p>The approach prioritizes precision over recall - it’s better to miss some candidates
-than to incorrectly flag public API functions as needing to be private.</p>
+<p>Function Privacy Detection:
+The plugin uses import analysis to identify functions that should be private by
+scanning actual usage patterns across the project:
+- Analyzes cross-module imports and function calls in all Python files
+- Identifies functions that are only used within their own module
+- Skips common public API patterns (main, run, setup, etc.)
+- Provides accurate detection based on real usage patterns</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="pylint_sort_functions.utils.are_functions_properly_separated">
 <span class="sig-prename descclassname"><span class="pre">pylint_sort_functions.utils.</span></span><span class="sig-name descname"><span class="pre">are_functions_properly_separated</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">functions</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pylint_sort_functions.utils.are_functions_properly_separated" title="Link to this definition"></a></dt>
 <dd><p>Check if public and private functions are properly separated.</p>
+<p>This function only verifies the ordering constraint: public functions must
+appear before private functions. It does not check for section comment headers
+like “# Public functions” or “# Private functions” - that would be a separate
+validation if implemented.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>functions</strong> (<em>list</em><em>[</em><em>nodes.FunctionDef</em><em>]</em>) – List of function definition nodes</p>
@@ -257,6 +256,11 @@ than to incorrectly flag public API functions as needing to be private.</p>
 <dt class="sig sig-object py" id="pylint_sort_functions.utils.are_functions_sorted">
 <span class="sig-prename descclassname"><span class="pre">pylint_sort_functions.utils.</span></span><span class="sig-name descname"><span class="pre">are_functions_sorted</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">functions</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pylint_sort_functions.utils.are_functions_sorted" title="Link to this definition"></a></dt>
 <dd><p>Check if functions are sorted alphabetically within their visibility scope.</p>
+<p>Functions are expected to be sorted with:
+- Public functions (including dunder methods like __init__) sorted first
+- Private functions (single underscore prefix) sorted alphabetically second</p>
+<p>Dunder methods are treated as public and will naturally sort to the top due to
+the __ prefix (e.g., __init__ comes before add_item).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>functions</strong> (<em>list</em><em>[</em><em>nodes.FunctionDef</em><em>]</em>) – List of function definition nodes</p>
@@ -332,16 +336,19 @@ sorting by excluding functions with specific decorators that create dependencies
 <dl class="py function">
 <dt class="sig sig-object py" id="pylint_sort_functions.utils.function_has_excluded_decorator">
 <span class="sig-prename descclassname"><span class="pre">pylint_sort_functions.utils.</span></span><span class="sig-name descname"><span class="pre">function_has_excluded_decorator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_decorators</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pylint_sort_functions.utils.function_has_excluded_decorator" title="Link to this definition"></a></dt>
-<dd><p>Check if a function has any decorators that should be excluded from sorting.</p>
+<dd><p>Check if a function should be excluded from sorting due to its decorators.</p>
+<p>Some decorators create dependencies that make alphabetical sorting inappropriate.
+For example, Click commands or Flask routes may need specific ordering for proper
+framework behavior.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>func</strong> (<em>nodes.FunctionDef</em>) – Function definition node to check</p></li>
-<li><p><strong>ignore_decorators</strong> (<em>list</em><em>[</em><em>str</em><em>]</em>) – List of decorator patterns to match against</p></li>
+<li><p><strong>ignore_decorators</strong> (<em>list</em><em>[</em><em>str</em><em>] </em><em>| </em><em>None</em>) – List of decorator patterns to match against</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>True if function has any excluded decorators</p>
+<dd class="field-even"><p>True if function should be excluded from sorting requirements</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>bool</p>
@@ -387,12 +394,15 @@ sorting by excluding functions with specific decorators that create dependencies
 <dt class="sig sig-object py" id="pylint_sort_functions.utils.is_private_function">
 <span class="sig-prename descclassname"><span class="pre">pylint_sort_functions.utils.</span></span><span class="sig-name descname"><span class="pre">is_private_function</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pylint_sort_functions.utils.is_private_function" title="Link to this definition"></a></dt>
 <dd><p>Check if a function is private (starts with underscore).</p>
+<p>Functions starting with a single underscore are considered private by convention.
+Dunder methods (double underscore) like __init__ are not considered private
+as they are special methods with specific meanings in Python.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>func</strong> (<em>nodes.FunctionDef</em>) – Function definition node</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>True if function name starts with underscore</p>
+<dd class="field-even"><p>True if function name starts with underscore but not double underscore</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>bool</p>
@@ -402,43 +412,16 @@ sorting by excluding functions with specific decorators that create dependencies
 
 <dl class="py function">
 <dt class="sig sig-object py" id="pylint_sort_functions.utils.should_function_be_private">
-<span class="sig-prename descclassname"><span class="pre">pylint_sort_functions.utils.</span></span><span class="sig-name descname"><span class="pre">should_function_be_private</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pylint_sort_functions.utils.should_function_be_private" title="Link to this definition"></a></dt>
-<dd><p>Legacy heuristic-based privacy detection (deprecated).</p>
-<p>This function is kept for backward compatibility but always returns False.
-The preferred approach is should_function_be_private_with_import_analysis()
-which provides more accurate detection based on actual usage patterns.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>func</strong> (<em>nodes.FunctionDef</em>) – Function definition node to analyze</p></li>
-<li><p><strong>module</strong> (<em>nodes.Module</em>) – The module containing the function</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Always returns False (heuristics disabled)</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>bool</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="pylint_sort_functions.utils.should_function_be_private_with_import_analysis">
-<span class="sig-prename descclassname"><span class="pre">pylint_sort_functions.utils.</span></span><span class="sig-name descname"><span class="pre">should_function_be_private_with_import_analysis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">project_root</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pylint_sort_functions.utils.should_function_be_private_with_import_analysis" title="Link to this definition"></a></dt>
-<dd><p>Enhanced version using import analysis to detect cross-module usage.</p>
-<p>This version provides more accurate detection by analyzing actual import
-patterns across the entire project, rather than just heuristics.</p>
+<span class="sig-prename descclassname"><span class="pre">pylint_sort_functions.utils.</span></span><span class="sig-name descname"><span class="pre">should_function_be_private</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">project_root</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pylint_sort_functions.utils.should_function_be_private" title="Link to this definition"></a></dt>
+<dd><p>Detect if a function should be private based on import analysis.</p>
+<p>Analyzes actual usage patterns across the project to determine if a function
+is only used within its own module and should therefore be made private.</p>
 <p>Detection Logic:
 1. Skip if already private (starts with underscore)
 2. Skip special methods (__init__, __str__, etc.)
 3. Skip common public API patterns (main, run, setup, etc.)
 4. Check if function is imported/used by other modules
 5. If not used externally, suggest making it private</p>
-<p>Technical Approach:
-- Scans entire project directory for Python files
-- Parses import statements from all files
-- May be slower on large projects (caching could help)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
