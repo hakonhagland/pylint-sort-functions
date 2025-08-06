@@ -175,6 +175,64 @@ git add .
 git commit -m "style: format code with pre-commit hooks"
 ```
 
+### Handling Pre-commit Hook File Modifications
+
+**Problem**: When pre-commit hooks modify files after staging, this can interfere with comprehensive commit messages, potentially replacing detailed commit messages with generic "style" messages.
+
+**Root Cause**: Pre-commit hooks run after `git commit` but before the commit is finalized. If hooks modify staged files, the modifications become part of the commit, potentially overriding the intended commit message flow.
+
+**Prevention Strategy**:
+
+1. **Always run pre-commit checks manually BEFORE staging**:
+```bash
+# 1. Make your changes
+# 2. Run pre-commit manually to catch all formatting issues
+make pre-commit
+
+# 3. Stage files AFTER pre-commit formatting is complete
+git add .
+
+# 4. Commit with confidence that hooks won't modify files
+git commit -m "your comprehensive commit message"
+```
+
+2. **For comprehensive commits with detailed messages, use this workflow**:
+```bash
+# For major documentation/feature work requiring detailed commit messages:
+
+# 1. Complete all work
+# 2. Run pre-commit to fix any formatting
+make pre-commit
+
+# 3. Review changes and ensure everything is ready
+git status
+git diff --staged
+
+# 4. Stage everything and commit with comprehensive message
+git add .
+git commit -m "$(cat <<'EOF'
+docs: comprehensive feature enhancement
+
+Detailed multi-line commit message
+with all the important details...
+
+🤖 Generated with [Claude Code](https://claude.ai/code)
+Co-Authored-By: Claude <noreply@anthropic.com>
+EOF
+)"
+```
+
+3. **If commit message gets lost due to hook modifications**:
+```bash
+# Use git commit --amend to restore the proper message
+git commit --amend -m "$(cat <<'EOF'
+your comprehensive commit message here
+EOF
+)"
+```
+
+**Key Principle**: Separate formatting fixes from substantive commits to preserve detailed commit messages for important work.
+
 **Never use these anti-patterns**:
 ```bash
 # ❌ DON'T: Commit then amend with formatting changes
