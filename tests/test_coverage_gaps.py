@@ -253,8 +253,9 @@ from .sibling import helper
 """)
 
             # Should handle relative imports without crashing
+            file_mtime = test_file.stat().st_mtime
             module_imports, function_imports, attribute_accesses = (
-                utils._extract_imports_from_file(test_file)
+                utils._extract_imports_from_file(test_file, file_mtime)
             )
 
             # from .sibling import helper adds 'sibling' to module_imports

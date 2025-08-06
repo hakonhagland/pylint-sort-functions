@@ -314,8 +314,11 @@ def test_function():
 """
             test_file.write_text(content)
 
+            # Get file modification time for the cache key
+            file_mtime = test_file.stat().st_mtime
+
             (module_imports, function_imports, attribute_accesses) = (
-                utils._extract_imports_from_file(test_file)
+                utils._extract_imports_from_file(test_file, file_mtime)
             )
 
             # Test module imports
@@ -350,8 +353,11 @@ def test_function():
             # Create file with syntax error
             test_file.write_text("def broken(:\n    pass")
 
+            # Get file modification time for the cache key
+            file_mtime = test_file.stat().st_mtime
+
             (module_imports, function_imports, attribute_accesses) = (
-                utils._extract_imports_from_file(test_file)
+                utils._extract_imports_from_file(test_file, file_mtime)
             )
 
             # Should return empty sets for unparseable files
@@ -505,3 +511,32 @@ def use_library():
                 special_func, library_file, temp_path
             )
             assert result is False
+
+    def test_build_cross_module_usage_graph_handles_oserror(self) -> None:
+        """Test that cross-module usage graph handles OSError gracefully."""
+        from pathlib import Path
+        from unittest.mock import patch
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_path = Path(temp_dir)
+
+            # Create a valid python file
+            test_file = temp_path / "test_file.py"
+            test_file.write_text("def test_func(): pass")
+
+            # Mock Path.stat to raise OSError for our test file
+            original_stat = Path.stat
+
+            def mock_stat(self):
+                if self.name == "test_file.py":
+                    raise OSError("Mocked file access error")
+                return original_stat(self)
+
+            with patch.object(Path, "stat", mock_stat):
+                # This should not crash and should skip the problematic file
+                usage_graph = utils._build_cross_module_usage_graph(temp_path)
+
+                # Verify it handles the error gracefully
+                # The graph should be empty or not contain anything from the problematic file
+                assert isinstance(usage_graph, dict)
