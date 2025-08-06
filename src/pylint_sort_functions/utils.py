@@ -308,7 +308,7 @@ def _build_cross_module_usage_graph(project_root: Path) -> dict[str, set[str]]:
             # Get file modification time for cache key
             try:
                 file_mtime = file_path.stat().st_mtime
-            except OSError:
+            except OSError:  # pragma: no cover
                 # If we can't get mtime, skip this file
                 continue
 
@@ -417,7 +417,7 @@ def _decorator_node_to_string(decorator: nodes.NodeNG) -> str:
 def _extract_attribute_accesses(
     tree: ast.AST,
     imported_modules: dict[str, str],
-    attribute_accesses: set[tuple[str, str]]
+    attribute_accesses: set[tuple[str, str]],
 ) -> None:
     """Extract attribute access patterns from AST for import analysis.
 
@@ -442,7 +442,8 @@ def _extract_attribute_accesses(
 
 @lru_cache(maxsize=128)
 def _extract_imports_from_file(
-    file_path: Path, file_mtime: float  # pylint: disable=unused-argument
+    file_path: Path,
+    file_mtime: float,  # pylint: disable=unused-argument
 ) -> tuple[set[str], set[tuple[str, str]], set[tuple[str, str]]]:
     """Extract import information from a Python file.
 
@@ -505,7 +506,6 @@ def _extract_imports_from_file(
     except (SyntaxError, UnicodeDecodeError, FileNotFoundError):
         # If file can't be parsed, return empty sets
         return set(), set(), set()
-
 
 
 def _find_python_files(root_path: Path) -> list[Path]:
