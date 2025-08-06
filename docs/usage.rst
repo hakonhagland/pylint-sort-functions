@@ -463,3 +463,10 @@ The ``pylint-sort-functions`` plugin helps maintain consistent code organization
 - Clear identification of internal helper functions
 
 This leads to more maintainable and navigable codebases where developers can quickly locate functions and understand the public API surface.
+
+See Also
+--------
+
+- :doc:`cli` - Command-line auto-fix tool with ``pylint-sort-functions`` command
+- :doc:`pylintrc` - Complete PyLint configuration reference
+- :doc:`sorting` - Detailed sorting algorithm and rules documentation

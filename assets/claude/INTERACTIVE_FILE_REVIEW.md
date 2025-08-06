@@ -9,10 +9,20 @@ Interactive file review is a structured process where the user guides the analys
 ## The Four-Phase Process
 
 ### Phase 1: Question & Answer 🤔
-- **User drives the review** by asking specific questions about the code
+
+This phase is split into two sub-phases for better organization:
+
+#### Phase 1a: User-Led Questions 👤
+- **User drives the initial exploration** by asking specific questions about the code
 - **Claude provides detailed answers** explaining implementation choices, alternatives, and implications
-- **No file modifications** are made during this phase
-- **Focus on understanding** rather than changing
+- **Focus on areas of user interest** and specific concerns
+
+#### Phase 1b: Claude-Led Questions 🤖
+- **Claude asks targeted questions** to fill knowledge gaps and explore areas not covered by user
+- **Comprehensive coverage** of all aspects: functionality, maintainability, performance, edge cases
+- **User provides insights** about intended behavior, constraints, and priorities
+
+**Combined Phase 1 Outcome:** Complete understanding of the file from both perspectives before any modifications
 
 ### Phase 2: Analysis & Knowledge Building 📚
 - **Comprehensive understanding** is built through systematic Q&A
