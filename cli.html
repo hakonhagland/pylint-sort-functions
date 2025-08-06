@@ -1,0 +1,478 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Command Line Interface &mdash; pylint-sort-functions 0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=2709fde1"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Known Issues &amp; Workarounds" href="workarounds.html" />
+    <link rel="prev" title="User Guide" href="usage.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            pylint-sort-functions
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">User Guide</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Command Line Interface</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#installation">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#usage">Usage</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#basic-syntax">Basic Syntax</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#command-examples">Command Examples</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#command-line-options">Command-Line Options</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#positional-arguments">Positional Arguments</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#optional-arguments">Optional Arguments</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#operating-modes">Operating Modes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#check-only-mode-default">Check-Only Mode (Default)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#dry-run-mode">Dry-Run Mode</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#fix-mode">Fix Mode</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#decorator-pattern-matching">Decorator Pattern Matching</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pattern-syntax">Pattern Syntax</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#common-framework-examples">Common Framework Examples</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#exit-codes">Exit Codes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#error-handling">Error Handling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#integration-with-build-systems">Integration with Build Systems</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#makefile-integration">Makefile Integration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pre-commit-integration">Pre-commit Integration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#github-actions-integration">GitHub Actions Integration</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#performance-considerations">Performance Considerations</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#file-discovery">File Discovery</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#processing-speed">Processing Speed</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#backup-files">Backup Files</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#related-tools">Related Tools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#troubleshooting">Troubleshooting</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#tool-not-found">Tool Not Found</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#permission-issues">Permission Issues</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#large-project-performance">Large Project Performance</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="workarounds.html">Known Issues &amp; Workarounds</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Configuration:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="pylintrc.html">PyLint Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sorting.html">Function and Method Sorting Algorithm</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="developer.html">Developer Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="roadmap.html">Development Roadmap</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">pylint-sort-functions</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Command Line Interface</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/hakonhagland/pylint-sort-functions/blob/main/docs/cli.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="command-line-interface">
+<h1>Command Line Interface<a class="headerlink" href="#command-line-interface" title="Link to this heading"></a></h1>
+<p>The <code class="docutils literal notranslate"><span class="pre">pylint-sort-functions</span></code> command-line tool provides auto-fix functionality for function
+and method sorting independent of PyLint integration.</p>
+<section id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Link to this heading"></a></h2>
+<p>The CLI tool is automatically available after installing the package:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>pylint-sort-functions
+</pre></div>
+</div>
+</section>
+<section id="usage">
+<h2>Usage<a class="headerlink" href="#usage" title="Link to this heading"></a></h2>
+<section id="basic-syntax">
+<h3>Basic Syntax<a class="headerlink" href="#basic-syntax" title="Link to this heading"></a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pylint-sort-functions<span class="w"> </span><span class="o">[</span>options<span class="o">]</span><span class="w"> </span>PATHS
+</pre></div>
+</div>
+<p>The tool operates on Python files or directories containing Python files.</p>
+</section>
+<section id="command-examples">
+<h3>Command Examples<a class="headerlink" href="#command-examples" title="Link to this heading"></a></h3>
+<p><strong>Check files (dry-run mode):</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pylint-sort-functions<span class="w"> </span>--dry-run<span class="w"> </span>src/
+pylint-sort-functions<span class="w"> </span>--dry-run<span class="w"> </span>myfile.py
+</pre></div>
+</div>
+<p><strong>Fix files in-place:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pylint-sort-functions<span class="w"> </span>--fix<span class="w"> </span>src/
+pylint-sort-functions<span class="w"> </span>--fix<span class="w"> </span>myfile.py<span class="w"> </span>another_file.py
+</pre></div>
+</div>
+<p><strong>Fix without creating backups:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pylint-sort-functions<span class="w"> </span>--fix<span class="w"> </span>--no-backup<span class="w"> </span>src/
+</pre></div>
+</div>
+<p><strong>Exclude decorator patterns:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pylint-sort-functions<span class="w"> </span>--fix<span class="w"> </span>--ignore-decorators<span class="w"> </span><span class="s2">&quot;@app.route&quot;</span><span class="w"> </span>src/
+pylint-sort-functions<span class="w"> </span>--fix<span class="w"> </span>--ignore-decorators<span class="w"> </span><span class="s2">&quot;@*.command&quot;</span><span class="w"> </span>--ignore-decorators<span class="w"> </span><span class="s2">&quot;@pytest.fixture&quot;</span><span class="w"> </span>src/
+</pre></div>
+</div>
+</section>
+</section>
+<section id="command-line-options">
+<h2>Command-Line Options<a class="headerlink" href="#command-line-options" title="Link to this heading"></a></h2>
+<section id="positional-arguments">
+<h3>Positional Arguments<a class="headerlink" href="#positional-arguments" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">PATHS</span></code></dt><dd><p>One or more Python files or directories to process. Directories are searched recursively for <code class="docutils literal notranslate"><span class="pre">.py</span></code> files.</p>
+</dd>
+</dl>
+</section>
+<section id="optional-arguments">
+<h3>Optional Arguments<a class="headerlink" href="#optional-arguments" title="Link to this heading"></a></h3>
+<dl>
+<dt><code class="docutils literal notranslate"><span class="pre">--fix</span></code></dt><dd><p>Apply auto-fix to sort functions and methods. Without this flag, the tool runs in check-only mode.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">--dry-run</span></code></dt><dd><p>Show what would be changed without modifying files. Useful for previewing changes.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">--no-backup</span></code></dt><dd><p>Do not create backup files (<code class="docutils literal notranslate"><span class="pre">.bak</span></code>) when fixing files. By default, backups are created for safety.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">--ignore-decorators</span> <span class="pre">PATTERN</span></code></dt><dd><p>Decorator patterns to ignore during sorting. Can be used multiple times. Supports wildcards.</p>
+<p>Examples:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">&#64;app.route</span></code> - Exact match</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&#64;*.command</span></code> - Wildcard match (<code class="docutils literal notranslate"><span class="pre">&#64;main.command</span></code>, <code class="docutils literal notranslate"><span class="pre">&#64;cli.command</span></code>, etc.)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&#64;pytest.fixture</span></code> - Framework decorators</p></li>
+</ul>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">--verbose,</span> <span class="pre">-v</span></code></dt><dd><p>Enable verbose output showing processing details.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">--help,</span> <span class="pre">-h</span></code></dt><dd><p>Show help message and exit.</p>
+</dd>
+</dl>
+</section>
+</section>
+<section id="operating-modes">
+<h2>Operating Modes<a class="headerlink" href="#operating-modes" title="Link to this heading"></a></h2>
+<section id="check-only-mode-default">
+<h3>Check-Only Mode (Default)<a class="headerlink" href="#check-only-mode-default" title="Link to this heading"></a></h3>
+<p>When run without <code class="docutils literal notranslate"><span class="pre">--fix</span></code> or <code class="docutils literal notranslate"><span class="pre">--dry-run</span></code>, the tool displays usage information:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>pylint-sort-functions<span class="w"> </span>src/
+Note:<span class="w"> </span>Running<span class="w"> </span><span class="k">in</span><span class="w"> </span>check-only<span class="w"> </span>mode.<span class="w"> </span>Use<span class="w"> </span>--fix<span class="w"> </span>or<span class="w"> </span>--dry-run<span class="w"> </span>to<span class="w"> </span>make<span class="w"> </span>changes.
+Use<span class="w"> </span><span class="s1">&#39;pylint-sort-functions --help&#39;</span><span class="w"> </span><span class="k">for</span><span class="w"> </span>more<span class="w"> </span>options.
+</pre></div>
+</div>
+</section>
+<section id="dry-run-mode">
+<h3>Dry-Run Mode<a class="headerlink" href="#dry-run-mode" title="Link to this heading"></a></h3>
+<p>Preview changes without modifying files:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>pylint-sort-functions<span class="w"> </span>--dry-run<span class="w"> </span>src/
+Would<span class="w"> </span>modify:<span class="w"> </span>src/utils.py
+Would<span class="w"> </span>modify:<span class="w"> </span>src/models.py
+Would<span class="w"> </span>modify<span class="w"> </span><span class="m">2</span><span class="w"> </span>of<span class="w"> </span><span class="m">15</span><span class="w"> </span>files
+</pre></div>
+</div>
+</section>
+<section id="fix-mode">
+<h3>Fix Mode<a class="headerlink" href="#fix-mode" title="Link to this heading"></a></h3>
+<p>Modify files in-place with optional backup creation:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>pylint-sort-functions<span class="w"> </span>--fix<span class="w"> </span>src/
+Modified<span class="w"> </span><span class="m">3</span><span class="w"> </span>of<span class="w"> </span><span class="m">15</span><span class="w"> </span>files
+Backup<span class="w"> </span>files<span class="w"> </span>created<span class="w"> </span>with<span class="w"> </span>.bak<span class="w"> </span>extension
+</pre></div>
+</div>
+</section>
+</section>
+<section id="decorator-pattern-matching">
+<h2>Decorator Pattern Matching<a class="headerlink" href="#decorator-pattern-matching" title="Link to this heading"></a></h2>
+<section id="pattern-syntax">
+<h3>Pattern Syntax<a class="headerlink" href="#pattern-syntax" title="Link to this heading"></a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">--ignore-decorators</span></code> option supports flexible pattern matching:</p>
+<p><strong>Exact Matches:</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">&#64;app.route</span></code> matches <code class="docutils literal notranslate"><span class="pre">&#64;app.route</span></code> and <code class="docutils literal notranslate"><span class="pre">&#64;app.route(&quot;/path&quot;)</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&#64;pytest.fixture</span></code> matches <code class="docutils literal notranslate"><span class="pre">&#64;pytest.fixture</span></code> and <code class="docutils literal notranslate"><span class="pre">&#64;pytest.fixture(scope=&quot;session&quot;)</span></code></p></li>
+</ul>
+<p><strong>Wildcard Patterns:</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">&#64;*.command</span></code> matches <code class="docutils literal notranslate"><span class="pre">&#64;main.command</span></code>, <code class="docutils literal notranslate"><span class="pre">&#64;cli.command</span></code>, <code class="docutils literal notranslate"><span class="pre">&#64;app.command</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&#64;app.*</span></code> matches <code class="docutils literal notranslate"><span class="pre">&#64;app.route</span></code>, <code class="docutils literal notranslate"><span class="pre">&#64;app.before_request</span></code>, <code class="docutils literal notranslate"><span class="pre">&#64;app.errorhandler</span></code></p></li>
+</ul>
+<p><strong>Pattern Normalization:</strong></p>
+<ul class="simple">
+<li><p>Patterns are automatically prefixed with <code class="docutils literal notranslate"><span class="pre">&#64;</span></code> if not present</p></li>
+<li><p>Parentheses are ignored for matching (<code class="docutils literal notranslate"><span class="pre">&#64;fixture()</span></code> matches <code class="docutils literal notranslate"><span class="pre">&#64;fixture</span></code>)</p></li>
+</ul>
+</section>
+<section id="common-framework-examples">
+<h3>Common Framework Examples<a class="headerlink" href="#common-framework-examples" title="Link to this heading"></a></h3>
+<p><strong>Flask Applications:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pylint-sort-functions<span class="w"> </span>--fix<span class="w"> </span>--ignore-decorators<span class="w"> </span><span class="s2">&quot;@app.route&quot;</span><span class="w"> </span>--ignore-decorators<span class="w"> </span><span class="s2">&quot;@app.before_request&quot;</span><span class="w"> </span>src/
+</pre></div>
+</div>
+<p><strong>Click CLI Applications:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pylint-sort-functions<span class="w"> </span>--fix<span class="w"> </span>--ignore-decorators<span class="w"> </span><span class="s2">&quot;@*.command&quot;</span><span class="w"> </span>--ignore-decorators<span class="w"> </span><span class="s2">&quot;@*.group&quot;</span><span class="w"> </span>src/
+</pre></div>
+</div>
+<p><strong>Django Applications:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pylint-sort-functions<span class="w"> </span>--fix<span class="w"> </span>--ignore-decorators<span class="w"> </span><span class="s2">&quot;@login_required&quot;</span><span class="w"> </span>--ignore-decorators<span class="w"> </span><span class="s2">&quot;@csrf_exempt&quot;</span><span class="w"> </span>src/
+</pre></div>
+</div>
+<p><strong>Pytest Test Files:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pylint-sort-functions<span class="w"> </span>--fix<span class="w"> </span>--ignore-decorators<span class="w"> </span><span class="s2">&quot;@pytest.*&quot;</span><span class="w"> </span>tests/
+</pre></div>
+</div>
+</section>
+</section>
+<section id="exit-codes">
+<h2>Exit Codes<a class="headerlink" href="#exit-codes" title="Link to this heading"></a></h2>
+<p>The tool returns standard exit codes:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">0</span></code> - Success (files processed successfully, or check-only mode)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">1</span></code> - Error (invalid paths, processing failures, user interruption)</p></li>
+</ul>
+</section>
+<section id="error-handling">
+<h2>Error Handling<a class="headerlink" href="#error-handling" title="Link to this heading"></a></h2>
+<p>The CLI tool provides user-friendly error handling:</p>
+<p><strong>File System Errors:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>pylint-sort-functions<span class="w"> </span>--fix<span class="w"> </span>nonexistent_file.py
+Error:<span class="w"> </span>Path<span class="w"> </span>does<span class="w"> </span>not<span class="w"> </span>exist:<span class="w"> </span>/path/to/nonexistent_file.py
+</pre></div>
+</div>
+<p><strong>Permission Errors:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>pylint-sort-functions<span class="w"> </span>--fix<span class="w"> </span>readonly_file.py
+Error<span class="w"> </span>processing<span class="w"> </span>readonly_file.py:<span class="w"> </span><span class="o">[</span>Errno<span class="w"> </span><span class="m">13</span><span class="o">]</span><span class="w"> </span>Permission<span class="w"> </span>denied
+</pre></div>
+</div>
+<p><strong>Keyboard Interruption:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>pylint-sort-functions<span class="w"> </span>--fix<span class="w"> </span>large_project/
+Processing<span class="w"> </span><span class="m">1000</span><span class="w"> </span>Python<span class="w"> </span>files...
+^C
+Operation<span class="w"> </span>cancelled<span class="w"> </span>by<span class="w"> </span>user.
+</pre></div>
+</div>
+</section>
+<section id="integration-with-build-systems">
+<h2>Integration with Build Systems<a class="headerlink" href="#integration-with-build-systems" title="Link to this heading"></a></h2>
+<section id="makefile-integration">
+<h3>Makefile Integration<a class="headerlink" href="#makefile-integration" title="Link to this heading"></a></h3>
+<div class="highlight-makefile notranslate"><div class="highlight"><pre><span></span><span class="nf">.PHONY</span><span class="o">:</span><span class="w"> </span><span class="n">format</span>-<span class="n">functions</span>
+<span class="nf">format-functions</span><span class="o">:</span>
+<span class="w">     </span>pylint-sort-functions<span class="w"> </span>--fix<span class="w"> </span>--ignore-decorators<span class="w"> </span><span class="s2">&quot;@app.route&quot;</span><span class="w"> </span>src/
+
+<span class="nf">.PHONY</span><span class="o">:</span><span class="w"> </span><span class="n">check</span>-<span class="n">functions</span>
+<span class="nf">check-functions</span><span class="o">:</span>
+<span class="w">     </span>pylint-sort-functions<span class="w"> </span>--dry-run<span class="w"> </span>src/
+</pre></div>
+</div>
+</section>
+<section id="pre-commit-integration">
+<h3>Pre-commit Integration<a class="headerlink" href="#pre-commit-integration" title="Link to this heading"></a></h3>
+<p>Add to <code class="docutils literal notranslate"><span class="pre">.pre-commit-config.yaml</span></code>:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">repos</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">repo</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">local</span>
+<span class="w">    </span><span class="nt">hooks</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pylint-sort-functions</span>
+<span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Sort functions and methods</span>
+<span class="w">        </span><span class="nt">entry</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pylint-sort-functions</span>
+<span class="w">        </span><span class="nt">args</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">--fix</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">--ignore-decorators</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;@app.route&quot;</span><span class="p p-Indicator">]</span>
+<span class="w">        </span><span class="nt">language</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">system</span>
+<span class="w">        </span><span class="nt">files</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">\\.py$</span>
+</pre></div>
+</div>
+</section>
+<section id="github-actions-integration">
+<h3>GitHub Actions Integration<a class="headerlink" href="#github-actions-integration" title="Link to this heading"></a></h3>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Code Quality</span>
+<span class="nt">on</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">push</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">pull_request</span><span class="p p-Indicator">]</span>
+
+<span class="nt">jobs</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">lint</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">runs-on</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ubuntu-latest</span>
+<span class="w">    </span><span class="nt">steps</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">actions/checkout@v3</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Set up Python</span>
+<span class="w">        </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">actions/setup-python@v4</span>
+<span class="w">        </span><span class="nt">with</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">python-version</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;3.11&#39;</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Install dependencies</span>
+<span class="w">        </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<span class="w">          </span><span class="no">pip install pylint-sort-functions</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Check function sorting</span>
+<span class="w">        </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<span class="w">          </span><span class="no">pylint-sort-functions --dry-run src/</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="performance-considerations">
+<h2>Performance Considerations<a class="headerlink" href="#performance-considerations" title="Link to this heading"></a></h2>
+<section id="file-discovery">
+<h3>File Discovery<a class="headerlink" href="#file-discovery" title="Link to this heading"></a></h3>
+<p>The tool recursively searches directories for Python files while skipping common
+directories that should not be processed:</p>
+<ul class="simple">
+<li><p>Build artifacts: <code class="docutils literal notranslate"><span class="pre">build/</span></code>, <code class="docutils literal notranslate"><span class="pre">dist/</span></code>, <code class="docutils literal notranslate"><span class="pre">*.egg-info/</span></code></p></li>
+<li><p>Version control: <code class="docutils literal notranslate"><span class="pre">.git/</span></code></p></li>
+<li><p>Virtual environments: <code class="docutils literal notranslate"><span class="pre">venv/</span></code>, <code class="docutils literal notranslate"><span class="pre">.venv/</span></code>, <code class="docutils literal notranslate"><span class="pre">env/</span></code>, <code class="docutils literal notranslate"><span class="pre">.env/</span></code></p></li>
+<li><p>Caches: <code class="docutils literal notranslate"><span class="pre">__pycache__/</span></code>, <code class="docutils literal notranslate"><span class="pre">.pytest_cache/</span></code>, <code class="docutils literal notranslate"><span class="pre">.mypy_cache/</span></code>, <code class="docutils literal notranslate"><span class="pre">.tox/</span></code></p></li>
+</ul>
+</section>
+<section id="processing-speed">
+<h3>Processing Speed<a class="headerlink" href="#processing-speed" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>Small projects (&lt;100 files):</strong> Near-instantaneous processing</p></li>
+<li><p><strong>Medium projects (100-1000 files):</strong> 1-5 seconds typical</p></li>
+<li><p><strong>Large projects (1000+ files):</strong> May take longer due to import analysis</p></li>
+</ul>
+<p>The import analysis feature scans the project to determine function privacy suggestions,
+which scales with project size.</p>
+</section>
+<section id="backup-files">
+<h3>Backup Files<a class="headerlink" href="#backup-files" title="Link to this heading"></a></h3>
+<p>When using <code class="docutils literal notranslate"><span class="pre">--fix</span></code> (default behavior), the tool creates <code class="docutils literal notranslate"><span class="pre">.bak</span></code> backup files:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">myfile.py</span></code> → <code class="docutils literal notranslate"><span class="pre">myfile.py.bak</span></code></p></li>
+<li><p>Backups preserve original timestamps and permissions</p></li>
+<li><p>Use <code class="docutils literal notranslate"><span class="pre">--no-backup</span></code> to skip backup creation</p></li>
+<li><p>Clean up with: <code class="docutils literal notranslate"><span class="pre">find</span> <span class="pre">.</span> <span class="pre">-name</span> <span class="pre">&quot;*.py.bak&quot;</span> <span class="pre">-delete</span></code></p></li>
+</ul>
+</section>
+</section>
+<section id="related-tools">
+<h2>Related Tools<a class="headerlink" href="#related-tools" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><strong>PyLint Plugin:</strong> Use <code class="docutils literal notranslate"><span class="pre">pylint</span> <span class="pre">--load-plugins=pylint_sort_functions</span></code> for linting integration</p></li>
+<li><p><strong>Configuration:</strong> See <a class="reference internal" href="pylintrc.html"><span class="doc">PyLint Configuration</span></a> for PyLint configuration options</p></li>
+<li><p><strong>Algorithm Details:</strong> See <a class="reference internal" href="sorting.html"><span class="doc">Function and Method Sorting Algorithm</span></a> for complete sorting algorithm documentation</p></li>
+</ul>
+</section>
+<section id="troubleshooting">
+<h2>Troubleshooting<a class="headerlink" href="#troubleshooting" title="Link to this heading"></a></h2>
+<section id="tool-not-found">
+<h3>Tool Not Found<a class="headerlink" href="#tool-not-found" title="Link to this heading"></a></h3>
+<p>If <code class="docutils literal notranslate"><span class="pre">pylint-sort-functions</span></code> command is not found after installation:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Verify installation</span>
+pip<span class="w"> </span>show<span class="w"> </span>pylint-sort-functions
+
+<span class="c1"># Check if script directory is in PATH</span>
+python<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>show<span class="w"> </span>pylint-sort-functions
+
+<span class="c1"># Alternative: run as module</span>
+python<span class="w"> </span>-m<span class="w"> </span>pylint_sort_functions.cli<span class="w"> </span>--help
+</pre></div>
+</div>
+</section>
+<section id="permission-issues">
+<h3>Permission Issues<a class="headerlink" href="#permission-issues" title="Link to this heading"></a></h3>
+<p>For files with restrictive permissions:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Make files writable</span>
+chmod<span class="w"> </span>u+w<span class="w"> </span>src/*.py
+
+<span class="c1"># Run the tool</span>
+pylint-sort-functions<span class="w"> </span>--fix<span class="w"> </span>src/
+
+<span class="c1"># Optionally restore permissions</span>
+chmod<span class="w"> </span>u-w<span class="w"> </span>src/*.py
+</pre></div>
+</div>
+</section>
+<section id="large-project-performance">
+<h3>Large Project Performance<a class="headerlink" href="#large-project-performance" title="Link to this heading"></a></h3>
+<p>For very large projects, consider:</p>
+<ul class="simple">
+<li><p>Processing subdirectories individually</p></li>
+<li><p>Using <code class="docutils literal notranslate"><span class="pre">--dry-run</span></code> first to preview changes</p></li>
+<li><p>Running during off-peak hours for large codebases</p></li>
+</ul>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="usage.html" class="btn btn-neutral float-left" title="User Guide" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="workarounds.html" class="btn btn-neutral float-right" title="Known Issues &amp; Workarounds" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Håkon Hægland.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

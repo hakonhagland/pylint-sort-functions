@@ -1,0 +1,427 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Function and Method Sorting Algorithm &mdash; pylint-sort-functions 0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=2709fde1"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="API Reference" href="api.html" />
+    <link rel="prev" title="PyLint Configuration" href="pylintrc.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            pylint-sort-functions
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli.html">Command Line Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="workarounds.html">Known Issues &amp; Workarounds</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Configuration:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="pylintrc.html">PyLint Configuration</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Function and Method Sorting Algorithm</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#sorting-rules">Sorting Rules</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#module-level-functions">Module-Level Functions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#class-methods">Class Methods</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#special-method-handling">Special Method Handling</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#dunder-methods">Dunder Methods</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#private-vs-public-classification">Private vs Public Classification</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#framework-integration">Framework Integration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#decorator-exclusions">Decorator Exclusions</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#privacy-detection">Privacy Detection</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#detection-algorithm">Detection Algorithm</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#comment-preservation">Comment Preservation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#section-headers-future-enhancement">Section Headers (Future Enhancement)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#message-types">Message Types</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#w9001-unsorted-functions">W9001: unsorted-functions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#w9002-unsorted-methods">W9002: unsorted-methods</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#w9003-mixed-function-visibility">W9003: mixed-function-visibility</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#configuration">Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#cli-tool">CLI Tool</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#benefits">Benefits</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#consistency">Consistency</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#readability">Readability</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#maintainability">Maintainability</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="developer.html">Developer Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="roadmap.html">Development Roadmap</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">pylint-sort-functions</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Function and Method Sorting Algorithm</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/hakonhagland/pylint-sort-functions/blob/main/docs/sorting.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="function-and-method-sorting-algorithm">
+<h1>Function and Method Sorting Algorithm<a class="headerlink" href="#function-and-method-sorting-algorithm" title="Link to this heading"></a></h1>
+<p>This document describes the comprehensive sorting algorithm used by pylint-sort-functions
+to organize Python code for improved readability and maintainability.</p>
+<section id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Link to this heading"></a></h2>
+<p>The plugin enforces a consistent organizational pattern for both module-level functions
+and class methods. This creates predictable code structure that improves navigation
+and reduces cognitive overhead when reading code.</p>
+</section>
+<section id="sorting-rules">
+<h2>Sorting Rules<a class="headerlink" href="#sorting-rules" title="Link to this heading"></a></h2>
+<section id="module-level-functions">
+<h3>Module-Level Functions<a class="headerlink" href="#module-level-functions" title="Link to this heading"></a></h3>
+<p>Functions within a module are organized using the following hierarchy:</p>
+<ol class="arabic simple">
+<li><p><strong>Public functions</strong> (no underscore prefix) - sorted alphabetically</p></li>
+<li><p><strong>Private functions</strong> (single underscore prefix) - sorted alphabetically</p></li>
+</ol>
+<p><strong>Example:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Public functions (alphabetically sorted)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">calculate_total</span><span class="p">(</span><span class="n">items</span><span class="p">):</span>
+    <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">price</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">items</span><span class="p">)</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">format_currency</span><span class="p">(</span><span class="n">amount</span><span class="p">):</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;$</span><span class="si">{</span><span class="n">amount</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">validate_input</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">data</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span>
+
+<span class="c1"># Private functions (alphabetically sorted)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_format_error_message</span><span class="p">(</span><span class="n">error</span><span class="p">):</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Error: </span><span class="si">{</span><span class="n">error</span><span class="si">}</span><span class="s2">&quot;</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_log_operation</span><span class="p">(</span><span class="n">operation</span><span class="p">):</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Performing: </span><span class="si">{</span><span class="n">operation</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="class-methods">
+<h3>Class Methods<a class="headerlink" href="#class-methods" title="Link to this heading"></a></h3>
+<p>Methods within classes follow the same organizational pattern:</p>
+<ol class="arabic simple">
+<li><p><strong>Public methods</strong> (including dunder methods) - sorted alphabetically</p></li>
+<li><p><strong>Private methods</strong> (single underscore prefix) - sorted alphabetically</p></li>
+</ol>
+<p><strong>Example:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">ShoppingCart</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">customer_id</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">customer_id</span> <span class="o">=</span> <span class="n">customer_id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">items</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Cart for </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">customer_id</span><span class="si">}</span><span class="s2"> with </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">items</span><span class="p">)</span><span class="si">}</span><span class="s2"> items&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_item</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">items</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">calculate_total</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">price</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">items</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">remove_item</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item_id</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">items</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">items</span> <span class="k">if</span> <span class="n">item</span><span class="o">.</span><span class="n">id</span> <span class="o">!=</span> <span class="n">item_id</span><span class="p">]</span>
+
+    <span class="c1"># Private methods</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_apply_discount</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">amount</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">amount</span> <span class="o">*</span> <span class="mf">0.9</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_log_transaction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">transaction</span><span class="p">):</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Transaction: </span><span class="si">{</span><span class="n">transaction</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="special-method-handling">
+<h2>Special Method Handling<a class="headerlink" href="#special-method-handling" title="Link to this heading"></a></h2>
+<section id="dunder-methods">
+<h3>Dunder Methods<a class="headerlink" href="#dunder-methods" title="Link to this heading"></a></h3>
+<p>Dunder methods (<code class="docutils literal notranslate"><span class="pre">__init__</span></code>, <code class="docutils literal notranslate"><span class="pre">__str__</span></code>, <code class="docutils literal notranslate"><span class="pre">__call__</span></code>, etc.) are treated as public methods
+and are sorted alphabetically with other public methods. Due to their <code class="docutils literal notranslate"><span class="pre">__</span></code> prefix, they
+naturally appear at the top of the public methods section.</p>
+<p><strong>Rationale:</strong> Dunder methods are part of Python’s special method protocol and are considered
+public API. Their alphabetical ordering ensures consistency while their double-underscore prefix
+provides natural grouping at the top of classes.</p>
+</section>
+<section id="private-vs-public-classification">
+<h3>Private vs Public Classification<a class="headerlink" href="#private-vs-public-classification" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>Public:</strong> No underscore prefix (<code class="docutils literal notranslate"><span class="pre">method_name</span></code>)</p></li>
+<li><p><strong>Public:</strong> Dunder methods (<code class="docutils literal notranslate"><span class="pre">__method_name__</span></code>)</p></li>
+<li><p><strong>Private:</strong> Single underscore prefix (<code class="docutils literal notranslate"><span class="pre">_method_name</span></code>)</p></li>
+</ul>
+</section>
+</section>
+<section id="framework-integration">
+<h2>Framework Integration<a class="headerlink" href="#framework-integration" title="Link to this heading"></a></h2>
+<section id="decorator-exclusions">
+<h3>Decorator Exclusions<a class="headerlink" href="#decorator-exclusions" title="Link to this heading"></a></h3>
+<p>The plugin supports excluding functions/methods with specific decorators from sorting requirements.
+This is essential for framework compatibility where decorator order matters.</p>
+<p><strong>Common exclusion patterns:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Click commands - order may matter for help display</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">command</span><span class="p">()</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">init</span><span class="p">():</span>
+    <span class="k">pass</span>
+
+<span class="nd">@click</span><span class="o">.</span><span class="n">command</span><span class="p">()</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">deploy</span><span class="p">():</span>
+    <span class="k">pass</span>
+
+<span class="c1"># Flask routes - order may affect route matching</span>
+<span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/api/users&#39;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">list_users</span><span class="p">():</span>
+    <span class="k">pass</span>
+
+<span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/api/users/&lt;int:id&gt;&#39;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_user</span><span class="p">(</span><span class="nb">id</span><span class="p">):</span>
+    <span class="k">pass</span>
+</pre></div>
+</div>
+<p><strong>Configuration example:</strong></p>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[tool.pylint.plugins]</span>
+<span class="na">load-plugins</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">[&quot;pylint_sort_functions&quot;]</span>
+
+<span class="k">[tool.pylint.&quot;messages control&quot;]</span>
+<span class="c1"># Enable all sorting checks</span>
+<span class="na">enable</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">[&quot;unsorted-functions&quot;, &quot;unsorted-methods&quot;, &quot;mixed-function-visibility&quot;]</span>
+
+<span class="c1"># Configure decorator exclusions</span>
+<span class="na">ignore-decorators</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">[&quot;@app.route&quot;, &quot;@*.command&quot;, &quot;@pytest.fixture&quot;]</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="privacy-detection">
+<h2>Privacy Detection<a class="headerlink" href="#privacy-detection" title="Link to this heading"></a></h2>
+<p>The plugin includes intelligent privacy detection to suggest functions that should be made private.</p>
+<section id="detection-algorithm">
+<h3>Detection Algorithm<a class="headerlink" href="#detection-algorithm" title="Link to this heading"></a></h3>
+<ol class="arabic simple">
+<li><p><strong>Skip already private functions</strong> (start with <code class="docutils literal notranslate"><span class="pre">_</span></code>)</p></li>
+<li><p><strong>Skip dunder methods</strong> (<code class="docutils literal notranslate"><span class="pre">__method__</span></code>)</p></li>
+<li><p><strong>Skip common public API patterns:</strong></p>
+<ul class="simple">
+<li><p>Entry points: <code class="docutils literal notranslate"><span class="pre">main</span></code>, <code class="docutils literal notranslate"><span class="pre">run</span></code>, <code class="docutils literal notranslate"><span class="pre">execute</span></code></p></li>
+<li><p>Lifecycle: <code class="docutils literal notranslate"><span class="pre">start</span></code>, <code class="docutils literal notranslate"><span class="pre">stop</span></code>, <code class="docutils literal notranslate"><span class="pre">setup</span></code>, <code class="docutils literal notranslate"><span class="pre">teardown</span></code></p></li>
+</ul>
+</li>
+<li><p><strong>Analyze cross-module usage</strong> via import analysis</p></li>
+<li><p><strong>Flag functions only used internally</strong> as privacy candidates</p></li>
+</ol>
+<p><strong>Example:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># This function would be flagged for privacy</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">calculate_tax_rate</span><span class="p">(</span><span class="n">income</span><span class="p">):</span>  <span class="c1"># Not imported by other modules</span>
+    <span class="k">return</span> <span class="n">income</span> <span class="o">*</span> <span class="mf">0.15</span>
+
+<span class="c1"># This function would NOT be flagged</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>  <span class="c1"># Entry point pattern</span>
+    <span class="k">pass</span>
+
+<span class="c1"># This function would NOT be flagged</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_user_data</span><span class="p">():</span>  <span class="c1"># Imported by user_service.py</span>
+    <span class="k">pass</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="comment-preservation">
+<h2>Comment Preservation<a class="headerlink" href="#comment-preservation" title="Link to this heading"></a></h2>
+<p>The auto-fix tool preserves comments associated with functions during reordering:</p>
+<p><strong>Before sorting:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">zebra_function</span><span class="p">():</span>
+    <span class="k">pass</span>
+
+<span class="c1"># Important comment about alpha function</span>
+<span class="c1"># This explains the algorithm</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">alpha_function</span><span class="p">():</span>
+    <span class="k">pass</span>
+</pre></div>
+</div>
+<p><strong>After sorting:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Important comment about alpha function</span>
+<span class="c1"># This explains the algorithm</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">alpha_function</span><span class="p">():</span>
+    <span class="k">pass</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">zebra_function</span><span class="p">():</span>
+    <span class="k">pass</span>
+</pre></div>
+</div>
+</section>
+<section id="section-headers-future-enhancement">
+<h2>Section Headers (Future Enhancement)<a class="headerlink" href="#section-headers-future-enhancement" title="Link to this heading"></a></h2>
+<p>A future enhancement may add support for automatic section header comments:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Public functions</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">calculate_total</span><span class="p">(</span><span class="n">items</span><span class="p">):</span>
+    <span class="k">pass</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">validate_input</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+    <span class="k">pass</span>
+
+<span class="c1"># Private functions</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_format_error</span><span class="p">(</span><span class="n">error</span><span class="p">):</span>
+    <span class="k">pass</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_log_operation</span><span class="p">(</span><span class="n">op</span><span class="p">):</span>
+    <span class="k">pass</span>
+</pre></div>
+</div>
+</section>
+<section id="message-types">
+<h2>Message Types<a class="headerlink" href="#message-types" title="Link to this heading"></a></h2>
+<p>The plugin reports three types of sorting violations:</p>
+<section id="w9001-unsorted-functions">
+<h3>W9001: unsorted-functions<a class="headerlink" href="#w9001-unsorted-functions" title="Link to this heading"></a></h3>
+<p>Functions in a module are not sorted alphabetically within their visibility scope.</p>
+</section>
+<section id="w9002-unsorted-methods">
+<h3>W9002: unsorted-methods<a class="headerlink" href="#w9002-unsorted-methods" title="Link to this heading"></a></h3>
+<p>Methods in a class are not sorted alphabetically within their visibility scope.</p>
+</section>
+<section id="w9003-mixed-function-visibility">
+<h3>W9003: mixed-function-visibility<a class="headerlink" href="#w9003-mixed-function-visibility" title="Link to this heading"></a></h3>
+<p>Public and private functions are not properly separated (public must come before private).</p>
+</section>
+</section>
+<section id="configuration">
+<h2>Configuration<a class="headerlink" href="#configuration" title="Link to this heading"></a></h2>
+<p>See <a class="reference internal" href="pylintrc.html"><span class="doc">PyLint Configuration</span></a> for complete configuration options including:</p>
+<ul class="simple">
+<li><p>Enabling/disabling specific message types</p></li>
+<li><p>Configuring decorator exclusion patterns</p></li>
+<li><p>Setting up auto-fix integration</p></li>
+</ul>
+</section>
+<section id="cli-tool">
+<h2>CLI Tool<a class="headerlink" href="#cli-tool" title="Link to this heading"></a></h2>
+<p>See <a class="reference internal" href="cli.html"><span class="doc">Command Line Interface</span></a> for information about the standalone <code class="docutils literal notranslate"><span class="pre">pylint-sort-functions</span></code> command-line tool
+that provides auto-fix functionality independent of PyLint.</p>
+</section>
+<section id="benefits">
+<h2>Benefits<a class="headerlink" href="#benefits" title="Link to this heading"></a></h2>
+<section id="consistency">
+<h3>Consistency<a class="headerlink" href="#consistency" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Predictable function/method location</p></li>
+<li><p>Reduced time searching for specific functions</p></li>
+<li><p>Easier code reviews and maintenance</p></li>
+</ul>
+</section>
+<section id="readability">
+<h3>Readability<a class="headerlink" href="#readability" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Public API clearly separated from internal implementation</p></li>
+<li><p>Alphabetical ordering eliminates arbitrary placement decisions</p></li>
+<li><p>Natural grouping of related functionality</p></li>
+</ul>
+</section>
+<section id="maintainability">
+<h3>Maintainability<a class="headerlink" href="#maintainability" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>New functions have obvious placement location</p></li>
+<li><p>Refactoring becomes more systematic</p></li>
+<li><p>Codebase-wide organizational standards</p></li>
+</ul>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="pylintrc.html" class="btn btn-neutral float-left" title="PyLint Configuration" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="api.html" class="btn btn-neutral float-right" title="API Reference" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Håkon Hægland.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

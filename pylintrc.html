@@ -1,0 +1,631 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PyLint Configuration &mdash; pylint-sort-functions 0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=2709fde1"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Function and Method Sorting Algorithm" href="sorting.html" />
+    <link rel="prev" title="Known Issues &amp; Workarounds" href="workarounds.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            pylint-sort-functions
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli.html">Command Line Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="workarounds.html">Known Issues &amp; Workarounds</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Configuration:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">PyLint Configuration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#basic-setup">Basic Setup</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#plugin-loading">Plugin Loading</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#message-control">Message Control</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#message-types">Message Types</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#enabling-messages">Enabling Messages</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#disabling-messages">Disabling Messages</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#plugin-specific-configuration">Plugin-Specific Configuration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#decorator-exclusions">Decorator Exclusions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#privacy-detection-settings">Privacy Detection Settings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#directory-exclusions">Directory Exclusions</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#framework-specific-configurations">Framework-Specific Configurations</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#flask-applications">Flask Applications</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#click-cli-applications">Click CLI Applications</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#django-applications">Django Applications</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#fastapi-applications">FastAPI Applications</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pytest-test-configuration">Pytest Test Configuration</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#integration-examples">Integration Examples</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#ci-cd-pipeline">CI/CD Pipeline</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pre-commit-hooks">Pre-commit Hooks</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#makefile-integration">Makefile Integration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tox-configuration">tox Configuration</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#advanced-configuration">Advanced Configuration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#per-file-overrides">Per-File Overrides</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#multiple-configuration-files">Multiple Configuration Files</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#custom-message-formats">Custom Message Formats</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#output-configuration">Output Configuration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#json-output">JSON Output</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#colorized-output">Colorized Output</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#troubleshooting">Troubleshooting</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#plugin-not-loading">Plugin Not Loading</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#configuration-not-applied">Configuration Not Applied</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#performance-issues">Performance Issues</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#memory-usage">Memory Usage</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#related-documentation">Related Documentation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="sorting.html">Function and Method Sorting Algorithm</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="developer.html">Developer Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="roadmap.html">Development Roadmap</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">pylint-sort-functions</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">PyLint Configuration</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/hakonhagland/pylint-sort-functions/blob/main/docs/pylintrc.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="pylint-configuration">
+<h1>PyLint Configuration<a class="headerlink" href="#pylint-configuration" title="Link to this heading"></a></h1>
+<p>This document covers all configuration options for the pylint-sort-functions plugin
+when used with PyLint.</p>
+<section id="basic-setup">
+<h2>Basic Setup<a class="headerlink" href="#basic-setup" title="Link to this heading"></a></h2>
+<section id="plugin-loading">
+<h3>Plugin Loading<a class="headerlink" href="#plugin-loading" title="Link to this heading"></a></h3>
+<p>Add the plugin to your PyLint configuration:</p>
+<p><strong>.pylintrc:</strong></p>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[MASTER]</span>
+<span class="na">load-plugins</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">pylint_sort_functions</span>
+</pre></div>
+</div>
+<p><strong>pyproject.toml:</strong></p>
+<div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span class="k">[tool.pylint.MASTER]</span>
+<span class="n">load-plugins</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;pylint_sort_functions&quot;</span><span class="p">]</span>
+</pre></div>
+</div>
+<p><strong>setup.cfg:</strong></p>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[pylint]</span>
+<span class="na">load-plugins</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">pylint_sort_functions</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="message-control">
+<h2>Message Control<a class="headerlink" href="#message-control" title="Link to this heading"></a></h2>
+<p>The plugin defines three message types that can be individually controlled:</p>
+<section id="message-types">
+<h3>Message Types<a class="headerlink" href="#message-types" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>W9001: unsorted-functions</dt><dd><p>Functions in a module are not sorted alphabetically within their visibility scope.</p>
+</dd>
+<dt>W9002: unsorted-methods</dt><dd><p>Methods in a class are not sorted alphabetically within their visibility scope.</p>
+</dd>
+<dt>W9003: mixed-function-visibility</dt><dd><p>Public and private functions/methods are not properly separated.</p>
+</dd>
+</dl>
+</section>
+<section id="enabling-messages">
+<h3>Enabling Messages<a class="headerlink" href="#enabling-messages" title="Link to this heading"></a></h3>
+<p><strong>.pylintrc:</strong></p>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[MESSAGES CONTROL]</span>
+<span class="c1"># Enable all sorting messages</span>
+<span class="na">enable</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">unsorted-functions,unsorted-methods,mixed-function-visibility</span>
+
+<span class="c1"># Or enable specific messages only</span>
+<span class="na">enable</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">unsorted-functions</span>
+</pre></div>
+</div>
+<p><strong>pyproject.toml:</strong></p>
+<div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span class="k">[tool.pylint.</span><span class="s2">&quot;messages control&quot;</span><span class="k">]</span>
+<span class="n">enable</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="s2">&quot;unsorted-functions&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;unsorted-methods&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;mixed-function-visibility&quot;</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+</section>
+<section id="disabling-messages">
+<h3>Disabling Messages<a class="headerlink" href="#disabling-messages" title="Link to this heading"></a></h3>
+<p><strong>.pylintrc:</strong></p>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[MESSAGES CONTROL]</span>
+<span class="c1"># Disable specific sorting messages</span>
+<span class="na">disable</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">unsorted-methods</span>
+
+<span class="c1"># Disable all sorting messages</span>
+<span class="na">disable</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">unsorted-functions,unsorted-methods,mixed-function-visibility</span>
+</pre></div>
+</div>
+<p><strong>pyproject.toml:</strong></p>
+<div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span class="k">[tool.pylint.</span><span class="s2">&quot;messages control&quot;</span><span class="k">]</span>
+<span class="n">disable</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;unsorted-methods&quot;</span><span class="p">]</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="plugin-specific-configuration">
+<h2>Plugin-Specific Configuration<a class="headerlink" href="#plugin-specific-configuration" title="Link to this heading"></a></h2>
+<section id="decorator-exclusions">
+<h3>Decorator Exclusions<a class="headerlink" href="#decorator-exclusions" title="Link to this heading"></a></h3>
+<p>Configure patterns for decorators that should be excluded from sorting requirements.
+This is essential for framework compatibility where decorator order matters.</p>
+<p><strong>.pylintrc:</strong></p>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[pylint-sort-functions]</span>
+<span class="c1"># Exclude Flask routes and Click commands</span>
+<span class="na">ignore-decorators</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">@app.route,@*.command,@pytest.fixture</span>
+
+<span class="c1"># Multiple patterns on separate lines</span>
+<span class="na">ignore-decorators</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">@app.route</span>
+<span class="w">                   </span><span class="na">@*.command</span>
+<span class="w">                   </span><span class="na">@pytest.fixture</span>
+</pre></div>
+</div>
+<p><strong>pyproject.toml:</strong></p>
+<div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span class="k">[tool.pylint-sort-functions]</span>
+<span class="n">ignore-decorators</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="s2">&quot;@app.route&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;@*.command&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;@pytest.fixture&quot;</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+</section>
+<section id="privacy-detection-settings">
+<h3>Privacy Detection Settings<a class="headerlink" href="#privacy-detection-settings" title="Link to this heading"></a></h3>
+<p>Configure the privacy detection feature that suggests functions should be made private:</p>
+<p><strong>.pylintrc:</strong></p>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[pylint-sort-functions]</span>
+<span class="c1"># Enable privacy detection (default: true)</span>
+<span class="na">check-privacy</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">yes</span>
+
+<span class="c1"># Custom public API patterns (future feature)</span>
+<span class="na">public-patterns</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">main,run,execute,setup,teardown,init</span>
+</pre></div>
+</div>
+<p><strong>pyproject.toml:</strong></p>
+<div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span class="k">[tool.pylint-sort-functions]</span>
+<span class="n">check-privacy</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span>
+<span class="n">public-patterns</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;main&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;run&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;execute&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;setup&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;teardown&quot;</span><span class="p">]</span>
+</pre></div>
+</div>
+</section>
+<section id="directory-exclusions">
+<h3>Directory Exclusions<a class="headerlink" href="#directory-exclusions" title="Link to this heading"></a></h3>
+<p>Configure which directories to skip during import analysis (future feature):</p>
+<p><strong>.pylintrc:</strong></p>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[pylint-sort-functions]</span>
+<span class="c1"># Skip additional directories during analysis</span>
+<span class="na">skip-dirs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">vendor,third_party,legacy</span>
+
+<span class="c1"># Add to default skip list</span>
+<span class="na">additional-skip-dirs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">custom_vendor,generated</span>
+</pre></div>
+</div>
+<p><strong>pyproject.toml:</strong></p>
+<div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span class="k">[tool.pylint-sort-functions]</span>
+<span class="n">skip-dirs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;vendor&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;third_party&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;legacy&quot;</span><span class="p">]</span>
+<span class="n">additional-skip-dirs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;custom_vendor&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;generated&quot;</span><span class="p">]</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="framework-specific-configurations">
+<h2>Framework-Specific Configurations<a class="headerlink" href="#framework-specific-configurations" title="Link to this heading"></a></h2>
+<section id="flask-applications">
+<h3>Flask Applications<a class="headerlink" href="#flask-applications" title="Link to this heading"></a></h3>
+<p><strong>.pylintrc:</strong></p>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[MASTER]</span>
+<span class="na">load-plugins</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">pylint_sort_functions</span>
+
+<span class="k">[MESSAGES CONTROL]</span>
+<span class="na">enable</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">unsorted-functions,unsorted-methods,mixed-function-visibility</span>
+
+<span class="k">[pylint-sort-functions]</span>
+<span class="na">ignore-decorators</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">@app.route</span>
+<span class="w">                   </span><span class="na">@app.before_request</span>
+<span class="w">                   </span><span class="na">@app.after_request</span>
+<span class="w">                   </span><span class="na">@app.errorhandler</span>
+<span class="w">                   </span><span class="na">@app.teardown_appcontext</span>
+</pre></div>
+</div>
+<p><strong>pyproject.toml:</strong></p>
+<div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span class="k">[tool.pylint.MASTER]</span>
+<span class="n">load-plugins</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;pylint_sort_functions&quot;</span><span class="p">]</span>
+
+<span class="k">[tool.pylint.</span><span class="s2">&quot;messages control&quot;</span><span class="k">]</span>
+<span class="n">enable</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;unsorted-functions&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;unsorted-methods&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;mixed-function-visibility&quot;</span><span class="p">]</span>
+
+<span class="k">[tool.pylint-sort-functions]</span>
+<span class="n">ignore-decorators</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="s2">&quot;@app.route&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;@app.before_request&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;@app.after_request&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;@app.errorhandler&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;@app.teardown_appcontext&quot;</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+</section>
+<section id="click-cli-applications">
+<h3>Click CLI Applications<a class="headerlink" href="#click-cli-applications" title="Link to this heading"></a></h3>
+<p><strong>.pylintrc:</strong></p>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[MASTER]</span>
+<span class="na">load-plugins</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">pylint_sort_functions</span>
+
+<span class="k">[pylint-sort-functions]</span>
+<span class="na">ignore-decorators</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">@*.command</span>
+<span class="w">                   </span><span class="na">@*.group</span>
+<span class="w">                   </span><span class="na">@*.option</span>
+<span class="w">                   </span><span class="na">@*.argument</span>
+</pre></div>
+</div>
+<p><strong>pyproject.toml:</strong></p>
+<div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span class="k">[tool.pylint-sort-functions]</span>
+<span class="n">ignore-decorators</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="s2">&quot;@*.command&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;@*.group&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;@*.option&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;@*.argument&quot;</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+</section>
+<section id="django-applications">
+<h3>Django Applications<a class="headerlink" href="#django-applications" title="Link to this heading"></a></h3>
+<p><strong>.pylintrc:</strong></p>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[pylint-sort-functions]</span>
+<span class="na">ignore-decorators</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">@login_required</span>
+<span class="w">                   </span><span class="na">@csrf_exempt</span>
+<span class="w">                   </span><span class="na">@require_http_methods</span>
+<span class="w">                   </span><span class="na">@cache_page</span>
+<span class="w">                   </span><span class="na">@vary_on_headers</span>
+</pre></div>
+</div>
+</section>
+<section id="fastapi-applications">
+<h3>FastAPI Applications<a class="headerlink" href="#fastapi-applications" title="Link to this heading"></a></h3>
+<p><strong>.pylintrc:</strong></p>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[pylint-sort-functions]</span>
+<span class="na">ignore-decorators</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">@app.get</span>
+<span class="w">                   </span><span class="na">@app.post</span>
+<span class="w">                   </span><span class="na">@app.put</span>
+<span class="w">                   </span><span class="na">@app.delete</span>
+<span class="w">                   </span><span class="na">@app.patch</span>
+<span class="w">                   </span><span class="na">@app.middleware</span>
+</pre></div>
+</div>
+</section>
+<section id="pytest-test-configuration">
+<h3>Pytest Test Configuration<a class="headerlink" href="#pytest-test-configuration" title="Link to this heading"></a></h3>
+<p><strong>.pylintrc:</strong></p>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[pylint-sort-functions]</span>
+<span class="na">ignore-decorators</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">@pytest.fixture</span>
+<span class="w">                   </span><span class="na">@pytest.mark.*</span>
+<span class="w">                   </span><span class="na">@pytest.parametrize</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="integration-examples">
+<h2>Integration Examples<a class="headerlink" href="#integration-examples" title="Link to this heading"></a></h2>
+<section id="ci-cd-pipeline">
+<h3>CI/CD Pipeline<a class="headerlink" href="#ci-cd-pipeline" title="Link to this heading"></a></h3>
+<p><strong>.github/workflows/lint.yml:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Code Quality</span>
+<span class="nt">on</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">push</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">pull_request</span><span class="p p-Indicator">]</span>
+
+<span class="nt">jobs</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">pylint</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">runs-on</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ubuntu-latest</span>
+<span class="w">    </span><span class="nt">steps</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">actions/checkout@v3</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Set up Python</span>
+<span class="w">        </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">actions/setup-python@v4</span>
+<span class="w">        </span><span class="nt">with</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">python-version</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;3.11&#39;</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Install dependencies</span>
+<span class="w">        </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<span class="w">          </span><span class="no">pip install pylint pylint-sort-functions</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Run PyLint with sorting checks</span>
+<span class="w">        </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<span class="w">          </span><span class="no">pylint --load-plugins=pylint_sort_functions src/</span>
+</pre></div>
+</div>
+</section>
+<section id="pre-commit-hooks">
+<h3>Pre-commit Hooks<a class="headerlink" href="#pre-commit-hooks" title="Link to this heading"></a></h3>
+<p><strong>.pre-commit-config.yaml:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">repos</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">repo</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">local</span>
+<span class="w">    </span><span class="nt">hooks</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pylint-sort-functions</span>
+<span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Check function sorting</span>
+<span class="w">        </span><span class="nt">entry</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pylint</span>
+<span class="w">        </span><span class="nt">args</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">--load-plugins=pylint_sort_functions</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">--disable=all</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">--enable=unsorted-functions</span><span class="p p-Indicator">,</span><span class="nv">unsorted-methods</span><span class="p p-Indicator">,</span><span class="nv">mixed-function-visibility</span><span class="p p-Indicator">]</span>
+<span class="w">        </span><span class="nt">language</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">system</span>
+<span class="w">        </span><span class="nt">files</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">\\.py$</span>
+</pre></div>
+</div>
+</section>
+<section id="makefile-integration">
+<h3>Makefile Integration<a class="headerlink" href="#makefile-integration" title="Link to this heading"></a></h3>
+<p><strong>Makefile:</strong></p>
+<div class="highlight-makefile notranslate"><div class="highlight"><pre><span></span><span class="nf">.PHONY</span><span class="o">:</span><span class="w"> </span><span class="n">lint</span>-<span class="n">sorting</span>
+<span class="nf">lint-sorting</span><span class="o">:</span>
+<span class="w">     </span>pylint<span class="w"> </span>--load-plugins<span class="o">=</span>pylint_sort_functions<span class="w"> </span><span class="se">\</span>
+<span class="w">            </span>--disable<span class="o">=</span>all<span class="w"> </span><span class="se">\</span>
+<span class="w">            </span>--enable<span class="o">=</span>unsorted-functions,unsorted-methods,mixed-function-visibility<span class="w"> </span><span class="se">\</span>
+<span class="w">            </span>src/
+</pre></div>
+</div>
+</section>
+<section id="tox-configuration">
+<h3>tox Configuration<a class="headerlink" href="#tox-configuration" title="Link to this heading"></a></h3>
+<p><strong>tox.ini:</strong></p>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[testenv:lint]</span>
+<span class="na">deps</span><span class="w"> </span><span class="o">=</span>
+<span class="w">    </span><span class="na">pylint</span>
+<span class="w">    </span><span class="na">pylint-sort-functions</span>
+<span class="na">commands</span><span class="w"> </span><span class="o">=</span>
+<span class="w">    </span><span class="na">pylint --load-plugins</span><span class="o">=</span><span class="s">pylint_sort_functions src/</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="advanced-configuration">
+<h2>Advanced Configuration<a class="headerlink" href="#advanced-configuration" title="Link to this heading"></a></h2>
+<section id="per-file-overrides">
+<h3>Per-File Overrides<a class="headerlink" href="#per-file-overrides" title="Link to this heading"></a></h3>
+<p>Use PyLint’s standard per-file configuration:</p>
+<p><strong>.pylintrc:</strong></p>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[MESSAGES CONTROL]</span>
+<span class="c1"># Disable sorting checks for specific files</span>
+<span class="na">per-file-ignores</span><span class="w"> </span><span class="o">=</span>
+<span class="w">    </span><span class="na">legacy_code.py</span><span class="o">:</span><span class="s">unsorted-functions,unsorted-methods</span>
+<span class="w">    </span><span class="na">third_party/*.py</span><span class="o">:</span><span class="s">unsorted-functions,unsorted-methods,mixed-function-visibility</span>
+</pre></div>
+</div>
+</section>
+<section id="multiple-configuration-files">
+<h3>Multiple Configuration Files<a class="headerlink" href="#multiple-configuration-files" title="Link to this heading"></a></h3>
+<p>For projects with multiple components:</p>
+<p><strong>src/.pylintrc:</strong></p>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[MASTER]</span>
+<span class="na">load-plugins</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">pylint_sort_functions</span>
+
+<span class="k">[pylint-sort-functions]</span>
+<span class="na">ignore-decorators</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">@app.route</span>
+</pre></div>
+</div>
+<p><strong>tests/.pylintrc:</strong></p>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[MASTER]</span>
+<span class="na">load-plugins</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">pylint_sort_functions</span>
+
+<span class="k">[pylint-sort-functions]</span>
+<span class="na">ignore-decorators</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">@pytest.fixture,@pytest.mark.*</span>
+</pre></div>
+</div>
+</section>
+<section id="custom-message-formats">
+<h3>Custom Message Formats<a class="headerlink" href="#custom-message-formats" title="Link to this heading"></a></h3>
+<p>Customize how sorting messages are displayed:</p>
+<p><strong>.pylintrc:</strong></p>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[REPORTS]</span>
+<span class="na">msg-template</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">{path}:{line}:{column}: [{msg_id}({symbol})] {msg}</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="output-configuration">
+<h2>Output Configuration<a class="headerlink" href="#output-configuration" title="Link to this heading"></a></h2>
+<section id="json-output">
+<h3>JSON Output<a class="headerlink" href="#json-output" title="Link to this heading"></a></h3>
+<p>For integration with other tools:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pylint<span class="w"> </span>--load-plugins<span class="o">=</span>pylint_sort_functions<span class="w"> </span>--output-format<span class="o">=</span>json<span class="w"> </span>src/
+</pre></div>
+</div>
+<p>Parsing the output:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">subprocess</span>
+
+<span class="n">result</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span>
+    <span class="s1">&#39;pylint&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;--load-plugins=pylint_sort_functions&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;--output-format=json&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;src/&#39;</span>
+<span class="p">],</span> <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="n">messages</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+<span class="n">sorting_messages</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="n">msg</span> <span class="k">for</span> <span class="n">msg</span> <span class="ow">in</span> <span class="n">messages</span>
+    <span class="k">if</span> <span class="n">msg</span><span class="p">[</span><span class="s1">&#39;message-id&#39;</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;W9001&#39;</span><span class="p">,</span> <span class="s1">&#39;W9002&#39;</span><span class="p">,</span> <span class="s1">&#39;W9003&#39;</span><span class="p">]</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+</section>
+<section id="colorized-output">
+<h3>Colorized Output<a class="headerlink" href="#colorized-output" title="Link to this heading"></a></h3>
+<p>Enable colors in terminal output:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pylint<span class="w"> </span>--load-plugins<span class="o">=</span>pylint_sort_functions<span class="w"> </span>--output-format<span class="o">=</span>colorized<span class="w"> </span>src/
+</pre></div>
+</div>
+</section>
+</section>
+<section id="troubleshooting">
+<h2>Troubleshooting<a class="headerlink" href="#troubleshooting" title="Link to this heading"></a></h2>
+<section id="plugin-not-loading">
+<h3>Plugin Not Loading<a class="headerlink" href="#plugin-not-loading" title="Link to this heading"></a></h3>
+<p><strong>Error:</strong> <code class="docutils literal notranslate"><span class="pre">No</span> <span class="pre">such</span> <span class="pre">message</span> <span class="pre">id</span> <span class="pre">'unsorted-functions'</span></code></p>
+<p><strong>Solution:</strong> Ensure the plugin is properly loaded:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Verify plugin loading</span>
+pylint<span class="w"> </span>--load-plugins<span class="o">=</span>pylint_sort_functions<span class="w"> </span>--list-msgs<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>W900
+</pre></div>
+</div>
+<p><strong>Error:</strong> <code class="docutils literal notranslate"><span class="pre">ImportError:</span> <span class="pre">No</span> <span class="pre">module</span> <span class="pre">named</span> <span class="pre">'pylint_sort_functions'</span></code></p>
+<p><strong>Solution:</strong> Install the plugin:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>pylint-sort-functions
+</pre></div>
+</div>
+</section>
+<section id="configuration-not-applied">
+<h3>Configuration Not Applied<a class="headerlink" href="#configuration-not-applied" title="Link to this heading"></a></h3>
+<p><strong>Issue:</strong> Configuration seems to be ignored</p>
+<p><strong>Solutions:</strong></p>
+<ol class="arabic">
+<li><p>Verify configuration file location:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># PyLint searches in this order:</span>
+<span class="c1"># 1. Command line: --rcfile=path/to/.pylintrc</span>
+<span class="c1"># 2. Current directory: ./.pylintrc</span>
+<span class="c1"># 3. Parent directories (recursively)</span>
+<span class="c1"># 4. Home directory: ~/.pylintrc</span>
+<span class="c1"># 5. /etc/pylintrc</span>
+</pre></div>
+</div>
+</li>
+<li><p>Test configuration loading:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pylint<span class="w"> </span>--load-plugins<span class="o">=</span>pylint_sort_functions<span class="w"> </span>--generate-rcfile
+</pre></div>
+</div>
+</li>
+<li><p>Use explicit configuration:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pylint<span class="w"> </span>--rcfile<span class="o">=</span>.pylintrc<span class="w"> </span>--load-plugins<span class="o">=</span>pylint_sort_functions<span class="w"> </span>src/
+</pre></div>
+</div>
+</li>
+</ol>
+</section>
+<section id="performance-issues">
+<h3>Performance Issues<a class="headerlink" href="#performance-issues" title="Link to this heading"></a></h3>
+<p>For large projects, the import analysis may be slow:</p>
+<p><strong>.pylintrc:</strong></p>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[pylint-sort-functions]</span>
+<span class="c1"># Disable privacy detection for better performance</span>
+<span class="na">check-privacy</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">no</span>
+</pre></div>
+</div>
+</section>
+<section id="memory-usage">
+<h3>Memory Usage<a class="headerlink" href="#memory-usage" title="Link to this heading"></a></h3>
+<p>For very large codebases:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Process directories individually</span>
+pylint<span class="w"> </span>--load-plugins<span class="o">=</span>pylint_sort_functions<span class="w"> </span>src/module1/
+pylint<span class="w"> </span>--load-plugins<span class="o">=</span>pylint_sort_functions<span class="w"> </span>src/module2/
+</pre></div>
+</div>
+</section>
+</section>
+<section id="related-documentation">
+<h2>Related Documentation<a class="headerlink" href="#related-documentation" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="cli.html"><span class="doc">Command Line Interface</span></a> - Command-line auto-fix tool</p></li>
+<li><p><a class="reference internal" href="sorting.html"><span class="doc">Function and Method Sorting Algorithm</span></a> - Detailed sorting algorithm documentation</p></li>
+<li><p><a class="reference internal" href="usage.html"><span class="doc">User Guide</span></a> - Usage examples and integration guides</p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="workarounds.html" class="btn btn-neutral float-left" title="Known Issues &amp; Workarounds" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="sorting.html" class="btn btn-neutral float-right" title="Function and Method Sorting Algorithm" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Håkon Hægland.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

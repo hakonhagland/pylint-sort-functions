@@ -9,7 +9,15 @@ A pylint plugin that enforces alphabetical sorting of functions and methods with
 
     introduction
     usage
+    cli
     workarounds
+
+.. toctree::
+    :maxdepth: 2
+    :caption: Configuration:
+
+    pylintrc
+    sorting
 
 .. toctree::
     :maxdepth: 2
