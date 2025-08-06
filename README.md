@@ -1,14 +1,18 @@
 # pylint-sort-functions
 
-A PyLint plugin that enforces alphabetical sorting of functions and methods within Python classes and modules.
+A PyLint plugin that enforces alphabetical sorting of functions and methods within Python classes and modules, helping maintain consistent and predictable code organization.
 
 ## Features
 
 - **Function Organization**: Enforces alphabetical sorting of functions within modules
 - **Method Organization**: Enforces alphabetical sorting of methods within classes
 - **Public/Private Separation**: Ensures public functions/methods come before private ones (underscore prefix)
-- **Configurable Rules**: Customizable message codes (W9001-W9003) for different violations
-- **Clear Error Messages**: Helpful messages indicating exactly what needs to be reordered
+- **Auto-fix Capability**: Automatically reorder functions and methods with the included CLI tool
+- **Comment Preservation**: Comments move with their associated functions during sorting
+- **Framework Integration**: Supports decorator exclusions for Flask, Click, FastAPI, Django
+- **Performance Optimized**: Intelligent caching for large projects (100+ files)
+- **Configurable Privacy Detection**: Customizable patterns for public API identification
+- **Enterprise Ready**: 100% test coverage, comprehensive documentation
 
 ## Installation
 
@@ -16,9 +20,9 @@ A PyLint plugin that enforces alphabetical sorting of functions and methods with
 pip install pylint-sort-functions
 ```
 
-## Usage
+## Quick Start
 
-### Enable the Plugin
+### 1. Enable the Plugin
 
 Add the plugin to your pylint configuration:
 
@@ -38,6 +42,15 @@ Or in `pyproject.toml`:
 ```toml
 [tool.pylint.MASTER]
 load-plugins = ["pylint_sort_functions"]
+```
+
+### 2. Auto-fix Violations
+
+Use the included CLI tool to automatically reorder functions:
+
+```bash
+pylint-sort-functions path/to/file.py  # Fix single file
+pylint-sort-functions src/            # Fix entire directory
 ```
 
 ### Example
@@ -76,22 +89,39 @@ class MyClass:
 - **W9002**: `unsorted-methods` - Class methods not sorted alphabetically within their scope
 - **W9003**: `mixed-function-visibility` - Public and private functions not properly separated
 
-## Warning
+## Advanced Configuration
 
-⚠️ **This project is currently under active development and not ready for production use.**
+### Framework Integration
 
-Key limitations:
-- Many core features are still being implemented
-- More unit tests need to be added
-- Documentation is incomplete
-- APIs and functionality may change significantly
+Exclude framework decorators from sorting requirements:
 
-Please check back later for a stable release.
+```ini
+[tool.pylint-sort-functions]
+ignore-decorators = ["@app.route", "@*.command", "@pytest.fixture"]
+```
+
+### Privacy Detection
+
+Configure which functions are always considered public API:
+
+```ini
+[tool.pylint-sort-functions]
+public-api-patterns = ["main", "run", "setup", "teardown", "handler"]
+enable-privacy-detection = true
+```
 
 ## Documentation
 
+For comprehensive documentation, including:
+- **CLI Reference**: Complete command-line tool documentation
+- **Configuration Guide**: PyLint integration and advanced options
+- **Algorithm Details**: How function sorting and privacy detection work
+- **Framework Integration**: Flask, Django, FastAPI, Click examples
+
 See [hakonhagland.github.io/pylint-sort-functions](https://hakonhagland.github.io/pylint-sort-functions)
 
-## PyPI
+## Links
 
-See [pylint-sort-functions](https://pypi.org/project/pylint-sort-functions/)
+- **PyPI Package**: [pylint-sort-functions](https://pypi.org/project/pylint-sort-functions/)
+- **GitHub Repository**: [pylint-sort-functions](https://github.com/hakonhagland/pylint-sort-functions)
+- **Issue Tracker**: [GitHub Issues](https://github.com/hakonhagland/pylint-sort-functions/issues)
