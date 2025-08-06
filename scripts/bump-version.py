@@ -95,10 +95,15 @@ def update_pyproject_version(pyproject_path: Path, new_version: str) -> None:
 def git_commit_version(version: str) -> None:
     """Create git commit for version bump.
 
+    Pre-commit hooks may modify files (like uv.lock when rebuilding the plugin),
+    so we stage all changes after the initial commit attempt.
+
     :param version: New version string
     :type version: str
     """
+    # Stage the version file first
     subprocess.run(["git", "add", "pyproject.toml"], check=True)
+
     commit_message = f"""chore: bump version to {version}
 
 Automated version bump for PyPI release.
@@ -107,7 +112,15 @@ Automated version bump for PyPI release.
 
 Co-Authored-By: Claude <noreply@anthropic.com>"""
 
-    subprocess.run(["git", "commit", "-m", commit_message], check=True)
+    try:
+        # Try initial commit
+        subprocess.run(["git", "commit", "-m", commit_message], check=True)
+    except subprocess.CalledProcessError:
+        # Pre-commit hooks may have modified files (e.g., uv.lock)
+        # Stage all changes and retry commit
+        print("Pre-commit hooks modified files, staging all changes and retrying...")
+        subprocess.run(["git", "add", "."], check=True)
+        subprocess.run(["git", "commit", "-m", commit_message], check=True)
 
 
 def check_git_status() -> None:
