@@ -539,3 +539,111 @@ def use_library():
 
                 # Verify it handles the error gracefully - graph exists but may be empty
                 assert isinstance(usage_graph, dict)
+
+    def test_should_function_be_private_with_custom_public_patterns(self) -> None:
+        """Test should_function_be_private with configurable public patterns."""
+        import tempfile
+        from pathlib import Path
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_path = Path(temp_dir)
+
+            # Create library module with custom public API patterns
+            library_file = temp_path / "library.py"
+            library_content = """
+def handler():
+    return "handles requests"
+
+def processor():
+    return "processes data"
+
+def internal_utility():
+    return "utility"
+
+def main():
+    return "default pattern"
+"""
+            library_file.write_text(library_content)
+
+            # Parse the library module
+            module = astroid.parse(library_content)
+            functions = utils.get_functions_from_node(module)
+
+            handler_func = functions[0]
+            processor_func = functions[1]
+            internal_func = functions[2]
+            main_func = functions[3]
+
+            # Test with default patterns - only main should be excluded
+            assert (
+                utils.should_function_be_private(handler_func, library_file, temp_path)
+                is True
+            )
+            assert (
+                utils.should_function_be_private(
+                    processor_func, library_file, temp_path
+                )
+                is True
+            )
+            assert (
+                utils.should_function_be_private(internal_func, library_file, temp_path)
+                is True
+            )
+            assert (
+                utils.should_function_be_private(main_func, library_file, temp_path)
+                is False
+            )  # main is default pattern
+
+            # Test with custom patterns - handler and processor should now be excluded
+            custom_patterns = {"handler", "processor", "main"}
+            assert (
+                utils.should_function_be_private(
+                    handler_func, library_file, temp_path, custom_patterns
+                )
+                is False
+            )
+            assert (
+                utils.should_function_be_private(
+                    processor_func, library_file, temp_path, custom_patterns
+                )
+                is False
+            )
+            assert (
+                utils.should_function_be_private(
+                    internal_func, library_file, temp_path, custom_patterns
+                )
+                is True
+            )
+            assert (
+                utils.should_function_be_private(
+                    main_func, library_file, temp_path, custom_patterns
+                )
+                is False
+            )
+
+            # Test with empty patterns set - all functions should be private candidates
+            empty_patterns: set[str] = set()
+            assert (
+                utils.should_function_be_private(
+                    handler_func, library_file, temp_path, empty_patterns
+                )
+                is True
+            )
+            assert (
+                utils.should_function_be_private(
+                    processor_func, library_file, temp_path, empty_patterns
+                )
+                is True
+            )
+            assert (
+                utils.should_function_be_private(
+                    internal_func, library_file, temp_path, empty_patterns
+                )
+                is True
+            )
+            assert (
+                utils.should_function_be_private(
+                    main_func, library_file, temp_path, empty_patterns
+                )
+                is True
+            )

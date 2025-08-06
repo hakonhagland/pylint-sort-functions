@@ -47,6 +47,16 @@ def main():
             # Mock the linter with current_file pointing to our module
             mock_linter = Mock()
             mock_linter.current_file = str(module_file)
+            mock_linter.config.enable_privacy_detection = True
+            mock_linter.config.public_api_patterns = [
+                "main",
+                "run",
+                "execute",
+                "start",
+                "stop",
+                "setup",
+                "teardown",
+            ]
             self.checker.linter = mock_linter
 
             # Collect messages
@@ -85,6 +95,16 @@ def get_data():
             # Mock the linter
             mock_linter = Mock()
             mock_linter.current_file = str(module_file)
+            mock_linter.config.enable_privacy_detection = True
+            mock_linter.config.public_api_patterns = [
+                "main",
+                "run",
+                "execute",
+                "start",
+                "stop",
+                "setup",
+                "teardown",
+            ]
             self.checker.linter = mock_linter
 
             # Visit the module - should handle missing project markers gracefully

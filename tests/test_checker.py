@@ -519,3 +519,78 @@ def public_function_2():
 
                     # Verify the heuristic method was called as fallback
                     mock_heuristic.assert_called_once_with(functions, mock_module)
+
+    def test_configuration_options(self) -> None:
+        """Test that configuration options are properly defined."""
+        # Verify options are defined
+        assert hasattr(self.checker, "options")
+        assert isinstance(self.checker.options, tuple)
+        assert len(self.checker.options) == 2
+
+        # Test public-api-patterns option
+        public_api_option = self.checker.options[0]
+        assert public_api_option[0] == "public-api-patterns"
+        assert public_api_option[1]["type"] == "csv"
+        assert "main" in public_api_option[1]["default"]
+
+        # Test enable-privacy-detection option
+        privacy_option = self.checker.options[1]
+        assert privacy_option[0] == "enable-privacy-detection"
+        assert privacy_option[1]["type"] == "yn"
+        assert privacy_option[1]["default"] is True
+
+    def test_privacy_detection_disabled(self) -> None:
+        """Test that privacy detection can be disabled via configuration."""
+        from unittest.mock import Mock
+
+        content = """
+def unused_function():
+    pass
+"""
+        module = astroid.parse(content)
+
+        # Mock linter with privacy detection disabled
+        mock_linter = Mock()
+        mock_linter.config.enable_privacy_detection = False
+
+        with patch.object(self.checker, "linter", mock_linter):
+            with self.assertNoMessages():
+                self.checker.visit_module(module)
+
+    def test_custom_public_api_patterns(self) -> None:
+        """Test that custom public API patterns are used in privacy detection."""
+        from pathlib import Path
+        from unittest.mock import Mock, patch
+
+        content = """
+def handler():
+    pass
+
+def processor():
+    pass
+"""
+        module = astroid.parse(content)
+
+        # Mock linter with custom public API patterns
+        mock_linter = Mock()
+        mock_linter.config.enable_privacy_detection = True
+        mock_linter.config.public_api_patterns = ["handler", "processor"]
+        mock_linter.current_file = "/test/module.py"
+
+        with patch.object(self.checker, "linter", mock_linter):
+            with patch.object(self.checker, "_get_project_root") as mock_project_root:
+                mock_project_root.return_value = Path("/test")
+
+                with patch(
+                    "pylint_sort_functions.utils.should_function_be_private"
+                ) as mock_should_private:
+                    mock_should_private.return_value = False
+
+                    with self.assertNoMessages():
+                        self.checker.visit_module(module)
+
+                    # Verify should_function_be_private was called with custom patterns
+                    assert mock_should_private.call_count == 2
+                    call_args = mock_should_private.call_args_list[0]
+                    # Check the fourth argument (public_patterns)
+                    assert call_args[0][3] == {"handler", "processor"}

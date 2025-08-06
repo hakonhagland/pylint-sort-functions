@@ -8,6 +8,10 @@ It includes functions for:
 3. Function privacy detection (identifying functions that should be private)
 4. Framework-aware sorting with decorator exclusions
 
+For detailed information about the sorting algorithm and rules, see the documentation
+at docs/sorting.rst which explains the complete sorting methodology, special method
+handling, privacy detection, and configuration options.
+
 Function Privacy Detection:
 The plugin uses import analysis to identify functions that should be private by
 scanning actual usage patterns across the project:
@@ -224,7 +228,10 @@ def is_private_function(func: nodes.FunctionDef) -> bool:
 
 
 def should_function_be_private(
-    func: nodes.FunctionDef, module_path: Path, project_root: Path
+    func: nodes.FunctionDef,
+    module_path: Path,
+    project_root: Path,
+    public_patterns: set[str] | None = None,
 ) -> bool:
     """Detect if a function should be private based on import analysis.
 
@@ -234,7 +241,7 @@ def should_function_be_private(
     Detection Logic:
     1. Skip if already private (starts with underscore)
     2. Skip special methods (__init__, __str__, etc.)
-    3. Skip common public API patterns (main, run, setup, etc.)
+    3. Skip configurable public API patterns (main, run, setup, etc.)
     4. Check if function is imported/used by other modules
     5. If not used externally, suggest making it private
 
@@ -244,6 +251,9 @@ def should_function_be_private(
     :type module_path: Path
     :param project_root: Root directory of the project
     :type project_root: Path
+    :param public_patterns: Set of function names to always treat as public.
+                           If None, uses default patterns (main, run, execute, etc.)
+    :type public_patterns: set[str] | None
     :returns: True if the function should be marked as private
     :rtype: bool
     """
@@ -259,8 +269,16 @@ def should_function_be_private(
     # These are entry points, framework callbacks, or conventional APIs that
     # won't show up in import analysis (e.g., main() called by Python runtime,
     # setup/teardown called by test frameworks)
-    # TODO: Make this list configurable for project-specific patterns
-    public_patterns = {"main", "run", "execute", "start", "stop", "setup", "teardown"}
+    if public_patterns is None:
+        public_patterns = {
+            "main",
+            "run",
+            "execute",
+            "start",
+            "stop",
+            "setup",
+            "teardown",
+        }
     if func.name in public_patterns:
         return False
 

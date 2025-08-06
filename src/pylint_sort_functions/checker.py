@@ -3,6 +3,8 @@
 The FunctionSortChecker is used by PyLint itself, not by end users directly.
 PyLint discovers this checker via the plugin entry point and manages its lifecycle.
 
+For detailed information about the sorting rules and algorithm, see docs/sorting.rst.
+
 How it works:
     1. PyLint loads the plugin and calls register() function (the plugin entry point
        defined in __init__.py and configured in pyproject.toml)
@@ -42,6 +44,41 @@ class FunctionSortChecker(BaseChecker):
 
     name = "function-sort"  # Identifier used by PyLint for this checker
     msgs: dict[str, Any] = messages.MESSAGES  # Message definitions from messages.py
+    options = (  # pylint: disable=duplicate-code
+        (
+            "public-api-patterns",
+            {
+                "default": [
+                    "main",
+                    "run",
+                    "execute",
+                    "start",
+                    "stop",
+                    "setup",
+                    "teardown",
+                ],
+                "type": "csv",
+                "metavar": "<pattern1,pattern2,...>",
+                "help": (
+                    "List of function names to always treat as public API. "
+                    "These functions will not be flagged for privacy even if only used internally. "
+                    "Useful for entry points and framework callbacks."
+                ),
+            },
+        ),
+        (
+            "enable-privacy-detection",
+            {
+                "default": True,
+                "type": "yn",
+                "metavar": "<y or n>",
+                "help": (
+                    "Enable detection of functions that should be made private "
+                    "based on usage analysis."
+                ),
+            },
+        ),
+    )
 
     # Public methods
 
@@ -98,6 +135,10 @@ class FunctionSortChecker(BaseChecker):
         :param node: The module node
         :type node: nodes.Module
         """
+        # Check if privacy detection is enabled
+        if not self.linter.config.enable_privacy_detection:
+            return
+
         module_path = self._get_module_path()
         if not module_path:
             # Fallback to heuristic approach when path info unavailable
@@ -110,9 +151,14 @@ class FunctionSortChecker(BaseChecker):
             self._check_function_privacy_heuristic(functions, node)
             return
 
+        # Get configured public API patterns
+        public_patterns = set(self.linter.config.public_api_patterns)
+
         # Use import analysis for more accurate detection
         for func in functions:
-            if utils.should_function_be_private(func, module_path, project_root):
+            if utils.should_function_be_private(
+                func, module_path, project_root, public_patterns
+            ):
                 # Report function that should be private
                 # See docs/usage.rst for privacy detection feature
                 self.add_message(
