@@ -44,7 +44,7 @@ class FunctionSortChecker(BaseChecker):
 
     name = "function-sort"  # Identifier used by PyLint for this checker
     msgs: dict[str, Any] = messages.MESSAGES  # Message definitions from messages.py
-    options = (  # pylint: disable=duplicate-code
+    options = (
         (
             "public-api-patterns",
             {
@@ -61,8 +61,8 @@ class FunctionSortChecker(BaseChecker):
                 "metavar": "<pattern1,pattern2,...>",
                 "help": (
                     "List of function names to always treat as public API. "
-                    "These functions will not be flagged for privacy even if only used internally. "
-                    "Useful for entry points and framework callbacks."
+                    "These functions will not be flagged for privacy even if only used "
+                    "internally. Useful for entry points and framework callbacks."
                 ),
             },
         ),
