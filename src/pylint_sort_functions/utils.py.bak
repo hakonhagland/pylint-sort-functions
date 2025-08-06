@@ -554,21 +554,6 @@ def _get_function_groups(
     return public_functions, private_functions
 
 
-def _is_dunder_method(func: nodes.FunctionDef) -> bool:
-    """Check if a function is a dunder/magic method.
-
-    Dunder methods are special methods that start and end with double underscores,
-    like __init__, __str__, __call__, etc.
-
-    :param func: Function definition node
-    :type func: nodes.FunctionDef
-    :returns: True if function is a dunder method
-    :rtype: bool
-    """
-    name: str = func.name  # Explicitly typed to satisfy mypy
-    return name.startswith("__") and name.endswith("__")
-
-
 def _is_function_used_externally(
     func_name: str, module_path: Path, project_root: Path
 ) -> bool:
@@ -608,6 +593,20 @@ def _is_function_used_externally(
     external_usage = [m for m in using_modules if m != current_module]
 
     return len(external_usage) > 0
+
+
+def _is_dunder_method(func: nodes.FunctionDef) -> bool:
+    """Check if a function is a dunder/magic method.
+
+    Dunder methods are special methods that start and end with double underscores,
+    like __init__, __str__, __call__, etc.
+
+    :param func: Function definition node
+    :type func: nodes.FunctionDef
+    :returns: True if function is a dunder method
+    :rtype: bool
+    """
+    return func.name.startswith("__") and func.name.endswith("__")
 
 
 def _is_unittest_file(module_name: str) -> bool:

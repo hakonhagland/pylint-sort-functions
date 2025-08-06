@@ -147,8 +147,13 @@ def main():
             importlib.reload(utils)
 
             # Now test - this should hit line 285
-            result = utils.should_function_be_private(func, module)
-            assert result is False  # Line 285 should return False
+            # Using dummy paths for testing
+            module_path = Path("dummy_module.py")
+            project_root = Path(".")
+            result = utils.should_function_be_private(func, module_path, project_root)
+            # With import analysis, get_special_helper is not imported by
+            # any other module, so it should be flagged as needing to be private
+            assert result is True
 
         finally:
             # Always restore original content
@@ -170,9 +175,7 @@ def _private_helper():
             func = module.body[0]
 
             # Should return False for already private functions
-            result = utils.should_function_be_private_with_import_analysis(
-                func, module_file, temp_path
-            )
+            result = utils.should_function_be_private(func, module_file, temp_path)
             assert result is False
 
     def test_build_usage_graph_skip_test_files(self) -> None:
@@ -278,7 +281,10 @@ def caller():
 
         # Even though main() is called internally, it's in public_patterns
         # so it should not be flagged as private (line 285 returns False)
-        result = utils.should_function_be_private(main_func, module)
+        # Using dummy paths for testing
+        module_path = Path("dummy_module.py")
+        project_root = Path(".")
+        result = utils.should_function_be_private(main_func, module_path, project_root)
         assert result is False  # Exact name is in public patterns
 
     def test_build_usage_graph_with_attribute_access(self) -> None:

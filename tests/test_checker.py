@@ -476,7 +476,7 @@ def public_function_2():
         assert result == test_file.parent
 
     def test_check_function_privacy_heuristic(self) -> None:
-        """Test _check_function_privacy_heuristic method."""
+        """Test _check_function_privacy_heuristic does nothing (fallback mode)."""
         # Create a mock function and module
         mock_func = Mock(spec=nodes.FunctionDef)
         mock_func.name = "test_function"
@@ -484,25 +484,14 @@ def public_function_2():
 
         functions = [mock_func]
 
-        # Mock the utils.should_function_be_private to return True
-        with patch(
-            "pylint_sort_functions.utils.should_function_be_private"
-        ) as mock_should_be_private:
-            mock_should_be_private.return_value = True
+        # Mock add_message
+        self.checker.add_message = Mock()
 
-            # Mock add_message
-            self.checker.add_message = Mock()
+        # Call the method
+        self.checker._check_function_privacy_heuristic(functions, mock_module)
 
-            # Call the method
-            self.checker._check_function_privacy_heuristic(functions, mock_module)
-
-            # Verify should_function_be_private was called
-            mock_should_be_private.assert_called_once_with(mock_func, mock_module)
-
-            # Verify add_message was called
-            self.checker.add_message.assert_called_once_with(
-                "function-should-be-private", node=mock_func, args=("test_function",)
-            )
+        # Verify add_message was NOT called (heuristic mode does nothing)
+        self.checker.add_message.assert_not_called()
 
     def test_check_function_privacy_no_project_root(self) -> None:
         """Test _check_function_privacy when project root cannot be determined."""

@@ -112,9 +112,7 @@ class FunctionSortChecker(BaseChecker):
 
         # Use import analysis for more accurate detection
         for func in functions:
-            if utils.should_function_be_private_with_import_analysis(
-                func, module_path, project_root
-            ):
+            if utils.should_function_be_private(func, module_path, project_root):
                 # Report function that should be private
                 # See docs/usage.rst for privacy detection feature
                 self.add_message(
@@ -122,7 +120,9 @@ class FunctionSortChecker(BaseChecker):
                 )
 
     def _check_function_privacy_heuristic(
-        self, functions: list[nodes.FunctionDef], node: nodes.Module
+        self,
+        functions: list[nodes.FunctionDef],
+        node: nodes.Module,  # pylint: disable=unused-argument
     ) -> None:
         """Check function privacy using heuristic approach (fallback).
 
@@ -133,13 +133,9 @@ class FunctionSortChecker(BaseChecker):
         :param node: The module node
         :type node: nodes.Module
         """
-        for func in functions:
-            if utils.should_function_be_private(func, node):
-                # Report function that should be private
-                # See docs/usage.rst for privacy detection feature
-                self.add_message(
-                    "function-should-be-private", node=func, args=(func.name,)
-                )
+        # Skip privacy check in heuristic mode - we can't determine without paths
+        # This fallback mode is rarely used (only when linter has no file info)
+        pass  # pragma: no cover
 
     def _get_module_path(self) -> Path | None:
         """Get the current module's file path from the linter.

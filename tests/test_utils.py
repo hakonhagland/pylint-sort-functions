@@ -232,7 +232,12 @@ class TestUtils:
         assert isinstance(dunder_func, nodes.FunctionDef)
         assert dunder_func.name == "__get_something__"
 
-        result = utils.should_function_be_private(dunder_func, module)
+        # Using dummy paths for testing
+        module_path = Path("dummy_module.py")
+        project_root = Path(".")
+        result = utils.should_function_be_private(
+            dunder_func, module_path, project_root
+        )
 
         # Dunder methods should never be flagged as should be private
         assert result is False
@@ -242,13 +247,13 @@ class TestUtils:
         assert isinstance(helper_func, nodes.FunctionDef)
         assert helper_func.name == "get_helper"
 
-        result = utils.should_function_be_private(helper_func, module)
+        result = utils.should_function_be_private(
+            helper_func, module_path, project_root
+        )
 
-        # get_helper has "get_" prefix but isn't called by anything else in the module
-        # The heuristic approach only flags functions that have helper patterns
-        # AND are used internally
-        # Since get_helper is not called by other functions, it shouldn't be flagged
-        assert result is False
+        # get_helper is not imported or used by any other module in the test setup
+        # With import analysis, it should be flagged as a candidate for being private
+        assert result is True
 
     def test_find_python_files(self) -> None:
         """Test finding Python files in a directory."""
@@ -478,25 +483,25 @@ def use_library():
             special_func = functions[3]
 
             # public_api should not be flagged (used externally)
-            result = utils.should_function_be_private_with_import_analysis(
+            result = utils.should_function_be_private(
                 public_api_func, library_file, temp_path
             )
             assert result is False
 
             # internal_helper should be flagged (not used externally)
-            result = utils.should_function_be_private_with_import_analysis(
+            result = utils.should_function_be_private(
                 internal_helper_func, library_file, temp_path
             )
             assert result is True
 
             # main should not be flagged (public pattern)
-            result = utils.should_function_be_private_with_import_analysis(
+            result = utils.should_function_be_private(
                 main_func, library_file, temp_path
             )
             assert result is False
 
             # __special__ should not be flagged (dunder method)
-            result = utils.should_function_be_private_with_import_analysis(
+            result = utils.should_function_be_private(
                 special_func, library_file, temp_path
             )
             assert result is False
