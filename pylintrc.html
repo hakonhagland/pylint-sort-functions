@@ -225,25 +225,17 @@ when used with PyLint.</p>
 <h2>Plugin-Specific Configuration<a class="headerlink" href="#plugin-specific-configuration" title="Link to this heading"></a></h2>
 <section id="decorator-exclusions">
 <h3>Decorator Exclusions<a class="headerlink" href="#decorator-exclusions" title="Link to this heading"></a></h3>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p><strong>IMPORTANT</strong>: Decorator exclusion patterns (<code class="docutils literal notranslate"><span class="pre">ignore-decorators</span></code>) are currently only supported in the <strong>CLI tool</strong>, not in the PyLint plugin.</p>
-<p>The PyLint plugin will <strong>ignore</strong> these configurations and sort decorated functions normally. For framework compatibility, use the CLI auto-fix tool instead.</p>
-<p>See <a class="reference external" href="https://github.com/hakonhagland/pylint-sort-functions/issues/13">GitHub Issue #13</a> for plugin implementation status.</p>
-</div>
-<p>The <code class="docutils literal notranslate"><span class="pre">ignore-decorators</span></code> option configures patterns for decorators that should be excluded from sorting requirements in the <strong>CLI tool only</strong>. This is essential for framework compatibility where decorator order matters.</p>
-<p><strong>CLI tool usage (works):</strong></p>
+<p>The <code class="docutils literal notranslate"><span class="pre">ignore-decorators</span></code> option configures patterns for decorators that should be excluded from sorting requirements. This is essential for framework compatibility where decorator order matters.</p>
+<p><strong>CLI tool usage:</strong></p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pylint-sort-functions<span class="w"> </span>--ignore-decorators<span class="w"> </span><span class="s2">&quot;@app.route,@*.command&quot;</span><span class="w"> </span>src/
 </pre></div>
 </div>
-<p><strong>PyLint plugin configuration (currently ignored):</strong></p>
-<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[pylint-sort-functions]</span>
-<span class="c1"># WARNING: This configuration is ignored by the PyLint plugin</span>
+<p><strong>PyLint plugin configuration:</strong></p>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[function-sort]</span>
 <span class="na">ignore-decorators</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">@app.route,@*.command,@pytest.fixture</span>
 </pre></div>
 </div>
-<div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span class="k">[tool.pylint-sort-functions]</span>
-<span class="c1"># WARNING: This configuration is ignored by the PyLint plugin</span>
+<div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span class="k">[tool.pylint.</span><span class="s2">&quot;function-sort&quot;</span><span class="k">]</span>
 <span class="n">ignore-decorators</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span>
 <span class="w">    </span><span class="s2">&quot;@app.route&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="s2">&quot;@*.command&quot;</span><span class="p">,</span>
@@ -256,7 +248,7 @@ when used with PyLint.</p>
 <h3>Privacy Detection Settings<a class="headerlink" href="#privacy-detection-settings" title="Link to this heading"></a></h3>
 <p>Configure the privacy detection feature that suggests functions should be made private:</p>
 <p><strong>.pylintrc:</strong></p>
-<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[pylint-sort-functions]</span>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[function-sort]</span>
 <span class="c1"># Enable privacy detection (default: true)</span>
 <span class="na">enable-privacy-detection</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">yes</span>
 
@@ -265,7 +257,7 @@ when used with PyLint.</p>
 </pre></div>
 </div>
 <p><strong>pyproject.toml:</strong></p>
-<div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span class="k">[tool.pylint-sort-functions]</span>
+<div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span class="k">[tool.pylint.</span><span class="s2">&quot;function-sort&quot;</span><span class="k">]</span>
 <span class="n">enable-privacy-detection</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span>
 <span class="n">public-api-patterns</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;main&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;run&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;execute&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;setup&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;teardown&quot;</span><span class="p">]</span>
 </pre></div>
@@ -275,7 +267,7 @@ when used with PyLint.</p>
 <h3>Directory Exclusions<a class="headerlink" href="#directory-exclusions" title="Link to this heading"></a></h3>
 <p>Configure which directories to skip during import analysis (future feature):</p>
 <p><strong>.pylintrc:</strong></p>
-<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[pylint-sort-functions]</span>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[function-sort]</span>
 <span class="c1"># Skip additional directories during analysis</span>
 <span class="na">skip-dirs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">vendor,third_party,legacy</span>
 
@@ -284,7 +276,7 @@ when used with PyLint.</p>
 </pre></div>
 </div>
 <p><strong>pyproject.toml:</strong></p>
-<div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span class="k">[tool.pylint-sort-functions]</span>
+<div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span class="k">[tool.pylint.</span><span class="s2">&quot;function-sort&quot;</span><span class="k">]</span>
 <span class="n">skip-dirs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;vendor&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;third_party&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;legacy&quot;</span><span class="p">]</span>
 <span class="n">additional-skip-dirs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;custom_vendor&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;generated&quot;</span><span class="p">]</span>
 </pre></div>
@@ -293,19 +285,10 @@ when used with PyLint.</p>
 </section>
 <section id="framework-specific-configurations">
 <h2>Framework-Specific Configurations<a class="headerlink" href="#framework-specific-configurations" title="Link to this heading"></a></h2>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p><strong>CRITICAL LIMITATION</strong>: All framework configurations below show <code class="docutils literal notranslate"><span class="pre">ignore-decorators</span></code> options that <strong>do not work</strong> in the PyLint plugin. These configurations are only supported in the CLI tool.</p>
-<p>For framework compatibility:</p>
-<ul class="simple">
-<li><p><strong>Use CLI tool</strong>: <code class="docutils literal notranslate"><span class="pre">pylint-sort-functions</span> <span class="pre">--ignore-decorators</span> <span class="pre">&quot;&#64;app.route&quot;</span> <span class="pre">src/</span></code></p></li>
-<li><p><strong>PyLint plugin</strong>: Will sort ALL functions regardless of decorators</p></li>
-<li><p><strong>Tracking</strong>: <a class="reference external" href="https://github.com/hakonhagland/pylint-sort-functions/issues/13">GitHub Issue #13</a></p></li>
-</ul>
-</div>
+<p>The following configurations show working examples for both the CLI tool and PyLint plugin. The <code class="docutils literal notranslate"><span class="pre">ignore-decorators</span></code> option is supported in both tools for consistent framework compatibility.</p>
 <section id="flask-applications">
 <h3>Flask Applications<a class="headerlink" href="#flask-applications" title="Link to this heading"></a></h3>
-<p><strong>Working CLI tool usage:</strong></p>
+<p><strong>CLI tool usage:</strong></p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pylint-sort-functions<span class="w"> </span>--ignore-decorators<span class="w"> </span><span class="s2">&quot;@app.route,@app.before_request&quot;</span><span class="w"> </span>src/
 </pre></div>
 </div>
@@ -339,7 +322,7 @@ when used with PyLint.</p>
 </section>
 <section id="click-cli-applications">
 <h3>Click CLI Applications<a class="headerlink" href="#click-cli-applications" title="Link to this heading"></a></h3>
-<p><strong>Working CLI tool usage:</strong></p>
+<p><strong>CLI tool usage:</strong></p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pylint-sort-functions<span class="w"> </span>--ignore-decorators<span class="w"> </span><span class="s2">&quot;@*.command,@*.group,@*.option&quot;</span><span class="w"> </span>src/
 </pre></div>
 </div>
@@ -363,7 +346,7 @@ when used with PyLint.</p>
 </section>
 <section id="django-applications">
 <h3>Django Applications<a class="headerlink" href="#django-applications" title="Link to this heading"></a></h3>
-<p><strong>Working CLI tool usage:</strong></p>
+<p><strong>CLI tool usage:</strong></p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pylint-sort-functions<span class="w"> </span>--ignore-decorators<span class="w"> </span><span class="s2">&quot;@login_required,@csrf_exempt&quot;</span><span class="w"> </span>src/
 </pre></div>
 </div>
@@ -375,34 +358,25 @@ when used with PyLint.</p>
 </section>
 <section id="fastapi-applications">
 <h3>FastAPI Applications<a class="headerlink" href="#fastapi-applications" title="Link to this heading"></a></h3>
-<p><strong>Working CLI tool usage:</strong></p>
+<p><strong>CLI tool usage:</strong></p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pylint-sort-functions<span class="w"> </span>--ignore-decorators<span class="w"> </span><span class="s2">&quot;@app.get,@app.post&quot;</span><span class="w"> </span>src/
 </pre></div>
 </div>
-<p><strong>PyLint plugin configuration (decorator exclusions ignored):</strong></p>
-<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[pylint-sort-functions]</span>
-<span class="c1"># WARNING: ignore-decorators is ignored by PyLint plugin</span>
-<span class="na">ignore-decorators</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">@app.get</span>
-<span class="w">                   </span><span class="na">@app.post</span>
-<span class="w">                   </span><span class="na">@app.put</span>
-<span class="w">                   </span><span class="na">@app.delete</span>
-<span class="w">                   </span><span class="na">@app.patch</span>
-<span class="w">                   </span><span class="na">@app.middleware</span>
+<p><strong>PyLint plugin configuration:</strong></p>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[function-sort]</span>
+<span class="na">ignore-decorators</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">@app.get,@app.post,@app.put,@app.delete,@app.patch,@app.middleware</span>
 </pre></div>
 </div>
 </section>
 <section id="pytest-test-configuration">
 <h3>Pytest Test Configuration<a class="headerlink" href="#pytest-test-configuration" title="Link to this heading"></a></h3>
-<p><strong>Working CLI tool usage:</strong></p>
+<p><strong>CLI tool usage:</strong></p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pylint-sort-functions<span class="w"> </span>--ignore-decorators<span class="w"> </span><span class="s2">&quot;@pytest.fixture,@pytest.mark.*&quot;</span><span class="w"> </span>src/
 </pre></div>
 </div>
-<p><strong>PyLint plugin configuration (decorator exclusions ignored):</strong></p>
-<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[pylint-sort-functions]</span>
-<span class="c1"># WARNING: ignore-decorators is ignored by PyLint plugin</span>
-<span class="na">ignore-decorators</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">@pytest.fixture</span>
-<span class="w">                   </span><span class="na">@pytest.mark.*</span>
-<span class="w">                   </span><span class="na">@pytest.parametrize</span>
+<p><strong>PyLint plugin configuration:</strong></p>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[function-sort]</span>
+<span class="na">ignore-decorators</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">@pytest.fixture,@pytest.mark.*,@pytest.parametrize</span>
 </pre></div>
 </div>
 </section>
@@ -494,7 +468,7 @@ when used with PyLint.</p>
 <div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[MASTER]</span>
 <span class="na">load-plugins</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">pylint_sort_functions</span>
 
-<span class="k">[pylint-sort-functions]</span>
+<span class="k">[function-sort]</span>
 <span class="na">ignore-decorators</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">@app.route</span>
 </pre></div>
 </div>
@@ -502,7 +476,7 @@ when used with PyLint.</p>
 <div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[MASTER]</span>
 <span class="na">load-plugins</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">pylint_sort_functions</span>
 
-<span class="k">[pylint-sort-functions]</span>
+<span class="k">[function-sort]</span>
 <span class="na">ignore-decorators</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">@pytest.fixture,@pytest.mark.*</span>
 </pre></div>
 </div>
@@ -599,9 +573,9 @@ pylint<span class="w"> </span>--load-plugins<span class="o">=</span>pylint_sort_
 <h3>Performance Issues<a class="headerlink" href="#performance-issues" title="Link to this heading"></a></h3>
 <p>For large projects, the import analysis may be slow:</p>
 <p><strong>.pylintrc:</strong></p>
-<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[pylint-sort-functions]</span>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[function-sort]</span>
 <span class="c1"># Disable privacy detection for better performance</span>
-<span class="na">check-privacy</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">no</span>
+<span class="na">enable-privacy-detection</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">no</span>
 </pre></div>
 </div>
 </section>

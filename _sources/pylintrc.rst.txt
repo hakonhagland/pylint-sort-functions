@@ -106,33 +106,24 @@ Plugin-Specific Configuration
 Decorator Exclusions
 ~~~~~~~~~~~~~~~~~~~~
 
-.. warning::
-   **IMPORTANT**: Decorator exclusion patterns (``ignore-decorators``) are currently only supported in the **CLI tool**, not in the PyLint plugin.
+The ``ignore-decorators`` option configures patterns for decorators that should be excluded from sorting requirements. This is essential for framework compatibility where decorator order matters.
 
-   The PyLint plugin will **ignore** these configurations and sort decorated functions normally. For framework compatibility, use the CLI auto-fix tool instead.
-
-   See `GitHub Issue #13 <https://github.com/hakonhagland/pylint-sort-functions/issues/13>`_ for plugin implementation status.
-
-The ``ignore-decorators`` option configures patterns for decorators that should be excluded from sorting requirements in the **CLI tool only**. This is essential for framework compatibility where decorator order matters.
-
-**CLI tool usage (works):**
+**CLI tool usage:**
 
 .. code-block:: bash
 
    pylint-sort-functions --ignore-decorators "@app.route,@*.command" src/
 
-**PyLint plugin configuration (currently ignored):**
+**PyLint plugin configuration:**
 
 .. code-block:: ini
 
-   [pylint-sort-functions]
-   # WARNING: This configuration is ignored by the PyLint plugin
+   [function-sort]
    ignore-decorators = @app.route,@*.command,@pytest.fixture
 
 .. code-block:: toml
 
-   [tool.pylint-sort-functions]
-   # WARNING: This configuration is ignored by the PyLint plugin
+   [tool.pylint."function-sort"]
    ignore-decorators = [
        "@app.route",
        "@*.command",
@@ -148,7 +139,7 @@ Configure the privacy detection feature that suggests functions should be made p
 
 .. code-block:: ini
 
-   [pylint-sort-functions]
+   [function-sort]
    # Enable privacy detection (default: true)
    enable-privacy-detection = yes
 
@@ -159,7 +150,7 @@ Configure the privacy detection feature that suggests functions should be made p
 
 .. code-block:: toml
 
-   [tool.pylint-sort-functions]
+   [tool.pylint."function-sort"]
    enable-privacy-detection = true
    public-api-patterns = ["main", "run", "execute", "setup", "teardown"]
 
@@ -172,7 +163,7 @@ Configure which directories to skip during import analysis (future feature):
 
 .. code-block:: ini
 
-   [pylint-sort-functions]
+   [function-sort]
    # Skip additional directories during analysis
    skip-dirs = vendor,third_party,legacy
 
@@ -183,26 +174,19 @@ Configure which directories to skip during import analysis (future feature):
 
 .. code-block:: toml
 
-   [tool.pylint-sort-functions]
+   [tool.pylint."function-sort"]
    skip-dirs = ["vendor", "third_party", "legacy"]
    additional-skip-dirs = ["custom_vendor", "generated"]
 
 Framework-Specific Configurations
 ---------------------------------
 
-.. warning::
-   **CRITICAL LIMITATION**: All framework configurations below show ``ignore-decorators`` options that **do not work** in the PyLint plugin. These configurations are only supported in the CLI tool.
-
-   For framework compatibility:
-
-   * **Use CLI tool**: ``pylint-sort-functions --ignore-decorators "@app.route" src/``
-   * **PyLint plugin**: Will sort ALL functions regardless of decorators
-   * **Tracking**: `GitHub Issue #13 <https://github.com/hakonhagland/pylint-sort-functions/issues/13>`_
+The following configurations show working examples for both the CLI tool and PyLint plugin. The ``ignore-decorators`` option is supported in both tools for consistent framework compatibility.
 
 Flask Applications
 ~~~~~~~~~~~~~~~~~~
 
-**Working CLI tool usage:**
+**CLI tool usage:**
 
 .. code-block:: bash
 
@@ -241,7 +225,7 @@ Flask Applications
 Click CLI Applications
 ~~~~~~~~~~~~~~~~~~~~~~
 
-**Working CLI tool usage:**
+**CLI tool usage:**
 
 .. code-block:: bash
 
@@ -270,7 +254,7 @@ Click CLI Applications
 Django Applications
 ~~~~~~~~~~~~~~~~~~~
 
-**Working CLI tool usage:**
+**CLI tool usage:**
 
 .. code-block:: bash
 
@@ -286,43 +270,34 @@ Django Applications
 FastAPI Applications
 ~~~~~~~~~~~~~~~~~~~~
 
-**Working CLI tool usage:**
+**CLI tool usage:**
 
 .. code-block:: bash
 
    pylint-sort-functions --ignore-decorators "@app.get,@app.post" src/
 
-**PyLint plugin configuration (decorator exclusions ignored):**
+**PyLint plugin configuration:**
 
 .. code-block:: ini
 
-   [pylint-sort-functions]
-   # WARNING: ignore-decorators is ignored by PyLint plugin
-   ignore-decorators = @app.get
-                      @app.post
-                      @app.put
-                      @app.delete
-                      @app.patch
-                      @app.middleware
+   [function-sort]
+   ignore-decorators = @app.get,@app.post,@app.put,@app.delete,@app.patch,@app.middleware
 
 Pytest Test Configuration
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-**Working CLI tool usage:**
+**CLI tool usage:**
 
 .. code-block:: bash
 
    pylint-sort-functions --ignore-decorators "@pytest.fixture,@pytest.mark.*" src/
 
-**PyLint plugin configuration (decorator exclusions ignored):**
+**PyLint plugin configuration:**
 
 .. code-block:: ini
 
-   [pylint-sort-functions]
-   # WARNING: ignore-decorators is ignored by PyLint plugin
-   ignore-decorators = @pytest.fixture
-                      @pytest.mark.*
-                      @pytest.parametrize
+   [function-sort]
+   ignore-decorators = @pytest.fixture,@pytest.mark.*,@pytest.parametrize
 
 Integration Examples
 --------------------
@@ -428,7 +403,7 @@ For projects with multiple components:
    [MASTER]
    load-plugins = pylint_sort_functions
 
-   [pylint-sort-functions]
+   [function-sort]
    ignore-decorators = @app.route
 
 **tests/.pylintrc:**
@@ -438,7 +413,7 @@ For projects with multiple components:
    [MASTER]
    load-plugins = pylint_sort_functions
 
-   [pylint-sort-functions]
+   [function-sort]
    ignore-decorators = @pytest.fixture,@pytest.mark.*
 
 Custom Message Formats
@@ -556,9 +531,9 @@ For large projects, the import analysis may be slow:
 
 .. code-block:: ini
 
-   [pylint-sort-functions]
+   [function-sort]
    # Disable privacy detection for better performance
-   check-privacy = no
+   enable-privacy-detection = no
 
 Memory Usage
 ~~~~~~~~~~~~
