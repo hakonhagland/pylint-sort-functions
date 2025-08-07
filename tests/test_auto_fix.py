@@ -3,6 +3,7 @@
 import os
 import tempfile
 from pathlib import Path
+from typing import Any
 from unittest.mock import MagicMock, patch
 
 from pylint_sort_functions.auto_fix import (
@@ -1005,7 +1006,7 @@ def alpha_function():
         assert not sorter._is_section_header_comment("# TODO: implement this")
         assert not sorter._is_section_header_comment("# Bug fix for issue #123")
 
-    def test_automatic_section_header_insertion_basic(self):
+    def test_automatic_section_header_insertion_basic(self) -> None:
         """Test automatic section header insertion with mixed visibility functions."""
         content = '''"""Test module with unsorted mixed functions."""
 
@@ -1060,7 +1061,7 @@ def _zebra_private():
 
         assert result.strip() == expected.strip()
 
-    def test_automatic_section_header_insertion_only_public(self):
+    def test_automatic_section_header_insertion_only_public(self) -> None:
         """Test that headers are not added when only public functions exist."""
         content = '''"""Test module with only public functions."""
 
@@ -1086,7 +1087,7 @@ def zebra_function():
 
         assert result.strip() == expected.strip()
 
-    def test_automatic_section_header_insertion_only_private(self):
+    def test_automatic_section_header_insertion_only_private(self) -> None:
         """Test that headers are not added when only private functions exist."""
         content = '''"""Test module with only private functions."""
 
@@ -1112,7 +1113,7 @@ def _zebra_private():
 
         assert result.strip() == expected.strip()
 
-    def test_automatic_section_header_insertion_disabled(self):
+    def test_automatic_section_header_insertion_disabled(self) -> None:
         """Test that headers are not added when feature is disabled."""
         content = '''"""Test module with mixed functions."""
 
@@ -1138,7 +1139,7 @@ def _alpha_private():
 
         assert result.strip() == expected.strip()
 
-    def test_automatic_section_header_insertion_methods(self):
+    def test_automatic_section_header_insertion_methods(self) -> None:
         """Test automatic section header insertion for class methods."""
         content = '''"""Test module with class methods."""
 
@@ -1174,7 +1175,7 @@ class TestClass:
         assert "def _alpha_private(self)" in result
         assert "def _zebra_private(self)" in result
 
-    def test_automatic_section_header_custom_headers(self):
+    def test_automatic_section_header_custom_headers(self) -> None:
         """Test automatic section header insertion with custom header text."""
         content = '''"""Test module with custom headers."""
 
@@ -1197,7 +1198,7 @@ def _alpha_private():
         assert "## PUBLIC API ##" in result
         assert "## INTERNAL HELPERS ##" in result
 
-    def test_mixed_visibility_functions_detection(self):
+    def test_mixed_visibility_functions_detection(self) -> None:
         """Test _has_mixed_visibility_functions helper method."""
         config = AutoFixConfig()
         sorter = FunctionSorter(config)
@@ -1214,24 +1215,24 @@ def _alpha_private():
             "pylint_sort_functions.utils.is_private_function"
         ) as mock_is_private:
 
-            def side_effect(node):
-                return node.name.startswith("_")
+            def side_effect(node: Any) -> bool:
+                return node.name.startswith("_")  # type: ignore[no-any-return]
 
             mock_is_private.side_effect = side_effect
 
             # Test mixed visibility
             mixed_spans = [public_span, private_span]
-            assert sorter._has_mixed_visibility_functions(mixed_spans)
+            assert sorter._has_mixed_visibility_functions(mixed_spans)  # type: ignore[arg-type]
 
             # Test only public
             public_only = [public_span]
-            assert not sorter._has_mixed_visibility_functions(public_only)
+            assert not sorter._has_mixed_visibility_functions(public_only)  # type: ignore[arg-type]
 
             # Test only private
             private_only = [private_span]
-            assert not sorter._has_mixed_visibility_functions(private_only)
+            assert not sorter._has_mixed_visibility_functions(private_only)  # type: ignore[arg-type]  # pylint: disable=line-too-long
 
-    def test_find_existing_section_headers(self):
+    def test_find_existing_section_headers(self) -> None:
         """Test _find_existing_section_headers helper method."""
         config = AutoFixConfig()
         sorter = FunctionSorter(config)
@@ -1254,7 +1255,7 @@ def _alpha_private():
 
         assert headers == expected
 
-    def test_find_existing_section_headers_with_methods(self):
+    def test_find_existing_section_headers_with_methods(self) -> None:
         """Test _find_existing_section_headers with method headers."""
         config = AutoFixConfig()
         sorter = FunctionSorter(config)
@@ -1276,7 +1277,7 @@ def _alpha_private():
 
         assert headers == expected
 
-    def test_spacing_logic_for_functions_without_trailing_newlines(self):
+    def test_spacing_logic_for_functions_without_trailing_newlines(self) -> None:
         """Test that proper spacing is added for functions without trailing newlines."""
         config = AutoFixConfig(add_section_headers=False)
         sorter = FunctionSorter(config)
@@ -1302,7 +1303,7 @@ def _alpha_private():
         with patch(
             "pylint_sort_functions.utils.is_private_function", return_value=False
         ):
-            result = sorter._add_section_headers_to_functions(spans, is_methods=False)
+            result = sorter._add_section_headers_to_functions(spans, is_methods=False)  # type: ignore[arg-type]  # pylint: disable=line-too-long
 
         # Should have proper spacing added:
         # - span1 needs both newline + extra newline (line 468 + 469)
