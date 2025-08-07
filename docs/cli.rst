@@ -1,5 +1,5 @@
-Command Line Interface
-======================
+Auto-Fix Tool Reference
+========================
 
 The ``pylint-sort-functions`` command-line tool provides auto-fix functionality for function
 and method sorting independent of PyLint integration.
@@ -7,11 +7,32 @@ and method sorting independent of PyLint integration.
 Installation
 ------------
 
-The CLI tool is automatically available after installing the package:
+The CLI tool is automatically available after installing the ``pylint-sort-functions`` package.
+
+Development Dependency (Recommended)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If you're already using the PyLint plugin in your project (see :doc:`usage`), the CLI tool is automatically available:
 
 .. code-block:: bash
 
+   # Tool is available after plugin installation
+   uv sync  # or poetry install, pip install -r requirements-dev.txt
+   pylint-sort-functions --help
+
+Global Installation
+~~~~~~~~~~~~~~~~~~~
+
+For standalone use without the PyLint plugin integration:
+
+.. code-block:: bash
+
+   # Install globally or in a virtual environment
    pip install pylint-sort-functions
+   pylint-sort-functions --help
+
+.. note::
+   This CLI tool complements the PyLint plugin integration. For comprehensive code quality workflows, see :doc:`usage` for PyLint plugin setup, configuration options, and team integration patterns.
 
 Usage
 -----
@@ -130,6 +151,9 @@ Modify files in-place with optional backup creation:
 
 Decorator Pattern Matching
 ---------------------------
+
+.. important::
+   The ``--ignore-decorators`` feature is currently available only in the CLI tool. The PyLint plugin does not yet support decorator exclusions. See `GitHub Issue #13 <https://github.com/hakonhagland/pylint-sort-functions/issues/13>`_ for planned PyLint plugin support.
 
 Pattern Syntax
 ~~~~~~~~~~~~~~~
@@ -304,6 +328,9 @@ When using ``--fix`` (default behavior), the tool creates ``.bak`` backup files:
 - Backups preserve original timestamps and permissions
 - Use ``--no-backup`` to skip backup creation
 - Clean up with: ``find . -name "*.py.bak" -delete``
+
+.. warning::
+   **Known Issue - Section Header Comments:** The auto-fix tool may displace section header comments (like ``# Public functions``) during function reordering instead of keeping them positioned correctly. Function-specific comments are preserved properly. See `GitHub Issue #10 <https://github.com/hakonhagland/pylint-sort-functions/issues/10>`_ for status and workarounds.
 
 Related Tools
 -------------
