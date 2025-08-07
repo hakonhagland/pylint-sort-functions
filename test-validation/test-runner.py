@@ -301,9 +301,9 @@ class DocumentationValidator:
             plugin_info = self.api_client.get_plugin_info()
             documented_options = [
                 "ignore-decorators",
-                "check-privacy",
-                "public-patterns",
-                "skip-dirs",
+                "enable-privacy-detection",
+                "public-api-patterns",
+                # Note: "skip-dirs" is a future feature, not yet implemented
             ]
             actual_options = plugin_info.get("options", [])
 
