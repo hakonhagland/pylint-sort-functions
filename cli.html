@@ -71,6 +71,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#decorator-pattern-matching">Decorator Pattern Matching</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#pattern-syntax">Pattern Syntax</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#common-framework-examples">Common Framework Examples</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#section-header-examples">Section Header Examples</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#exit-codes">Exit Codes</a></li>
@@ -224,6 +225,20 @@ pylint-sort-functions<span class="w"> </span>--fix<span class="w"> </span>--igno
 <li><p><code class="docutils literal notranslate"><span class="pre">&#64;pytest.fixture</span></code> - Framework decorators</p></li>
 </ul>
 </dd>
+<dt><code class="docutils literal notranslate"><span class="pre">--add-section-headers</span></code></dt><dd><p>Add section header comments (e.g., ‘# Public functions’) during sorting to improve code organization.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">--public-header</span> <span class="pre">TEXT</span></code></dt><dd><p>Header text for public functions (default: ‘# Public functions’).</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">--private-header</span> <span class="pre">TEXT</span></code></dt><dd><p>Header text for private functions (default: ‘# Private functions’).</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">--public-method-header</span> <span class="pre">TEXT</span></code></dt><dd><p>Header text for public methods (default: ‘# Public methods’).</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">--private-method-header</span> <span class="pre">TEXT</span></code></dt><dd><p>Header text for private methods (default: ‘# Private methods’).</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">--additional-section-patterns</span> <span class="pre">PATTERN</span></code></dt><dd><p>Additional patterns to detect as section headers (e.g., ‘=== API ===’ or ‘— Helpers —‘). Can be used multiple times.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">--section-headers-case-sensitive</span></code></dt><dd><p>Make section header detection case-sensitive (default: case-insensitive).</p>
+</dd>
 <dt><code class="docutils literal notranslate"><span class="pre">--verbose,</span> <span class="pre">-v</span></code></dt><dd><p>Enable verbose output showing processing details.</p>
 </dd>
 <dt><code class="docutils literal notranslate"><span class="pre">--help,</span> <span class="pre">-h</span></code></dt><dd><p>Show help message and exit.</p>
@@ -303,6 +318,38 @@ Backup<span class="w"> </span>files<span class="w"> </span>created<span class="w
 </div>
 <p><strong>Pytest Test Files:</strong></p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pylint-sort-functions<span class="w"> </span>--fix<span class="w"> </span>--ignore-decorators<span class="w"> </span><span class="s2">&quot;@pytest.*&quot;</span><span class="w"> </span>tests/
+</pre></div>
+</div>
+</section>
+<section id="section-header-examples">
+<h3>Section Header Examples<a class="headerlink" href="#section-header-examples" title="Link to this heading"></a></h3>
+<p><strong>Basic Section Headers:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Add default section headers</span>
+pylint-sort-functions<span class="w"> </span>--fix<span class="w"> </span>--add-section-headers<span class="w"> </span>src/
+</pre></div>
+</div>
+<p><strong>Custom Header Text:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Use custom organizational style</span>
+pylint-sort-functions<span class="w"> </span>--fix<span class="w"> </span>--add-section-headers<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--public-header<span class="w"> </span><span class="s2">&quot;=== PUBLIC API ===&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--private-header<span class="w"> </span><span class="s2">&quot;=== INTERNAL ===&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>src/
+</pre></div>
+</div>
+<p><strong>Detect Existing Custom Headers:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Preserve existing organizational patterns</span>
+pylint-sort-functions<span class="w"> </span>--fix<span class="w"> </span>--add-section-headers<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--additional-section-patterns<span class="w"> </span><span class="s2">&quot;--- API ---&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--additional-section-patterns<span class="w"> </span><span class="s2">&quot;*** Helpers ***&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>src/
+</pre></div>
+</div>
+<p><strong>Case-Sensitive Detection:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Enable case-sensitive header detection</span>
+pylint-sort-functions<span class="w"> </span>--fix<span class="w"> </span>--add-section-headers<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--section-headers-case-sensitive<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--additional-section-patterns<span class="w"> </span><span class="s2">&quot;Public API&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>src/
 </pre></div>
 </div>
 </section>
@@ -421,9 +468,9 @@ which scales with project size.</p>
 <li><p>Use <code class="docutils literal notranslate"><span class="pre">--no-backup</span></code> to skip backup creation</p></li>
 <li><p>Clean up with: <code class="docutils literal notranslate"><span class="pre">find</span> <span class="pre">.</span> <span class="pre">-name</span> <span class="pre">&quot;*.py.bak&quot;</span> <span class="pre">-delete</span></code></p></li>
 </ul>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p><strong>Known Issue - Section Header Comments:</strong> The auto-fix tool may displace section header comments (like <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">Public</span> <span class="pre">functions</span></code>) during function reordering instead of keeping them positioned correctly. Function-specific comments are preserved properly. See <a class="reference external" href="https://github.com/hakonhagland/pylint-sort-functions/issues/10">GitHub Issue #10</a> for status and workarounds.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><strong>Section Header Support:</strong> The auto-fix tool now fully supports automatic section header insertion and detection. Use <code class="docutils literal notranslate"><span class="pre">--add-section-headers</span></code> to enable organizational headers, and <code class="docutils literal notranslate"><span class="pre">--additional-section-patterns</span></code> to detect existing custom organizational patterns. Function-specific comments are preserved during reordering.</p>
 </div>
 </section>
 </section>

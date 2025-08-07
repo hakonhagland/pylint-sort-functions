@@ -255,6 +255,93 @@ Section headers are configured through the ``AutoFixConfig`` class or CLI argume
        --private-method-header ">>> Private Methods <<<" \
        myfile.py
 
+Custom Section Header Detection
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The auto-fix tool can detect and preserve existing section headers using configurable patterns.
+This prevents duplication when section headers are already present and allows integration with
+existing code organization styles.
+
+**Configuration Options:**
+
+.. code-block:: python
+
+   config = AutoFixConfig(
+       add_section_headers=True,
+       # Detection patterns for custom organizational styles
+       additional_section_patterns=[
+           "=== API ===",                    # Custom delimiter style
+           "--- Helpers ---",                # Different delimiter
+           "## Core Functions ##",           # Markdown-style headers
+           "*** Private Implementation ***"  # Alternative marker
+       ],
+       # Case sensitivity control (default: case-insensitive)
+       section_header_case_sensitive=True
+   )
+
+**CLI Usage:**
+
+.. code-block:: bash
+
+   # Add custom detection patterns
+   pylint-sort-functions --fix --add-section-headers \
+       --additional-section-patterns "=== API ===" \
+       --additional-section-patterns "--- Helpers ---" \
+       myfile.py
+
+   # Enable case-sensitive detection
+   pylint-sort-functions --fix --add-section-headers \
+       --section-headers-case-sensitive \
+       myfile.py
+
+**Detection Logic:**
+
+The tool automatically detects section headers using a comprehensive pattern matching system:
+
+1. **Configured Headers**: Patterns from your ``public_header``, ``private_header``, etc. are automatically included
+2. **Default Patterns**: Backward-compatible patterns like "public functions", "private methods", etc.
+3. **Additional Patterns**: Your custom patterns via ``additional_section_patterns``
+4. **Case Sensitivity**: Configurable case-sensitive or case-insensitive matching
+
+**Example - Preserving Existing Headers:**
+
+.. code-block:: python
+
+   # Before: Existing file with custom headers
+   """=== PUBLIC API ==="""
+
+   def zebra_function():
+       return "zebra"
+
+   def alpha_function():
+       return "alpha"
+
+   """=== INTERNAL ==="""
+
+   def _private_helper():
+       return "helper"
+
+   # Configuration to detect these headers
+   config = AutoFixConfig(
+       add_section_headers=True,
+       public_header="=== PUBLIC API ===",
+       private_header="=== INTERNAL ==="
+   )
+
+   # After auto-fix: Headers preserved, functions sorted
+   """=== PUBLIC API ==="""
+
+   def alpha_function():
+       return "alpha"
+
+   def zebra_function():
+       return "zebra"
+
+   """=== INTERNAL ==="""
+
+   def _private_helper():
+       return "helper"
+
 When Headers Are Added
 ~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -367,8 +454,8 @@ W9003: mixed-function-visibility
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Public and private functions are not properly separated (public must come before private).
 
-Configuration
--------------
+PyLint Integration
+------------------
 
 See :doc:`pylintrc` for complete configuration options including:
 

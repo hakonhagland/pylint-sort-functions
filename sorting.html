@@ -75,6 +75,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#comment-preservation">Comment Preservation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#automatic-section-headers">Automatic Section Headers</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#configuration">Configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#custom-section-header-detection">Custom Section Header Detection</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#when-headers-are-added">When Headers Are Added</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#examples">Examples</a></li>
 </ul>
@@ -85,7 +86,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#w9003-mixed-function-visibility">W9003: mixed-function-visibility</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#id1">Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pylint-integration">PyLint Integration</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#cli-tool">CLI Tool</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#benefits">Benefits</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#consistency">Consistency</a></li>
@@ -360,6 +361,85 @@ pylint-sort-functions<span class="w"> </span>--fix<span class="w"> </span>--add-
 </pre></div>
 </div>
 </section>
+<section id="custom-section-header-detection">
+<h3>Custom Section Header Detection<a class="headerlink" href="#custom-section-header-detection" title="Link to this heading"></a></h3>
+<p>The auto-fix tool can detect and preserve existing section headers using configurable patterns.
+This prevents duplication when section headers are already present and allows integration with
+existing code organization styles.</p>
+<p><strong>Configuration Options:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">config</span> <span class="o">=</span> <span class="n">AutoFixConfig</span><span class="p">(</span>
+    <span class="n">add_section_headers</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="c1"># Detection patterns for custom organizational styles</span>
+    <span class="n">additional_section_patterns</span><span class="o">=</span><span class="p">[</span>
+        <span class="s2">&quot;=== API ===&quot;</span><span class="p">,</span>                    <span class="c1"># Custom delimiter style</span>
+        <span class="s2">&quot;--- Helpers ---&quot;</span><span class="p">,</span>                <span class="c1"># Different delimiter</span>
+        <span class="s2">&quot;## Core Functions ##&quot;</span><span class="p">,</span>           <span class="c1"># Markdown-style headers</span>
+        <span class="s2">&quot;*** Private Implementation ***&quot;</span>  <span class="c1"># Alternative marker</span>
+    <span class="p">],</span>
+    <span class="c1"># Case sensitivity control (default: case-insensitive)</span>
+    <span class="n">section_header_case_sensitive</span><span class="o">=</span><span class="kc">True</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>CLI Usage:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Add custom detection patterns</span>
+pylint-sort-functions<span class="w"> </span>--fix<span class="w"> </span>--add-section-headers<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--additional-section-patterns<span class="w"> </span><span class="s2">&quot;=== API ===&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--additional-section-patterns<span class="w"> </span><span class="s2">&quot;--- Helpers ---&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>myfile.py
+
+<span class="c1"># Enable case-sensitive detection</span>
+pylint-sort-functions<span class="w"> </span>--fix<span class="w"> </span>--add-section-headers<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--section-headers-case-sensitive<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>myfile.py
+</pre></div>
+</div>
+<p><strong>Detection Logic:</strong></p>
+<p>The tool automatically detects section headers using a comprehensive pattern matching system:</p>
+<ol class="arabic simple">
+<li><p><strong>Configured Headers</strong>: Patterns from your <code class="docutils literal notranslate"><span class="pre">public_header</span></code>, <code class="docutils literal notranslate"><span class="pre">private_header</span></code>, etc. are automatically included</p></li>
+<li><p><strong>Default Patterns</strong>: Backward-compatible patterns like “public functions”, “private methods”, etc.</p></li>
+<li><p><strong>Additional Patterns</strong>: Your custom patterns via <code class="docutils literal notranslate"><span class="pre">additional_section_patterns</span></code></p></li>
+<li><p><strong>Case Sensitivity</strong>: Configurable case-sensitive or case-insensitive matching</p></li>
+</ol>
+<p><strong>Example - Preserving Existing Headers:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Before: Existing file with custom headers</span>
+<span class="sd">&quot;&quot;&quot;=== PUBLIC API ===&quot;&quot;&quot;</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">zebra_function</span><span class="p">():</span>
+    <span class="k">return</span> <span class="s2">&quot;zebra&quot;</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">alpha_function</span><span class="p">():</span>
+    <span class="k">return</span> <span class="s2">&quot;alpha&quot;</span>
+
+<span class="sd">&quot;&quot;&quot;=== INTERNAL ===&quot;&quot;&quot;</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_private_helper</span><span class="p">():</span>
+    <span class="k">return</span> <span class="s2">&quot;helper&quot;</span>
+
+<span class="c1"># Configuration to detect these headers</span>
+<span class="n">config</span> <span class="o">=</span> <span class="n">AutoFixConfig</span><span class="p">(</span>
+    <span class="n">add_section_headers</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">public_header</span><span class="o">=</span><span class="s2">&quot;=== PUBLIC API ===&quot;</span><span class="p">,</span>
+    <span class="n">private_header</span><span class="o">=</span><span class="s2">&quot;=== INTERNAL ===&quot;</span>
+<span class="p">)</span>
+
+<span class="c1"># After auto-fix: Headers preserved, functions sorted</span>
+<span class="sd">&quot;&quot;&quot;=== PUBLIC API ===&quot;&quot;&quot;</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">alpha_function</span><span class="p">():</span>
+    <span class="k">return</span> <span class="s2">&quot;alpha&quot;</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">zebra_function</span><span class="p">():</span>
+    <span class="k">return</span> <span class="s2">&quot;zebra&quot;</span>
+
+<span class="sd">&quot;&quot;&quot;=== INTERNAL ===&quot;&quot;&quot;</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_private_helper</span><span class="p">():</span>
+    <span class="k">return</span> <span class="s2">&quot;helper&quot;</span>
+</pre></div>
+</div>
+</section>
 <section id="when-headers-are-added">
 <h3>When Headers Are Added<a class="headerlink" href="#when-headers-are-added" title="Link to this heading"></a></h3>
 <p>Section headers are automatically inserted <strong>only when both public and private functions/methods
@@ -463,8 +543,8 @@ different visibility levels, while avoiding unnecessary headers for single-visib
 <p>Public and private functions are not properly separated (public must come before private).</p>
 </section>
 </section>
-<section id="id1">
-<h2>Configuration<a class="headerlink" href="#id1" title="Link to this heading"></a></h2>
+<section id="pylint-integration">
+<h2>PyLint Integration<a class="headerlink" href="#pylint-integration" title="Link to this heading"></a></h2>
 <p>See <a class="reference internal" href="pylintrc.html"><span class="doc">PyLint Configuration</span></a> for complete configuration options including:</p>
 <ul class="simple">
 <li><p>Enabling/disabling specific message types</p></li>

@@ -106,6 +106,27 @@ Optional Arguments
   - ``@*.command`` - Wildcard match (``@main.command``, ``@cli.command``, etc.)
   - ``@pytest.fixture`` - Framework decorators
 
+``--add-section-headers``
+  Add section header comments (e.g., '# Public functions') during sorting to improve code organization.
+
+``--public-header TEXT``
+  Header text for public functions (default: '# Public functions').
+
+``--private-header TEXT``
+  Header text for private functions (default: '# Private functions').
+
+``--public-method-header TEXT``
+  Header text for public methods (default: '# Public methods').
+
+``--private-method-header TEXT``
+  Header text for private methods (default: '# Private methods').
+
+``--additional-section-patterns PATTERN``
+  Additional patterns to detect as section headers (e.g., '=== API ===' or '--- Helpers ---'). Can be used multiple times.
+
+``--section-headers-case-sensitive``
+  Make section header detection case-sensitive (default: case-insensitive).
+
 ``--verbose, -v``
   Enable verbose output showing processing details.
 
@@ -201,6 +222,46 @@ Common Framework Examples
 .. code-block:: bash
 
    pylint-sort-functions --fix --ignore-decorators "@pytest.*" tests/
+
+Section Header Examples
+~~~~~~~~~~~~~~~~~~~~~~~
+
+**Basic Section Headers:**
+
+.. code-block:: bash
+
+   # Add default section headers
+   pylint-sort-functions --fix --add-section-headers src/
+
+**Custom Header Text:**
+
+.. code-block:: bash
+
+   # Use custom organizational style
+   pylint-sort-functions --fix --add-section-headers \
+       --public-header "=== PUBLIC API ===" \
+       --private-header "=== INTERNAL ===" \
+       src/
+
+**Detect Existing Custom Headers:**
+
+.. code-block:: bash
+
+   # Preserve existing organizational patterns
+   pylint-sort-functions --fix --add-section-headers \
+       --additional-section-patterns "--- API ---" \
+       --additional-section-patterns "*** Helpers ***" \
+       src/
+
+**Case-Sensitive Detection:**
+
+.. code-block:: bash
+
+   # Enable case-sensitive header detection
+   pylint-sort-functions --fix --add-section-headers \
+       --section-headers-case-sensitive \
+       --additional-section-patterns "Public API" \
+       src/
 
 Exit Codes
 -----------
@@ -329,8 +390,8 @@ When using ``--fix`` (default behavior), the tool creates ``.bak`` backup files:
 - Use ``--no-backup`` to skip backup creation
 - Clean up with: ``find . -name "*.py.bak" -delete``
 
-.. warning::
-   **Known Issue - Section Header Comments:** The auto-fix tool may displace section header comments (like ``# Public functions``) during function reordering instead of keeping them positioned correctly. Function-specific comments are preserved properly. See `GitHub Issue #10 <https://github.com/hakonhagland/pylint-sort-functions/issues/10>`_ for status and workarounds.
+.. note::
+   **Section Header Support:** The auto-fix tool now fully supports automatic section header insertion and detection. Use ``--add-section-headers`` to enable organizational headers, and ``--additional-section-patterns`` to detect existing custom organizational patterns. Function-specific comments are preserved during reordering.
 
 Related Tools
 -------------
