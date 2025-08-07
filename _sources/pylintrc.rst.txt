@@ -430,7 +430,7 @@ Use PyLint's standard per-file configuration:
    # Disable sorting checks for specific files
    per-file-ignores =
        legacy_code.py:unsorted-functions,unsorted-methods
-       third_party/*.py:unsorted-functions,unsorted-methods,mixed-function-visibility
+       third_party/*.py:unsorted-functions,unsorted-methods,mixed-function-visibility,function-should-be-private
 
 Multiple Configuration Files
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -498,7 +498,7 @@ Parsing the output:
    messages = json.loads(result.stdout)
    sorting_messages = [
        msg for msg in messages
-       if msg['message-id'] in ['W9001', 'W9002', 'W9003']
+       if msg['message-id'] in ['W9001', 'W9002', 'W9003', 'W9004']
    ]
 
 Colorized Output

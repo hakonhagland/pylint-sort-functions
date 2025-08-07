@@ -497,7 +497,7 @@ when used with PyLint.</p>
 <span class="c1"># Disable sorting checks for specific files</span>
 <span class="na">per-file-ignores</span><span class="w"> </span><span class="o">=</span>
 <span class="w">    </span><span class="na">legacy_code.py</span><span class="o">:</span><span class="s">unsorted-functions,unsorted-methods</span>
-<span class="w">    </span><span class="na">third_party/*.py</span><span class="o">:</span><span class="s">unsorted-functions,unsorted-methods,mixed-function-visibility</span>
+<span class="w">    </span><span class="na">third_party/*.py</span><span class="o">:</span><span class="s">unsorted-functions,unsorted-methods,mixed-function-visibility,function-should-be-private</span>
 </pre></div>
 </div>
 </section>
@@ -553,7 +553,7 @@ when used with PyLint.</p>
 <span class="n">messages</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
 <span class="n">sorting_messages</span> <span class="o">=</span> <span class="p">[</span>
     <span class="n">msg</span> <span class="k">for</span> <span class="n">msg</span> <span class="ow">in</span> <span class="n">messages</span>
-    <span class="k">if</span> <span class="n">msg</span><span class="p">[</span><span class="s1">&#39;message-id&#39;</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;W9001&#39;</span><span class="p">,</span> <span class="s1">&#39;W9002&#39;</span><span class="p">,</span> <span class="s1">&#39;W9003&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">msg</span><span class="p">[</span><span class="s1">&#39;message-id&#39;</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;W9001&#39;</span><span class="p">,</span> <span class="s1">&#39;W9002&#39;</span><span class="p">,</span> <span class="s1">&#39;W9003&#39;</span><span class="p">,</span> <span class="s1">&#39;W9004&#39;</span><span class="p">]</span>
 <span class="p">]</span>
 </pre></div>
 </div>
