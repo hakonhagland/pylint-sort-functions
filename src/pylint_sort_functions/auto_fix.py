@@ -49,7 +49,7 @@ class AutoFixConfig:  # pylint: disable=too-many-instance-attributes
 
 # Note: This class intentionally has only one public method as it encapsulates
 # the configuration state and provides a clean interface for file processing.
-class FunctionSorter:  # pylint: disable=too-many-public-methods,unsorted-methods,too-few-public-methods
+class FunctionSorter:  # pylint: disable=too-many-public-methods,too-few-public-methods
     """Main class for auto-fixing function sorting.
 
     This class provides the core functionality for automatically reordering
@@ -114,6 +114,80 @@ class FunctionSorter:  # pylint: disable=too-many-public-methods,unsorted-method
         ) as e:  # pragma: no cover  # pylint: disable=broad-exception-caught
             print(f"Error processing {file_path}: {e}")
             return False
+
+    def _add_section_headers_to_functions(  # pylint: disable=too-many-branches
+        self, sorted_spans: List[FunctionSpan], is_methods: bool = False
+    ) -> List[str]:
+        """Add section headers to sorted function spans.
+
+        Creates a list of lines that includes both section headers and function text,
+        organized with public functions first, then private functions.
+
+        :param sorted_spans: Function spans in sorted order (public first, then private)
+        :type sorted_spans: List[FunctionSpan]
+        :param is_methods: True if these are class methods, False for module functions
+        :type is_methods: bool
+        :returns: List of text lines with headers and functions
+        :rtype: List[str]
+        """
+        if not self.config.add_section_headers:
+            # If section headers are disabled, just return function texts with spacing
+            result = []
+            for i, span in enumerate(sorted_spans):
+                result.append(span.text)
+                # Ensure proper spacing between functions if not already included
+                if i < len(sorted_spans) - 1 and not span.text.endswith("\n\n"):
+                    if not span.text.endswith("\n"):
+                        result.append("\n")
+                    result.append("\n")
+            return result
+
+        if not self._has_mixed_visibility_functions(sorted_spans):
+            # Only add headers when both public and private functions exist
+            # Still ensure proper spacing between functions
+            result = []
+            for i, span in enumerate(sorted_spans):
+                result.append(span.text)
+                # Ensure proper spacing between functions if not already included
+                if i < len(sorted_spans) - 1 and not span.text.endswith("\n\n"):
+                    if not span.text.endswith("\n"):
+                        result.append("\n")  # pragma: no cover
+                    result.append("\n")
+            return result
+
+        result_lines: list[str] = []
+        current_visibility = None  # Track whether we're in public or private section
+
+        # Get appropriate header texts based on function type
+        if is_methods:
+            public_header = self.config.public_method_header
+            private_header = self.config.private_method_header
+        else:
+            public_header = self.config.public_header
+            private_header = self.config.private_header
+
+        for i, span in enumerate(sorted_spans):
+            is_private = utils.is_private_function(span.node)
+            section_visibility = "private" if is_private else "public"
+
+            # Add section header if we're entering a new section
+            if current_visibility != section_visibility:
+                # Add blank line before section header (except at the very beginning)
+                if result_lines:
+                    result_lines.append("\n")
+
+                # Add appropriate section header
+                if section_visibility == "public":
+                    result_lines.append(f"{public_header}\n\n")
+                else:
+                    result_lines.append(f"{private_header}\n\n")
+
+                current_visibility = section_visibility
+
+            # Add the function text
+            result_lines.append(span.text)
+
+        return result_lines
 
     def _extract_function_spans(
         self, functions: List[nodes.FunctionDef], lines: List[str]
@@ -313,6 +387,79 @@ class FunctionSorter:  # pylint: disable=too-many-public-methods,unsorted-method
 
         return comment_start_line
 
+    def _find_existing_section_headers(self, lines: List[str]) -> Dict[str, int]:
+        """Find existing section headers in the source lines.
+
+        Returns a mapping of header types to their line numbers (0-based).
+        This helps avoid duplicating headers during automatic insertion.
+
+        :param lines: Source file lines
+        :type lines: List[str]
+        :returns: Dictionary mapping header type to line number
+        :rtype: dict[str, int]
+        """
+        headers = {}
+
+        for i, line in enumerate(lines):
+            stripped = line.strip()
+            if not stripped.startswith("#"):
+                continue
+
+            # Check if this matches any of our configured header patterns
+            lower_line = stripped.lower()
+
+            # Check for public function headers
+            if any(
+                keyword in lower_line
+                for keyword in ["public functions", "public function"]
+            ):
+                headers["public_functions"] = i
+            # Check for private function headers
+            elif any(
+                keyword in lower_line
+                for keyword in ["private functions", "private function"]
+            ):
+                headers["private_functions"] = i
+            # Check for public method headers
+            elif any(
+                keyword in lower_line for keyword in ["public methods", "public method"]
+            ):
+                headers["public_methods"] = i
+            # Check for private method headers
+            elif any(
+                keyword in lower_line
+                for keyword in ["private methods", "private method"]
+            ):
+                headers["private_methods"] = i
+
+        return headers
+
+    def _has_mixed_visibility_functions(self, spans: List[FunctionSpan]) -> bool:
+        """Check if spans contain both public and private functions.
+
+        Only add section headers when there are both public and private functions,
+        as per the requirement in issue #9.
+
+        :param spans: List of function spans to analyze
+        :type spans: List[FunctionSpan]
+        :returns: True if both public and private functions exist
+        :rtype: bool
+        """
+        has_public = False
+        has_private = False
+
+        for span in spans:
+            if utils.is_private_function(span.node):
+                has_private = True
+            else:
+                has_public = True
+
+            # Early exit if we've found both types
+            if has_public and has_private:
+                return True
+
+        return False
+
     def _is_section_header_comment(self, comment_line: str) -> bool:
         """Check if a comment line is a section header.
 
@@ -366,153 +513,6 @@ class FunctionSorter:  # pylint: disable=too-many-public-methods,unsorted-method
                 return True
 
         return False
-
-    def _has_mixed_visibility_functions(self, spans: List[FunctionSpan]) -> bool:
-        """Check if spans contain both public and private functions.
-
-        Only add section headers when there are both public and private functions,
-        as per the requirement in issue #9.
-
-        :param spans: List of function spans to analyze
-        :type spans: List[FunctionSpan]
-        :returns: True if both public and private functions exist
-        :rtype: bool
-        """
-        has_public = False
-        has_private = False
-
-        for span in spans:
-            if utils.is_private_function(span.node):
-                has_private = True
-            else:
-                has_public = True
-
-            # Early exit if we've found both types
-            if has_public and has_private:
-                return True
-
-        return False
-
-    def _find_existing_section_headers(self, lines: List[str]) -> Dict[str, int]:
-        """Find existing section headers in the source lines.
-
-        Returns a mapping of header types to their line numbers (0-based).
-        This helps avoid duplicating headers during automatic insertion.
-
-        :param lines: Source file lines
-        :type lines: List[str]
-        :returns: Dictionary mapping header type to line number
-        :rtype: dict[str, int]
-        """
-        headers = {}
-
-        for i, line in enumerate(lines):
-            stripped = line.strip()
-            if not stripped.startswith("#"):
-                continue
-
-            # Check if this matches any of our configured header patterns
-            lower_line = stripped.lower()
-
-            # Check for public function headers
-            if any(
-                keyword in lower_line
-                for keyword in ["public functions", "public function"]
-            ):
-                headers["public_functions"] = i
-            # Check for private function headers
-            elif any(
-                keyword in lower_line
-                for keyword in ["private functions", "private function"]
-            ):
-                headers["private_functions"] = i
-            # Check for public method headers
-            elif any(
-                keyword in lower_line for keyword in ["public methods", "public method"]
-            ):
-                headers["public_methods"] = i
-            # Check for private method headers
-            elif any(
-                keyword in lower_line
-                for keyword in ["private methods", "private method"]
-            ):
-                headers["private_methods"] = i
-
-        return headers
-
-    def _add_section_headers_to_functions(  # pylint: disable=too-many-branches
-        self, sorted_spans: List[FunctionSpan], is_methods: bool = False
-    ) -> List[str]:
-        """Add section headers to sorted function spans.
-
-        Creates a list of lines that includes both section headers and function text,
-        organized with public functions first, then private functions.
-
-        :param sorted_spans: Function spans in sorted order (public first, then private)
-        :type sorted_spans: List[FunctionSpan]
-        :param is_methods: True if these are class methods, False for module functions
-        :type is_methods: bool
-        :returns: List of text lines with headers and functions
-        :rtype: List[str]
-        """
-        if not self.config.add_section_headers:
-            # If section headers are disabled, just return function texts with spacing
-            result = []
-            for i, span in enumerate(sorted_spans):
-                result.append(span.text)
-                # Ensure proper spacing between functions if not already included
-                if i < len(sorted_spans) - 1 and not span.text.endswith("\n\n"):
-                    if not span.text.endswith("\n"):
-                        result.append("\n")
-                    result.append("\n")
-            return result
-
-        if not self._has_mixed_visibility_functions(sorted_spans):
-            # Only add headers when both public and private functions exist
-            # Still ensure proper spacing between functions
-            result = []
-            for i, span in enumerate(sorted_spans):
-                result.append(span.text)
-                # Ensure proper spacing between functions if not already included
-                if i < len(sorted_spans) - 1 and not span.text.endswith("\n\n"):
-                    if not span.text.endswith("\n"):
-                        result.append("\n")  # pragma: no cover
-                    result.append("\n")
-            return result
-
-        result_lines: list[str] = []
-        current_visibility = None  # Track whether we're in public or private section
-
-        # Get appropriate header texts based on function type
-        if is_methods:
-            public_header = self.config.public_method_header
-            private_header = self.config.private_method_header
-        else:
-            public_header = self.config.public_header
-            private_header = self.config.private_header
-
-        for i, span in enumerate(sorted_spans):
-            is_private = utils.is_private_function(span.node)
-            section_visibility = "private" if is_private else "public"
-
-            # Add section header if we're entering a new section
-            if current_visibility != section_visibility:
-                # Add blank line before section header (except at the very beginning)
-                if result_lines:
-                    result_lines.append("\n")
-
-                # Add appropriate section header
-                if section_visibility == "public":
-                    result_lines.append(f"{public_header}\n\n")
-                else:
-                    result_lines.append(f"{private_header}\n\n")
-
-                current_visibility = section_visibility
-
-            # Add the function text
-            result_lines.append(span.text)
-
-        return result_lines
 
     def _reconstruct_class_with_sorted_methods(
         self,
