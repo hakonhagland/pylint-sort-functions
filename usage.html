@@ -46,12 +46,20 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">User Guide</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#installation">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#installation">Installation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#project-development-dependencies-recommended">Project Development Dependencies (Recommended)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#virtual-environment-installation">Virtual Environment Installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ci-cd-integration">CI/CD Integration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#standalone-auto-fix-tool">Standalone Auto-Fix Tool</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#quick-start">Quick Start</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#configuration">Configuration</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#using-pylintrc">Using .pylintrc</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#using-pyproject-toml">Using pyproject.toml</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#using-setup-cfg">Using setup.cfg</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#plugin-configuration-options">Plugin Configuration Options</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#configuration-options-reference">Configuration Options Reference</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#message-types">Message Types</a><ul>
@@ -82,6 +90,8 @@
 <li class="toctree-l2"><a class="reference internal" href="#best-practices">Best Practices</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#troubleshooting">Troubleshooting</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#plugin-not-loading">Plugin Not Loading</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#configuration-issues">Configuration Issues</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#privacy-detection-issues">Privacy Detection Issues</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#false-positives">False Positives</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#performance-issues">Performance Issues</a></li>
 </ul>
@@ -138,10 +148,74 @@
 <p>This guide explains how to use the <code class="docutils literal notranslate"><span class="pre">pylint-sort-functions</span></code> plugin to enforce function and method sorting in your Python code.</p>
 <section id="installation">
 <h2>Installation<a class="headerlink" href="#installation" title="Link to this heading"></a></h2>
-<p>Install the plugin using pip:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>pylint-sort-functions
+<p>Add <code class="docutils literal notranslate"><span class="pre">pylint-sort-functions</span></code> as a development dependency to enable function sorting enforcement in your PyLint workflow.</p>
+<section id="project-development-dependencies-recommended">
+<h3>Project Development Dependencies (Recommended)<a class="headerlink" href="#project-development-dependencies-recommended" title="Link to this heading"></a></h3>
+<p>The most common approach is adding the plugin to your project’s development dependencies, ensuring consistent code quality checks across your team and CI/CD pipeline.</p>
+<p><strong>Using pyproject.toml</strong> (Modern Python projects):</p>
+<div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span class="k">[tool.uv.dev-dependencies]</span>
+<span class="c1"># or [project.optional-dependencies.dev]</span>
+<span class="n">pylint-sort-functions</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;&gt;=1.0.0&quot;</span>
+<span class="n">pylint</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;&gt;=3.3.0&quot;</span><span class="w">  </span><span class="c1"># Required for the plugin</span>
 </pre></div>
 </div>
+<p><strong>Using Poetry</strong>:</p>
+<div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span class="k">[tool.poetry.group.dev.dependencies]</span>
+<span class="n">pylint-sort-functions</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;^1.0.0&quot;</span>
+<span class="n">pylint</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;^3.3.0&quot;</span>
+</pre></div>
+</div>
+<p><strong>Using requirements-dev.txt</strong>:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span># requirements-dev.txt
+pylint-sort-functions&gt;=1.0.0
+pylint&gt;=3.3.0
+</pre></div>
+</div>
+<p>Then install with your preferred dependency manager:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># uv (recommended)</span>
+uv<span class="w"> </span>sync
+
+<span class="c1"># Poetry</span>
+poetry<span class="w"> </span>install
+
+<span class="c1"># pip</span>
+pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>requirements-dev.txt
+</pre></div>
+</div>
+</section>
+<section id="virtual-environment-installation">
+<h3>Virtual Environment Installation<a class="headerlink" href="#virtual-environment-installation" title="Link to this heading"></a></h3>
+<p>For project-specific virtual environments without modern dependency management:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create and activate virtual environment</span>
+python<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>.venv
+<span class="nb">source</span><span class="w"> </span>.venv/bin/activate<span class="w">  </span><span class="c1"># Linux/macOS</span>
+<span class="c1"># .venv\Scripts\activate   # Windows</span>
+
+<span class="c1"># Install the plugin</span>
+pip<span class="w"> </span>install<span class="w"> </span>pylint-sort-functions<span class="w"> </span>pylint
+</pre></div>
+</div>
+</section>
+<section id="ci-cd-integration">
+<h3>CI/CD Integration<a class="headerlink" href="#ci-cd-integration" title="Link to this heading"></a></h3>
+<p>With development dependencies, your continuous integration automatically includes the plugin:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># GitHub Actions example</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Install dependencies</span>
+<span class="w">  </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">uv sync</span>
+
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Run PyLint with sorting checks</span>
+<span class="w">  </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">uv run pylint --load-plugins=pylint_sort_functions src/</span>
+</pre></div>
+</div>
+</section>
+<section id="standalone-auto-fix-tool">
+<h3>Standalone Auto-Fix Tool<a class="headerlink" href="#standalone-auto-fix-tool" title="Link to this heading"></a></h3>
+<p>The package also includes a standalone command-line tool for automatically fixing function order. For installation and usage details, see <a class="reference internal" href="cli.html"><span class="doc">Command Line Interface</span></a>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Most users should start with the PyLint plugin integration described in this guide. The standalone CLI tool is useful for one-time fixes or integration with other tools.</p>
+</div>
+</section>
 </section>
 <section id="quick-start">
 <h2>Quick Start<a class="headerlink" href="#quick-start" title="Link to this heading"></a></h2>
@@ -176,6 +250,39 @@
 <span class="na">load-plugins</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">pylint_sort_functions</span>
 </pre></div>
 </div>
+</section>
+<section id="plugin-configuration-options">
+<h3>Plugin Configuration Options<a class="headerlink" href="#plugin-configuration-options" title="Link to this heading"></a></h3>
+<p>The plugin supports several configuration options to customize its behavior:</p>
+<p><strong>Using pyproject.toml</strong> (Recommended):</p>
+<div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span class="k">[tool.pylint.MASTER]</span>
+<span class="n">load-plugins</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;pylint_sort_functions&quot;</span><span class="p">]</span>
+
+<span class="k">[tool.pylint.function-sort]</span>
+<span class="n">public-api-patterns</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;main&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;run&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;execute&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;start&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;stop&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;setup&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;teardown&quot;</span><span class="p">]</span>
+<span class="n">enable-privacy-detection</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span>
+</pre></div>
+</div>
+<p><strong>Using .pylintrc</strong>:</p>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[MASTER]</span>
+<span class="na">load-plugins</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">pylint_sort_functions</span>
+
+<span class="k">[function-sort]</span>
+<span class="na">public-api-patterns</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">main,run,execute,start,stop,setup,teardown</span>
+<span class="na">enable-privacy-detection</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">yes</span>
+</pre></div>
+</div>
+</section>
+<section id="configuration-options-reference">
+<h3>Configuration Options Reference<a class="headerlink" href="#configuration-options-reference" title="Link to this heading"></a></h3>
+<dl>
+<dt><strong>public-api-patterns</strong></dt><dd><p>List of function names to always treat as public API. These functions will not be flagged for privacy even if only used internally. Useful for entry points and framework callbacks.</p>
+<p><em>Default</em>: <code class="docutils literal notranslate"><span class="pre">[&quot;main&quot;,</span> <span class="pre">&quot;run&quot;,</span> <span class="pre">&quot;execute&quot;,</span> <span class="pre">&quot;start&quot;,</span> <span class="pre">&quot;stop&quot;,</span> <span class="pre">&quot;setup&quot;,</span> <span class="pre">&quot;teardown&quot;]</span></code></p>
+</dd>
+<dt><strong>enable-privacy-detection</strong></dt><dd><p>Enable detection of functions that should be made private based on usage analysis. When enabled, the plugin analyzes cross-module imports to identify functions only used within their defining module.</p>
+<p><em>Default</em>: <code class="docutils literal notranslate"><span class="pre">true</span></code></p>
+</dd>
+</dl>
 </section>
 </section>
 <section id="message-types">
@@ -483,16 +590,43 @@ pylint<span class="w"> </span>--load-plugins<span class="o">=</span>pylint_sort_
 <ol class="arabic simple">
 <li><p>Installation: <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">show</span> <span class="pre">pylint-sort-functions</span></code></p></li>
 <li><p>Python path: <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">-c</span> <span class="pre">&quot;import</span> <span class="pre">pylint_sort_functions&quot;</span></code></p></li>
-<li><p>PyLint version: <code class="docutils literal notranslate"><span class="pre">pylint</span> <span class="pre">--version</span></code> (requires PyLint 2.0+)</p></li>
+<li><p>PyLint version: <code class="docutils literal notranslate"><span class="pre">pylint</span> <span class="pre">--version</span></code> (requires PyLint &gt;=3.3.0)</p></li>
+<li><p>Python version: <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">--version</span></code> (requires Python &gt;=3.11)</p></li>
+</ol>
+</section>
+<section id="configuration-issues">
+<h3>Configuration Issues<a class="headerlink" href="#configuration-issues" title="Link to this heading"></a></h3>
+<p>If plugin configuration options aren’t being recognized:</p>
+<ol class="arabic simple">
+<li><p>Verify configuration section name: <code class="docutils literal notranslate"><span class="pre">[tool.pylint.function-sort]</span></code></p></li>
+<li><p>Check option names: <code class="docutils literal notranslate"><span class="pre">public-api-patterns</span></code>, <code class="docutils literal notranslate"><span class="pre">enable-privacy-detection</span></code></p></li>
+<li><p>Restart your IDE/editor after configuration changes</p></li>
+<li><p>Test configuration: <code class="docutils literal notranslate"><span class="pre">pylint</span> <span class="pre">--help</span></code> should show plugin options</p></li>
+</ol>
+</section>
+<section id="privacy-detection-issues">
+<h3>Privacy Detection Issues<a class="headerlink" href="#privacy-detection-issues" title="Link to this heading"></a></h3>
+<p>If <code class="docutils literal notranslate"><span class="pre">function-should-be-private</span></code> messages aren’t appearing:</p>
+<ol class="arabic simple">
+<li><p>Verify privacy detection is enabled: <code class="docutils literal notranslate"><span class="pre">enable-privacy-detection=y</span></code></p></li>
+<li><p>Check that files are part of a Python project with project markers (pyproject.toml, setup.py, etc.)</p></li>
+<li><p>Ensure functions aren’t in test files (automatically excluded)</p></li>
+<li><p>Verify functions aren’t matching public API patterns</p></li>
 </ol>
 </section>
 <section id="false-positives">
 <h3>False Positives<a class="headerlink" href="#false-positives" title="Link to this heading"></a></h3>
 <p>If you get false positives for <code class="docutils literal notranslate"><span class="pre">function-should-be-private</span></code>:</p>
-<ol class="arabic simple">
+<ol class="arabic">
 <li><p>Ensure your <code class="docutils literal notranslate"><span class="pre">__init__.py</span></code> files properly export public APIs</p></li>
 <li><p>The detection is conservative and won’t flag functions used across modules</p></li>
-<li><p>Use inline disables for legitimate cases</p></li>
+<li><p>Configure public API patterns if you have custom entry points:</p>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[tool.pylint.function-sort]</span>
+<span class="na">public-api-patterns</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">[&quot;main&quot;, &quot;run&quot;, &quot;setup&quot;, &quot;custom_entry&quot;]</span>
+</pre></div>
+</div>
+</li>
+<li><p>Use inline disables for legitimate cases: <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">pylint:</span> <span class="pre">disable=function-should-be-private</span></code></p></li>
 </ol>
 </section>
 <section id="performance-issues">
