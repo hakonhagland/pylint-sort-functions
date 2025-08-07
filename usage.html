@@ -600,9 +600,9 @@ make<span class="w"> </span>self-check
 <li><p><strong>Framework Exceptions</strong>: Some frameworks require specific ordering. In these cases:</p>
 <ul class="simple">
 <li><p>Document why the order is required</p></li>
-<li><p>Disable the check for those specific functions</p></li>
+<li><p>Configure decorator exclusions in your project (see <a class="reference internal" href="pylintrc.html"><span class="doc">PyLint Configuration</span></a>)</p></li>
 <li><p>Use the CLI auto-fix tool with decorator exclusions: <code class="docutils literal notranslate"><span class="pre">pylint-sort-functions</span> <span class="pre">--fix</span> <span class="pre">--ignore-decorators</span> <span class="pre">&quot;&#64;app.route&quot;</span></code> (see <a class="reference internal" href="cli.html"><span class="doc">Auto-Fix Tool Reference</span></a>)</p></li>
-<li><p><strong>Note</strong>: Decorator exclusions are currently CLI-only. See <a class="reference external" href="https://github.com/hakonhagland/pylint-sort-functions/issues/13">GitHub Issue #13</a> for PyLint plugin support.</p></li>
+<li><p><strong>Note</strong>: Decorator exclusions are available in both PyLint plugin and CLI tool for consistent behavior.</p></li>
 </ul>
 </li>
 <li><p><strong>Test Organization</strong>: Apply the same principles to test files for consistency:</p>

@@ -309,20 +309,15 @@ when used with PyLint.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pylint-sort-functions<span class="w"> </span>--ignore-decorators<span class="w"> </span><span class="s2">&quot;@app.route,@app.before_request&quot;</span><span class="w"> </span>src/
 </pre></div>
 </div>
-<p><strong>PyLint plugin configuration (decorator exclusions ignored):</strong></p>
+<p><strong>PyLint plugin configuration with decorator exclusions:</strong></p>
 <div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[MASTER]</span>
 <span class="na">load-plugins</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">pylint_sort_functions</span>
 
 <span class="k">[MESSAGES CONTROL]</span>
 <span class="na">enable</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">unsorted-functions,unsorted-methods,mixed-function-visibility</span>
 
-<span class="k">[pylint-sort-functions]</span>
-<span class="c1"># WARNING: ignore-decorators is ignored by PyLint plugin</span>
-<span class="na">ignore-decorators</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">@app.route</span>
-<span class="w">                   </span><span class="na">@app.before_request</span>
-<span class="w">                   </span><span class="na">@app.after_request</span>
-<span class="w">                   </span><span class="na">@app.errorhandler</span>
-<span class="w">                   </span><span class="na">@app.teardown_appcontext</span>
+<span class="k">[function-sort]</span>
+<span class="na">ignore-decorators</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">@app.route,@app.before_request,@app.after_request,@app.errorhandler,@app.teardown_appcontext</span>
 </pre></div>
 </div>
 <div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span class="k">[tool.pylint.MASTER]</span>
@@ -331,8 +326,7 @@ when used with PyLint.</p>
 <span class="k">[tool.pylint.</span><span class="s2">&quot;messages control&quot;</span><span class="k">]</span>
 <span class="n">enable</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;unsorted-functions&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;unsorted-methods&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;mixed-function-visibility&quot;</span><span class="p">]</span>
 
-<span class="k">[tool.pylint-sort-functions]</span>
-<span class="c1"># WARNING: ignore-decorators is ignored by PyLint plugin</span>
+<span class="k">[tool.pylint.</span><span class="s2">&quot;function-sort&quot;</span><span class="k">]</span>
 <span class="n">ignore-decorators</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span>
 <span class="w">    </span><span class="s2">&quot;@app.route&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="s2">&quot;@app.before_request&quot;</span><span class="p">,</span>
@@ -349,20 +343,15 @@ when used with PyLint.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pylint-sort-functions<span class="w"> </span>--ignore-decorators<span class="w"> </span><span class="s2">&quot;@*.command,@*.group,@*.option&quot;</span><span class="w"> </span>src/
 </pre></div>
 </div>
-<p><strong>PyLint plugin configuration (decorator exclusions ignored):</strong></p>
+<p><strong>PyLint plugin configuration with decorator exclusions:</strong></p>
 <div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[MASTER]</span>
 <span class="na">load-plugins</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">pylint_sort_functions</span>
 
-<span class="k">[pylint-sort-functions]</span>
-<span class="c1"># WARNING: ignore-decorators is ignored by PyLint plugin</span>
-<span class="na">ignore-decorators</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">@*.command</span>
-<span class="w">                   </span><span class="na">@*.group</span>
-<span class="w">                   </span><span class="na">@*.option</span>
-<span class="w">                   </span><span class="na">@*.argument</span>
+<span class="k">[function-sort]</span>
+<span class="na">ignore-decorators</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">@*.command,@*.group,@*.option,@*.argument</span>
 </pre></div>
 </div>
-<div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span class="k">[tool.pylint-sort-functions]</span>
-<span class="c1"># WARNING: ignore-decorators is ignored by PyLint plugin</span>
+<div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span class="k">[tool.pylint.</span><span class="s2">&quot;function-sort&quot;</span><span class="k">]</span>
 <span class="n">ignore-decorators</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span>
 <span class="w">    </span><span class="s2">&quot;@*.command&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="s2">&quot;@*.group&quot;</span><span class="p">,</span>
@@ -378,14 +367,9 @@ when used with PyLint.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pylint-sort-functions<span class="w"> </span>--ignore-decorators<span class="w"> </span><span class="s2">&quot;@login_required,@csrf_exempt&quot;</span><span class="w"> </span>src/
 </pre></div>
 </div>
-<p><strong>PyLint plugin configuration (decorator exclusions ignored):</strong></p>
-<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[pylint-sort-functions]</span>
-<span class="c1"># WARNING: ignore-decorators is ignored by PyLint plugin</span>
-<span class="na">ignore-decorators</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">@login_required</span>
-<span class="w">                   </span><span class="na">@csrf_exempt</span>
-<span class="w">                   </span><span class="na">@require_http_methods</span>
-<span class="w">                   </span><span class="na">@cache_page</span>
-<span class="w">                   </span><span class="na">@vary_on_headers</span>
+<p><strong>PyLint plugin configuration with decorator exclusions:</strong></p>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[function-sort]</span>
+<span class="na">ignore-decorators</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">@login_required,@csrf_exempt,@require_http_methods,@cache_page,@vary_on_headers</span>
 </pre></div>
 </div>
 </section>
