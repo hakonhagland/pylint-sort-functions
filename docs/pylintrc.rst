@@ -36,7 +36,7 @@ Add the plugin to your PyLint configuration:
 Message Control
 ---------------
 
-The plugin defines three message types that can be individually controlled:
+The plugin defines four message types that can be individually controlled:
 
 Message Types
 ~~~~~~~~~~~~~
@@ -50,6 +50,9 @@ W9002: unsorted-methods
 W9003: mixed-function-visibility
   Public and private functions/methods are not properly separated.
 
+W9004: function-should-be-private
+  Function appears to be internal-only based on usage analysis and should be renamed with underscore prefix.
+
 Enabling Messages
 ~~~~~~~~~~~~~~~~~
 
@@ -59,7 +62,7 @@ Enabling Messages
 
    [MESSAGES CONTROL]
    # Enable all sorting messages
-   enable = unsorted-functions,unsorted-methods,mixed-function-visibility
+   enable = unsorted-functions,unsorted-methods,mixed-function-visibility,function-should-be-private
 
    # Or enable specific messages only
    enable = unsorted-functions
@@ -72,7 +75,8 @@ Enabling Messages
    enable = [
        "unsorted-functions",
        "unsorted-methods",
-       "mixed-function-visibility"
+       "mixed-function-visibility",
+       "function-should-be-private"
    ]
 
 Disabling Messages
@@ -87,7 +91,7 @@ Disabling Messages
    disable = unsorted-methods
 
    # Disable all sorting messages
-   disable = unsorted-functions,unsorted-methods,mixed-function-visibility
+   disable = unsorted-functions,unsorted-methods,mixed-function-visibility,function-should-be-private
 
 **pyproject.toml:**
 
@@ -102,27 +106,33 @@ Plugin-Specific Configuration
 Decorator Exclusions
 ~~~~~~~~~~~~~~~~~~~~
 
-Configure patterns for decorators that should be excluded from sorting requirements.
-This is essential for framework compatibility where decorator order matters.
+.. warning::
+   **IMPORTANT**: Decorator exclusion patterns (``ignore-decorators``) are currently only supported in the **CLI tool**, not in the PyLint plugin.
 
-**.pylintrc:**
+   The PyLint plugin will **ignore** these configurations and sort decorated functions normally. For framework compatibility, use the CLI auto-fix tool instead.
+
+   See `GitHub Issue #13 <https://github.com/hakonhagland/pylint-sort-functions/issues/13>`_ for plugin implementation status.
+
+The ``ignore-decorators`` option configures patterns for decorators that should be excluded from sorting requirements in the **CLI tool only**. This is essential for framework compatibility where decorator order matters.
+
+**CLI tool usage (works):**
+
+.. code-block:: bash
+
+   pylint-sort-functions --ignore-decorators "@app.route,@*.command" src/
+
+**PyLint plugin configuration (currently ignored):**
 
 .. code-block:: ini
 
    [pylint-sort-functions]
-   # Exclude Flask routes and Click commands
+   # WARNING: This configuration is ignored by the PyLint plugin
    ignore-decorators = @app.route,@*.command,@pytest.fixture
-
-   # Multiple patterns on separate lines
-   ignore-decorators = @app.route
-                      @*.command
-                      @pytest.fixture
-
-**pyproject.toml:**
 
 .. code-block:: toml
 
    [tool.pylint-sort-functions]
+   # WARNING: This configuration is ignored by the PyLint plugin
    ignore-decorators = [
        "@app.route",
        "@*.command",
@@ -140,18 +150,18 @@ Configure the privacy detection feature that suggests functions should be made p
 
    [pylint-sort-functions]
    # Enable privacy detection (default: true)
-   check-privacy = yes
+   enable-privacy-detection = yes
 
-   # Custom public API patterns (future feature)
-   public-patterns = main,run,execute,setup,teardown,init
+   # Custom public API patterns
+   public-api-patterns = main,run,execute,setup,teardown,init
 
 **pyproject.toml:**
 
 .. code-block:: toml
 
    [tool.pylint-sort-functions]
-   check-privacy = true
-   public-patterns = ["main", "run", "execute", "setup", "teardown"]
+   enable-privacy-detection = true
+   public-api-patterns = ["main", "run", "execute", "setup", "teardown"]
 
 Directory Exclusions
 ~~~~~~~~~~~~~~~~~~~~~
@@ -180,10 +190,25 @@ Configure which directories to skip during import analysis (future feature):
 Framework-Specific Configurations
 ---------------------------------
 
+.. warning::
+   **CRITICAL LIMITATION**: All framework configurations below show ``ignore-decorators`` options that **do not work** in the PyLint plugin. These configurations are only supported in the CLI tool.
+
+   For framework compatibility:
+
+   * **Use CLI tool**: ``pylint-sort-functions --ignore-decorators "@app.route" src/``
+   * **PyLint plugin**: Will sort ALL functions regardless of decorators
+   * **Tracking**: `GitHub Issue #13 <https://github.com/hakonhagland/pylint-sort-functions/issues/13>`_
+
 Flask Applications
 ~~~~~~~~~~~~~~~~~~
 
-**.pylintrc:**
+**Working CLI tool usage:**
+
+.. code-block:: bash
+
+   pylint-sort-functions --ignore-decorators "@app.route,@app.before_request" src/
+
+**PyLint plugin configuration (decorator exclusions ignored):**
 
 .. code-block:: ini
 
@@ -194,13 +219,12 @@ Flask Applications
    enable = unsorted-functions,unsorted-methods,mixed-function-visibility
 
    [pylint-sort-functions]
+   # WARNING: ignore-decorators is ignored by PyLint plugin
    ignore-decorators = @app.route
                       @app.before_request
                       @app.after_request
                       @app.errorhandler
                       @app.teardown_appcontext
-
-**pyproject.toml:**
 
 .. code-block:: toml
 
@@ -211,6 +235,7 @@ Flask Applications
    enable = ["unsorted-functions", "unsorted-methods", "mixed-function-visibility"]
 
    [tool.pylint-sort-functions]
+   # WARNING: ignore-decorators is ignored by PyLint plugin
    ignore-decorators = [
        "@app.route",
        "@app.before_request",
@@ -222,7 +247,13 @@ Flask Applications
 Click CLI Applications
 ~~~~~~~~~~~~~~~~~~~~~~
 
-**.pylintrc:**
+**Working CLI tool usage:**
+
+.. code-block:: bash
+
+   pylint-sort-functions --ignore-decorators "@*.command,@*.group,@*.option" src/
+
+**PyLint plugin configuration (decorator exclusions ignored):**
 
 .. code-block:: ini
 
@@ -230,16 +261,16 @@ Click CLI Applications
    load-plugins = pylint_sort_functions
 
    [pylint-sort-functions]
+   # WARNING: ignore-decorators is ignored by PyLint plugin
    ignore-decorators = @*.command
                       @*.group
                       @*.option
                       @*.argument
 
-**pyproject.toml:**
-
 .. code-block:: toml
 
    [tool.pylint-sort-functions]
+   # WARNING: ignore-decorators is ignored by PyLint plugin
    ignore-decorators = [
        "@*.command",
        "@*.group",
@@ -250,11 +281,18 @@ Click CLI Applications
 Django Applications
 ~~~~~~~~~~~~~~~~~~~
 
-**.pylintrc:**
+**Working CLI tool usage:**
+
+.. code-block:: bash
+
+   pylint-sort-functions --ignore-decorators "@login_required,@csrf_exempt" src/
+
+**PyLint plugin configuration (decorator exclusions ignored):**
 
 .. code-block:: ini
 
    [pylint-sort-functions]
+   # WARNING: ignore-decorators is ignored by PyLint plugin
    ignore-decorators = @login_required
                       @csrf_exempt
                       @require_http_methods
@@ -264,11 +302,18 @@ Django Applications
 FastAPI Applications
 ~~~~~~~~~~~~~~~~~~~~
 
-**.pylintrc:**
+**Working CLI tool usage:**
+
+.. code-block:: bash
+
+   pylint-sort-functions --ignore-decorators "@app.get,@app.post" src/
+
+**PyLint plugin configuration (decorator exclusions ignored):**
 
 .. code-block:: ini
 
    [pylint-sort-functions]
+   # WARNING: ignore-decorators is ignored by PyLint plugin
    ignore-decorators = @app.get
                       @app.post
                       @app.put
@@ -279,11 +324,18 @@ FastAPI Applications
 Pytest Test Configuration
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-**.pylintrc:**
+**Working CLI tool usage:**
+
+.. code-block:: bash
+
+   pylint-sort-functions --ignore-decorators "@pytest.fixture,@pytest.mark.*" src/
+
+**PyLint plugin configuration (decorator exclusions ignored):**
 
 .. code-block:: ini
 
    [pylint-sort-functions]
+   # WARNING: ignore-decorators is ignored by PyLint plugin
    ignore-decorators = @pytest.fixture
                       @pytest.mark.*
                       @pytest.parametrize
