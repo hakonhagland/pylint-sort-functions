@@ -84,8 +84,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#message-reporting">Message Reporting</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#sorting-logic">Sorting Logic</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#function-organization-rules">Function Organization Rules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#sorting-algorithm">Sorting Algorithm</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#framework-integration">Framework Integration</a></li>
 </ul>
 </li>
@@ -525,36 +524,17 @@ The plugin includes sophisticated import analysis to suggest when public functio
 <code class="docutils literal notranslate"><span class="pre">W9001:</span> <span class="pre">Functions</span> <span class="pre">are</span> <span class="pre">not</span> <span class="pre">sorted</span> <span class="pre">alphabetically</span> <span class="pre">in</span> <span class="pre">module</span> <span class="pre">scope</span> <span class="pre">(unsorted-functions)</span></code></p>
 </section>
 </section>
-<section id="sorting-logic">
-<h2>Sorting Logic<a class="headerlink" href="#sorting-logic" title="Link to this heading"></a></h2>
-<section id="function-organization-rules">
-<h3>Function Organization Rules<a class="headerlink" href="#function-organization-rules" title="Link to this heading"></a></h3>
-<p>The plugin enforces these rules:</p>
-<ol class="arabic simple">
-<li><p><strong>Visibility Separation</strong>: Public functions (no underscore) before private functions (underscore prefix)</p></li>
-<li><p><strong>Alphabetical Sorting</strong>: Within each visibility scope, functions are sorted alphabetically</p></li>
-<li><p><strong>Decorator Awareness</strong>: Functions with certain decorators can be excluded from sorting</p></li>
-</ol>
-<p>Example of correct organization:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Public functions (alphabetically sorted)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">calculate_total</span><span class="p">():</span>
-    <span class="k">pass</span>
-
-<span class="k">def</span><span class="w"> </span><span class="nf">process_data</span><span class="p">():</span>
-    <span class="k">pass</span>
-
-<span class="k">def</span><span class="w"> </span><span class="nf">validate_input</span><span class="p">():</span>
-    <span class="k">pass</span>
-
-<span class="c1"># Private functions (alphabetically sorted)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">_format_output</span><span class="p">():</span>
-    <span class="k">pass</span>
-
-<span class="k">def</span><span class="w"> </span><span class="nf">_helper_function</span><span class="p">():</span>
-    <span class="k">pass</span>
-</pre></div>
-</div>
-</section>
+<section id="sorting-algorithm">
+<h2>Sorting Algorithm<a class="headerlink" href="#sorting-algorithm" title="Link to this heading"></a></h2>
+<p>The plugin implements a comprehensive sorting algorithm for organizing Python functions and methods. For complete details about sorting rules, examples, and configuration options, see <a class="reference internal" href="sorting.html"><span class="doc">Function and Method Sorting Algorithm</span></a>.</p>
+<p><strong>Key Implementation Points:</strong></p>
+<ul class="simple">
+<li><p><strong>Dual-Level Processing</strong>: Handles both module-level functions and class methods</p></li>
+<li><p><strong>AST-Based Analysis</strong>: Uses <code class="docutils literal notranslate"><span class="pre">astroid</span></code> for consistent parsing with PyLint</p></li>
+<li><p><strong>Comment Preservation</strong>: Maintains function-associated comments during reordering</p></li>
+<li><p><strong>Section Header Integration</strong>: Optional automatic insertion of organizational headers</p></li>
+<li><p><strong>Framework Compatibility</strong>: Supports decorator-based exclusions for frameworks</p></li>
+</ul>
 <section id="framework-integration">
 <h3>Framework Integration<a class="headerlink" href="#framework-integration" title="Link to this heading"></a></h3>
 <p>The plugin supports framework-aware sorting through decorator exclusions:</p>

@@ -208,28 +208,147 @@ The auto-fix tool preserves comments associated with functions during reordering
    def zebra_function():
        pass
 
-Section Headers (Future Enhancement)
-------------------------------------
+Automatic Section Headers
+--------------------------
 
-A future enhancement may add support for automatic section header comments:
+The auto-fix tool can automatically insert section header comments to improve code organization
+and make the visibility separation more explicit.
+
+Configuration
+~~~~~~~~~~~~~
+
+Section headers are configured through the ``AutoFixConfig`` class or CLI arguments:
+
+**Programmatic Configuration:**
 
 .. code-block:: python
 
+   from pylint_sort_functions.auto_fix import AutoFixConfig, FunctionSorter
+
+   config = AutoFixConfig(
+       add_section_headers=True,                    # Enable section headers
+       public_header="# Public functions",         # Header for public functions
+       private_header="# Private functions",       # Header for private functions
+       public_method_header="# Public methods",    # Header for public methods
+       private_method_header="# Private methods"   # Header for private methods
+   )
+
+   sorter = FunctionSorter(config)
+   sorter.sort_file(Path("myfile.py"))
+
+**CLI Configuration:**
+
+.. code-block:: bash
+
+   # Enable section headers with default text
+   pylint-sort-functions --fix --add-section-headers myfile.py
+
+   # Customize header text
+   pylint-sort-functions --fix --add-section-headers \
+       --public-header "=== PUBLIC API ===" \
+       --private-header "=== INTERNAL HELPERS ===" \
+       myfile.py
+
+   # Separate headers for functions vs methods
+   pylint-sort-functions --fix --add-section-headers \
+       --public-method-header ">>> Public Methods <<<" \
+       --private-method-header ">>> Private Methods <<<" \
+       myfile.py
+
+When Headers Are Added
+~~~~~~~~~~~~~~~~~~~~~~~
+
+Section headers are automatically inserted **only when both public and private functions/methods
+exist in the same scope**. This smart behavior ensures headers add value by clearly separating
+different visibility levels, while avoiding unnecessary headers for single-visibility scopes.
+
+**Headers added:**
+- Module with both public and private functions ✓
+- Class with both public and private methods ✓
+
+**Headers NOT added:**
+- Module with only public functions ✗
+- Module with only private functions ✗
+- Class with only public methods ✗
+- Class with only private methods ✗
+
+Examples
+~~~~~~~~
+
+**Before auto-fix (unsorted mixed functions):**
+
+.. code-block:: python
+
+   """User management module."""
+
+   def zebra_function():
+       """A public function."""
+       return "zebra"
+
+   def alpha_function():
+       """Another public function."""
+       return "alpha"
+
+   def _zebra_private():
+       """A private helper function."""
+       return "_zebra"
+
+   def _alpha_private():
+       """Another private helper."""
+       return "_alpha"
+
+**After auto-fix with section headers enabled:**
+
+.. code-block:: python
+
+   """User management module."""
+
    # Public functions
 
-   def calculate_total(items):
-       pass
+   def alpha_function():
+       """Another public function."""
+       return "alpha"
 
-   def validate_input(data):
-       pass
+   def zebra_function():
+       """A public function."""
+       return "zebra"
+
 
    # Private functions
 
-   def _format_error(error):
-       pass
+   def _alpha_private():
+       """Another private helper."""
+       return "_alpha"
 
-   def _log_operation(op):
-       pass
+   def _zebra_private():
+       """A private helper function."""
+       return "_zebra"
+
+**Class method example:**
+
+.. code-block:: python
+
+   class UserService:
+       """Service for user management."""
+
+       # Public methods
+
+       def create_user(self, data):
+           return self._validate_user_data(data)
+
+       def get_user(self, user_id):
+           return self._fetch_from_db(user_id)
+
+
+       # Private methods
+
+       def _fetch_from_db(self, user_id):
+           # Database access logic
+           pass
+
+       def _validate_user_data(self, data):
+           # Validation logic
+           pass
 
 Message Types
 -------------

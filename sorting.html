@@ -73,14 +73,19 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#comment-preservation">Comment Preservation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#section-headers-future-enhancement">Section Headers (Future Enhancement)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#automatic-section-headers">Automatic Section Headers</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#configuration">Configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#when-headers-are-added">When Headers Are Added</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#examples">Examples</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#message-types">Message Types</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#w9001-unsorted-functions">W9001: unsorted-functions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#w9002-unsorted-methods">W9002: unsorted-methods</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#w9003-mixed-function-visibility">W9003: mixed-function-visibility</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#configuration">Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id1">Configuration</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#cli-tool">CLI Tool</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#benefits">Benefits</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#consistency">Consistency</a></li>
@@ -315,26 +320,132 @@ This is essential for framework compatibility where decorator order matters.</p>
 </pre></div>
 </div>
 </section>
-<section id="section-headers-future-enhancement">
-<h2>Section Headers (Future Enhancement)<a class="headerlink" href="#section-headers-future-enhancement" title="Link to this heading"></a></h2>
-<p>A future enhancement may add support for automatic section header comments:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Public functions</span>
+<section id="automatic-section-headers">
+<h2>Automatic Section Headers<a class="headerlink" href="#automatic-section-headers" title="Link to this heading"></a></h2>
+<p>The auto-fix tool can automatically insert section header comments to improve code organization
+and make the visibility separation more explicit.</p>
+<section id="configuration">
+<h3>Configuration<a class="headerlink" href="#configuration" title="Link to this heading"></a></h3>
+<p>Section headers are configured through the <code class="docutils literal notranslate"><span class="pre">AutoFixConfig</span></code> class or CLI arguments:</p>
+<p><strong>Programmatic Configuration:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pylint_sort_functions.auto_fix</span><span class="w"> </span><span class="kn">import</span> <span class="n">AutoFixConfig</span><span class="p">,</span> <span class="n">FunctionSorter</span>
 
-<span class="k">def</span><span class="w"> </span><span class="nf">calculate_total</span><span class="p">(</span><span class="n">items</span><span class="p">):</span>
-    <span class="k">pass</span>
+<span class="n">config</span> <span class="o">=</span> <span class="n">AutoFixConfig</span><span class="p">(</span>
+    <span class="n">add_section_headers</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>                    <span class="c1"># Enable section headers</span>
+    <span class="n">public_header</span><span class="o">=</span><span class="s2">&quot;# Public functions&quot;</span><span class="p">,</span>         <span class="c1"># Header for public functions</span>
+    <span class="n">private_header</span><span class="o">=</span><span class="s2">&quot;# Private functions&quot;</span><span class="p">,</span>       <span class="c1"># Header for private functions</span>
+    <span class="n">public_method_header</span><span class="o">=</span><span class="s2">&quot;# Public methods&quot;</span><span class="p">,</span>    <span class="c1"># Header for public methods</span>
+    <span class="n">private_method_header</span><span class="o">=</span><span class="s2">&quot;# Private methods&quot;</span>   <span class="c1"># Header for private methods</span>
+<span class="p">)</span>
 
-<span class="k">def</span><span class="w"> </span><span class="nf">validate_input</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
-    <span class="k">pass</span>
+<span class="n">sorter</span> <span class="o">=</span> <span class="n">FunctionSorter</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+<span class="n">sorter</span><span class="o">.</span><span class="n">sort_file</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;myfile.py&quot;</span><span class="p">))</span>
+</pre></div>
+</div>
+<p><strong>CLI Configuration:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Enable section headers with default text</span>
+pylint-sort-functions<span class="w"> </span>--fix<span class="w"> </span>--add-section-headers<span class="w"> </span>myfile.py
+
+<span class="c1"># Customize header text</span>
+pylint-sort-functions<span class="w"> </span>--fix<span class="w"> </span>--add-section-headers<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--public-header<span class="w"> </span><span class="s2">&quot;=== PUBLIC API ===&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--private-header<span class="w"> </span><span class="s2">&quot;=== INTERNAL HELPERS ===&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>myfile.py
+
+<span class="c1"># Separate headers for functions vs methods</span>
+pylint-sort-functions<span class="w"> </span>--fix<span class="w"> </span>--add-section-headers<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--public-method-header<span class="w"> </span><span class="s2">&quot;&gt;&gt;&gt; Public Methods &lt;&lt;&lt;&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--private-method-header<span class="w"> </span><span class="s2">&quot;&gt;&gt;&gt; Private Methods &lt;&lt;&lt;&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>myfile.py
+</pre></div>
+</div>
+</section>
+<section id="when-headers-are-added">
+<h3>When Headers Are Added<a class="headerlink" href="#when-headers-are-added" title="Link to this heading"></a></h3>
+<p>Section headers are automatically inserted <strong>only when both public and private functions/methods
+exist in the same scope</strong>. This smart behavior ensures headers add value by clearly separating
+different visibility levels, while avoiding unnecessary headers for single-visibility scopes.</p>
+<p><strong>Headers added:</strong>
+- Module with both public and private functions ✓
+- Class with both public and private methods ✓</p>
+<p><strong>Headers NOT added:</strong>
+- Module with only public functions ✗
+- Module with only private functions ✗
+- Class with only public methods ✗
+- Class with only private methods ✗</p>
+</section>
+<section id="examples">
+<h3>Examples<a class="headerlink" href="#examples" title="Link to this heading"></a></h3>
+<p><strong>Before auto-fix (unsorted mixed functions):</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;User management module.&quot;&quot;&quot;</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">zebra_function</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A public function.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="s2">&quot;zebra&quot;</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">alpha_function</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Another public function.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="s2">&quot;alpha&quot;</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_zebra_private</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A private helper function.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="s2">&quot;_zebra&quot;</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_alpha_private</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Another private helper.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="s2">&quot;_alpha&quot;</span>
+</pre></div>
+</div>
+<p><strong>After auto-fix with section headers enabled:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;User management module.&quot;&quot;&quot;</span>
+
+<span class="c1"># Public functions</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">alpha_function</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Another public function.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="s2">&quot;alpha&quot;</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">zebra_function</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A public function.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="s2">&quot;zebra&quot;</span>
+
 
 <span class="c1"># Private functions</span>
 
-<span class="k">def</span><span class="w"> </span><span class="nf">_format_error</span><span class="p">(</span><span class="n">error</span><span class="p">):</span>
-    <span class="k">pass</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_alpha_private</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Another private helper.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="s2">&quot;_alpha&quot;</span>
 
-<span class="k">def</span><span class="w"> </span><span class="nf">_log_operation</span><span class="p">(</span><span class="n">op</span><span class="p">):</span>
-    <span class="k">pass</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_zebra_private</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A private helper function.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="s2">&quot;_zebra&quot;</span>
 </pre></div>
 </div>
+<p><strong>Class method example:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">UserService</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Service for user management.&quot;&quot;&quot;</span>
+
+    <span class="c1"># Public methods</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">create_user</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_validate_user_data</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_user</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">user_id</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fetch_from_db</span><span class="p">(</span><span class="n">user_id</span><span class="p">)</span>
+
+
+    <span class="c1"># Private methods</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_fetch_from_db</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">user_id</span><span class="p">):</span>
+        <span class="c1"># Database access logic</span>
+        <span class="k">pass</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_validate_user_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="c1"># Validation logic</span>
+        <span class="k">pass</span>
+</pre></div>
+</div>
+</section>
 </section>
 <section id="message-types">
 <h2>Message Types<a class="headerlink" href="#message-types" title="Link to this heading"></a></h2>
@@ -352,8 +463,8 @@ This is essential for framework compatibility where decorator order matters.</p>
 <p>Public and private functions are not properly separated (public must come before private).</p>
 </section>
 </section>
-<section id="configuration">
-<h2>Configuration<a class="headerlink" href="#configuration" title="Link to this heading"></a></h2>
+<section id="id1">
+<h2>Configuration<a class="headerlink" href="#id1" title="Link to this heading"></a></h2>
 <p>See <a class="reference internal" href="pylintrc.html"><span class="doc">PyLint Configuration</span></a> for complete configuration options including:</p>
 <ul class="simple">
 <li><p>Enabling/disabling specific message types</p></li>

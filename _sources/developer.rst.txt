@@ -398,38 +398,18 @@ When violations are found, the checker reports them to PyLint:
 This creates output like:
 ``W9001: Functions are not sorted alphabetically in module scope (unsorted-functions)``
 
-Sorting Logic
--------------
+Sorting Algorithm
+-----------------
 
-Function Organization Rules
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+The plugin implements a comprehensive sorting algorithm for organizing Python functions and methods. For complete details about sorting rules, examples, and configuration options, see :doc:`sorting`.
 
-The plugin enforces these rules:
+**Key Implementation Points:**
 
-1. **Visibility Separation**: Public functions (no underscore) before private functions (underscore prefix)
-2. **Alphabetical Sorting**: Within each visibility scope, functions are sorted alphabetically
-3. **Decorator Awareness**: Functions with certain decorators can be excluded from sorting
-
-Example of correct organization:
-
-.. code-block:: python
-
-    # Public functions (alphabetically sorted)
-    def calculate_total():
-        pass
-
-    def process_data():
-        pass
-
-    def validate_input():
-        pass
-
-    # Private functions (alphabetically sorted)
-    def _format_output():
-        pass
-
-    def _helper_function():
-        pass
+- **Dual-Level Processing**: Handles both module-level functions and class methods
+- **AST-Based Analysis**: Uses ``astroid`` for consistent parsing with PyLint
+- **Comment Preservation**: Maintains function-associated comments during reordering
+- **Section Header Integration**: Optional automatic insertion of organizational headers
+- **Framework Compatibility**: Supports decorator-based exclusions for frameworks
 
 Framework Integration
 ~~~~~~~~~~~~~~~~~~~~~
