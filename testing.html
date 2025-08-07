@@ -541,14 +541,14 @@ make<span class="w"> </span>stop-docker-container
 <p class="admonition-title">Warning</p>
 <p>These plugin options are <strong>documented but not implemented</strong>:</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">ignore-decorators</span></code> - Only works in CLI tool, not PyLint plugin</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">check-privacy</span></code> - Not implemented in PyLint plugin</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">public-patterns</span></code> - Not implemented in PyLint plugin</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">skip-dirs</span></code> - Not implemented in PyLint plugin</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ignore-decorators</span></code> - ✅ <strong>RESOLVED</strong>: Now works in both CLI tool and PyLint plugin (GitHub issue #13)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">enable-privacy-detection</span></code> - ✅ <strong>IMPLEMENTED</strong>: Works correctly</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">public-api-patterns</span></code> - ✅ <strong>IMPLEMENTED</strong>: Works correctly</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">skip-dirs</span></code> - ❌ <strong>NOT IMPLEMENTED</strong>: Future feature (GitHub issue #7)</p></li>
 </ul>
-<p>All framework projects <strong>fail with configuration errors</strong> when using these options.</p>
+<p>Framework projects now <strong>pass successfully</strong> with decorator exclusions.</p>
 </div>
-<p>This confirms that GitHub issue #13 correctly identified decorator exclusions as CLI-only.</p>
+<p>GitHub issue #13 has been resolved - decorator exclusions now work in both tools.</p>
 </section>
 </section>
 <section id="framework-integration-testing">

@@ -65,7 +65,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#plugin-specific-configuration">Plugin-Specific Configuration</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#decorator-exclusions">Decorator Exclusions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#privacy-detection-settings">Privacy Detection Settings</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#directory-exclusions">Directory Exclusions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#directory-exclusions-future-feature">Directory Exclusions (Future Feature)</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#framework-specific-configurations">Framework-Specific Configurations</a><ul>
@@ -263,20 +263,24 @@ when used with PyLint.</p>
 </pre></div>
 </div>
 </section>
-<section id="directory-exclusions">
-<h3>Directory Exclusions<a class="headerlink" href="#directory-exclusions" title="Link to this heading"></a></h3>
-<p>Configure which directories to skip during import analysis (future feature):</p>
+<section id="directory-exclusions-future-feature">
+<h3>Directory Exclusions (Future Feature)<a class="headerlink" href="#directory-exclusions-future-feature" title="Link to this heading"></a></h3>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><strong>FUTURE FEATURE</strong>: Directory exclusion options are planned but not yet implemented in the PyLint plugin. These configurations will be ignored.</p>
+<p>Track implementation progress at <a class="reference external" href="https://github.com/hakonhagland/pylint-sort-functions/issues/7">GitHub Issue #7</a>.</p>
+</div>
+<p><strong>Planned configuration (not yet functional):</strong></p>
 <p><strong>.pylintrc:</strong></p>
 <div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[function-sort]</span>
-<span class="c1"># Skip additional directories during analysis</span>
+<span class="c1"># FUTURE: Skip additional directories during analysis</span>
 <span class="na">skip-dirs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">vendor,third_party,legacy</span>
-
-<span class="c1"># Add to default skip list</span>
 <span class="na">additional-skip-dirs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">custom_vendor,generated</span>
 </pre></div>
 </div>
 <p><strong>pyproject.toml:</strong></p>
 <div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span class="k">[tool.pylint.</span><span class="s2">&quot;function-sort&quot;</span><span class="k">]</span>
+<span class="c1"># FUTURE: Skip additional directories during analysis</span>
 <span class="n">skip-dirs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;vendor&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;third_party&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;legacy&quot;</span><span class="p">]</span>
 <span class="n">additional-skip-dirs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;custom_vendor&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;generated&quot;</span><span class="p">]</span>
 </pre></div>
