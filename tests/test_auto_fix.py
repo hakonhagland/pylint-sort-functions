@@ -1352,3 +1352,78 @@ def _zebra_private():
         sorter_no_headers = FunctionSorter(config_no_headers)
         assert not sorter_no_headers._file_needs_sorting(module_content)
         assert not sorter_no_headers._file_needs_sorting(class_content)
+
+    def test_configurable_section_header_detection(self) -> None:
+        """Test configurable section header detection patterns."""
+        # Test custom header detection
+        config = AutoFixConfig(
+            public_header="=== PUBLIC API ===",
+            private_header="=== INTERNAL ===",
+            additional_section_patterns=["--- Custom Pattern ---", "## Special ##"],
+        )
+        sorter = FunctionSorter(config)
+
+        # Should detect configured headers
+        assert sorter._is_section_header_comment("=== PUBLIC API ===")
+        assert sorter._is_section_header_comment("=== INTERNAL ===")
+
+        # Should detect additional patterns
+        assert sorter._is_section_header_comment("--- Custom Pattern ---")
+        assert sorter._is_section_header_comment("## Special ##")
+
+        # Should still detect default patterns for backward compatibility
+        assert sorter._is_section_header_comment("# Public functions")
+        assert sorter._is_section_header_comment("# Private methods")
+
+        # Case insensitive by default
+        assert sorter._is_section_header_comment("=== public api ===")
+        assert sorter._is_section_header_comment("--- CUSTOM PATTERN ---")
+
+    def test_case_sensitive_section_header_detection(self) -> None:
+        """Test case-sensitive section header detection."""
+        config = AutoFixConfig(
+            public_header="Public API",
+            section_header_case_sensitive=True,
+            additional_section_patterns=["Custom Pattern"],
+        )
+        sorter = FunctionSorter(config)
+
+        # Should detect exact case matches
+        assert sorter._is_section_header_comment("Public API")
+        assert sorter._is_section_header_comment("Custom Pattern")
+
+        # Should NOT detect different case
+        assert not sorter._is_section_header_comment("public api")
+        assert not sorter._is_section_header_comment("CUSTOM PATTERN")
+
+        # Default patterns should still work with exact case
+        assert sorter._is_section_header_comment("public functions")
+        assert not sorter._is_section_header_comment("PUBLIC FUNCTIONS")
+
+    def test_custom_headers_prevent_duplication(self) -> None:
+        """Test that custom headers are detected to prevent duplication."""
+        content = """=== PUBLIC API ===
+
+def alpha_function():
+    return "alpha"
+
+=== INTERNAL ===
+
+def _zebra_private():
+    return "_zebra"
+"""
+
+        config = AutoFixConfig(
+            add_section_headers=True,
+            public_header="=== PUBLIC API ===",
+            private_header="=== INTERNAL ===",
+        )
+        sorter = FunctionSorter(config)
+
+        # The file already has the custom headers, so it shouldn't need modification
+        # for header insertion (though it might still need processing for other reasons)
+        result = sorter._sort_functions_in_content(content)
+
+        # Should not have duplicate headers
+        assert result.count("=== PUBLIC API ===") == 1
+        assert result.count("=== INTERNAL ===") == 1

@@ -46,6 +46,12 @@ class AutoFixConfig:  # pylint: disable=too-many-instance-attributes
     public_method_header: str = "# Public methods"  # Header text for public methods
     private_method_header: str = "# Private methods"  # Header text for private methods
 
+    # Section header detection configuration
+    additional_section_patterns: Optional[List[str]] = (
+        None  # Extra patterns to detect as headers
+    )
+    section_header_case_sensitive: bool = False  # Case sensitivity for header detection
+
 
 # Note: This class intentionally has only one public method as it encapsulates
 # the configuration state and provides a clean interface for file processing.
@@ -482,19 +488,41 @@ class FunctionSorter:  # pylint: disable=too-many-public-methods,too-few-public-
     def _is_section_header_comment(self, comment_line: str) -> bool:
         """Check if a comment line is a section header.
 
-        Section headers are comments that organize groups of functions/methods,
-        such as "# Public functions", "# Private methods", etc.
+        Section headers are comments that organize groups of functions/methods.
+        This method uses configurable patterns and automatically includes
+        the configured header texts from the AutoFixConfig.
 
         :param comment_line: The comment line to check (already stripped)
         :type comment_line: str
         :returns: True if this is likely a section header comment
         :rtype: bool
         """
-        # Convert to lowercase for case-insensitive matching
-        lower_comment = comment_line.lower()
+        # Determine case sensitivity
+        comparison_comment = (
+            comment_line
+            if self.config.section_header_case_sensitive
+            else comment_line.lower()
+        )
 
-        # Common section header patterns
-        section_keywords = [
+        # Build list of all patterns to check
+        patterns_to_check = []
+
+        # 1. Always include configured header texts (what we insert, we detect)
+        configured_headers = [
+            self.config.public_header,
+            self.config.private_header,
+            self.config.public_method_header,
+            self.config.private_method_header,
+        ]
+
+        for header in configured_headers:
+            pattern = (
+                header if self.config.section_header_case_sensitive else header.lower()
+            )
+            patterns_to_check.append(pattern)
+
+        # 2. Add default fallback patterns for backward compatibility
+        default_keywords = [
             "public functions",
             "private functions",
             "public methods",
@@ -507,13 +535,7 @@ class FunctionSorter:  # pylint: disable=too-many-public-methods,too-few-public-
             "imports",
         ]
 
-        # Check for exact matches or patterns like "# Public functions"
-        for keyword in section_keywords:
-            if keyword in lower_comment:
-                return True
-
-        # Check for other common organizational patterns
-        organizational_patterns = [
+        default_organizational = [
             "# functions",
             "# methods",
             "## functions",
@@ -524,11 +546,26 @@ class FunctionSorter:  # pylint: disable=too-many-public-methods,too-few-public-
             "=== methods",
         ]
 
-        for pattern in organizational_patterns:
-            if (
-                lower_comment.startswith(pattern.lower())
-                or pattern.lower() in lower_comment
-            ):
+        # Apply case sensitivity to defaults
+        if not self.config.section_header_case_sensitive:
+            default_keywords = [kw.lower() for kw in default_keywords]
+            default_organizational = [org.lower() for org in default_organizational]
+
+        patterns_to_check.extend(default_keywords)
+        patterns_to_check.extend(default_organizational)
+
+        # 3. Add user-configured additional patterns
+        if self.config.additional_section_patterns:
+            additional_patterns = self.config.additional_section_patterns[:]
+            if not self.config.section_header_case_sensitive:
+                additional_patterns = [
+                    pattern.lower() for pattern in additional_patterns
+                ]
+            patterns_to_check.extend(additional_patterns)
+
+        # Check if the comment matches any pattern
+        for pattern in patterns_to_check:
+            if pattern in comparison_comment:
                 return True
 
         return False

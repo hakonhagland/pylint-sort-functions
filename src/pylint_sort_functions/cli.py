@@ -105,6 +105,8 @@ def main() -> int:  # pylint: disable=too-many-return-statements,too-many-branch
         private_header=args.private_header,
         public_method_header=args.public_method_header,
         private_method_header=args.private_method_header,
+        additional_section_patterns=args.additional_section_patterns,
+        section_header_case_sensitive=args.section_headers_case_sensitive,
     )
 
     if args.verbose:  # pragma: no cover
@@ -117,6 +119,11 @@ def main() -> int:  # pylint: disable=too-many-return-statements,too-many-branch
             print(f"  Private functions: '{config.private_header}'")
             print(f"  Public methods: '{config.public_method_header}'")
             print(f"  Private methods: '{config.private_method_header}'")
+            if config.additional_section_patterns:
+                patterns = config.additional_section_patterns
+                print(f"  Additional detection patterns: {patterns}")
+            if config.section_header_case_sensitive:
+                print("  Case-sensitive detection enabled")
 
     # Process files
     try:
@@ -214,6 +221,21 @@ def _add_parser_arguments(parser: argparse.ArgumentParser) -> None:
         default="# Private methods",
         metavar="TEXT",
         help="Header text for private methods (default: '# Private methods')",
+    )
+
+    # Section header detection options
+    parser.add_argument(
+        "--additional-section-patterns",
+        action="append",
+        metavar="PATTERN",
+        help="Additional patterns to detect as section headers "
+        + "(e.g., '=== API ===' or '--- Helpers ---'). Can be used multiple times.",
+    )
+
+    parser.add_argument(
+        "--section-headers-case-sensitive",
+        action="store_true",
+        help="Make section header detection case-sensitive (default: case-insensitive)",
     )
 
     parser.add_argument("--verbose", "-v", action="store_true", help="Verbose output")
