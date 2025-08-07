@@ -100,12 +100,23 @@ def main() -> int:  # pylint: disable=too-many-return-statements,too-many-branch
         dry_run=args.dry_run,
         backup=not args.no_backup,
         ignore_decorators=args.ignore_decorators or [],
+        add_section_headers=args.add_section_headers,
+        public_header=args.public_header,
+        private_header=args.private_header,
+        public_method_header=args.public_method_header,
+        private_method_header=args.private_method_header,
     )
 
     if args.verbose:  # pragma: no cover
         print(f"Processing {len(python_files)} Python files...")
         if config.ignore_decorators:
             print(f"Ignoring decorators: {', '.join(config.ignore_decorators)}")
+        if config.add_section_headers:
+            print(f"Section headers enabled:")
+            print(f"  Public functions: '{config.public_header}'")
+            print(f"  Private functions: '{config.private_header}'")
+            print(f"  Public methods: '{config.public_method_header}'")
+            print(f"  Private methods: '{config.private_method_header}'")
 
     # Process files
     try:
@@ -168,6 +179,41 @@ def _add_parser_arguments(parser: argparse.ArgumentParser) -> None:
         metavar="PATTERN",
         help='Decorator patterns to ignore (e.g., "@app.route" "@*.command"). '
         + "Can be used multiple times.",
+    )
+
+    # Section header options
+    parser.add_argument(
+        "--add-section-headers",
+        action="store_true",
+        help="Add section header comments (e.g., '# Public functions') during sorting",
+    )
+
+    parser.add_argument(
+        "--public-header",
+        default="# Public functions",
+        metavar="TEXT",
+        help="Header text for public functions (default: '# Public functions')",
+    )
+
+    parser.add_argument(
+        "--private-header", 
+        default="# Private functions",
+        metavar="TEXT",
+        help="Header text for private functions (default: '# Private functions')",
+    )
+
+    parser.add_argument(
+        "--public-method-header",
+        default="# Public methods",
+        metavar="TEXT",
+        help="Header text for public methods (default: '# Public methods')",
+    )
+
+    parser.add_argument(
+        "--private-method-header",
+        default="# Private methods", 
+        metavar="TEXT",
+        help="Header text for private methods (default: '# Private methods')",
     )
 
     parser.add_argument("--verbose", "-v", action="store_true", help="Verbose output")

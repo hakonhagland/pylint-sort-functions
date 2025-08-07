@@ -3,6 +3,7 @@
 import os
 import tempfile
 from pathlib import Path
+from unittest.mock import MagicMock, patch
 
 from pylint_sort_functions.auto_fix import (
     AutoFixConfig,
@@ -1003,3 +1004,316 @@ def alpha_function():
         )
         assert not sorter._is_section_header_comment("# TODO: implement this")
         assert not sorter._is_section_header_comment("# Bug fix for issue #123")
+
+    def test_automatic_section_header_insertion_basic(self):
+        """Test automatic section header insertion with mixed visibility functions."""
+        content = '''"""Test module with unsorted mixed functions."""
+
+def zebra_function():
+    """Public zebra function."""
+    return "zebra"
+
+def alpha_function():
+    """Public alpha function."""
+    return "alpha"
+
+def _zebra_private():
+    """Private zebra function."""
+    return "_zebra"
+
+def _alpha_private():
+    """Private alpha function."""
+    return "_alpha"
+'''
+        
+        # Configure with section headers enabled
+        config = AutoFixConfig(
+            add_section_headers=True,
+            public_header="# Public functions",
+            private_header="# Private functions"
+        )
+        
+        sorter = FunctionSorter(config)
+        result = sorter._sort_functions_in_content(content)
+        
+        expected = '''"""Test module with unsorted mixed functions."""
+
+# Public functions
+
+def alpha_function():
+    """Public alpha function."""
+    return "alpha"
+
+def zebra_function():
+    """Public zebra function."""
+    return "zebra"
+
+
+# Private functions
+
+def _alpha_private():
+    """Private alpha function."""
+    return "_alpha"
+def _zebra_private():
+    """Private zebra function."""
+    return "_zebra"'''
+        
+        assert result.strip() == expected.strip()
+
+    def test_automatic_section_header_insertion_only_public(self):
+        """Test that headers are not added when only public functions exist."""
+        content = '''"""Test module with only public functions."""
+
+def zebra_function():
+    return "zebra"
+
+def alpha_function():
+    return "alpha"
+'''
+        
+        config = AutoFixConfig(add_section_headers=True)
+        sorter = FunctionSorter(config)
+        result = sorter._sort_functions_in_content(content)
+        
+        expected = '''"""Test module with only public functions."""
+
+def alpha_function():
+    return "alpha"
+
+def zebra_function():
+    return "zebra"
+'''
+        
+        assert result.strip() == expected.strip()
+
+    def test_automatic_section_header_insertion_only_private(self):
+        """Test that headers are not added when only private functions exist."""
+        content = '''"""Test module with only private functions."""
+
+def _zebra_private():
+    return "_zebra"
+
+def _alpha_private():
+    return "_alpha"
+'''
+        
+        config = AutoFixConfig(add_section_headers=True)
+        sorter = FunctionSorter(config)
+        result = sorter._sort_functions_in_content(content)
+        
+        expected = '''"""Test module with only private functions."""
+
+def _alpha_private():
+    return "_alpha"
+
+def _zebra_private():
+    return "_zebra"
+'''
+        
+        assert result.strip() == expected.strip()
+
+    def test_automatic_section_header_insertion_disabled(self):
+        """Test that headers are not added when feature is disabled."""
+        content = '''"""Test module with mixed functions."""
+
+def zebra_function():
+    return "zebra"
+
+def _alpha_private():
+    return "_alpha"
+'''
+        
+        config = AutoFixConfig(add_section_headers=False)
+        sorter = FunctionSorter(config)
+        result = sorter._sort_functions_in_content(content)
+        
+        expected = '''"""Test module with mixed functions."""
+
+def zebra_function():
+    return "zebra"
+
+def _alpha_private():
+    return "_alpha"
+'''
+        
+        assert result.strip() == expected.strip()
+
+    def test_automatic_section_header_insertion_methods(self):
+        """Test automatic section header insertion for class methods."""
+        content = '''"""Test module with class methods."""
+
+class TestClass:
+    def zebra_method(self):
+        return "zebra"
+    
+    def alpha_method(self):
+        return "alpha"
+        
+    def _zebra_private(self):
+        return "_zebra"
+        
+    def _alpha_private(self):
+        return "_alpha"
+'''
+        
+        config = AutoFixConfig(
+            add_section_headers=True,
+            public_method_header="# Public methods", 
+            private_method_header="# Private methods"
+        )
+        
+        sorter = FunctionSorter(config)
+        result = sorter._sort_functions_in_content(content)
+        
+        # Should contain both method headers
+        assert "# Public methods" in result
+        assert "# Private methods" in result
+        # Methods should be sorted within their sections
+        assert "def alpha_method(self)" in result
+        assert "def zebra_method(self)" in result
+        assert "def _alpha_private(self)" in result
+        assert "def _zebra_private(self)" in result
+
+    def test_automatic_section_header_custom_headers(self):
+        """Test automatic section header insertion with custom header text."""
+        content = '''"""Test module with custom headers."""
+
+def zebra_function():
+    return "zebra"
+
+def _alpha_private():
+    return "_alpha"
+'''
+        
+        config = AutoFixConfig(
+            add_section_headers=True,
+            public_header="## PUBLIC API ##",
+            private_header="## INTERNAL HELPERS ##"
+        )
+        
+        sorter = FunctionSorter(config)
+        result = sorter._sort_functions_in_content(content)
+        
+        assert "## PUBLIC API ##" in result
+        assert "## INTERNAL HELPERS ##" in result
+
+    def test_mixed_visibility_functions_detection(self):
+        """Test _has_mixed_visibility_functions helper method."""
+        config = AutoFixConfig()
+        sorter = FunctionSorter(config)
+        
+        # Create mock function spans
+        public_span = MagicMock()
+        public_span.node.name = "public_func"
+        
+        private_span = MagicMock()  
+        private_span.node.name = "_private_func"
+        
+        # Mock the is_private_function utility
+        with patch('pylint_sort_functions.utils.is_private_function') as mock_is_private:
+            def side_effect(node):
+                return node.name.startswith('_')
+            mock_is_private.side_effect = side_effect
+            
+            # Test mixed visibility
+            mixed_spans = [public_span, private_span]
+            assert sorter._has_mixed_visibility_functions(mixed_spans)
+            
+            # Test only public
+            public_only = [public_span]
+            assert not sorter._has_mixed_visibility_functions(public_only)
+            
+            # Test only private
+            private_only = [private_span]
+            assert not sorter._has_mixed_visibility_functions(private_only)
+
+    def test_find_existing_section_headers(self):
+        """Test _find_existing_section_headers helper method."""
+        config = AutoFixConfig()
+        sorter = FunctionSorter(config)
+        
+        lines = [
+            "# Module docstring",
+            "",
+            "# Public functions",
+            "def func1():",
+            "    pass",
+            "",
+            "# Private functions", 
+            "def _func2():",
+            "    pass",
+        ]
+        
+        headers = sorter._find_existing_section_headers(lines)
+        
+        expected = {
+            "public_functions": 2,
+            "private_functions": 6
+        }
+        
+        assert headers == expected
+
+    def test_find_existing_section_headers_with_methods(self):
+        """Test _find_existing_section_headers with method headers."""
+        config = AutoFixConfig()
+        sorter = FunctionSorter(config)
+        
+        lines = [
+            "class TestClass:",
+            "    # Public methods",
+            "    def method1(self):",
+            "        pass",
+            "",
+            "    # Private methods",
+            "    def _method2(self):",
+            "        pass",
+        ]
+        
+        headers = sorter._find_existing_section_headers(lines)
+        
+        expected = {
+            "public_methods": 1,
+            "private_methods": 5
+        }
+        
+        assert headers == expected
+
+    def test_spacing_logic_for_functions_without_trailing_newlines(self):
+        """Test that proper spacing is added for functions without trailing newlines."""
+        config = AutoFixConfig(add_section_headers=False)
+        sorter = FunctionSorter(config)
+        
+        # Create mock function spans - test both cases:
+        # 1. Function with no newline at all
+        # 2. Function with single newline (not double)
+        span1 = MagicMock()
+        span1.text = "def func1():\n    pass"  # No trailing newline at all
+        span1.node.name = "func1"
+        
+        span2 = MagicMock()
+        span2.text = "def func2():\n    pass\n"  # Only one trailing newline
+        span2.node.name = "func2" 
+        
+        span3 = MagicMock()
+        span3.text = "def func3():\n    pass\n\n"  # Already has proper spacing
+        span3.node.name = "func3"
+        
+        spans = [span1, span2, span3]
+        
+        # Mock is_private_function to return False for all (public functions only)
+        with patch('pylint_sort_functions.utils.is_private_function', return_value=False):
+            result = sorter._add_section_headers_to_functions(spans, is_methods=False)
+        
+        # Should have proper spacing added:
+        # - span1 needs both newline + extra newline (line 468 + 469)  
+        # - span2 needs only extra newline (line 469 only)
+        # - span3 doesn't need anything (already has double newline)
+        expected = [
+            "def func1():\n    pass",  # span1.text
+            "\n",                     # Added by line 468 (no newline at end)
+            "\n",                     # Added by line 469 (spacing)
+            "def func2():\n    pass\n", # span2.text  
+            "\n",                     # Added by line 469 (spacing)
+            "def func3():\n    pass\n\n"  # span3.text (no additions needed)
+        ]
+        assert result == expected
