@@ -6,11 +6,87 @@ This guide explains how to use the ``pylint-sort-functions`` plugin to enforce f
 Installation
 ------------
 
-Install the plugin using pip:
+Add ``pylint-sort-functions`` as a development dependency to enable function sorting enforcement in your PyLint workflow.
+
+Project Development Dependencies (Recommended)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The most common approach is adding the plugin to your project's development dependencies, ensuring consistent code quality checks across your team and CI/CD pipeline.
+
+**Using pyproject.toml** (Modern Python projects):
+
+.. code-block:: toml
+
+    [tool.uv.dev-dependencies]
+    # or [project.optional-dependencies.dev]
+    pylint-sort-functions = ">=1.0.0"
+    pylint = ">=3.3.0"  # Required for the plugin
+
+**Using Poetry**:
+
+.. code-block:: toml
+
+    [tool.poetry.group.dev.dependencies]
+    pylint-sort-functions = "^1.0.0"
+    pylint = "^3.3.0"
+
+**Using requirements-dev.txt**:
+
+.. code-block:: text
+
+    # requirements-dev.txt
+    pylint-sort-functions>=1.0.0
+    pylint>=3.3.0
+
+Then install with your preferred dependency manager:
 
 .. code-block:: bash
 
-    pip install pylint-sort-functions
+    # uv (recommended)
+    uv sync
+
+    # Poetry
+    poetry install
+
+    # pip
+    pip install -r requirements-dev.txt
+
+Virtual Environment Installation
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+For project-specific virtual environments without modern dependency management:
+
+.. code-block:: bash
+
+    # Create and activate virtual environment
+    python -m venv .venv
+    source .venv/bin/activate  # Linux/macOS
+    # .venv\Scripts\activate   # Windows
+
+    # Install the plugin
+    pip install pylint-sort-functions pylint
+
+CI/CD Integration
+~~~~~~~~~~~~~~~~~
+
+With development dependencies, your continuous integration automatically includes the plugin:
+
+.. code-block:: yaml
+
+    # GitHub Actions example
+    - name: Install dependencies
+      run: uv sync
+
+    - name: Run PyLint with sorting checks
+      run: uv run pylint --load-plugins=pylint_sort_functions src/
+
+Standalone Auto-Fix Tool
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The package also includes a standalone command-line tool for automatically fixing function order. For installation and usage details, see :doc:`cli`.
+
+.. note::
+   Most users should start with the PyLint plugin integration described in this guide. The standalone CLI tool is useful for one-time fixes or integration with other tools.
 
 Quick Start
 -----------
@@ -55,6 +131,46 @@ Add to your ``setup.cfg``:
 
     [pylint]
     load-plugins = pylint_sort_functions
+
+Plugin Configuration Options
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The plugin supports several configuration options to customize its behavior:
+
+**Using pyproject.toml** (Recommended):
+
+.. code-block:: toml
+
+    [tool.pylint.MASTER]
+    load-plugins = ["pylint_sort_functions"]
+
+    [tool.pylint.function-sort]
+    public-api-patterns = ["main", "run", "execute", "start", "stop", "setup", "teardown"]
+    enable-privacy-detection = true
+
+**Using .pylintrc**:
+
+.. code-block:: ini
+
+    [MASTER]
+    load-plugins = pylint_sort_functions
+
+    [function-sort]
+    public-api-patterns = main,run,execute,start,stop,setup,teardown
+    enable-privacy-detection = yes
+
+Configuration Options Reference
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+**public-api-patterns**
+    List of function names to always treat as public API. These functions will not be flagged for privacy even if only used internally. Useful for entry points and framework callbacks.
+
+    *Default*: ``["main", "run", "execute", "start", "stop", "setup", "teardown"]``
+
+**enable-privacy-detection**
+    Enable detection of functions that should be made private based on usage analysis. When enabled, the plugin analyzes cross-module imports to identify functions only used within their defining module.
+
+    *Default*: ``true``
 
 Message Types
 -------------
@@ -372,6 +488,7 @@ Best Practices
    - Disable the check for those specific functions
    - Consider using the decorator exclusion feature (future enhancement)
 
+
 3. **Test Organization**: Apply the same principles to test files for consistency:
 
    .. code-block:: python
@@ -406,7 +523,28 @@ If the plugin isn't loading, verify:
 
 1. Installation: ``pip show pylint-sort-functions``
 2. Python path: ``python -c "import pylint_sort_functions"``
-3. PyLint version: ``pylint --version`` (requires PyLint 2.0+)
+3. PyLint version: ``pylint --version`` (requires PyLint >=3.3.0)
+4. Python version: ``python --version`` (requires Python >=3.11)
+
+Configuration Issues
+~~~~~~~~~~~~~~~~~~~~
+
+If plugin configuration options aren't being recognized:
+
+1. Verify configuration section name: ``[tool.pylint.function-sort]``
+2. Check option names: ``public-api-patterns``, ``enable-privacy-detection``
+3. Restart your IDE/editor after configuration changes
+4. Test configuration: ``pylint --help`` should show plugin options
+
+Privacy Detection Issues
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If ``function-should-be-private`` messages aren't appearing:
+
+1. Verify privacy detection is enabled: ``enable-privacy-detection=y``
+2. Check that files are part of a Python project with project markers (pyproject.toml, setup.py, etc.)
+3. Ensure functions aren't in test files (automatically excluded)
+4. Verify functions aren't matching public API patterns
 
 False Positives
 ~~~~~~~~~~~~~~~
@@ -415,7 +553,14 @@ If you get false positives for ``function-should-be-private``:
 
 1. Ensure your ``__init__.py`` files properly export public APIs
 2. The detection is conservative and won't flag functions used across modules
-3. Use inline disables for legitimate cases
+3. Configure public API patterns if you have custom entry points:
+
+   .. code-block:: ini
+
+       [tool.pylint.function-sort]
+       public-api-patterns = ["main", "run", "setup", "custom_entry"]
+
+4. Use inline disables for legitimate cases: ``# pylint: disable=function-should-be-private``
 
 Performance Issues
 ~~~~~~~~~~~~~~~~~~
