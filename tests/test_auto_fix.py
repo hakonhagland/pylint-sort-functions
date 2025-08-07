@@ -1,4 +1,4 @@
-"""Tests for auto-fix functionality."""
+"""Tests for auto-fix functionality."""  # pylint: disable=too-many-lines
 
 import os
 import tempfile
@@ -747,3 +747,259 @@ MODULE_CONSTANT = "module level"
 
         finally:
             temp_file.unlink()
+
+    def test_section_header_displacement_bug(self) -> None:
+        """Test that section header comments stay positioned correctly during sorting.
+
+        This reproduces the bug described in GitHub issue #10 where section headers
+        like '# Public functions' get displaced during function reordering.
+        """
+        code_with_section_headers = """from pathlib import Path
+
+# Public functions
+
+# Bad: Functions out of order
+def zebra_function():
+    pass
+
+def alpha_function():  # Should come before zebra_function
+    pass
+"""
+
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False) as f:
+            f.write(code_with_section_headers)
+            temp_file = Path(f.name)
+
+        try:
+            config = AutoFixConfig(dry_run=False, backup=False)
+            result = sort_python_file(temp_file, config)
+
+            assert result is True  # File should be modified
+
+            sorted_content = temp_file.read_text()
+
+            # Check that section header appears before both functions
+            public_header_pos = sorted_content.find("# Public functions")
+            alpha_pos = sorted_content.find("def alpha_function():")
+            zebra_pos = sorted_content.find("def zebra_function():")
+
+            # Section header should come before both functions
+            assert public_header_pos < alpha_pos, (
+                f"Section header at {public_header_pos} should come before "
+                f"alpha function at {alpha_pos}"
+            )
+            assert public_header_pos < zebra_pos, (
+                f"Section header at {public_header_pos} should come before "
+                f"zebra function at {zebra_pos}"
+            )
+
+            # Functions should be in alphabetical order
+            assert alpha_pos < zebra_pos, (
+                f"Alpha function at {alpha_pos} should come before "
+                f"zebra function at {zebra_pos}"
+            )
+
+        finally:
+            temp_file.unlink()
+
+    def test_multiple_section_headers(self) -> None:
+        """Test section headers stay positioned and don't move with functions."""
+        code_with_multiple_sections = '''"""Module with multiple sections."""
+
+# Public functions
+
+def zebra_public():
+    """Public zebra function."""
+    return "zebra"
+
+def alpha_public():
+    """Public alpha function."""
+    return "alpha"
+
+# Private functions
+
+def _zebra_private():
+    """Private zebra function."""
+    return "_zebra"
+
+def _alpha_private():
+    """Private alpha function."""
+    return "_alpha"
+'''
+
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False) as f:
+            f.write(code_with_multiple_sections)
+            temp_file = Path(f.name)
+
+        try:
+            config = AutoFixConfig(dry_run=False, backup=False)
+            result = sort_python_file(temp_file, config)
+
+            assert result is True  # File should be modified
+
+            sorted_content = temp_file.read_text()
+
+            # Check section headers are preserved and don't get displaced
+            public_header_pos = sorted_content.find("# Public functions")
+            private_header_pos = sorted_content.find("# Private functions")
+
+            # Both headers should exist
+            assert public_header_pos >= 0, "Public functions header should be preserved"
+            assert private_header_pos >= 0, (
+                "Private functions header should be preserved"
+            )
+
+            # Headers should maintain their relative order
+            assert public_header_pos < private_header_pos, (
+                "Section headers should maintain relative order"
+            )
+
+            # Functions should be sorted (public first, then private, both alphabetical)
+            alpha_public_pos = sorted_content.find("def alpha_public():")
+            zebra_public_pos = sorted_content.find("def zebra_public():")
+            alpha_private_pos = sorted_content.find("def _alpha_private():")
+            zebra_private_pos = sorted_content.find("def _zebra_private():")
+
+            # All functions should be found
+            assert alpha_public_pos >= 0
+            assert zebra_public_pos >= 0
+            assert alpha_private_pos >= 0
+            assert zebra_private_pos >= 0
+
+            # Functions should be in sorted order: public alphabetical, then private
+            assert alpha_public_pos < zebra_public_pos, (
+                "Public functions should be sorted alphabetically"
+            )
+            assert alpha_private_pos < zebra_private_pos, (
+                "Private functions should be sorted alphabetically"
+            )
+            assert zebra_public_pos < alpha_private_pos, (
+                "All public functions should come before private functions"
+            )
+
+        finally:
+            temp_file.unlink()
+
+    def test_various_section_header_formats(self) -> None:
+        """Test different section header formats are recognized and preserved."""
+        code_with_various_headers = '''"""Module with various header formats."""
+
+# Utility functions
+
+def zebra_util():
+    return "zebra"
+
+## Helper functions
+
+def alpha_helper():
+    return "alpha_help"
+'''
+
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False) as f:
+            f.write(code_with_various_headers)
+            temp_file = Path(f.name)
+
+        try:
+            config = AutoFixConfig(dry_run=False, backup=False)
+            result = sort_python_file(temp_file, config)
+
+            assert result is True
+
+            sorted_content = temp_file.read_text()
+
+            # Key test: section headers should not be displaced from original positions
+            # Our fix prevents section headers from moving with individual functions
+            util_header_pos = sorted_content.find("# Utility functions")
+            helper_header_pos = sorted_content.find("## Helper functions")
+
+            # Both headers should still exist in the file
+            assert util_header_pos >= 0, "Utility functions header should be preserved"
+            assert helper_header_pos >= 0, "Helper functions header should be preserved"
+
+            # The section headers should appear in their original order
+            # (this tests that they don't get mixed up during sorting)
+            assert util_header_pos < helper_header_pos, (
+                "Section headers should maintain relative order"
+            )
+
+        finally:
+            temp_file.unlink()
+
+    def test_function_comments_vs_section_headers(self) -> None:
+        """Test function-specific comments move with functions, headers don't."""
+        code_with_mixed_comments = '''"""Module with mixed comment types."""
+
+# Public functions
+
+# This is a specific comment about zebra_function
+# It should move with the function
+def zebra_function():
+    return "zebra"
+
+# This is a specific comment about alpha_function
+def alpha_function():
+    return "alpha"
+'''
+
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False) as f:
+            f.write(code_with_mixed_comments)
+            temp_file = Path(f.name)
+
+        try:
+            config = AutoFixConfig(dry_run=False, backup=False)
+            result = sort_python_file(temp_file, config)
+
+            assert result is True
+
+            sorted_content = temp_file.read_text()
+
+            # Section header should stay at the top
+            public_header_pos = sorted_content.find("# Public functions")
+            alpha_pos = sorted_content.find("def alpha_function():")
+            zebra_pos = sorted_content.find("def zebra_function():")
+
+            assert public_header_pos < alpha_pos
+            assert public_header_pos < zebra_pos
+            assert alpha_pos < zebra_pos
+
+            # Function-specific comments should move with their functions
+            zebra_comment_pos = sorted_content.find(
+                "# This is a specific comment about zebra_function"
+            )
+            alpha_comment_pos = sorted_content.find(
+                "# This is a specific comment about alpha_function"
+            )
+
+            # Comments should appear right before their respective functions
+            assert zebra_comment_pos < zebra_pos
+            assert alpha_comment_pos < alpha_pos
+
+            # Alpha function and its comment should come first
+            assert alpha_comment_pos < zebra_comment_pos
+
+        finally:
+            temp_file.unlink()
+
+    def test_section_header_detection_patterns(self) -> None:
+        """Test various section header patterns are correctly detected."""
+        from pylint_sort_functions.auto_fix import AutoFixConfig, FunctionSorter
+
+        config = AutoFixConfig()
+        sorter = FunctionSorter(config)
+
+        # Test organizational patterns (covers the missing line in coverage)
+        assert sorter._is_section_header_comment("## functions")
+        assert sorter._is_section_header_comment("=== methods ===")
+        assert sorter._is_section_header_comment("--- helper functions ---")
+
+        # Test keyword patterns
+        assert sorter._is_section_header_comment("# Public functions")
+        assert sorter._is_section_header_comment("# private methods")
+        assert sorter._is_section_header_comment("API functions")
+
+        # Test non-header comments
+        assert not sorter._is_section_header_comment(
+            "# This is a specific function comment"
+        )
+        assert not sorter._is_section_header_comment("# TODO: implement this")
+        assert not sorter._is_section_header_comment("# Bug fix for issue #123")

@@ -262,6 +262,7 @@ class FunctionSorter:  # pylint: disable=too-few-public-methods
         """Find comments that belong to a function and return the start line.
 
         Scans backwards from the function definition to find associated comments.
+        Excludes section header comments that should remain at section boundaries.
 
         :param lines: Source file lines
         :type lines: List[str]
@@ -274,12 +275,21 @@ class FunctionSorter:  # pylint: disable=too-few-public-methods
 
         # Scan backwards from the function start to find comments
         current_line = function_start_line - 1
+        found_function_comments = []
 
         while current_line >= 0:
             line = lines[current_line].strip()
 
             # If we find a comment line, this could be part of the function's comments
             if line.startswith("#"):
+                # Check if this is a section header comment
+                if self._is_section_header_comment(line):
+                    # Section headers should not move with functions
+                    # Stop including comments here
+                    break
+
+                # This is a function-specific comment
+                found_function_comments.append(current_line)
                 comment_start_line = current_line
                 current_line -= 1
                 continue
@@ -293,6 +303,60 @@ class FunctionSorter:  # pylint: disable=too-few-public-methods
             break
 
         return comment_start_line
+
+    def _is_section_header_comment(self, comment_line: str) -> bool:
+        """Check if a comment line is a section header.
+
+        Section headers are comments that organize groups of functions/methods,
+        such as "# Public functions", "# Private methods", etc.
+
+        :param comment_line: The comment line to check (already stripped)
+        :type comment_line: str
+        :returns: True if this is likely a section header comment
+        :rtype: bool
+        """
+        # Convert to lowercase for case-insensitive matching
+        lower_comment = comment_line.lower()
+
+        # Common section header patterns
+        section_keywords = [
+            "public functions",
+            "private functions",
+            "public methods",
+            "private methods",
+            "helper functions",
+            "utility functions",
+            "api functions",
+            "internal functions",
+            "exports",
+            "imports",
+        ]
+
+        # Check for exact matches or patterns like "# Public functions"
+        for keyword in section_keywords:
+            if keyword in lower_comment:
+                return True
+
+        # Check for other common organizational patterns
+        organizational_patterns = [
+            "# functions",
+            "# methods",
+            "## functions",
+            "## methods",
+            "--- functions",
+            "--- methods",
+            "=== functions",
+            "=== methods",
+        ]
+
+        for pattern in organizational_patterns:
+            if (
+                lower_comment.startswith(pattern.lower())
+                or pattern.lower() in lower_comment
+            ):
+                return True
+
+        return False
 
     def _reconstruct_class_with_sorted_methods(
         self,
