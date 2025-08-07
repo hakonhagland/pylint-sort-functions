@@ -1,0 +1,8 @@
+[MASTER]
+load-plugins = pylint_sort_functions
+
+[MESSAGES CONTROL]
+enable = unsorted-functions,unsorted-methods,mixed-function-visibility,function-should-be-private
+
+[PYLINT_SORT_FUNCTIONS]
+ignore-decorators = login_required,csrf_exempt,require_http_methods

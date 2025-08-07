@@ -2,6 +2,7 @@ ROOT := $(shell pwd)
 
 .PHONY: coverage docs help mypy ruff-check ruff-fix ruff-format test test-plugin test-plugin-strict tox
 .PHONY: publish-to-pypi publish-to-pypi-minor publish-to-pypi-major rstcheck self-check
+.PHONY: build-docker-image run-docker-container stop-docker-container test-documentation
 
 coverage:
 	coverage run -m pytest tests
@@ -35,6 +36,12 @@ help:
 	@echo "  test-plugin-strict    - Check code with our plugin (strict rules everywhere)"
 	@echo "  tox                   - Run tests across Python versions"
 	@echo "  view-docs             - Open documentation in browser"
+	@echo ""
+	@echo "Docker validation targets:"
+	@echo "  build-docker-image    - Build the validation container"
+	@echo "  run-docker-container  - Start the validation container"
+	@echo "  stop-docker-container - Stop and remove the container"
+	@echo "  test-documentation    - Run documentation validation tests"
 	@echo ""
 	@echo "Plugin testing options:"
 	@echo "  test-plugin        - Production-ready (clean output, matches pre-commit)"
@@ -127,3 +134,32 @@ tox:
 
 view-docs:
 	@xdg-open "file://$(ROOT)/docs/_build/html/index.html"
+
+# Docker-based documentation validation system targets
+# See docs/validation-system.rst for detailed documentation
+
+build-docker-image:
+	@echo "Building Docker validation container..."
+	@bash scripts/build-container.sh
+
+run-docker-container: build-docker-image
+	@echo "Starting Docker validation container..."
+	@docker run -d --name pylint-validation-container \
+		-p 8080:8080 \
+		-v $(ROOT)/dist:/dist:ro \
+		pylint-sort-functions-validation
+	@echo "Container started. Waiting for health check..."
+	@sleep 3
+	@curl -f http://localhost:8080/health || echo "Warning: Health check failed"
+
+stop-docker-container:
+	@echo "Stopping Docker validation container..."
+	@docker stop pylint-validation-container 2>/dev/null || true
+	@docker rm pylint-validation-container 2>/dev/null || true
+	@echo "Container stopped and removed."
+
+test-documentation: run-docker-container
+	@echo "Running comprehensive documentation validation tests..."
+	@echo "This validates all configuration examples in docs/ against the plugin"
+	@python test-validation/test-runner.py --verbose
+	@$(MAKE) stop-docker-container

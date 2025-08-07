@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.pylint.main]
+load-plugins = ["pylint_sort_functions"]
+
+[tool.pylint."messages control"]
+enable = [
+    "unsorted-functions",
+    "unsorted-methods",
+    "mixed-function-visibility",
+    "function-should-be-private"
+]
+
+[tool.pylint.pylint_sort_functions]
+ignore-decorators = [
+    "app.route",
+    "app.before_request",
+    "app.errorhandler"
+]

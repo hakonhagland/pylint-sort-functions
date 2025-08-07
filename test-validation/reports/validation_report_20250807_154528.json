@@ -1,0 +1,197 @@
+{
+  "timestamp": "2025-08-07 15:45:28",
+  "summary": {
+    "total_tests": 1,
+    "passed_tests": 1,
+    "failed_tests": 0,
+    "success_rate": 1.0,
+    "config_errors": 0,
+    "plugin_issues": 0,
+    "critical_issues": []
+  },
+  "config_errors": [],
+  "plugin_issues": [],
+  "framework_results": {
+    "flask-project": {
+      "total_messages": 12,
+      "config_errors": 1,
+      "plugin_messages": 7,
+      "exit_code": 22,
+      "success": false
+    },
+    "django-project": {
+      "total_messages": 20,
+      "config_errors": 1,
+      "plugin_messages": 7,
+      "exit_code": 22,
+      "success": false
+    },
+    "fastapi-project": {
+      "total_messages": 16,
+      "config_errors": 1,
+      "plugin_messages": 10,
+      "exit_code": 22,
+      "success": false
+    },
+    "click-project": {
+      "total_messages": 18,
+      "config_errors": 1,
+      "plugin_messages": 9,
+      "exit_code": 22,
+      "success": false
+    },
+    "pytest-project": {
+      "total_messages": 16,
+      "config_errors": 1,
+      "plugin_messages": 10,
+      "exit_code": 22,
+      "success": false
+    }
+  },
+  "detailed_results": [
+    {
+      "test_name": "pylintrc_section_1 (pylintrc)",
+      "success": true,
+      "details": {
+        "result": {
+          "config_applied": "/app/config/pylintrc_section_1.pylintrc",
+          "execution_time": 0.286411,
+          "messages": [
+            {
+              "column": 0,
+              "line": 1,
+              "message": "",
+              "message-id": "F0011: error while parsing the configuration: While reading from '/app/config/pylintrc_section_1.pylintrc' [line 13]: option '.. code-block' in section 'MASTER' already exists",
+              "path": "/app/config/pylintrc_section_1.pylintrc",
+              "symbol": "config-parse-error",
+              "type": "warning"
+            },
+            {
+              "column": 0,
+              "line": 33,
+              "message": "",
+              "message-id": "C0304: Final newline missing",
+              "path": "src/bad_sorting.py",
+              "symbol": "missing-final-newline",
+              "type": "convention"
+            },
+            {
+              "column": 0,
+              "line": 1,
+              "message": "",
+              "message-id": "W9001: Functions are not sorted alphabetically in module scope",
+              "path": "src/bad_sorting.py",
+              "symbol": "unsorted-functions",
+              "type": "warning"
+            },
+            {
+              "column": 0,
+              "line": 1,
+              "message": "",
+              "message-id": "W9003: Public and private functions are not properly separated in module",
+              "path": "src/bad_sorting.py",
+              "symbol": "mixed-function-visibility",
+              "type": "warning"
+            },
+            {
+              "column": 0,
+              "line": 4,
+              "message": "(function-should-be-private)",
+              "message-id": "W9004: Function 'zebra_function' should be private",
+              "path": "src/bad_sorting.py",
+              "symbol": "prefix with underscore",
+              "type": "warning"
+            },
+            {
+              "column": 0,
+              "line": 9,
+              "message": "(function-should-be-private)",
+              "message-id": "W9004: Function 'alpha_function' should be private",
+              "path": "src/bad_sorting.py",
+              "symbol": "prefix with underscore",
+              "type": "warning"
+            },
+            {
+              "column": 0,
+              "line": 19,
+              "message": "(function-should-be-private)",
+              "message-id": "W9004: Function 'public_after_private' should be private",
+              "path": "src/bad_sorting.py",
+              "symbol": "prefix with underscore",
+              "type": "warning"
+            },
+            {
+              "column": 4,
+              "line": 6,
+              "message": "",
+              "message-id": "W0107: Unnecessary pass statement",
+              "path": "src/bad_sorting.py",
+              "symbol": "unnecessary-pass",
+              "type": "warning"
+            },
+            {
+              "column": 4,
+              "line": 11,
+              "message": "",
+              "message-id": "W0107: Unnecessary pass statement",
+              "path": "src/bad_sorting.py",
+              "symbol": "unnecessary-pass",
+              "type": "warning"
+            },
+            {
+              "column": 4,
+              "line": 16,
+              "message": "",
+              "message-id": "W0107: Unnecessary pass statement",
+              "path": "src/bad_sorting.py",
+              "symbol": "unnecessary-pass",
+              "type": "warning"
+            },
+            {
+              "column": 4,
+              "line": 21,
+              "message": "",
+              "message-id": "W0107: Unnecessary pass statement",
+              "path": "src/bad_sorting.py",
+              "symbol": "unnecessary-pass",
+              "type": "warning"
+            },
+            {
+              "column": 0,
+              "line": 24,
+              "message": "",
+              "message-id": "W9002: Methods are not sorted alphabetically in class BadClass",
+              "path": "src/bad_sorting.py",
+              "symbol": "unsorted-methods",
+              "type": "warning"
+            },
+            {
+              "column": 8,
+              "line": 29,
+              "message": "",
+              "message-id": "W0107: Unnecessary pass statement",
+              "path": "src/bad_sorting.py",
+              "symbol": "unnecessary-pass",
+              "type": "warning"
+            },
+            {
+              "column": 8,
+              "line": 33,
+              "message": "",
+              "message-id": "W0107: Unnecessary pass statement",
+              "path": "src/bad_sorting.py",
+              "symbol": "unnecessary-pass",
+              "type": "warning"
+            }
+          ],
+          "project": "minimal-project",
+          "pylint_exit_code": 21,
+          "status": "completed",
+          "stderr": "",
+          "stdout": "************* Module /app/config/pylintrc_section_1.pylintrc\n/app/config/pylintrc_section_1.pylintrc:1:0: F0011: error while parsing the configuration: While reading from '/app/config/pylintrc_section_1.pylintrc' [line 13]: option '.. code-block' in section 'MASTER' already exists (config-parse-error)\n************* Module bad_sorting\nsrc/bad_sorting.py:33:0: C0304: Final newline missing (missing-final-newline)\nsrc/bad_sorting.py:1:0: W9001: Functions are not sorted alphabetically in module scope (unsorted-functions)\nsrc/bad_sorting.py:1:0: W9003: Public and private functions are not properly separated in module (mixed-function-visibility)\nsrc/bad_sorting.py:4:0: W9004: Function 'zebra_function' should be private (prefix with underscore) (function-should-be-private)\nsrc/bad_sorting.py:9:0: W9004: Function 'alpha_function' should be private (prefix with underscore) (function-should-be-private)\nsrc/bad_sorting.py:19:0: W9004: Function 'public_after_private' should be private (prefix with underscore) (function-should-be-private)\nsrc/bad_sorting.py:6:4: W0107: Unnecessary pass statement (unnecessary-pass)\nsrc/bad_sorting.py:11:4: W0107: Unnecessary pass statement (unnecessary-pass)\nsrc/bad_sorting.py:16:4: W0107: Unnecessary pass statement (unnecessary-pass)\nsrc/bad_sorting.py:21:4: W0107: Unnecessary pass statement (unnecessary-pass)\nsrc/bad_sorting.py:24:0: W9002: Methods are not sorted alphabetically in class BadClass (unsorted-methods)\nsrc/bad_sorting.py:29:8: W0107: Unnecessary pass statement (unnecessary-pass)\nsrc/bad_sorting.py:33:8: W0107: Unnecessary pass statement (unnecessary-pass)\n\n------------------------------------------------------------------\nYour code has been rated at 0.00/10 (previous run: 0.00/10, +0.00)\n\n",
+          "test_id": "47be2e22-7695-40ee-b2f3-19eef1077ac9"
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+# Flask for HTTP API
+flask==3.0.3
+
+# PyLint and dependencies
+pylint==3.2.5
+astroid==3.2.3
+
+# The plugin itself (will be installed from local dist)
+# pylint-sort-functions will be installed from mounted volume
+
+# Additional utilities
+tomli==2.0.1  # For parsing pyproject.toml files

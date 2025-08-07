@@ -1,0 +1,18 @@
+[tool.pylint.main]
+load-plugins = ["pylint_sort_functions"]
+
+[tool.pylint."messages control"]
+enable = [
+    "unsorted-functions",
+    "unsorted-methods",
+    "mixed-function-visibility",
+    "function-should-be-private"
+]
+
+[tool.pylint.pylint_sort_functions]
+ignore-decorators = [
+    "click.command",
+    "click.group",
+    "cli.command",
+    "admin.command"
+]
