@@ -407,7 +407,7 @@ The plugin implements a comprehensive sorting algorithm for organizing Python fu
 
 - **Dual-Level Processing**: Handles both module-level functions and class methods
 - **AST-Based Analysis**: Uses ``astroid`` for consistent parsing with PyLint
-- **Comment Preservation**: Maintains function-associated comments during reordering  
+- **Comment Preservation**: Maintains function-associated comments during reordering
 - **Section Header Integration**: Optional automatic insertion of organizational headers
 - **Framework Compatibility**: Supports decorator-based exclusions for frameworks
 

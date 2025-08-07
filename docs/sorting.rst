@@ -224,15 +224,15 @@ Section headers are configured through the ``AutoFixConfig`` class or CLI argume
 .. code-block:: python
 
    from pylint_sort_functions.auto_fix import AutoFixConfig, FunctionSorter
-   
+
    config = AutoFixConfig(
        add_section_headers=True,                    # Enable section headers
        public_header="# Public functions",         # Header for public functions
-       private_header="# Private functions",       # Header for private functions  
+       private_header="# Private functions",       # Header for private functions
        public_method_header="# Public methods",    # Header for public methods
        private_method_header="# Private methods"   # Header for private methods
    )
-   
+
    sorter = FunctionSorter(config)
    sorter.sort_file(Path("myfile.py"))
 
@@ -242,13 +242,13 @@ Section headers are configured through the ``AutoFixConfig`` class or CLI argume
 
    # Enable section headers with default text
    pylint-sort-functions --fix --add-section-headers myfile.py
-   
+
    # Customize header text
    pylint-sort-functions --fix --add-section-headers \
        --public-header "=== PUBLIC API ===" \
        --private-header "=== INTERNAL HELPERS ===" \
        myfile.py
-   
+
    # Separate headers for functions vs methods
    pylint-sort-functions --fix --add-section-headers \
        --public-method-header ">>> Public Methods <<<" \
@@ -258,8 +258,8 @@ Section headers are configured through the ``AutoFixConfig`` class or CLI argume
 When Headers Are Added
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-Section headers are automatically inserted **only when both public and private functions/methods 
-exist in the same scope**. This smart behavior ensures headers add value by clearly separating 
+Section headers are automatically inserted **only when both public and private functions/methods
+exist in the same scope**. This smart behavior ensures headers add value by clearly separating
 different visibility levels, while avoiding unnecessary headers for single-visibility scopes.
 
 **Headers added:**
@@ -267,7 +267,7 @@ different visibility levels, while avoiding unnecessary headers for single-visib
 - Class with both public and private methods ✓
 
 **Headers NOT added:**
-- Module with only public functions ✗ 
+- Module with only public functions ✗
 - Module with only private functions ✗
 - Class with only public methods ✗
 - Class with only private methods ✗
@@ -285,14 +285,14 @@ Examples
        """A public function."""
        return "zebra"
 
-   def alpha_function(): 
+   def alpha_function():
        """Another public function."""
        return "alpha"
-       
+
    def _zebra_private():
        """A private helper function."""
        return "_zebra"
-       
+
    def _alpha_private():
        """Another private helper."""
        return "_alpha"
@@ -308,7 +308,7 @@ Examples
    def alpha_function():
        """Another public function."""
        return "alpha"
-       
+
    def zebra_function():
        """A public function."""
        return "zebra"
@@ -319,7 +319,7 @@ Examples
    def _alpha_private():
        """Another private helper."""
        return "_alpha"
-       
+
    def _zebra_private():
        """A private helper function."""
        return "_zebra"
@@ -330,24 +330,24 @@ Examples
 
    class UserService:
        """Service for user management."""
-       
+
        # Public methods
-       
+
        def create_user(self, data):
            return self._validate_user_data(data)
-           
+
        def get_user(self, user_id):
            return self._fetch_from_db(user_id)
-       
-       
+
+
        # Private methods
-       
+
        def _fetch_from_db(self, user_id):
            # Database access logic
            pass
-           
+
        def _validate_user_data(self, data):
-           # Validation logic  
+           # Validation logic
            pass
 
 Message Types
