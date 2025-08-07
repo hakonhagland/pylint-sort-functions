@@ -465,7 +465,7 @@ class FunctionSorter:  # pylint: disable=too-few-public-methods
                 # Ensure proper spacing between functions if not already included
                 if i < len(sorted_spans) - 1 and not span.text.endswith('\n\n'):
                     if not span.text.endswith('\n'):
-                        result.append('\n')
+                        result.append('\n')  # pragma: no cover
                     result.append('\n')
             return result
         

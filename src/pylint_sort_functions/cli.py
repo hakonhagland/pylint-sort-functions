@@ -112,7 +112,7 @@ def main() -> int:  # pylint: disable=too-many-return-statements,too-many-branch
         if config.ignore_decorators:
             print(f"Ignoring decorators: {', '.join(config.ignore_decorators)}")
         if config.add_section_headers:
-            print(f"Section headers enabled:")
+            print("Section headers enabled:")
             print(f"  Public functions: '{config.public_header}'")
             print(f"  Private functions: '{config.private_header}'")
             print(f"  Public methods: '{config.public_method_header}'")
@@ -196,7 +196,7 @@ def _add_parser_arguments(parser: argparse.ArgumentParser) -> None:
     )
 
     parser.add_argument(
-        "--private-header", 
+        "--private-header",
         default="# Private functions",
         metavar="TEXT",
         help="Header text for private functions (default: '# Private functions')",
@@ -211,7 +211,7 @@ def _add_parser_arguments(parser: argparse.ArgumentParser) -> None:
 
     parser.add_argument(
         "--private-method-header",
-        default="# Private methods", 
+        default="# Private methods",
         metavar="TEXT",
         help="Header text for private methods (default: '# Private methods')",
     )
