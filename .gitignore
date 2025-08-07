@@ -8,3 +8,6 @@ __pycache__/
 .claude/
 .venv/
 .venv-linux/
+
+# Integration test reports (generated automatically)
+test-validation/reports/

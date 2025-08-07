@@ -358,14 +358,14 @@ The validation system has already identified **4 critical documentation issues**
 
    These plugin options are **documented but not implemented**:
 
-   - ``ignore-decorators`` - Only works in CLI tool, not PyLint plugin
-   - ``check-privacy`` - Not implemented in PyLint plugin
-   - ``public-patterns`` - Not implemented in PyLint plugin
-   - ``skip-dirs`` - Not implemented in PyLint plugin
+   - ``ignore-decorators`` - ✅ **RESOLVED**: Now works in both CLI tool and PyLint plugin (GitHub issue #13)
+   - ``enable-privacy-detection`` - ✅ **IMPLEMENTED**: Works correctly
+   - ``public-api-patterns`` - ✅ **IMPLEMENTED**: Works correctly
+   - ``skip-dirs`` - ❌ **NOT IMPLEMENTED**: Future feature (GitHub issue #7)
 
-   All framework projects **fail with configuration errors** when using these options.
+   Framework projects now **pass successfully** with decorator exclusions.
 
-This confirms that GitHub issue #13 correctly identified decorator exclusions as CLI-only.
+GitHub issue #13 has been resolved - decorator exclusions now work in both tools.
 
 Framework Integration Testing
 -----------------------------

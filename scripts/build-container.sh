@@ -123,7 +123,13 @@ fi
 
 # Build the Docker image
 echo "Building Docker image: pylint-sort-functions-validation"
-docker build -t pylint-sort-functions-validation "$BUILD_CONTEXT"
+# Try to use modern buildx, fall back to legacy build if not available
+if docker buildx version >/dev/null 2>&1; then
+    docker buildx build -t pylint-sort-functions-validation "$BUILD_CONTEXT"
+else
+    echo "Warning: docker buildx not available, using legacy build"
+    docker build -t pylint-sort-functions-validation "$BUILD_CONTEXT"
+fi
 
 # Clean up build context
 rm -rf "$BUILD_CONTEXT"

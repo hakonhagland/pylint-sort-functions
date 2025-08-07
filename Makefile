@@ -144,6 +144,9 @@ build-docker-image:
 
 run-docker-container: build-docker-image
 	@echo "Starting Docker validation container..."
+	@echo "Cleaning up any existing container..."
+	@docker stop pylint-validation-container 2>/dev/null || true
+	@docker rm pylint-validation-container 2>/dev/null || true
 	@docker run -d --name pylint-validation-container \
 		-p 8080:8080 \
 		-v $(ROOT)/dist:/dist:ro \

@@ -260,10 +260,10 @@ Configuration Validation
 
 3. **Plugin-Specific Options** *(Verify actual existence)*
 
-   - ``ignore-decorators`` *(may be CLI-only - GitHub Issue #13)*
-   - ``check-privacy`` / ``enable-privacy-detection``
-   - ``public-patterns`` / ``public-api-patterns``
-   - ``skip-dirs`` *(may be future feature - GitHub Issue #7)*
+   - ``ignore-decorators`` *(✅ implemented in both CLI and PyLint plugin)*
+   - ``enable-privacy-detection`` *(✅ implemented)*
+   - ``public-api-patterns`` *(✅ implemented)*
+   - ``skip-dirs`` *(❌ future feature - GitHub Issue #7)*
 
 Framework Configuration Testing
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

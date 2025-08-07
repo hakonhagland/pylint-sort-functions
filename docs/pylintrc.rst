@@ -154,20 +154,23 @@ Configure the privacy detection feature that suggests functions should be made p
    enable-privacy-detection = true
    public-api-patterns = ["main", "run", "execute", "setup", "teardown"]
 
-Directory Exclusions
-~~~~~~~~~~~~~~~~~~~~~
+Directory Exclusions (Future Feature)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Configure which directories to skip during import analysis (future feature):
+.. note::
+   **FUTURE FEATURE**: Directory exclusion options are planned but not yet implemented in the PyLint plugin. These configurations will be ignored.
+
+   Track implementation progress at `GitHub Issue #7 <https://github.com/hakonhagland/pylint-sort-functions/issues/7>`_.
+
+**Planned configuration (not yet functional):**
 
 **.pylintrc:**
 
 .. code-block:: ini
 
    [function-sort]
-   # Skip additional directories during analysis
+   # FUTURE: Skip additional directories during analysis
    skip-dirs = vendor,third_party,legacy
-
-   # Add to default skip list
    additional-skip-dirs = custom_vendor,generated
 
 **pyproject.toml:**
@@ -175,6 +178,7 @@ Configure which directories to skip during import analysis (future feature):
 .. code-block:: toml
 
    [tool.pylint."function-sort"]
+   # FUTURE: Skip additional directories during analysis
    skip-dirs = ["vendor", "third_party", "legacy"]
    additional-skip-dirs = ["custom_vendor", "generated"]
 
