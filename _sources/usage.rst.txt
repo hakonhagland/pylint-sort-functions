@@ -206,6 +206,8 @@ W9001: unsorted-functions
     def zebra_function():
         pass
 
+**Auto-fix available**: Use ``pylint-sort-functions --fix`` to automatically reorder functions. See :doc:`cli` for details.
+
 W9002: unsorted-methods
 ~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -234,6 +236,8 @@ W9002: unsorted-methods
 
         def method_z(self):
             pass
+
+**Auto-fix available**: Use ``pylint-sort-functions --fix`` to automatically reorder methods. See :doc:`cli` for details.
 
 W9003: mixed-function-visibility
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -264,12 +268,14 @@ W9003: mixed-function-visibility
     def _private_helper():
         pass
 
+**Auto-fix available**: Use ``pylint-sort-functions --fix`` to automatically reorder functions. See :doc:`cli` for details.
+
 W9004: function-should-be-private
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 **Description**: Function should be private (prefix with underscore)
 
-**When triggered**: A function is only used within its defining module and should be marked as private
+**When triggered**: A function is only used within its defining module based on sophisticated import analysis
 
 **Example violation**:
 
@@ -295,7 +301,14 @@ W9004: function-should-be-private
         if _validate_internal_state(data):
             process(data)
 
-**Note**: This detection uses import analysis when possible to avoid false positives. Functions that are imported by other modules won't be flagged.
+**Detection Method**: Uses comprehensive import analysis that scans the entire project to identify actual usage patterns:
+
+- **Cross-module analysis**: Analyzes all Python files to detect function imports and calls
+- **Usage tracking**: Maps which functions are accessed by other modules via ``from module import function`` or ``module.function()``
+- **Smart exclusions**: Skips common public API patterns (``main``, ``run``, ``setup``) and test files
+- **False positive prevention**: Only flags functions with zero external usage, ensuring accuracy
+
+**Auto-fix limitation**: Currently requires manual renaming. See `GitHub Issue #12 <https://github.com/hakonhagland/pylint-sort-functions/issues/12>`_ for planned automatic renaming support in the CLI tool.
 
 Sorting Rules
 -------------
@@ -305,6 +318,9 @@ The plugin enforces these sorting rules:
 1. **Visibility Separation**: Public functions/methods (no underscore) must come before private ones (underscore prefix)
 2. **Alphabetical Order**: Within each visibility group, items must be sorted alphabetically
 3. **Case Sensitive**: Sorting is case-sensitive (uppercase comes before lowercase)
+4. **Dunder Method Handling**: Special methods (``__init__``, ``__str__``) are treated as public and sorted alphabetically
+5. **Public API Pattern Recognition**: Configurable patterns (``main``, ``run``, ``setup``) are preserved as public regardless of usage
+6. **Decorator Exclusions**: Functions with specified decorators can be excluded from sorting requirements (CLI tool only)
 
 Complete Example
 ~~~~~~~~~~~~~~~~
@@ -434,6 +450,39 @@ Generate a full report:
     # Get detailed statistics
     pylint --load-plugins=pylint_sort_functions --reports=yes mymodule.py
 
+Plugin Configuration Options
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Configure plugin behavior through PyLint options:
+
+.. code-block:: bash
+
+    # Configure public API patterns
+    pylint --load-plugins=pylint_sort_functions \
+           --public-api-patterns=main,run,custom_entry \
+           mymodule.py
+
+    # Disable privacy detection
+    pylint --load-plugins=pylint_sort_functions \
+           --disable-privacy-detection \
+           mymodule.py
+
+Self-Check Pattern
+~~~~~~~~~~~~~~~~~~
+
+Focus exclusively on sorting violations for clean output:
+
+.. code-block:: bash
+
+    # Check only plugin-specific violations
+    pylint --load-plugins=pylint_sort_functions \
+           --disable=all \
+           --enable=unsorted-functions,unsorted-methods,mixed-function-visibility,function-should-be-private \
+           src/
+
+    # Make target equivalent (if available)
+    make self-check
+
 Integration with IDEs
 ---------------------
 
@@ -486,7 +535,8 @@ Best Practices
 
    - Document why the order is required
    - Disable the check for those specific functions
-   - Consider using the decorator exclusion feature (future enhancement)
+   - Use the CLI auto-fix tool with decorator exclusions: ``pylint-sort-functions --fix --ignore-decorators "@app.route"`` (see :doc:`cli`)
+   - **Note**: Decorator exclusions are currently CLI-only. See `GitHub Issue #13 <https://github.com/hakonhagland/pylint-sort-functions/issues/13>`_ for PyLint plugin support.
 
 
 3. **Test Organization**: Apply the same principles to test files for consistency:

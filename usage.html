@@ -80,7 +80,11 @@
 <li class="toctree-l3"><a class="reference internal" href="#configuration-in-pylintrc">Configuration in .pylintrc</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#command-line-options">Command Line Options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#command-line-options">Command Line Options</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id1">Plugin Configuration Options</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#self-check-pattern">Self-Check Pattern</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#integration-with-ides">Integration with IDEs</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#vs-code">VS Code</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pycharm">PyCharm</a></li>
@@ -310,6 +314,7 @@ pip<span class="w"> </span>install<span class="w"> </span>pylint-sort-functions<
     <span class="k">pass</span>
 </pre></div>
 </div>
+<p><strong>Auto-fix available</strong>: Use <code class="docutils literal notranslate"><span class="pre">pylint-sort-functions</span> <span class="pre">--fix</span></code> to automatically reorder functions. See <a class="reference internal" href="cli.html"><span class="doc">Auto-Fix Tool Reference</span></a> for details.</p>
 </section>
 <section id="w9002-unsorted-methods">
 <h3>W9002: unsorted-methods<a class="headerlink" href="#w9002-unsorted-methods" title="Link to this heading"></a></h3>
@@ -333,6 +338,7 @@ pip<span class="w"> </span>install<span class="w"> </span>pylint-sort-functions<
         <span class="k">pass</span>
 </pre></div>
 </div>
+<p><strong>Auto-fix available</strong>: Use <code class="docutils literal notranslate"><span class="pre">pylint-sort-functions</span> <span class="pre">--fix</span></code> to automatically reorder methods. See <a class="reference internal" href="cli.html"><span class="doc">Auto-Fix Tool Reference</span></a> for details.</p>
 </section>
 <section id="w9003-mixed-function-visibility">
 <h3>W9003: mixed-function-visibility<a class="headerlink" href="#w9003-mixed-function-visibility" title="Link to this heading"></a></h3>
@@ -356,11 +362,12 @@ pip<span class="w"> </span>install<span class="w"> </span>pylint-sort-functions<
     <span class="k">pass</span>
 </pre></div>
 </div>
+<p><strong>Auto-fix available</strong>: Use <code class="docutils literal notranslate"><span class="pre">pylint-sort-functions</span> <span class="pre">--fix</span></code> to automatically reorder functions. See <a class="reference internal" href="cli.html"><span class="doc">Auto-Fix Tool Reference</span></a> for details.</p>
 </section>
 <section id="w9004-function-should-be-private">
 <h3>W9004: function-should-be-private<a class="headerlink" href="#w9004-function-should-be-private" title="Link to this heading"></a></h3>
 <p><strong>Description</strong>: Function should be private (prefix with underscore)</p>
-<p><strong>When triggered</strong>: A function is only used within its defining module and should be marked as private</p>
+<p><strong>When triggered</strong>: A function is only used within its defining module based on sophisticated import analysis</p>
 <p><strong>Example violation</strong>:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Bad: Internal helper not marked as private</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">validate_internal_state</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>  <span class="c1"># Only used in this module</span>
@@ -381,7 +388,14 @@ pip<span class="w"> </span>install<span class="w"> </span>pylint-sort-functions<
         <span class="n">process</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
 </pre></div>
 </div>
-<p><strong>Note</strong>: This detection uses import analysis when possible to avoid false positives. Functions that are imported by other modules won’t be flagged.</p>
+<p><strong>Detection Method</strong>: Uses comprehensive import analysis that scans the entire project to identify actual usage patterns:</p>
+<ul class="simple">
+<li><p><strong>Cross-module analysis</strong>: Analyzes all Python files to detect function imports and calls</p></li>
+<li><p><strong>Usage tracking</strong>: Maps which functions are accessed by other modules via <code class="docutils literal notranslate"><span class="pre">from</span> <span class="pre">module</span> <span class="pre">import</span> <span class="pre">function</span></code> or <code class="docutils literal notranslate"><span class="pre">module.function()</span></code></p></li>
+<li><p><strong>Smart exclusions</strong>: Skips common public API patterns (<code class="docutils literal notranslate"><span class="pre">main</span></code>, <code class="docutils literal notranslate"><span class="pre">run</span></code>, <code class="docutils literal notranslate"><span class="pre">setup</span></code>) and test files</p></li>
+<li><p><strong>False positive prevention</strong>: Only flags functions with zero external usage, ensuring accuracy</p></li>
+</ul>
+<p><strong>Auto-fix limitation</strong>: Currently requires manual renaming. See <a class="reference external" href="https://github.com/hakonhagland/pylint-sort-functions/issues/12">GitHub Issue #12</a> for planned automatic renaming support in the CLI tool.</p>
 </section>
 </section>
 <section id="sorting-rules">
@@ -391,6 +405,9 @@ pip<span class="w"> </span>install<span class="w"> </span>pylint-sort-functions<
 <li><p><strong>Visibility Separation</strong>: Public functions/methods (no underscore) must come before private ones (underscore prefix)</p></li>
 <li><p><strong>Alphabetical Order</strong>: Within each visibility group, items must be sorted alphabetically</p></li>
 <li><p><strong>Case Sensitive</strong>: Sorting is case-sensitive (uppercase comes before lowercase)</p></li>
+<li><p><strong>Dunder Method Handling</strong>: Special methods (<code class="docutils literal notranslate"><span class="pre">__init__</span></code>, <code class="docutils literal notranslate"><span class="pre">__str__</span></code>) are treated as public and sorted alphabetically</p></li>
+<li><p><strong>Public API Pattern Recognition</strong>: Configurable patterns (<code class="docutils literal notranslate"><span class="pre">main</span></code>, <code class="docutils literal notranslate"><span class="pre">run</span></code>, <code class="docutils literal notranslate"><span class="pre">setup</span></code>) are preserved as public regardless of usage</p></li>
+<li><p><strong>Decorator Exclusions</strong>: Functions with specified decorators can be excluded from sorting requirements (CLI tool only)</p></li>
 </ol>
 <section id="complete-example">
 <h3>Complete Example<a class="headerlink" href="#complete-example" title="Link to this heading"></a></h3>
@@ -504,6 +521,35 @@ pylint<span class="w"> </span>--load-plugins<span class="o">=</span>pylint_sort_
 pylint<span class="w"> </span>--load-plugins<span class="o">=</span>pylint_sort_functions<span class="w"> </span>--reports<span class="o">=</span>yes<span class="w"> </span>mymodule.py
 </pre></div>
 </div>
+<section id="id1">
+<h3>Plugin Configuration Options<a class="headerlink" href="#id1" title="Link to this heading"></a></h3>
+<p>Configure plugin behavior through PyLint options:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Configure public API patterns</span>
+pylint<span class="w"> </span>--load-plugins<span class="o">=</span>pylint_sort_functions<span class="w"> </span><span class="se">\</span>
+<span class="w">       </span>--public-api-patterns<span class="o">=</span>main,run,custom_entry<span class="w"> </span><span class="se">\</span>
+<span class="w">       </span>mymodule.py
+
+<span class="c1"># Disable privacy detection</span>
+pylint<span class="w"> </span>--load-plugins<span class="o">=</span>pylint_sort_functions<span class="w"> </span><span class="se">\</span>
+<span class="w">       </span>--disable-privacy-detection<span class="w"> </span><span class="se">\</span>
+<span class="w">       </span>mymodule.py
+</pre></div>
+</div>
+</section>
+<section id="self-check-pattern">
+<h3>Self-Check Pattern<a class="headerlink" href="#self-check-pattern" title="Link to this heading"></a></h3>
+<p>Focus exclusively on sorting violations for clean output:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Check only plugin-specific violations</span>
+pylint<span class="w"> </span>--load-plugins<span class="o">=</span>pylint_sort_functions<span class="w"> </span><span class="se">\</span>
+<span class="w">       </span>--disable<span class="o">=</span>all<span class="w"> </span><span class="se">\</span>
+<span class="w">       </span>--enable<span class="o">=</span>unsorted-functions,unsorted-methods,mixed-function-visibility,function-should-be-private<span class="w"> </span><span class="se">\</span>
+<span class="w">       </span>src/
+
+<span class="c1"># Make target equivalent (if available)</span>
+make<span class="w"> </span>self-check
+</pre></div>
+</div>
+</section>
 </section>
 <section id="integration-with-ides">
 <h2>Integration with IDEs<a class="headerlink" href="#integration-with-ides" title="Link to this heading"></a></h2>
@@ -553,7 +599,8 @@ pylint<span class="w"> </span>--load-plugins<span class="o">=</span>pylint_sort_
 <ul class="simple">
 <li><p>Document why the order is required</p></li>
 <li><p>Disable the check for those specific functions</p></li>
-<li><p>Consider using the decorator exclusion feature (future enhancement)</p></li>
+<li><p>Use the CLI auto-fix tool with decorator exclusions: <code class="docutils literal notranslate"><span class="pre">pylint-sort-functions</span> <span class="pre">--fix</span> <span class="pre">--ignore-decorators</span> <span class="pre">&quot;&#64;app.route&quot;</span></code> (see <a class="reference internal" href="cli.html"><span class="doc">Auto-Fix Tool Reference</span></a>)</p></li>
+<li><p><strong>Note</strong>: Decorator exclusions are currently CLI-only. See <a class="reference external" href="https://github.com/hakonhagland/pylint-sort-functions/issues/13">GitHub Issue #13</a> for PyLint plugin support.</p></li>
 </ul>
 </li>
 <li><p><strong>Test Organization</strong>: Apply the same principles to test files for consistency:</p>
