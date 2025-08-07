@@ -469,22 +469,11 @@ The plugin analyzes cross-module imports to detect functions that should be priv
 
 This real usage analysis provides accurate detection with minimal false positives.
 
-Testing Strategy
-~~~~~~~~~~~~~~~~
+Testing
+~~~~~~~
 
-The plugin uses PyLint's testing framework:
-
-.. code-block:: python
-
-    class TestFunctionSortChecker(CheckerTestCase):
-        CHECKER_CLASS = FunctionSortChecker
-
-        def test_unsorted_functions(self):
-            node = astroid.extract_node("""
-            def zebra(): pass
-            def alpha(): pass
-            """)
-            # Test that violation is reported
+For comprehensive testing documentation including unit tests, integration testing,
+and the Docker validation system, see :doc:`testing`.
 
 Extending the Plugin
 --------------------
@@ -591,19 +580,23 @@ If you prefer traditional pip:
     # Install development dependencies
     pip install pytest mypy ruff coverage pre-commit
 
-Testing the Plugin
-~~~~~~~~~~~~~~~~~~
+Testing & Quality Assurance
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+See :doc:`testing` for complete testing documentation, including:
+
+- Unit testing with PyLint's framework
+- Plugin integration testing
+- Docker validation system for documentation examples
+- Framework-specific integration testing
+
+Quick test commands:
 
 .. code-block:: bash
 
-    # Run unit tests
-    pytest tests/
-
-    # Test plugin with PyLint
-    pylint --load-plugins=pylint_sort_functions src/
-
-    # Test auto-fix tool
-    python -m pylint_sort_functions.cli --dry-run src/
+    make test                    # Run unit tests
+    make test-plugin             # Test plugin with PyLint
+    make test-documentation      # Validate all documentation examples
 
 Code Quality Checks
 ~~~~~~~~~~~~~~~~~~~

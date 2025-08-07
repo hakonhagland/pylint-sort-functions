@@ -25,6 +25,8 @@ A pylint plugin that enforces alphabetical sorting of functions and methods with
 
     api
     developer
+    testing
+    validation-system
     roadmap
 
 Quick Links

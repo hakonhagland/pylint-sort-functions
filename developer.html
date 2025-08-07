@@ -19,7 +19,7 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Development Roadmap" href="roadmap.html" />
+    <link rel="next" title="Testing" href="testing.html" />
     <link rel="prev" title="API Reference" href="api.html" /> 
 </head>
 
@@ -91,7 +91,7 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#advanced-features">Advanced Features</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#import-analysis">Import Analysis</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#testing-strategy">Testing Strategy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#testing">Testing</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#extending-the-plugin">Extending the Plugin</a><ul>
@@ -107,7 +107,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#alternative-setup-pip">Alternative Setup (pip)</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#testing-the-plugin">Testing the Plugin</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#testing-quality-assurance">Testing &amp; Quality Assurance</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#code-quality-checks">Code Quality Checks</a></li>
 </ul>
 </li>
@@ -125,6 +125,8 @@
 <li class="toctree-l2"><a class="reference internal" href="#conclusion">Conclusion</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="testing.html">Testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="validation-system.html">Documentation Validation System</a></li>
 <li class="toctree-l1"><a class="reference internal" href="roadmap.html">Development Roadmap</a></li>
 </ul>
 
@@ -588,20 +590,10 @@ The plugin includes sophisticated import analysis to suggest when public functio
 </ol>
 <p>This real usage analysis provides accurate detection with minimal false positives.</p>
 </section>
-<section id="testing-strategy">
-<h3>Testing Strategy<a class="headerlink" href="#testing-strategy" title="Link to this heading"></a></h3>
-<p>The plugin uses PyLint’s testing framework:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">TestFunctionSortChecker</span><span class="p">(</span><span class="n">CheckerTestCase</span><span class="p">):</span>
-    <span class="n">CHECKER_CLASS</span> <span class="o">=</span> <span class="n">FunctionSortChecker</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="nf">test_unsorted_functions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">node</span> <span class="o">=</span> <span class="n">astroid</span><span class="o">.</span><span class="n">extract_node</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
-<span class="s2">        def zebra(): pass</span>
-<span class="s2">        def alpha(): pass</span>
-<span class="s2">        &quot;&quot;&quot;</span><span class="p">)</span>
-        <span class="c1"># Test that violation is reported</span>
-</pre></div>
-</div>
+<section id="testing">
+<h3>Testing<a class="headerlink" href="#testing" title="Link to this heading"></a></h3>
+<p>For comprehensive testing documentation including unit tests, integration testing,
+and the Docker validation system, see <a class="reference internal" href="testing.html"><span class="doc">Testing</span></a>.</p>
 </section>
 </section>
 <section id="extending-the-plugin">
@@ -708,16 +700,19 @@ pip<span class="w"> </span>install<span class="w"> </span>pytest<span class="w">
 </div>
 </section>
 </section>
-<section id="testing-the-plugin">
-<h3>Testing the Plugin<a class="headerlink" href="#testing-the-plugin" title="Link to this heading"></a></h3>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Run unit tests</span>
-pytest<span class="w"> </span>tests/
-
-<span class="c1"># Test plugin with PyLint</span>
-pylint<span class="w"> </span>--load-plugins<span class="o">=</span>pylint_sort_functions<span class="w"> </span>src/
-
-<span class="c1"># Test auto-fix tool</span>
-python<span class="w"> </span>-m<span class="w"> </span>pylint_sort_functions.cli<span class="w"> </span>--dry-run<span class="w"> </span>src/
+<section id="testing-quality-assurance">
+<h3>Testing &amp; Quality Assurance<a class="headerlink" href="#testing-quality-assurance" title="Link to this heading"></a></h3>
+<p>See <a class="reference internal" href="testing.html"><span class="doc">Testing</span></a> for complete testing documentation, including:</p>
+<ul class="simple">
+<li><p>Unit testing with PyLint’s framework</p></li>
+<li><p>Plugin integration testing</p></li>
+<li><p>Docker validation system for documentation examples</p></li>
+<li><p>Framework-specific integration testing</p></li>
+</ul>
+<p>Quick test commands:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span><span class="nb">test</span><span class="w">                    </span><span class="c1"># Run unit tests</span>
+make<span class="w"> </span>test-plugin<span class="w">             </span><span class="c1"># Test plugin with PyLint</span>
+make<span class="w"> </span>test-documentation<span class="w">      </span><span class="c1"># Validate all documentation examples</span>
 </pre></div>
 </div>
 </section>
@@ -852,7 +847,7 @@ pylint<span class="w"> </span>--load-plugins<span class="o">=</span>pylint_sort_
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="api.html" class="btn btn-neutral float-left" title="API Reference" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="roadmap.html" class="btn btn-neutral float-right" title="Development Roadmap" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="testing.html" class="btn btn-neutral float-right" title="Testing" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
