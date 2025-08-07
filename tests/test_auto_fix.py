@@ -1318,3 +1318,37 @@ def _alpha_private():
             "def func3():\n    pass\n\n",  # span3.text (no additions needed)
         ]
         assert result == expected
+
+    def test_file_needs_sorting_section_headers_only(self) -> None:
+        """Test _file_needs_sorting detects when only section headers are needed."""
+        # Test module functions that are sorted but need headers
+        module_content = """def alpha_function():
+    return "alpha"
+
+def _zebra_private():
+    return "_zebra"
+"""
+        config = AutoFixConfig(add_section_headers=True)
+        sorter = FunctionSorter(config)
+
+        # Functions are already sorted, but should need processing for headers
+        assert sorter._file_needs_sorting(module_content)
+
+        # Test class methods that are sorted but need headers
+        class_content = """class TestClass:
+    def __init__(self):
+        pass
+
+    def alpha_method(self):
+        return "alpha"
+
+    def _zebra_private(self):
+        return "_zebra"
+"""
+        assert sorter._file_needs_sorting(class_content)
+
+        # Test that without section headers, content doesn't need processing
+        config_no_headers = AutoFixConfig(add_section_headers=False)
+        sorter_no_headers = FunctionSorter(config_no_headers)
+        assert not sorter_no_headers._file_needs_sorting(module_content)
+        assert not sorter_no_headers._file_needs_sorting(class_content)

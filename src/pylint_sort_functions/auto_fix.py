@@ -63,6 +63,8 @@ class FunctionSorter:  # pylint: disable=too-many-public-methods,too-few-public-
         was_modified = sorter.sort_file(Path("my_file.py"))
     """
 
+    # Public methods
+
     def __init__(self, config: AutoFixConfig):
         """Initialize the function sorter.
 
@@ -114,6 +116,8 @@ class FunctionSorter:  # pylint: disable=too-many-public-methods,too-few-public-
         ) as e:  # pragma: no cover  # pylint: disable=broad-exception-caught
             print(f"Error processing {file_path}: {e}")
             return False
+
+    # Private methods
 
     def _add_section_headers_to_functions(  # pylint: disable=too-many-branches
         self, sorted_spans: List[FunctionSpan], is_methods: bool = False
@@ -312,7 +316,7 @@ class FunctionSorter:  # pylint: disable=too-many-public-methods,too-few-public-
         :returns: True if file needs sorting
         :rtype: bool
         """
-        try:
+        try:  # pylint: disable=too-many-nested-blocks
             # Parse with astroid for consistency with the checker
             module = astroid.parse(content)
 
@@ -324,15 +328,30 @@ class FunctionSorter:  # pylint: disable=too-many-public-methods,too-few-public-
                 )
                 if not sorted_result:
                     return True
+                # Even if sorted, check if we need to add section headers
+                if self.config.add_section_headers:
+                    function_spans = self._extract_function_spans(
+                        functions, content.splitlines()
+                    )
+                    if self._has_mixed_visibility_functions(function_spans):
+                        return True
 
             # Check class methods
             for node in module.body:
                 if isinstance(node, nodes.ClassDef):
                     methods = utils.get_methods_from_class(node)
-                    if methods and not utils.are_methods_sorted_with_exclusions(
-                        methods, self.config.ignore_decorators
-                    ):
-                        return True
+                    if methods:
+                        if not utils.are_methods_sorted_with_exclusions(
+                            methods, self.config.ignore_decorators
+                        ):
+                            return True
+                        # Even if sorted, check if we need to add section headers
+                        if self.config.add_section_headers:
+                            method_spans = self._extract_method_spans(
+                                methods, content.splitlines(), node
+                            )
+                            if self._has_mixed_visibility_functions(method_spans):
+                                return True
 
             return False
 
@@ -752,6 +771,9 @@ class FunctionSorter:  # pylint: disable=too-many-public-methods,too-few-public-
         return self._reconstruct_content_with_sorted_functions(
             content, function_spans, sorted_spans
         )
+
+
+# Public functions
 
 
 # Public API function for sorting a single file
