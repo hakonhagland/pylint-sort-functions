@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Command Line Interface &mdash; pylint-sort-functions 0.1 documentation</title>
+  <title>Auto-Fix Tool Reference &mdash; pylint-sort-functions 0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
 
@@ -46,8 +46,12 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="usage.html">User Guide</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Command Line Interface</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#installation">Installation</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Auto-Fix Tool Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#installation">Installation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#development-dependency-recommended">Development Dependency (Recommended)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#global-installation">Global Installation</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#usage">Usage</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#basic-syntax">Basic Syntax</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#command-examples">Command Examples</a></li>
@@ -120,7 +124,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">Command Line Interface</li>
+      <li class="breadcrumb-item active">Auto-Fix Tool Reference</li>
       <li class="wy-breadcrumbs-aside">
               <a href="https://github.com/hakonhagland/pylint-sort-functions/blob/main/docs/cli.rst" class="fa fa-github"> Edit on GitHub</a>
       </li>
@@ -130,16 +134,35 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="command-line-interface">
-<h1>Command Line Interface<a class="headerlink" href="#command-line-interface" title="Link to this heading"></a></h1>
+  <section id="auto-fix-tool-reference">
+<h1>Auto-Fix Tool Reference<a class="headerlink" href="#auto-fix-tool-reference" title="Link to this heading"></a></h1>
 <p>The <code class="docutils literal notranslate"><span class="pre">pylint-sort-functions</span></code> command-line tool provides auto-fix functionality for function
 and method sorting independent of PyLint integration.</p>
 <section id="installation">
 <h2>Installation<a class="headerlink" href="#installation" title="Link to this heading"></a></h2>
-<p>The CLI tool is automatically available after installing the package:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>pylint-sort-functions
+<p>The CLI tool is automatically available after installing the <code class="docutils literal notranslate"><span class="pre">pylint-sort-functions</span></code> package.</p>
+<section id="development-dependency-recommended">
+<h3>Development Dependency (Recommended)<a class="headerlink" href="#development-dependency-recommended" title="Link to this heading"></a></h3>
+<p>If you’re already using the PyLint plugin in your project (see <a class="reference internal" href="usage.html"><span class="doc">User Guide</span></a>), the CLI tool is automatically available:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Tool is available after plugin installation</span>
+uv<span class="w"> </span>sync<span class="w">  </span><span class="c1"># or poetry install, pip install -r requirements-dev.txt</span>
+pylint-sort-functions<span class="w"> </span>--help
 </pre></div>
 </div>
+</section>
+<section id="global-installation">
+<h3>Global Installation<a class="headerlink" href="#global-installation" title="Link to this heading"></a></h3>
+<p>For standalone use without the PyLint plugin integration:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Install globally or in a virtual environment</span>
+pip<span class="w"> </span>install<span class="w"> </span>pylint-sort-functions
+pylint-sort-functions<span class="w"> </span>--help
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This CLI tool complements the PyLint plugin integration. For comprehensive code quality workflows, see <a class="reference internal" href="usage.html"><span class="doc">User Guide</span></a> for PyLint plugin setup, configuration options, and team integration patterns.</p>
+</div>
+</section>
 </section>
 <section id="usage">
 <h2>Usage<a class="headerlink" href="#usage" title="Link to this heading"></a></h2>
@@ -239,6 +262,10 @@ Backup<span class="w"> </span>files<span class="w"> </span>created<span class="w
 </section>
 <section id="decorator-pattern-matching">
 <h2>Decorator Pattern Matching<a class="headerlink" href="#decorator-pattern-matching" title="Link to this heading"></a></h2>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">--ignore-decorators</span></code> feature is currently available only in the CLI tool. The PyLint plugin does not yet support decorator exclusions. See <a class="reference external" href="https://github.com/hakonhagland/pylint-sort-functions/issues/13">GitHub Issue #13</a> for planned PyLint plugin support.</p>
+</div>
 <section id="pattern-syntax">
 <h3>Pattern Syntax<a class="headerlink" href="#pattern-syntax" title="Link to this heading"></a></h3>
 <p>The <code class="docutils literal notranslate"><span class="pre">--ignore-decorators</span></code> option supports flexible pattern matching:</p>
@@ -392,6 +419,10 @@ which scales with project size.</p>
 <li><p>Use <code class="docutils literal notranslate"><span class="pre">--no-backup</span></code> to skip backup creation</p></li>
 <li><p>Clean up with: <code class="docutils literal notranslate"><span class="pre">find</span> <span class="pre">.</span> <span class="pre">-name</span> <span class="pre">&quot;*.py.bak&quot;</span> <span class="pre">-delete</span></code></p></li>
 </ul>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p><strong>Known Issue - Section Header Comments:</strong> The auto-fix tool may displace section header comments (like <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">Public</span> <span class="pre">functions</span></code>) during function reordering instead of keeping them positioned correctly. Function-specific comments are preserved properly. See <a class="reference external" href="https://github.com/hakonhagland/pylint-sort-functions/issues/10">GitHub Issue #10</a> for status and workarounds.</p>
+</div>
 </section>
 </section>
 <section id="related-tools">
