@@ -257,7 +257,9 @@ class SimpleClass:
             patch(
                 "pylint_sort_functions.utils.get_methods_from_class"
             ) as mock_get_methods,
-            patch("pylint_sort_functions.utils.are_methods_sorted") as mock_are_sorted,
+            patch(
+                "pylint_sort_functions.utils.are_methods_sorted_with_exclusions"
+            ) as mock_are_sorted,
             patch(
                 "pylint_sort_functions.utils.are_functions_properly_separated"
             ) as mock_are_separated,
@@ -266,14 +268,18 @@ class SimpleClass:
             mock_are_sorted.return_value = False
             mock_are_separated.return_value = False
 
-            # Mock the add_message method
+            # Mock the add_message method and linter config
             self.checker.add_message = Mock()
+            self.checker.linter = Mock()
+            self.checker.linter.config.ignore_decorators = []
 
             self.checker.visit_classdef(mock_node)
 
             # Verify utility functions were called
             mock_get_methods.assert_called_once_with(mock_node)
-            mock_are_sorted.assert_called_once_with([])
+            mock_are_sorted.assert_called_once_with(
+                [], []
+            )  # methods, ignore_decorators
             mock_are_separated.assert_called_once_with([])
 
             # Verify both messages were added
@@ -525,7 +531,7 @@ def public_function_2():
         # Verify options are defined
         assert hasattr(self.checker, "options")
         assert isinstance(self.checker.options, tuple)
-        assert len(self.checker.options) == 2
+        assert len(self.checker.options) == 3
 
         # Test public-api-patterns option
         public_api_option = self.checker.options[0]
@@ -594,3 +600,109 @@ def processor():
                     call_args = mock_should_private.call_args_list[0]
                     # Check the fourth argument (public_patterns)
                     assert call_args[0][3] == {"handler", "processor"}
+
+    def test_decorator_exclusions_configuration(self) -> None:
+        """Test that decorator exclusions configuration is properly defined."""
+        # Verify ignore-decorators option is defined
+        options_dict = {opt[0]: opt[1] for opt in self.checker.options}
+
+        assert "ignore-decorators" in options_dict
+        decorator_option = options_dict["ignore-decorators"]
+        assert decorator_option["type"] == "csv"
+        assert decorator_option["default"] == []
+        assert "decorator patterns" in decorator_option["help"].lower()
+
+    def test_decorator_exclusions_functions(self) -> None:
+        """Test that functions with excluded decorators are not flagged for sorting."""
+        from unittest.mock import Mock
+
+        content = """
+@app.route('/users')
+def zebra_route():
+    pass
+
+@app.route('/users/<int:id>')
+def alpha_route():
+    pass
+
+def alpha_function():
+    pass
+
+def zebra_function():
+    pass
+"""
+        module = astroid.parse(content)
+
+        # Mock linter with decorator exclusions configured
+        mock_linter = Mock()
+        mock_linter.config.ignore_decorators = ["@app.route"]
+        mock_linter.config.enable_privacy_detection = (
+            False  # Disable to focus on sorting
+        )
+
+        with patch.object(self.checker, "linter", mock_linter):
+            # Should NOT report unsorted functions because:
+            # - Decorated functions @app.route are excluded from sorting
+            # - Regular functions are properly sorted (alpha_function, zebra_function)
+            with self.assertNoMessages():
+                self.checker.visit_module(module)
+
+    def test_decorator_exclusions_methods(self) -> None:
+        """Test that methods with excluded decorators are not flagged for sorting."""
+        from unittest.mock import Mock
+
+        content = """
+class APIHandler:
+    @app.route('/api/users')
+    def zebra_route(self):
+        pass
+
+    @app.route('/api/users/<int:id>')
+    def alpha_route(self):
+        pass
+
+    def alpha_method(self):
+        pass
+
+    def zebra_method(self):
+        pass
+"""
+        module = astroid.parse(content)
+        class_node = module.body[0]
+        assert isinstance(class_node, nodes.ClassDef)
+
+        # Mock linter with decorator exclusions configured
+        mock_linter = Mock()
+        mock_linter.config.ignore_decorators = ["@app.route"]
+
+        with patch.object(self.checker, "linter", mock_linter):
+            # Should NOT report unsorted methods because:
+            # - Decorated methods @app.route are excluded from sorting
+            # - Regular methods are properly sorted (alpha_method, zebra_method)
+            with self.assertNoMessages():
+                self.checker.visit_classdef(class_node)
+
+    def test_all_functions_excluded_no_message(self) -> None:
+        """Test that when all functions are excluded, no message is issued."""
+        from unittest.mock import Mock
+
+        content = """
+@app.route('/users')
+def zebra_route():
+    pass
+
+@app.route('/admin')
+def alpha_route():
+    pass
+"""
+        module = astroid.parse(content)
+
+        # Mock linter excluding all functions
+        mock_linter = Mock()
+        mock_linter.config.ignore_decorators = ["@app.route"]
+        mock_linter.config.enable_privacy_detection = False
+
+        with patch.object(self.checker, "linter", mock_linter):
+            # No functions are sortable, so no sorting violation should be reported
+            with self.assertNoMessages():
+                self.checker.visit_module(module)

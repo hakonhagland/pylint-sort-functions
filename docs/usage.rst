@@ -534,9 +534,9 @@ Best Practices
 2. **Framework Exceptions**: Some frameworks require specific ordering. In these cases:
 
    - Document why the order is required
-   - Disable the check for those specific functions
+   - Configure decorator exclusions in your project (see :doc:`pylintrc`)
    - Use the CLI auto-fix tool with decorator exclusions: ``pylint-sort-functions --fix --ignore-decorators "@app.route"`` (see :doc:`cli`)
-   - **Note**: Decorator exclusions are currently CLI-only. See `GitHub Issue #13 <https://github.com/hakonhagland/pylint-sort-functions/issues/13>`_ for PyLint plugin support.
+   - **Note**: Decorator exclusions are available in both PyLint plugin and CLI tool for consistent behavior.
 
 
 3. **Test Organization**: Apply the same principles to test files for consistency:

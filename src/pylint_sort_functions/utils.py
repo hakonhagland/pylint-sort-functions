@@ -61,7 +61,7 @@ def are_functions_properly_separated(functions: list[nodes.FunctionDef]) -> bool
     return True
 
 
-def are_functions_sorted(functions: list[nodes.FunctionDef]) -> bool:
+def are_functions_sorted(functions: list[nodes.FunctionDef]) -> bool:  # pylint: disable=function-should-be-private
     """Check if functions are sorted alphabetically within their visibility scope.
 
     Functions are expected to be sorted with:
@@ -123,7 +123,7 @@ def are_functions_sorted_with_exclusions(
     return are_functions_sorted(sortable_functions)
 
 
-def are_methods_sorted(methods: list[nodes.FunctionDef]) -> bool:
+def are_methods_sorted(methods: list[nodes.FunctionDef]) -> bool:  # pylint: disable=function-should-be-private
     """Check if methods are sorted alphabetically within their visibility scope.
 
     :param methods: List of method definition nodes

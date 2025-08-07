@@ -78,6 +78,18 @@ class FunctionSortChecker(BaseChecker):
                 ),
             },
         ),
+        (
+            "ignore-decorators",
+            {
+                "default": [],
+                "type": "csv",
+                "metavar": "<pattern1,pattern2,...>",
+                "help": (
+                    "Decorator patterns to exclude from sorting requirements. "
+                    "Supports exact matches and wildcards (e.g., @app.route)."
+                ),
+            },
+        ),
     )
 
     # Public methods
@@ -91,7 +103,11 @@ class FunctionSortChecker(BaseChecker):
         :type node: nodes.ClassDef
         """
         methods = utils.get_methods_from_class(node)
-        if not utils.are_methods_sorted(methods):
+
+        # Get configured decorator exclusions
+        ignore_decorators = self.linter.config.ignore_decorators or []
+
+        if not utils.are_methods_sorted_with_exclusions(methods, ignore_decorators):
             # Report unsorted methods - see docs/usage.rst for message details
             self.add_message("unsorted-methods", node=node, args=(node.name,))
 
@@ -112,7 +128,11 @@ class FunctionSortChecker(BaseChecker):
         :type node: nodes.Module
         """
         functions = utils.get_functions_from_node(node)
-        if not utils.are_functions_sorted(functions):
+
+        # Get configured decorator exclusions
+        ignore_decorators = self.linter.config.ignore_decorators or []
+
+        if not utils.are_functions_sorted_with_exclusions(functions, ignore_decorators):
             # Report unsorted functions - see docs/usage.rst for configuration
             self.add_message("unsorted-functions", node=node, args=("module",))
 

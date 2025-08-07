@@ -173,8 +173,8 @@ Modify files in-place with optional backup creation:
 Decorator Pattern Matching
 ---------------------------
 
-.. important::
-   The ``--ignore-decorators`` feature is currently available only in the CLI tool. The PyLint plugin does not yet support decorator exclusions. See `GitHub Issue #13 <https://github.com/hakonhagland/pylint-sort-functions/issues/13>`_ for planned PyLint plugin support.
+.. note::
+   The ``--ignore-decorators`` feature is available in both the CLI tool and the PyLint plugin. For PyLint plugin configuration, see :doc:`pylintrc` for details on setting up decorator exclusions in your project configuration.
 
 Pattern Syntax
 ~~~~~~~~~~~~~~~

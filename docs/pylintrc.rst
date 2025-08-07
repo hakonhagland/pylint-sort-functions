@@ -208,7 +208,7 @@ Flask Applications
 
    pylint-sort-functions --ignore-decorators "@app.route,@app.before_request" src/
 
-**PyLint plugin configuration (decorator exclusions ignored):**
+**PyLint plugin configuration with decorator exclusions:**
 
 .. code-block:: ini
 
@@ -218,13 +218,8 @@ Flask Applications
    [MESSAGES CONTROL]
    enable = unsorted-functions,unsorted-methods,mixed-function-visibility
 
-   [pylint-sort-functions]
-   # WARNING: ignore-decorators is ignored by PyLint plugin
-   ignore-decorators = @app.route
-                      @app.before_request
-                      @app.after_request
-                      @app.errorhandler
-                      @app.teardown_appcontext
+   [function-sort]
+   ignore-decorators = @app.route,@app.before_request,@app.after_request,@app.errorhandler,@app.teardown_appcontext
 
 .. code-block:: toml
 
@@ -234,8 +229,7 @@ Flask Applications
    [tool.pylint."messages control"]
    enable = ["unsorted-functions", "unsorted-methods", "mixed-function-visibility"]
 
-   [tool.pylint-sort-functions]
-   # WARNING: ignore-decorators is ignored by PyLint plugin
+   [tool.pylint."function-sort"]
    ignore-decorators = [
        "@app.route",
        "@app.before_request",
@@ -253,24 +247,19 @@ Click CLI Applications
 
    pylint-sort-functions --ignore-decorators "@*.command,@*.group,@*.option" src/
 
-**PyLint plugin configuration (decorator exclusions ignored):**
+**PyLint plugin configuration with decorator exclusions:**
 
 .. code-block:: ini
 
    [MASTER]
    load-plugins = pylint_sort_functions
 
-   [pylint-sort-functions]
-   # WARNING: ignore-decorators is ignored by PyLint plugin
-   ignore-decorators = @*.command
-                      @*.group
-                      @*.option
-                      @*.argument
+   [function-sort]
+   ignore-decorators = @*.command,@*.group,@*.option,@*.argument
 
 .. code-block:: toml
 
-   [tool.pylint-sort-functions]
-   # WARNING: ignore-decorators is ignored by PyLint plugin
+   [tool.pylint."function-sort"]
    ignore-decorators = [
        "@*.command",
        "@*.group",
@@ -287,17 +276,12 @@ Django Applications
 
    pylint-sort-functions --ignore-decorators "@login_required,@csrf_exempt" src/
 
-**PyLint plugin configuration (decorator exclusions ignored):**
+**PyLint plugin configuration with decorator exclusions:**
 
 .. code-block:: ini
 
-   [pylint-sort-functions]
-   # WARNING: ignore-decorators is ignored by PyLint plugin
-   ignore-decorators = @login_required
-                      @csrf_exempt
-                      @require_http_methods
-                      @cache_page
-                      @vary_on_headers
+   [function-sort]
+   ignore-decorators = @login_required,@csrf_exempt,@require_http_methods,@cache_page,@vary_on_headers
 
 FastAPI Applications
 ~~~~~~~~~~~~~~~~~~~~
