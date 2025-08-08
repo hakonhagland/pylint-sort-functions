@@ -96,7 +96,8 @@ fi
 
 # Check for existing saved commit messages from previous validation failures
 if [ -z "$COMMIT_MESSAGE_FILE" ] && [ -z "$FORCE_FLAG" ]; then
-    EXISTING_TEMP_FILES=$(find /tmp -maxdepth 1 -name "tmp.*" -type f 2>/dev/null)
+    # Use project-specific naming to avoid conflicts: pylint-sort-functions-commit-msg-*
+    EXISTING_TEMP_FILES=$(find /tmp -maxdepth 1 -name "pylint-sort-functions-commit-msg-*" -type f 2>/dev/null)
     if [ -n "$EXISTING_TEMP_FILES" ]; then
         TEMP_COUNT=$(echo "$EXISTING_TEMP_FILES" | wc -l)
         echo -e "${YELLOW}⚠️  Found $TEMP_COUNT saved commit message(s) from previous validation failures:${NC}"
@@ -117,7 +118,7 @@ if [ -z "$COMMIT_MESSAGE_FILE" ] && [ -z "$FORCE_FLAG" ]; then
         echo "Options:"
         echo "1. Use most recent saved message: bash scripts/safe-commit.sh --file '$(echo "$EXISTING_TEMP_FILES" | head -1)'"
         echo "2. Continue with new message (ignores saved messages)"
-        echo "3. Clean up old messages: rm /tmp/tmp.*"
+        echo "3. Clean up old messages: rm /tmp/pylint-sort-functions-commit-msg-*"
         echo ""
         echo -e "${YELLOW}💡 Tip: Add --force flag to skip this check: bash scripts/safe-commit.sh --force 'message'${NC}"
         echo ""
@@ -174,7 +175,7 @@ if [ -z "$NO_VERIFY_FLAG" ]; then
         MODIFIED_FILES=$(git status --porcelain)
         if [ -z "$MODIFIED_FILES" ]; then
             # Save commit message to temporary file to avoid losing it
-            TEMP_MSG_FILE=$(mktemp)
+            TEMP_MSG_FILE=$(mktemp /tmp/pylint-sort-functions-commit-msg-XXXXXX)
             echo "$COMMIT_MESSAGE" > "$TEMP_MSG_FILE"
 
             echo -e "${RED}❌ Pre-commit validation failed${NC}"
@@ -205,14 +206,23 @@ if [ -z "$NO_VERIFY_FLAG" ]; then
         git add -A
 
         if [ $RETRY_COUNT -eq $MAX_RETRIES ]; then
+            # Save commit message to temporary file to avoid losing it
+            TEMP_MSG_FILE=$(mktemp /tmp/pylint-sort-functions-commit-msg-XXXXXX)
+            echo "$COMMIT_MESSAGE" > "$TEMP_MSG_FILE"
+
             echo -e "${RED}❌ Maximum retries reached${NC}"
             echo "Pre-commit hooks are still making formatting changes after $MAX_RETRIES attempts."
             echo "This suggests an unstable formatting configuration."
             echo ""
+            echo -e "${YELLOW}💾 Your commit message has been saved to: $TEMP_MSG_FILE${NC}"
+            echo ""
             echo "To continue manually:"
             echo "1. Review changes: git diff --cached"
             echo "2. Check for conflicting formatter configurations"
-            echo "3. Re-run: bash scripts/safe-commit.sh -m \"$COMMIT_MESSAGE\""
+            echo "3. Fix issues manually, stage fixes: git add <fixed-files>"
+            echo "4. Re-run with saved message: bash scripts/safe-commit.sh --file '$TEMP_MSG_FILE'"
+            echo ""
+            echo "The temporary file will be automatically cleaned up after successful commit."
             exit 1
         fi
     done
@@ -237,7 +247,7 @@ if [ $? -eq 0 ]; then
     echo -e "${GREEN}✅ Commit successful!${NC}"
 
     # Clean up temporary message files if they exist
-    if [ -n "$COMMIT_MESSAGE_FILE" ] && [[ "$COMMIT_MESSAGE_FILE" == /tmp/* ]]; then
+    if [ -n "$COMMIT_MESSAGE_FILE" ] && [[ "$COMMIT_MESSAGE_FILE" == /tmp/pylint-sort-functions-commit-msg-* ]]; then
         rm -f "$COMMIT_MESSAGE_FILE"
         echo "🧹 Cleaned up temporary message file"
     fi
