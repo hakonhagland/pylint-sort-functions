@@ -276,6 +276,45 @@ def _add_parser_arguments(parser: argparse.ArgumentParser) -> None:
         help="Show which functions would be renamed to private without modifying files",
     )
 
+    parser.add_argument(
+        "--auto-sort",
+        action="store_true",
+        help="Automatically apply function sorting after privacy fixes",
+    )
+
+
+def _apply_integrated_sorting(
+    args: argparse.Namespace, python_files: List[Path]
+) -> None:
+    """Apply function sorting after privacy fixes.
+
+    :param args: Parsed command-line arguments containing configuration
+    :param python_files: List of Python files to sort
+    """
+    # Create sorting configuration from CLI args
+    config = AutoFixConfig(
+        dry_run=args.privacy_dry_run,  # Use privacy dry-run mode for sorting too
+        backup=not args.no_backup,
+        ignore_decorators=args.ignore_decorators or [],
+        add_section_headers=args.add_section_headers,
+        public_header=args.public_header,
+        private_header=args.private_header,
+        public_method_header=args.public_method_header,
+        private_method_header=args.private_method_header,
+        additional_section_patterns=args.additional_section_patterns,
+        section_header_case_sensitive=args.section_headers_case_sensitive,
+    )
+
+    # Apply sorting
+    files_processed, files_modified = auto_fix.sort_python_files(python_files, config)
+
+    if config.dry_run:
+        print(f"Would sort {files_modified} of {files_processed} files")
+    else:
+        print(f"Sorted {files_modified} of {files_processed} files")
+        if config.backup and files_modified > 0:  # pragma: no cover
+            print("Additional backup files created for sorting changes")
+
 
 def _find_project_root(start_path: Path) -> Path:
     """Find the project root by looking for common project markers.
@@ -322,7 +361,7 @@ def _find_python_files(paths: List[Path]) -> List[Path]:
     return python_files
 
 
-def _handle_privacy_fixing(  # pylint: disable=too-many-locals
+def _handle_privacy_fixing(  # pylint: disable=too-many-locals,too-many-branches
     args: argparse.Namespace, python_files: List[Path], paths: List[Path]
 ) -> int:
     """Handle privacy fixing workflow.
@@ -417,8 +456,23 @@ def _handle_privacy_fixing(  # pylint: disable=too-many-locals
             if result.get("errors"):  # pragma: no cover
                 for error in result["errors"]:
                     print(f"Error: {error}")
+
+            # Apply automatic sorting if requested
+            if args.auto_sort and result["renamed"] > 0:
+                print("\n=== Applying Automatic Sorting ===")
+                _apply_integrated_sorting(args, python_files)
+        # For dry-run mode with auto-sort, show what sorting would do
+        if args.privacy_dry_run and args.auto_sort and all_candidates:
+            print("\n=== Auto-Sort Preview ===")
+            _apply_integrated_sorting(args, python_files)
     else:  # pragma: no cover
         print("No functions found that need privacy fixes.")
+
+        # For dry-run mode with auto-sort on files with no privacy issues,
+        # still show sorting preview
+        if args.privacy_dry_run and args.auto_sort:
+            print("\n=== Auto-Sort Preview ===")
+            _apply_integrated_sorting(args, python_files)
 
     return 0
 

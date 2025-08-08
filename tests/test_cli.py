@@ -222,3 +222,37 @@ def main(): return helper()""")
                 assert result == 0
         finally:
             temp_file.unlink()
+
+    def test_privacy_with_auto_sort_dry_run(self) -> None:
+        """Test privacy fixing with auto-sort in dry-run mode."""
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False) as f:
+            f.write("""def zebra(): return helper()
+def helper(): return 'help'
+def main(): return zebra()""")
+            temp_file = Path(f.name)
+
+        try:
+            test_args = ["--privacy-dry-run", "--auto-sort", str(temp_file)]
+
+            with patch("sys.argv", ["pylint-sort-functions"] + test_args):
+                result = main()
+                assert result == 0
+        finally:
+            temp_file.unlink()
+
+    def test_privacy_with_auto_sort_fix_mode(self) -> None:
+        """Test privacy fixing with auto-sort in fix mode."""
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False) as f:
+            f.write("""def zebra(): return helper()
+def helper(): return 'help'
+def main(): return zebra()""")
+            temp_file = Path(f.name)
+
+        try:
+            test_args = ["--fix-privacy", "--auto-sort", "--no-backup", str(temp_file)]
+
+            with patch("sys.argv", ["pylint-sort-functions"] + test_args):
+                result = main()
+                assert result == 0
+        finally:
+            temp_file.unlink()
