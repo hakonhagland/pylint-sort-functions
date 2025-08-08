@@ -36,6 +36,7 @@ COMMIT_MESSAGE=""
 COMMIT_MESSAGE_FILE=""
 AMEND_FLAG=""
 NO_VERIFY_FLAG=""
+FORCE_FLAG=""
 
 while [[ $# -gt 0 ]]; do
     case $1 in
@@ -53,6 +54,10 @@ while [[ $# -gt 0 ]]; do
             ;;
         --no-verify)
             NO_VERIFY_FLAG="--no-verify"
+            shift
+            ;;
+        --force)
+            FORCE_FLAG="1"
             shift
             ;;
         *)
@@ -87,6 +92,36 @@ if [ -z "$COMMIT_MESSAGE" ] && [ -z "$AMEND_FLAG" ]; then
     echo "   or: $0 -m 'commit message'"
     echo "   or: $0 --file path/to/message.txt"
     exit 1
+fi
+
+# Check for existing saved commit messages from previous validation failures
+if [ -z "$COMMIT_MESSAGE_FILE" ] && [ -z "$FORCE_FLAG" ]; then
+    EXISTING_TEMP_FILES=$(find /tmp -maxdepth 1 -name "tmp.*" -type f 2>/dev/null)
+    if [ -n "$EXISTING_TEMP_FILES" ]; then
+        TEMP_COUNT=$(echo "$EXISTING_TEMP_FILES" | wc -l)
+        echo -e "${YELLOW}⚠️  Found $TEMP_COUNT saved commit message(s) from previous validation failures:${NC}"
+
+        echo "$EXISTING_TEMP_FILES" | head -3 | while read -r temp_file; do
+            if [ -f "$temp_file" ] && [ -s "$temp_file" ]; then
+                echo "📝 $temp_file"
+                echo "   Preview: $(head -c 80 "$temp_file" | tr '\n' ' ')..."
+                echo ""
+            fi
+        done
+
+        if [ "$TEMP_COUNT" -gt 3 ]; then
+            echo "   ... and $((TEMP_COUNT - 3)) more files"
+            echo ""
+        fi
+
+        echo "Options:"
+        echo "1. Use most recent saved message: bash scripts/safe-commit.sh --file '$(echo "$EXISTING_TEMP_FILES" | head -1)'"
+        echo "2. Continue with new message (ignores saved messages)"
+        echo "3. Clean up old messages: rm /tmp/tmp.*"
+        echo ""
+        echo -e "${YELLOW}💡 Tip: Add --force flag to skip this check: bash scripts/safe-commit.sh --force 'message'${NC}"
+        echo ""
+    fi
 fi
 
 # Check for staged and unstaged changes
@@ -135,29 +170,48 @@ if [ -z "$NO_VERIFY_FLAG" ]; then
             break
         fi
 
-        RETRY_COUNT=$((RETRY_COUNT + 1))
-        echo -e "${YELLOW}⚠️  Pre-commit checks made changes (attempt $RETRY_COUNT/$MAX_RETRIES)${NC}"
-
-        # Check if only formatting files were modified
+        # Check if any files were modified by the hooks
         MODIFIED_FILES=$(git status --porcelain)
         if [ -z "$MODIFIED_FILES" ]; then
-            echo -e "${RED}❌ No files were modified but pre-commit failed${NC}"
+            # Save commit message to temporary file to avoid losing it
+            TEMP_MSG_FILE=$(mktemp)
+            echo "$COMMIT_MESSAGE" > "$TEMP_MSG_FILE"
+
+            echo -e "${RED}❌ Pre-commit validation failed${NC}"
             echo "This indicates a code quality issue that requires manual fixing."
+            echo "No files were modified by the hooks, so retrying won't help."
+            echo ""
+            echo "Common causes:"
+            echo "• Syntax errors in code or documentation"
+            echo "• Type checking failures"
+            echo "• Linting violations that require manual fixes"
+            echo ""
+            echo "To fix:"
+            echo "1. Review the error messages above"
+            echo "2. Fix the reported issues manually"
+            echo "3. Stage your fixes: git add <fixed-files>"
+            echo "4. Re-run with saved message: bash scripts/safe-commit.sh --file '$TEMP_MSG_FILE'"
+            echo ""
+            echo -e "${YELLOW}💾 Your commit message has been saved to: $TEMP_MSG_FILE${NC}"
+            echo "The temporary file will be automatically cleaned up after successful commit."
             exit 1
         fi
 
+        RETRY_COUNT=$((RETRY_COUNT + 1))
+        echo -e "${YELLOW}⚠️  Pre-commit hooks modified files (attempt $RETRY_COUNT/$MAX_RETRIES)${NC}"
+
         # Auto-stage modified files and retry
-        echo "Staging modified files and retrying..."
+        echo "Staging formatting changes and retrying..."
         git add -A
 
         if [ $RETRY_COUNT -eq $MAX_RETRIES ]; then
             echo -e "${RED}❌ Maximum retries reached${NC}"
-            echo "Pre-commit hooks are still making changes after $MAX_RETRIES attempts."
-            echo "This suggests a code quality issue that needs manual attention."
+            echo "Pre-commit hooks are still making formatting changes after $MAX_RETRIES attempts."
+            echo "This suggests an unstable formatting configuration."
             echo ""
             echo "To continue manually:"
             echo "1. Review changes: git diff --cached"
-            echo "2. Fix any code quality issues"
+            echo "2. Check for conflicting formatter configurations"
             echo "3. Re-run: bash scripts/safe-commit.sh -m \"$COMMIT_MESSAGE\""
             exit 1
         fi
@@ -181,6 +235,12 @@ fi
 
 if [ $? -eq 0 ]; then
     echo -e "${GREEN}✅ Commit successful!${NC}"
+
+    # Clean up temporary message files if they exist
+    if [ -n "$COMMIT_MESSAGE_FILE" ] && [[ "$COMMIT_MESSAGE_FILE" == /tmp/* ]]; then
+        rm -f "$COMMIT_MESSAGE_FILE"
+        echo "🧹 Cleaned up temporary message file"
+    fi
 else
     echo -e "${RED}❌ Commit failed${NC}"
     exit 1

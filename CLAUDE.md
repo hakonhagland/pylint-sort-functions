@@ -252,6 +252,56 @@ bash scripts/safe-commit.sh -m "Your commit message"
 bash scripts/safe-commit.sh --file path/to/message.txt
 ```
 
+### Handling Validation Failures
+
+**Smart Message Preservation**: When pre-commit validation fails (syntax errors, type checking, linting violations), the script automatically preserves your commit message:
+
+```bash
+# Validation fails → message automatically saved
+bash scripts/safe-commit.sh 'feat: comprehensive feature description
+
+- Detailed implementation notes
+- Important context and rationale
+- Complex multi-line message'
+
+# Output:
+# ❌ Pre-commit validation failed
+# 💾 Your commit message has been saved to: /tmp/tmp.abc123
+# 4. Re-run with saved message: bash scripts/safe-commit.sh --file '/tmp/tmp.abc123'
+
+# Fix the validation issues, stage files, then recover message:
+git add fixed-files.py
+bash scripts/safe-commit.sh --file '/tmp/tmp.abc123'  # Message restored!
+```
+
+**Collision Detection**: If you try to commit with a new message while saved messages exist:
+
+```bash
+bash scripts/safe-commit.sh 'different message'
+
+# Output:
+# ⚠️  Found 1 saved commit message(s) from previous validation failures:
+# 📝 /tmp/tmp.abc123
+#    Preview: feat: comprehensive feature description...
+#
+# Options:
+# 1. Use most recent saved message: bash scripts/safe-commit.sh --file '/tmp/tmp.abc123'
+# 2. Continue with new message (ignores saved messages)
+# 3. Clean up old messages: rm /tmp/tmp.*
+# 💡 Tip: Add --force flag to skip this check
+```
+
+**Force Override**: Skip saved message detection when intentional:
+```bash
+bash scripts/safe-commit.sh --force 'intentionally new message'
+```
+
+**Key Benefits**:
+- **No more lost messages**: Validation failures no longer lose detailed commit messages
+- **Immediate failure detection**: Validation errors exit immediately (no pointless retries)
+- **Claude Code friendly**: Handles complex multi-line messages seamlessly
+- **Automatic cleanup**: Temporary files removed after successful commits
+
 ### Pre-commit Best Practices
 
 **The Problem**: Pre-commit hooks run formatters that modify files AFTER you stage them. If you commit without running checks first, the hooks modify files during the commit, which can:
