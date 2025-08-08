@@ -3,6 +3,7 @@
 # For the full list of built-in configuration values, see the documentation:
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
 
+import importlib.util
 import os
 import sys
 
@@ -23,6 +24,14 @@ extensions = [
     "sphinx_autodoc_typehints",
 ]
 
+# Enable Markdown support (if myst-parser is available)
+if importlib.util.find_spec("myst_parser") is not None:
+    extensions.append("myst_parser")
+    source_suffix = {
+        ".rst": None,
+        ".md": None,
+    }
+
 templates_path = ["_templates"]
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
@@ -30,7 +39,11 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
-html_theme = "sphinx_rtd_theme"
+# Use Read the Docs theme if available, otherwise default
+if importlib.util.find_spec("sphinx_rtd_theme") is not None:
+    html_theme = "sphinx_rtd_theme"
+else:
+    html_theme = "default"
 html_static_path = ["_static"]
 html_context = {
     "display_github": True,
