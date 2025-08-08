@@ -196,16 +196,20 @@ def add_entry_to_section(
 
         # Check if section is empty (just has the header)
         if section_content.strip() == section_header:
-            # Empty section, add the entry
+            # Empty section, add the entry with proper spacing
             section_content = f"{section_header}\n\n{full_entry}\n"
         else:
-            # Section has entries, append to it
-            section_content = f"{section_content}\n{full_entry}"
+            # Section has entries, append to it with proper spacing
+            section_content = f"{section_content}\n{full_entry}\n"
+
+        # Ensure proper spacing after the section if there's content following
+        after_section = unreleased_content[section_end:]
+        if after_section.strip() and not section_content.endswith("\n\n"):
+            # Add extra newline if there's content after and no double newline
+            section_content = section_content.rstrip() + "\n\n"
 
         unreleased_content = (
-            unreleased_content[:section_start]
-            + section_content
-            + unreleased_content[section_end:]
+            unreleased_content[:section_start] + section_content + after_section
         )
 
     # Replace the [Unreleased] section in the original content
@@ -232,10 +236,16 @@ def clean_empty_sections(content: str) -> str:
     unreleased_content = content[unreleased_start:unreleased_end]
 
     # Remove empty sections (but keep the one we just added to)
+    # Only match empty sections that are completely within the [Unreleased] section
     sections = ["Added", "Changed", "Deprecated", "Removed", "Fixed", "Security"]
     for section in sections:
-        pattern = f"### {section}\n\n(?=(###|##|$))"
+        # Updated pattern: only match empty sections followed by subsection (###)
+        # or at the end of the [Unreleased] section (not version headers ##)
+        pattern = f"### {section}\n\n(?=###|$)"
         unreleased_content = re.sub(pattern, "", unreleased_content)
+
+    # Clean up any trailing empty lines before the end of [Unreleased] section
+    unreleased_content = unreleased_content.rstrip() + "\n"
 
     return content[:unreleased_start] + unreleased_content + content[unreleased_end:]
 
