@@ -121,7 +121,49 @@ Version 0.2.1 - Auto-fix Improvements
 
 **Target**: Patch release for auto-fix enhancements
 
-1. Class Method Sorting in Auto-fix 🔧
+1. Automatic Privacy Fixing 🔒
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+**Issue**: `#12 <https://github.com/hakonhagland/pylint-sort-functions/issues/12>`_ - Functions flagged with W9004 require manual renaming
+
+**Status**: 🚧 **In Active Development**
+
+**Impact**: High - automates tedious manual fixes for privacy violations
+
+**Complexity**: High
+
+**Implementation**:
+
+- ✅ Core architecture (FunctionReference, RenameCandidate, PrivacyFixer classes)
+- ✅ Comprehensive reference detection (calls, assignments, decorators)
+- ✅ Conservative safety validation system
+- ✅ Report generation with detailed analysis
+- ✅ 100% test coverage with comprehensive edge cases
+- ✅ Technical documentation (docs/privacy.rst)
+- 🚧 Function renaming application system
+- 📋 CLI integration (``--fix-privacy``, ``--privacy-dry-run`` arguments)
+
+**Safety Features**:
+
+- Multiple validation layers prevent unsafe renames
+- Detects name conflicts with existing private functions
+- Identifies dynamic references (``getattr``, ``hasattr``)
+- Finds function names in string literals
+- Creates automatic backups before applying changes
+- Dry-run mode for preview before changes
+
+**Usage Examples**::
+
+    # Preview privacy fixes
+    pylint-sort-functions --privacy-dry-run src/
+
+    # Apply privacy fixes with safety validation
+    pylint-sort-functions --fix-privacy src/
+
+    # Combined sorting and privacy fixing
+    pylint-sort-functions --fix --fix-privacy src/
+
+2. Class Method Sorting in Auto-fix 🔧
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 **Issue**: Auto-fix tool currently only sorts module-level functions, not class methods
@@ -141,8 +183,8 @@ Version 0.3.0 - Advanced Features
 
 **Target**: Minor release with auto-fixing and scope-specific rules
 
-High Priority Features
-~~~~~~~~~~~~~~~~~~~~~~
+Priority Features for 0.3.0
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 7. Batch Fix Utility 🛠️
 ^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -180,8 +222,8 @@ High Priority Features
     class_methods = "alphabetical"
     test_classes = "conventional"
 
-Medium Priority Features
-~~~~~~~~~~~~~~~~~~~~~~~~
+Secondary Features for 0.3.0
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 9. Auto-formatter Integration 📐
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

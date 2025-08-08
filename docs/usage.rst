@@ -308,7 +308,19 @@ W9004: function-should-be-private
 - **Smart exclusions**: Skips common public API patterns (``main``, ``run``, ``setup``) and test files
 - **False positive prevention**: Only flags functions with zero external usage, ensuring accuracy
 
-**Auto-fix limitation**: Currently requires manual renaming. See `GitHub Issue #12 <https://github.com/hakonhagland/pylint-sort-functions/issues/12>`_ for planned automatic renaming support in the CLI tool.
+**Auto-fix status**:
+- **Manual renaming**: Currently requires manual renaming of functions
+- **Automatic renaming**: Under active development - see `GitHub Issue #12 <https://github.com/hakonhagland/pylint-sort-functions/issues/12>`_
+
+  The upcoming privacy fixer feature will provide:
+
+  - **Conservative safety checks**: Multiple validation layers ensure safe renaming
+  - **Dry-run mode**: Preview changes before applying them
+  - **Comprehensive reference detection**: Finds all function calls, assignments, and decorators
+  - **Backup creation**: Automatic backups before applying changes
+  - **CLI integration**: New ``--fix-privacy`` and ``--privacy-dry-run`` arguments
+
+  For technical details about the privacy fixer architecture, see the developer documentation.
 
 Sorting Rules
 -------------
@@ -450,10 +462,10 @@ Generate a full report:
     # Get detailed statistics
     pylint --load-plugins=pylint_sort_functions --reports=yes mymodule.py
 
-Plugin Configuration Options
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Command-Line Plugin Configuration
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Configure plugin behavior through PyLint options:
+Configure plugin behavior through PyLint command-line options:
 
 .. code-block:: bash
 

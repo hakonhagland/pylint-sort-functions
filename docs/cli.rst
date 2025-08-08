@@ -127,6 +127,14 @@ Optional Arguments
 ``--section-headers-case-sensitive``
   Make section header detection case-sensitive (default: case-insensitive).
 
+**Privacy Fixer Options (Upcoming)**
+
+``--fix-privacy``
+  Apply automatic function renaming for privacy fixes (functions that should be private). Uses conservative safety validation before making changes.
+
+``--privacy-dry-run``
+  Preview privacy fixes without applying changes. Shows which functions can be safely renamed and which cannot.
+
 ``--verbose, -v``
   Enable verbose output showing processing details.
 
@@ -262,6 +270,57 @@ Section Header Examples
        --section-headers-case-sensitive \
        --additional-section-patterns "Public API" \
        src/
+
+Privacy Fixer (Upcoming Feature)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The CLI tool will soon include automatic privacy fixing functionality to rename functions that should be private (detected by PyLint message W9004).
+
+**Current Status**: Under active development - see `GitHub Issue #12 <https://github.com/hakonhagland/pylint-sort-functions/issues/12>`_
+
+**Planned Usage Examples:**
+
+.. code-block:: bash
+
+   # Preview privacy fixes (dry-run mode)
+   pylint-sort-functions --privacy-dry-run src/
+
+   # Apply privacy fixes with safety checks
+   pylint-sort-functions --fix-privacy src/
+
+   # Combined: fix sorting AND privacy issues
+   pylint-sort-functions --fix --fix-privacy src/
+
+**Key Features**:
+
+- **Conservative safety validation**: Multiple validation layers ensure safe renaming
+- **Comprehensive reference detection**: Finds function calls, assignments, decorators
+- **Dry-run preview**: Review changes before applying them
+- **Automatic backups**: Creates ``.bak`` files before modifying originals
+- **Integration with existing workflow**: Works alongside function sorting
+
+**Safety Checks**:
+
+- Validates no name conflicts with existing private functions
+- Ensures all references can be safely renamed
+- Detects dynamic references (``getattr``, ``hasattr``) that prevent safe renaming
+- Prevents renaming functions used in string literals
+
+**Example Output:**
+
+.. code-block:: text
+
+   Privacy Fix Analysis:
+
+   ✅ Can safely rename 3 functions:
+     • validate_input → _validate_input (2 references)
+     • helper_function → _helper_function (1 reference)
+     • format_data → _format_data (3 references)
+
+   ⚠️  Cannot safely rename 1 function:
+     • process_item: Contains dynamic references (getattr, hasattr, etc.)
+
+For technical implementation details, see the developer documentation.
 
 Exit Codes
 -----------
