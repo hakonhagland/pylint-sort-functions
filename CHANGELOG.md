@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.0] - 2025-08-08
+
+### Changed
+
+- README.md comprehensive documentation alignment with current feature set
 ## [1.1.0] - 2025-08-08
 
 ### Added
@@ -99,5 +104,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Minimal memory footprint** with efficient data structures
 - **Large project optimization** tested on 100+ file codebases
 
+[1.2.0]: https://github.com/hakonhagland/pylint-sort-functions/releases/tag/v1.2.0
 [1.1.0]: https://github.com/hakonhagland/pylint-sort-functions/releases/tag/v1.1.0
 [1.0.0]: https://github.com/hakonhagland/pylint-sort-functions/releases/tag/v1.0.0
