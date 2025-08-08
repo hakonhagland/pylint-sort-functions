@@ -1,0 +1,437 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Claude Code Guidelines &mdash; pylint-sort-functions 0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=2709fde1"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Testing" href="testing.html" />
+    <link rel="prev" title="Developer Guide" href="developer.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            pylint-sort-functions
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli.html">Auto-Fix Tool Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="workarounds.html">Known Issues &amp; Workarounds</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Configuration:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="pylintrc.html">PyLint Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sorting.html">Function and Method Sorting Algorithm</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="developer.html">Developer Guide</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Claude Code Guidelines</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#critical-safe-commit-workflow">Critical: Safe Commit Workflow</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#why-this-is-required">Why This Is Required</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#required-workflow">Required Workflow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#how-safe-commit-works">How Safe Commit Works</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#development-guidelines">Development Guidelines</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#code-style">Code Style</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#function-organization">Function Organization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#testing-requirements">Testing Requirements</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#changelog-management">Changelog Management</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#for-user-facing-changes">For User-Facing Changes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#skip-changelog-for">Skip Changelog For</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#release-workflow">Release Workflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#common-tasks">Common Tasks</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#when-asked-to-fix-a-bug">When Asked to Fix a Bug</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#when-asked-to-add-a-feature">When Asked to Add a Feature</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#important-reminders">Important Reminders</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#virtual-environment">Virtual Environment</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#git-workflow">Git Workflow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#documentation">Documentation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#quality-standards">Quality Standards</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#error-recovery">Error Recovery</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#if-commit-fails">If Commit Fails</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#if-pre-commit-modifies-files">If Pre-commit Modifies Files</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#best-practices-summary">Best Practices Summary</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#see-also">See Also</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="testing.html">Testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="validation-system.html">Documentation Validation System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="release.html">Release Management</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="roadmap.html">Development Roadmap</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">pylint-sort-functions</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Claude Code Guidelines</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/hakonhagland/pylint-sort-functions/blob/main/docs/claude.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="claude-code-guidelines">
+<h1>Claude Code Guidelines<a class="headerlink" href="#claude-code-guidelines" title="Link to this heading"></a></h1>
+<p>This document provides specific guidance for Claude Code (claude.ai/code) when working with this repository.</p>
+<section id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Link to this heading"></a></h2>
+<p>Claude Code is Anthropic’s AI coding assistant that can directly read, write, and execute code in your repository. This document contains important guidelines and workflows specifically designed for Claude Code sessions to ensure consistent, high-quality contributions.</p>
+</section>
+<section id="critical-safe-commit-workflow">
+<h2>Critical: Safe Commit Workflow<a class="headerlink" href="#critical-safe-commit-workflow" title="Link to this heading"></a></h2>
+<p><strong>MANDATORY FOR ALL COMMITS</strong>: Claude Code must use the safe commit workflow to prevent losing detailed commit messages when pre-commit hooks modify files.</p>
+<section id="why-this-is-required">
+<h3>Why This Is Required<a class="headerlink" href="#why-this-is-required" title="Link to this heading"></a></h3>
+<p>Pre-commit hooks run formatters (like <code class="docutils literal notranslate"><span class="pre">ruff</span> <span class="pre">format</span></code>) that modify files AFTER staging. Without the safe commit workflow:</p>
+<ol class="arabic simple">
+<li><p>Commits fail due to file modifications</p></li>
+<li><p>Detailed commit messages are lost</p></li>
+<li><p>Generic “style fix” commits replace comprehensive messages</p></li>
+<li><p>Important context and attribution is lost</p></li>
+</ol>
+</section>
+<section id="required-workflow">
+<h3>Required Workflow<a class="headerlink" href="#required-workflow" title="Link to this heading"></a></h3>
+<p><strong>Always use for commits:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># For simple single-line messages</span>
+make<span class="w"> </span>commit<span class="w"> </span><span class="nv">MSG</span><span class="o">=</span><span class="s1">&#39;Your commit message&#39;</span>
+
+<span class="c1"># For complex messages, use the script directly</span>
+bash<span class="w"> </span>scripts/safe-commit.sh<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;feat: comprehensive feature</span>
+
+<span class="s2">- Detailed bullet point</span>
+<span class="s2">- Another detail</span>
+
+<span class="s2">🤖 Generated with [Claude Code](https://claude.ai/code)</span>
+
+<span class="s2">Co-Authored-By: Claude &lt;noreply@anthropic.com&gt;&quot;</span>
+</pre></div>
+</div>
+<p><strong>Never use:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># ❌ AVOID: Direct git commit</span>
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;message&quot;</span>
+
+<span class="c1"># ❌ AVOID: Git commit --amend without permission</span>
+git<span class="w"> </span>commit<span class="w"> </span>--amend
+</pre></div>
+</div>
+</section>
+<section id="how-safe-commit-works">
+<h3>How Safe Commit Works<a class="headerlink" href="#how-safe-commit-works" title="Link to this heading"></a></h3>
+<p>The safe commit workflow:</p>
+<ol class="arabic simple">
+<li><p>Automatically activates virtual environment</p></li>
+<li><p>Runs pre-commit checks on staged files BEFORE committing</p></li>
+<li><p>Stops if files are modified, preserving your message</p></li>
+<li><p>Only commits if all checks pass cleanly</p></li>
+</ol>
+<p>This ensures comprehensive commit messages are always preserved.</p>
+</section>
+</section>
+<section id="development-guidelines">
+<h2>Development Guidelines<a class="headerlink" href="#development-guidelines" title="Link to this heading"></a></h2>
+<section id="code-style">
+<h3>Code Style<a class="headerlink" href="#code-style" title="Link to this heading"></a></h3>
+<p>Claude Code should follow these Python style guidelines:</p>
+<ul class="simple">
+<li><p><strong>Line length</strong>: 88 characters (Black compatible)</p></li>
+<li><p><strong>String formatting</strong>: Use f-strings</p></li>
+<li><p><strong>Docstrings</strong>: reStructuredText format for all public APIs</p></li>
+<li><p><strong>Type hints</strong>: Always include for parameters and return types</p></li>
+<li><p><strong>Import order</strong>: standard library → third-party → local (alphabetically sorted)</p></li>
+<li><p><strong>File endings</strong>: ALWAYS ensure files end with a newline character</p></li>
+</ul>
+</section>
+<section id="function-organization">
+<h3>Function Organization<a class="headerlink" href="#function-organization" title="Link to this heading"></a></h3>
+<p>Organize functions and methods alphabetically within their scope:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Public functions (alphabetical)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">analyze_data</span><span class="p">():</span>
+    <span class="k">pass</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">build_report</span><span class="p">():</span>
+    <span class="k">pass</span>
+
+<span class="c1"># Private functions (alphabetical)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_calculate_metrics</span><span class="p">():</span>
+    <span class="k">pass</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_validate_input</span><span class="p">():</span>
+    <span class="k">pass</span>
+</pre></div>
+</div>
+</section>
+<section id="testing-requirements">
+<h3>Testing Requirements<a class="headerlink" href="#testing-requirements" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>Coverage</strong>: Maintain 100% test coverage</p></li>
+<li><p><strong>Run tests</strong>: Always run <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">test</span></code> before committing</p></li>
+<li><p><strong>Check quality</strong>: Run <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">pre-commit</span></code> before commits</p></li>
+</ul>
+</section>
+</section>
+<section id="changelog-management">
+<h2>Changelog Management<a class="headerlink" href="#changelog-management" title="Link to this heading"></a></h2>
+<section id="for-user-facing-changes">
+<h3>For User-Facing Changes<a class="headerlink" href="#for-user-facing-changes" title="Link to this heading"></a></h3>
+<p>Always add changelog entries for bug fixes, features, or breaking changes:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Add bug fix</span>
+make<span class="w"> </span>changelog-add<span class="w"> </span><span class="nv">TYPE</span><span class="o">=</span><span class="s1">&#39;fixed&#39;</span><span class="w"> </span><span class="nv">MESSAGE</span><span class="o">=</span><span class="s1">&#39;Memory leak in parser&#39;</span>
+
+<span class="c1"># Add feature with references</span>
+make<span class="w"> </span>changelog-add<span class="w"> </span><span class="nv">TYPE</span><span class="o">=</span><span class="s1">&#39;added&#39;</span><span class="w"> </span><span class="nv">MESSAGE</span><span class="o">=</span><span class="s1">&#39;Dark mode support&#39;</span><span class="w"> </span><span class="nv">PR</span><span class="o">=</span><span class="m">45</span>
+
+<span class="c1"># Add breaking change</span>
+make<span class="w"> </span>changelog-add<span class="w"> </span><span class="nv">TYPE</span><span class="o">=</span><span class="s1">&#39;changed&#39;</span><span class="w"> </span><span class="nv">MESSAGE</span><span class="o">=</span><span class="s1">&#39;API redesign&#39;</span><span class="w"> </span><span class="nv">BREAKING</span><span class="o">=</span><span class="m">1</span>
+</pre></div>
+</div>
+</section>
+<section id="skip-changelog-for">
+<h3>Skip Changelog For<a class="headerlink" href="#skip-changelog-for" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Internal refactoring</p></li>
+<li><p>Test additions</p></li>
+<li><p>Documentation updates</p></li>
+<li><p>Code style changes</p></li>
+</ul>
+</section>
+</section>
+<section id="release-workflow">
+<h2>Release Workflow<a class="headerlink" href="#release-workflow" title="Link to this heading"></a></h2>
+<p>Claude Code should NOT initiate releases without explicit user request. When asked to release:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Check for unreleased changes</span>
+cat<span class="w"> </span>CHANGELOG.md<span class="w"> </span><span class="p">|</span><span class="w"> </span>head<span class="w"> </span>-20
+
+<span class="c1"># Run all quality checks</span>
+make<span class="w"> </span><span class="nb">test</span>
+make<span class="w"> </span>pre-commit
+
+<span class="c1"># Only if explicitly requested by user</span>
+make<span class="w"> </span>publish-to-pypi<span class="w">        </span><span class="c1"># Patch release</span>
+make<span class="w"> </span>publish-to-pypi-minor<span class="w">  </span><span class="c1"># Minor release</span>
+make<span class="w"> </span>publish-to-pypi-major<span class="w">  </span><span class="c1"># Major release</span>
+</pre></div>
+</div>
+</section>
+<section id="common-tasks">
+<h2>Common Tasks<a class="headerlink" href="#common-tasks" title="Link to this heading"></a></h2>
+<section id="when-asked-to-fix-a-bug">
+<h3>When Asked to Fix a Bug<a class="headerlink" href="#when-asked-to-fix-a-bug" title="Link to this heading"></a></h3>
+<ol class="arabic">
+<li><p>Search for the issue:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>commit<span class="w"> </span><span class="nv">MSG</span><span class="o">=</span><span class="s1">&#39;chore: investigating issue&#39;</span>
+grep<span class="w"> </span>-r<span class="w"> </span><span class="s2">&quot;error_pattern&quot;</span><span class="w"> </span>src/<span class="w"> </span>tests/
+</pre></div>
+</div>
+</li>
+<li><p>Fix the bug and add tests</p></li>
+<li><p>Add changelog entry:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>changelog-add<span class="w"> </span><span class="nv">TYPE</span><span class="o">=</span><span class="s1">&#39;fixed&#39;</span><span class="w"> </span><span class="nv">MESSAGE</span><span class="o">=</span><span class="s1">&#39;Description of fix&#39;</span>
+</pre></div>
+</div>
+</li>
+<li><p>Commit with safe workflow:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>commit<span class="w"> </span><span class="nv">MSG</span><span class="o">=</span><span class="s1">&#39;fix: clear description of the fix&#39;</span>
+</pre></div>
+</div>
+</li>
+</ol>
+</section>
+<section id="when-asked-to-add-a-feature">
+<h3>When Asked to Add a Feature<a class="headerlink" href="#when-asked-to-add-a-feature" title="Link to this heading"></a></h3>
+<ol class="arabic simple">
+<li><p>Create todo list using TodoWrite tool</p></li>
+<li><p>Implement feature with tests</p></li>
+<li><p>Add changelog entry</p></li>
+<li><p>Use safe commit workflow</p></li>
+</ol>
+</section>
+</section>
+<section id="important-reminders">
+<h2>Important Reminders<a class="headerlink" href="#important-reminders" title="Link to this heading"></a></h2>
+<section id="virtual-environment">
+<h3>Virtual Environment<a class="headerlink" href="#virtual-environment" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>Always</strong> work within the virtual environment</p></li>
+<li><p>The safe commit script auto-activates if needed</p></li>
+<li><p>For manual commands: <code class="docutils literal notranslate"><span class="pre">source</span> <span class="pre">.venv/bin/activate</span></code></p></li>
+</ul>
+</section>
+<section id="git-workflow">
+<h3>Git Workflow<a class="headerlink" href="#git-workflow" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>NEVER</strong> use <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">commit</span> <span class="pre">--amend</span></code> without user permission</p></li>
+<li><p><strong>ALWAYS</strong> use safe commit workflow</p></li>
+<li><p><strong>ASK</strong> before pushing to remote repositories</p></li>
+<li><p><strong>CHECK</strong> git status before major operations</p></li>
+</ul>
+</section>
+<section id="documentation">
+<h3>Documentation<a class="headerlink" href="#documentation" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>UPDATE</strong> docstrings for new/changed functions</p></li>
+<li><p><strong>ADD</strong> RST documentation for new features</p></li>
+<li><p><strong>LINK</strong> related documentation with cross-references</p></li>
+</ul>
+</section>
+<section id="quality-standards">
+<h3>Quality Standards<a class="headerlink" href="#quality-standards" title="Link to this heading"></a></h3>
+<p>Before ANY commit:</p>
+<ol class="arabic simple">
+<li><p>✅ Tests pass: <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">test</span></code></p></li>
+<li><p>✅ Coverage 100%: <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">coverage</span></code></p></li>
+<li><p>✅ Linting clean: <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">pre-commit</span></code></p></li>
+<li><p>✅ Changelog updated (if user-facing)</p></li>
+<li><p>✅ Safe commit used</p></li>
+</ol>
+</section>
+</section>
+<section id="error-recovery">
+<h2>Error Recovery<a class="headerlink" href="#error-recovery" title="Link to this heading"></a></h2>
+<section id="if-commit-fails">
+<h3>If Commit Fails<a class="headerlink" href="#if-commit-fails" title="Link to this heading"></a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Check what changed</span>
+git<span class="w"> </span>status
+git<span class="w"> </span>diff
+
+<span class="c1"># Stage changes</span>
+git<span class="w"> </span>add<span class="w"> </span>-A
+
+<span class="c1"># Retry with safe commit</span>
+make<span class="w"> </span>commit<span class="w"> </span><span class="nv">MSG</span><span class="o">=</span><span class="s1">&#39;Your message&#39;</span>
+</pre></div>
+</div>
+</section>
+<section id="if-pre-commit-modifies-files">
+<h3>If Pre-commit Modifies Files<a class="headerlink" href="#if-pre-commit-modifies-files" title="Link to this heading"></a></h3>
+<p>This is expected! The safe commit workflow handles this:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># The script will tell you:</span>
+<span class="c1"># &quot;Pre-commit checks made changes&quot;</span>
+<span class="c1"># Simply:</span>
+git<span class="w"> </span>add<span class="w"> </span>-A
+make<span class="w"> </span>commit<span class="w"> </span><span class="nv">MSG</span><span class="o">=</span><span class="s1">&#39;Your message&#39;</span><span class="w">  </span><span class="c1"># Retry</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="best-practices-summary">
+<h2>Best Practices Summary<a class="headerlink" href="#best-practices-summary" title="Link to this heading"></a></h2>
+<p><strong>DO:</strong></p>
+<ul class="simple">
+<li><p>✅ Use <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">commit</span></code> for all commits</p></li>
+<li><p>✅ Add changelog entries for user-facing changes</p></li>
+<li><p>✅ Run tests before committing</p></li>
+<li><p>✅ Keep functions alphabetically sorted</p></li>
+<li><p>✅ Include comprehensive commit messages</p></li>
+</ul>
+<p><strong>DON’T:</strong></p>
+<ul class="simple">
+<li><p>❌ Use <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">commit</span></code> directly</p></li>
+<li><p>❌ Use <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">commit</span> <span class="pre">--amend</span></code> without permission</p></li>
+<li><p>❌ Skip changelog for bug fixes/features</p></li>
+<li><p>❌ Commit without running tests</p></li>
+<li><p>❌ Leave files without trailing newlines</p></li>
+</ul>
+</section>
+<section id="see-also">
+<h2>See Also<a class="headerlink" href="#see-also" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="developer.html"><span class="doc">Developer Guide</span></a> - General development guide</p></li>
+<li><p><a class="reference internal" href="release.html"><span class="doc">Release Management</span></a> - Release management process</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">CLAUDE.md</span></code> - Project root file with additional Claude Code instructions</p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="developer.html" class="btn btn-neutral float-left" title="Developer Guide" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="testing.html" class="btn btn-neutral float-right" title="Testing" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Håkon Hægland.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

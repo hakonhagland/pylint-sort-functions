@@ -129,31 +129,16 @@ Safe Commit Workflow
 
 The project includes a safe commit system to prevent losing commit messages when pre-commit hooks modify files.
 
-**Always use:**
-
 .. code-block:: bash
 
-   # Single command for safe commits
-   make commit MSG='Your detailed commit message'
+   # Recommended for all commits
+   make commit MSG='Your commit message'
 
-**For multi-line messages:**
+This automatically runs pre-commit checks before committing, preventing file modifications that could cause message loss.
 
-.. code-block:: bash
+.. note::
 
-   # Use the script directly
-   bash scripts/safe-commit.sh -m "feat: comprehensive feature
-
-   - Detailed bullet point
-   - Another detail
-
-   Co-Authored-By: Claude <noreply@anthropic.com>"
-
-The safe commit workflow:
-
-1. Automatically activates virtual environment
-2. Runs pre-commit checks on staged files BEFORE committing
-3. Stops if files are modified, preserving your message
-4. Only commits if all checks pass cleanly
+   For Claude Code specific guidelines and detailed commit workflows, see :doc:`claude`.
 
 Best Practices
 --------------
