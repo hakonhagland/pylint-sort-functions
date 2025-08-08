@@ -118,10 +118,21 @@ make test-plugin
 pylint --load-plugins=pylint_sort_functions --disable=all --enable=unsorted-functions,unsorted-methods,mixed-function-visibility src/
 make self-check
 
-# Build and publish (with automatic version bumping)
+# Changelog management (use during development)
+make changelog-add TYPE='fixed' MESSAGE='Memory leak in parser'  # Add bug fix
+make changelog-add TYPE='added' MESSAGE='New CLI option' PR=123  # With PR link
+make changelog-add TYPE='changed' MESSAGE='Improved performance' BREAKING=1  # Breaking change
+# Types: added, changed, deprecated, removed, fixed, security
+
+# Build and publish (with automatic version bumping and changelog)
 make publish-to-pypi        # Patch release (0.1.0 → 0.1.1) for bug fixes
 make publish-to-pypi-minor  # Minor release (0.1.0 → 0.2.0) for new features
 make publish-to-pypi-major  # Major release (0.1.0 → 1.0.0) for breaking changes
+# These commands will:
+# 1. Move [Unreleased] changelog entries to versioned section
+# 2. Bump version in pyproject.toml
+# 3. Build and upload to PyPI
+# 4. Create and push git tag (triggers GitHub Action for release)
 
 # Manual version bumping (for testing)
 python scripts/bump-version.py --dry-run patch  # Test version bump
@@ -142,6 +153,52 @@ make pre-commit
 make eof-fix
 ```
 
+## Changelog Management Workflow
+
+### During Development
+**Update CHANGELOG.md continuously** as you develop, not just when releasing:
+
+```bash
+# After implementing a feature or fix:
+make changelog-add TYPE='fixed' MESSAGE='Memory leak in parser'
+
+# With PR/issue references:
+make changelog-add TYPE='added' MESSAGE='Dark mode support' PR=45 ISSUE=12
+
+# For breaking changes:
+make changelog-add TYPE='changed' MESSAGE='API redesign' BREAKING=1
+```
+
+Entries are added to the `[Unreleased]` section at the top of CHANGELOG.md.
+
+### Release Process
+When ready to release, the `make publish-to-pypi*` commands handle everything:
+
+1. **Changelog**: Moves `[Unreleased]` → `[1.0.1] - 2025-01-08`
+2. **Version**: Bumps version in `pyproject.toml`
+3. **Build**: Creates distribution packages
+4. **Upload**: Publishes to PyPI
+5. **Tag**: Creates git tag `v1.0.1` and pushes it
+6. **GitHub Action**: Tag push triggers automated GitHub release
+
+### GitHub Actions Automation
+The `.github/workflows/release.yml` provides multiple trigger methods:
+
+- **Tag push** (primary): `git push origin v1.0.1` → Automatic PyPI release
+- **Manual dispatch**: GitHub Actions UI → Test PyPI for testing
+- **GitHub Release**: Creating release in UI → PyPI publication
+
+### Best Practices for Claude Code
+When using Claude Code to make changes:
+
+1. **For bug fixes/features**: Always add changelog entry
+   ```bash
+   make changelog-add TYPE='fixed' MESSAGE='Your fix description'
+   ```
+
+2. **For internal changes**: Skip changelog (tests, docs, refactoring)
+
+3. **Claude will remind you**: When completing user-facing changes
 
 ## Git Workflow Requirements
 

@@ -3,6 +3,30 @@ ROOT := $(shell pwd)
 .PHONY: coverage docs eof-fix help mypy ruff-check ruff-fix ruff-format test test-plugin test-plugin-strict tox
 .PHONY: publish-to-pypi publish-to-pypi-minor publish-to-pypi-major rstcheck self-check
 .PHONY: build-docker-image run-docker-container stop-docker-container test-documentation
+.PHONY: changelog-add changelog-prepare changelog-validate
+
+# Changelog management targets
+changelog-add:
+	@echo "Adding changelog entry interactively..."
+	@echo "Usage: make changelog-add TYPE='fixed' MESSAGE='Bug in X module'"
+	@echo "   or: make changelog-add TYPE='added' MESSAGE='New feature Y' PR=123"
+	@if [ -z "$(TYPE)" ] || [ -z "$(MESSAGE)" ]; then \
+		echo "❌ Error: TYPE and MESSAGE are required"; \
+		echo "Example: make changelog-add TYPE='fixed' MESSAGE='Memory leak in parser'"; \
+		exit 1; \
+	fi
+	@python scripts/add-changelog-entry.py $(TYPE) "$(MESSAGE)" \
+		$(if $(PR),--pr $(PR)) \
+		$(if $(ISSUE),--issue $(ISSUE)) \
+		$(if $(BREAKING),--breaking)
+
+changelog-prepare:
+	@echo "Preparing changelog for release..."
+	@python scripts/prepare-release-changelog.py
+
+changelog-validate:
+	@echo "Validating changelog format..."
+	@python scripts/validate-changelog.py
 
 coverage:
 	coverage run -m pytest tests
@@ -20,16 +44,18 @@ eof-fix:
 
 help:
 	@echo "Available targets:"
+	@echo ""
+	@echo "Changelog management:"
+	@echo "  changelog-add         - Add entry to [Unreleased] section"
+	@echo "                          Usage: make changelog-add TYPE='fixed' MESSAGE='Bug fix'"
+	@echo "  changelog-prepare     - Move [Unreleased] to version (for releases)"
+	@echo "  changelog-validate    - Validate changelog format"
+	@echo ""
+	@echo "Testing and quality:"
 	@echo "  coverage              - Run tests with coverage report"
 	@echo "  coverage-html         - Generate HTML coverage report"
-	@echo "  docs                  - Build documentation"
-	@echo "  eof-fix               - Fix missing newlines at end of files"
-	@echo "  help                  - Show this help message"
 	@echo "  mypy                  - Run type checking"
 	@echo "  pre-commit            - Run all pre-commit hooks"
-	@echo "  publish-to-pypi       - Build and publish to PyPI (patch version bump)"
-	@echo "  publish-to-pypi-minor - Build and publish to PyPI (minor version bump)"
-	@echo "  publish-to-pypi-major - Build and publish to PyPI (major version bump)"
 	@echo "  rstcheck              - Check reStructuredText documentation"
 	@echo "  ruff-check            - Run ruff linting"
 	@echo "  ruff-fix              - Run ruff with auto-fix"
@@ -39,7 +65,19 @@ help:
 	@echo "  test-plugin           - Check code with our plugin (relaxed test rules)"
 	@echo "  test-plugin-strict    - Check code with our plugin (strict rules everywhere)"
 	@echo "  tox                   - Run tests across Python versions"
+	@echo ""
+	@echo "Documentation:"
+	@echo "  docs                  - Build documentation"
 	@echo "  view-docs             - Open documentation in browser"
+	@echo ""
+	@echo "Publishing:"
+	@echo "  publish-to-pypi       - Build and publish to PyPI (patch version bump)"
+	@echo "  publish-to-pypi-minor - Build and publish to PyPI (minor version bump)"
+	@echo "  publish-to-pypi-major - Build and publish to PyPI (major version bump)"
+	@echo ""
+	@echo "Utilities:"
+	@echo "  eof-fix               - Fix missing newlines at end of files"
+	@echo "  help                  - Show this help message"
 	@echo ""
 	@echo "Docker validation targets:"
 	@echo "  build-docker-image    - Build the validation container"
@@ -64,6 +102,8 @@ pre-commit:
 
 publish-to-pypi:
 	@echo "Publishing to PyPI with automatic version bump..."
+	@echo "Preparing changelog for release..."
+	@python scripts/prepare-release-changelog.py || true
 	python scripts/bump-version.py patch
 	@echo "Cleaning old builds..."
 	rm -rf dist/
@@ -71,10 +111,16 @@ publish-to-pypi:
 	uv build
 	@echo "Uploading to PyPI..."
 	twine upload dist/*
+	@echo "Creating git tag..."
+	@VERSION=$$(python -c "import tomllib; print(tomllib.load(open('pyproject.toml', 'rb'))['project']['version'])"); \
+	git tag -a "v$$VERSION" -m "Release v$$VERSION" && \
+	git push origin "v$$VERSION"
 	@echo "Successfully published new version to PyPI!"
 
 publish-to-pypi-minor:
 	@echo "Publishing to PyPI with minor version bump..."
+	@echo "Preparing changelog for release..."
+	@python scripts/prepare-release-changelog.py || true
 	python scripts/bump-version.py minor
 	@echo "Cleaning old builds..."
 	rm -rf dist/
@@ -82,10 +128,16 @@ publish-to-pypi-minor:
 	uv build
 	@echo "Uploading to PyPI..."
 	twine upload dist/*
+	@echo "Creating git tag..."
+	@VERSION=$$(python -c "import tomllib; print(tomllib.load(open('pyproject.toml', 'rb'))['project']['version'])"); \
+	git tag -a "v$$VERSION" -m "Release v$$VERSION" && \
+	git push origin "v$$VERSION"
 	@echo "Successfully published new version to PyPI!"
 
 publish-to-pypi-major:
 	@echo "Publishing to PyPI with major version bump..."
+	@echo "Preparing changelog for release..."
+	@python scripts/prepare-release-changelog.py || true
 	python scripts/bump-version.py major
 	@echo "Cleaning old builds..."
 	rm -rf dist/
@@ -93,6 +145,10 @@ publish-to-pypi-major:
 	uv build
 	@echo "Uploading to PyPI..."
 	twine upload dist/*
+	@echo "Creating git tag..."
+	@VERSION=$$(python -c "import tomllib; print(tomllib.load(open('pyproject.toml', 'rb'))['project']['version'])"); \
+	git tag -a "v$$VERSION" -m "Release v$$VERSION" && \
+	git push origin "v$$VERSION"
 	@echo "Successfully published new version to PyPI!"
 
 # NOTE: to avoid rstcheck to fail on info-level messages, we set the report-level to WARNING
