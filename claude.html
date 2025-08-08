@@ -133,9 +133,13 @@
   <section id="claude-code-guidelines">
 <h1>Claude Code Guidelines<a class="headerlink" href="#claude-code-guidelines" title="Link to this heading"></a></h1>
 <p>This document provides specific guidance for Claude Code (claude.ai/code) when working with this repository.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><strong>Comprehensive Guide Available</strong>: For complete development commands, architecture details, and in-depth workflows, see <a class="reference external" href="https://github.com/hakonhagland/pylint-sort-functions/blob/main/CLAUDE.md">CLAUDE.md</a> in the project root. This document focuses on the essential Claude Code workflow.</p>
+</div>
 <section id="overview">
 <h2>Overview<a class="headerlink" href="#overview" title="Link to this heading"></a></h2>
-<p>Claude Code is Anthropic’s AI coding assistant that can directly read, write, and execute code in your repository. This document contains important guidelines and workflows specifically designed for Claude Code sessions to ensure consistent, high-quality contributions.</p>
+<p>Claude Code is Anthropic’s AI coding assistant that can directly read, write, and execute code in your repository. This document contains the essential workflow guidelines for Claude Code sessions.</p>
 </section>
 <section id="critical-safe-commit-workflow">
 <h2>Critical: Safe Commit Workflow<a class="headerlink" href="#critical-safe-commit-workflow" title="Link to this heading"></a></h2>
@@ -152,19 +156,37 @@
 </section>
 <section id="required-workflow">
 <h3>Required Workflow<a class="headerlink" href="#required-workflow" title="Link to this heading"></a></h3>
-<p><strong>Always use for commits:</strong></p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># For simple single-line messages</span>
-make<span class="w"> </span>commit<span class="w"> </span><span class="nv">MSG</span><span class="o">=</span><span class="s1">&#39;Your commit message&#39;</span>
+<p><strong>STEP 1: Always stage files BEFORE running safe-commit</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Stage specific files</span>
+git<span class="w"> </span>add<span class="w"> </span>file1.py<span class="w"> </span>file2.py
+<span class="c1"># OR stage all changes</span>
+git<span class="w"> </span>add<span class="w"> </span>-A
+</pre></div>
+</div>
+<p><strong>STEP 2: Then run safe-commit</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Single command handles both simple and complex messages</span>
+bash<span class="w"> </span>scripts/safe-commit.sh<span class="w"> </span><span class="s1">&#39;Your commit message&#39;</span>
 
-<span class="c1"># For complex messages, use the script directly</span>
-bash<span class="w"> </span>scripts/safe-commit.sh<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;feat: comprehensive feature</span>
+<span class="c1"># Works seamlessly with multi-line messages and special characters</span>
+bash<span class="w"> </span>scripts/safe-commit.sh<span class="w"> </span><span class="s1">&#39;feat: comprehensive feature description</span>
 
-<span class="s2">- Detailed bullet point</span>
-<span class="s2">- Another detail</span>
+<span class="s1">- Detailed bullet point</span>
+<span class="s1">- Another detail</span>
+<span class="s1">- Handles quotes and special characters automatically</span>
 
-<span class="s2">🤖 Generated with [Claude Code](https://claude.ai/code)</span>
+<span class="s1">🤖 Generated with [Claude Code](https://claude.ai/code)</span>
 
-<span class="s2">Co-Authored-By: Claude &lt;noreply@anthropic.com&gt;&quot;</span>
+<span class="s1">Co-Authored-By: Claude &lt;noreply@anthropic.com&gt;&#39;</span>
+</pre></div>
+</div>
+<p><strong>Why staging first is important:</strong>
+- Prevents confusing pre-commit warnings about unstaged files
+- Makes your commit intent explicit and clear
+- Allows pre-commit to run cleanly on staged files only</p>
+<p><strong>Legacy compatibility (also supported):</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Traditional flag-based usage still works</span>
+bash<span class="w"> </span>scripts/safe-commit.sh<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;Your message&quot;</span>
+bash<span class="w"> </span>scripts/safe-commit.sh<span class="w"> </span>--file<span class="w"> </span>path/to/message.txt
 </pre></div>
 </div>
 <p><strong>Never use:</strong></p>
@@ -178,27 +200,31 @@ git<span class="w"> </span>commit<span class="w"> </span>--amend
 </section>
 <section id="how-safe-commit-works">
 <h3>How Safe Commit Works<a class="headerlink" href="#how-safe-commit-works" title="Link to this heading"></a></h3>
-<p>The safe commit workflow:</p>
+<p>The enhanced safe commit workflow:</p>
 <ol class="arabic simple">
 <li><p>Automatically activates virtual environment</p></li>
 <li><p>Runs pre-commit checks on staged files BEFORE committing</p></li>
-<li><p>Stops if files are modified, preserving your message</p></li>
-<li><p>Only commits if all checks pass cleanly</p></li>
+<li><p>Auto-retries if hooks make formatting changes (up to 3 attempts)</p></li>
+<li><p>Automatically stages any formatting changes made by hooks</p></li>
+<li><p>Only commits when all checks pass cleanly</p></li>
+<li><p>Preserves your complete commit message throughout the entire process</p></li>
 </ol>
-<p>This ensures comprehensive commit messages are always preserved.</p>
+<p>This unified approach eliminates confusion between different commit methods and ensures comprehensive commit messages are always preserved, regardless of complexity.</p>
 </section>
 </section>
 <section id="development-guidelines">
 <h2>Development Guidelines<a class="headerlink" href="#development-guidelines" title="Link to this heading"></a></h2>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>For complete development commands (<code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">test</span></code>, <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">coverage</span></code>, etc.) and detailed configuration, see <a class="reference external" href="https://github.com/hakonhagland/pylint-sort-functions/blob/main/CLAUDE.md">CLAUDE.md</a>.</p>
+</div>
 <section id="code-style">
 <h3>Code Style<a class="headerlink" href="#code-style" title="Link to this heading"></a></h3>
-<p>Claude Code should follow these Python style guidelines:</p>
+<p>Key Python style guidelines:</p>
 <ul class="simple">
 <li><p><strong>Line length</strong>: 88 characters (Black compatible)</p></li>
 <li><p><strong>String formatting</strong>: Use f-strings</p></li>
-<li><p><strong>Docstrings</strong>: reStructuredText format for all public APIs</p></li>
 <li><p><strong>Type hints</strong>: Always include for parameters and return types</p></li>
-<li><p><strong>Import order</strong>: standard library → third-party → local (alphabetically sorted)</p></li>
 <li><p><strong>File endings</strong>: ALWAYS ensure files end with a newline character</p></li>
 </ul>
 </section>
