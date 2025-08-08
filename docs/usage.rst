@@ -308,17 +308,18 @@ W9004: function-should-be-private
 - **Smart exclusions**: Skips common public API patterns (``main``, ``run``, ``setup``) and test files
 - **False positive prevention**: Only flags functions with zero external usage, ensuring accuracy
 
-**Auto-fix status**:
-- **Manual renaming**: Currently requires manual renaming of functions
-- **Automatic renaming**: Under active development - see `GitHub Issue #12 <https://github.com/hakonhagland/pylint-sort-functions/issues/12>`_
+**Auto-fix availability**:
+- **Manual renaming**: Functions can be manually renamed following PyLint suggestions
+- **Automatic renaming**: Available via the privacy fixer feature
 
-  The upcoming privacy fixer feature will provide:
+  The privacy fixer feature provides:
 
   - **Conservative safety checks**: Multiple validation layers ensure safe renaming
-  - **Dry-run mode**: Preview changes before applying them
+  - **Dry-run mode**: Preview changes before applying them (``--privacy-dry-run``)
   - **Comprehensive reference detection**: Finds all function calls, assignments, and decorators
   - **Backup creation**: Automatic backups before applying changes
-  - **CLI integration**: New ``--fix-privacy`` and ``--privacy-dry-run`` arguments
+  - **CLI integration**: Use ``--fix-privacy`` and ``--privacy-dry-run`` arguments
+  - **Integrated sorting**: Add ``--auto-sort`` for automatic function sorting after privacy fixes
 
   For technical details about the privacy fixer architecture, see the developer documentation.
 

@@ -127,13 +127,16 @@ Optional Arguments
 ``--section-headers-case-sensitive``
   Make section header detection case-sensitive (default: case-insensitive).
 
-**Privacy Fixer Options (Upcoming)**
+**Privacy Fixer Options**
 
 ``--fix-privacy``
   Apply automatic function renaming for privacy fixes (functions that should be private). Uses conservative safety validation before making changes.
 
 ``--privacy-dry-run``
   Preview privacy fixes without applying changes. Shows which functions can be safely renamed and which cannot.
+
+``--auto-sort``
+  Automatically apply function sorting after privacy fixes. Only takes effect when used with ``--fix-privacy`` or ``--privacy-dry-run``.
 
 ``--verbose, -v``
   Enable verbose output showing processing details.
@@ -271,14 +274,12 @@ Section Header Examples
        --additional-section-patterns "Public API" \
        src/
 
-Privacy Fixer (Upcoming Feature)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Privacy Fixer
+~~~~~~~~~~~~~~
 
-The CLI tool will soon include automatic privacy fixing functionality to rename functions that should be private (detected by PyLint message W9004).
+The CLI tool includes automatic privacy fixing functionality to rename functions that should be private (detected by PyLint message W9004).
 
-**Current Status**: Under active development - see `GitHub Issue #12 <https://github.com/hakonhagland/pylint-sort-functions/issues/12>`_
-
-**Planned Usage Examples:**
+**Usage Examples:**
 
 .. code-block:: bash
 
@@ -288,8 +289,11 @@ The CLI tool will soon include automatic privacy fixing functionality to rename 
    # Apply privacy fixes with safety checks
    pylint-sort-functions --fix-privacy src/
 
-   # Combined: fix sorting AND privacy issues
-   pylint-sort-functions --fix --fix-privacy src/
+   # Privacy fixes with automatic sorting
+   pylint-sort-functions --fix-privacy --auto-sort src/
+
+   # Preview privacy fixes AND sorting changes
+   pylint-sort-functions --privacy-dry-run --auto-sort src/
 
 **Key Features**:
 
@@ -297,7 +301,8 @@ The CLI tool will soon include automatic privacy fixing functionality to rename 
 - **Comprehensive reference detection**: Finds function calls, assignments, decorators
 - **Dry-run preview**: Review changes before applying them
 - **Automatic backups**: Creates ``.bak`` files before modifying originals
-- **Integration with existing workflow**: Works alongside function sorting
+- **Integrated sorting**: Use ``--auto-sort`` to automatically apply function sorting after privacy fixes
+- **Flexible workflow**: Use privacy fixes alone or combined with automatic sorting
 
 **Safety Checks**:
 
@@ -319,6 +324,25 @@ The CLI tool will soon include automatic privacy fixing functionality to rename 
 
    ⚠️  Cannot safely rename 1 function:
      • process_item: Contains dynamic references (getattr, hasattr, etc.)
+
+**Integrated Workflow Example with --auto-sort:**
+
+.. code-block:: text
+
+   $ pylint-sort-functions --fix-privacy --auto-sort --no-backup src/utils.py
+
+   Privacy Fix Analysis:
+
+   ✅ Can safely rename 2 functions:
+     • helper_function → _helper_function (1 reference)
+     • validate_data → _validate_data (2 references)
+
+   Renamed 2 functions.
+
+   === Applying Automatic Sorting ===
+   Sorted 1 of 1 files
+
+This workflow first applies privacy fixes (renaming functions to be private), then automatically sorts all functions alphabetically within their visibility groups (public functions first, then private functions).
 
 For technical implementation details, see the developer documentation.
 
