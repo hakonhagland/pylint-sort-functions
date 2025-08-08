@@ -1,6 +1,8 @@
 """Tests for the privacy fixer functionality."""
+# pylint: disable=too-many-lines
 
 import tempfile
+import unittest.mock
 from pathlib import Path
 from textwrap import dedent
 from typing import Any, Dict, List
@@ -15,7 +17,7 @@ from pylint_sort_functions.privacy_fixer import (
 )
 
 
-class TestPrivacyFixer:  # pylint: disable=attribute-defined-outside-init
+class TestPrivacyFixer:  # pylint: disable=attribute-defined-outside-init,too-many-public-methods
     """Test cases for PrivacyFixer functionality."""
 
     def setup_method(self) -> None:
@@ -200,7 +202,7 @@ class TestPrivacyFixer:  # pylint: disable=attribute-defined-outside-init
         # This tests the TODO implementation that returns empty list
         fixer = PrivacyFixer()
         result = fixer.analyze_module(Path("test.py"), Path("/project"), {"main"})
-        assert result == []
+        assert not result
 
     def test_apply_renames_empty_candidates(self) -> None:
         """Test apply_renames with empty candidates list."""
@@ -234,6 +236,7 @@ class TestPrivacyFixer:  # pylint: disable=attribute-defined-outside-init
         )
 
         # Test placeholder implementations
+        # pylint: disable=protected-access
         assert not fixer._has_name_conflict(candidate)  # Returns False (placeholder)
         assert not fixer._has_dynamic_references(
             candidate
@@ -244,7 +247,8 @@ class TestPrivacyFixer:  # pylint: disable=attribute-defined-outside-init
 
         # Test reference context checking
         contexts = fixer._check_reference_contexts(candidate)
-        assert contexts == []  # No references, so no unsafe contexts
+        assert not contexts  # No references, so no unsafe contexts
+        # pylint: enable=protected-access
 
     def test_name_conflict_exception_path(self) -> None:
         """Test _has_name_conflict exception handling path."""
@@ -253,13 +257,12 @@ class TestPrivacyFixer:  # pylint: disable=attribute-defined-outside-init
         fixer = PrivacyFixer()
 
         # Use unittest.mock to patch the method instead of direct assignment
-        import unittest.mock
 
         def patched_method(_candidate: RenameCandidate) -> bool:  # pylint: disable=unused-argument
             try:
                 # Simulate the module AST processing that might fail
                 raise OSError("Simulated file access error")
-            except Exception:
+            except Exception:  # pylint: disable=broad-exception-caught
                 return True  # Conservative: assume conflict if we can't check
 
         code = dedent("""
@@ -281,7 +284,7 @@ class TestPrivacyFixer:  # pylint: disable=attribute-defined-outside-init
         with unittest.mock.patch.object(
             fixer, "_has_name_conflict", side_effect=patched_method
         ):
-            result = fixer._has_name_conflict(candidate)
+            result = fixer._has_name_conflict(candidate)  # pylint: disable=protected-access
             # This should return True (conservative behavior on exception)
             assert result
 
@@ -301,7 +304,7 @@ class TestPrivacyFixer:  # pylint: disable=attribute-defined-outside-init
                     None.some_attribute  # type: ignore[attr-defined]  # pylint: disable=pointless-statement
                     # Needed for type checking but won't be reached
                     return False  # pragma: no cover
-                except Exception:
+                except Exception:  # pylint: disable=broad-exception-caught
                     # This should hit lines 279-280 in the original implementation
                     return True  # Conservative: assume conflict if we can't check
 
@@ -323,7 +326,7 @@ class TestPrivacyFixer:  # pylint: disable=attribute-defined-outside-init
         )
 
         # This should return True due to the exception path
-        result = fixer._has_name_conflict(candidate)
+        result = fixer._has_name_conflict(candidate)  # pylint: disable=protected-access
         assert result is True
 
     def test_exception_path_direct(self) -> None:
@@ -333,14 +336,13 @@ class TestPrivacyFixer:  # pylint: disable=attribute-defined-outside-init
         fixer = PrivacyFixer()
 
         # Temporarily modify the implementation to trigger exception
-        import unittest.mock
 
         def exception_method(_candidate: RenameCandidate) -> bool:  # pylint: disable=unused-argument
             # This should mirror the exact implementation but with a forced exception
             try:
                 # Simulate the actual work that might fail
                 raise IOError("Simulated file system error")
-            except Exception:
+            except Exception:  # pylint: disable=broad-exception-caught
                 return True  # Conservative: assume conflict if we can't check
 
         code = dedent("""
@@ -364,7 +366,7 @@ class TestPrivacyFixer:  # pylint: disable=attribute-defined-outside-init
             fixer, "_has_name_conflict", side_effect=exception_method
         ):
             # This should trigger the exception path and return True
-            result = fixer._has_name_conflict(candidate)
+            result = fixer._has_name_conflict(candidate)  # pylint: disable=protected-access
             assert result is True
 
     def test_coverage_edge_cases(self) -> None:
@@ -372,7 +374,6 @@ class TestPrivacyFixer:  # pylint: disable=attribute-defined-outside-init
 
         # Test with a mock that directly calls the parent implementation
         # and triggers an exception in a way that hits lines 279-280
-        import unittest.mock
 
         fixer = PrivacyFixer()
         code = dedent("""
@@ -399,7 +400,7 @@ class TestPrivacyFixer:  # pylint: disable=attribute-defined-outside-init
                 try:
                     # Simulate module AST operations that might fail
                     raise FileNotFoundError("Cannot read module file")
-                except Exception:
+                except Exception:  # pylint: disable=broad-exception-caught
                     return True  # Conservative approach
 
             mock_method.side_effect = side_effect
@@ -418,7 +419,7 @@ class TestPrivacyFixer:  # pylint: disable=attribute-defined-outside-init
         )
 
         # This should trigger the actual exception path in the source code
-        result_real = fixer_real._has_name_conflict(exception_candidate)
+        result_real = fixer_real._has_name_conflict(exception_candidate)  # pylint: disable=protected-access
         assert result_real is True
 
     def test_safety_validation_with_issues(self) -> None:
@@ -847,7 +848,7 @@ class TestPrivacyFixerIntegration:  # pylint: disable=too-few-public-methods
         # The candidates should be in different files
         assert file_paths[0] != file_paths[1]
 
-    def test_apply_renames_with_real_file_workflow(self) -> None:
+    def test_apply_renames_with_real_file_workflow(self) -> None:  # pylint: disable=too-many-locals
         """Test the complete workflow with real file modification."""
         with tempfile.TemporaryDirectory() as temp_dir:
             temp_path = Path(temp_dir)
@@ -950,7 +951,6 @@ class TestPrivacyFixerIntegration:  # pylint: disable=too-few-public-methods
         )
 
         # Mock _apply_renames_to_file to raise an exception
-        import unittest.mock
 
         def mock_apply_renames_to_file(
             file_path: Path, candidates: List[RenameCandidate]
@@ -1057,7 +1057,6 @@ class TestPrivacyFixerIntegration:  # pylint: disable=too-few-public-methods
         )
 
         # Mock _apply_renames_to_file to return errors
-        import unittest.mock
 
         def mock_apply_renames_to_file(
             file_path: Path,  # pylint: disable=unused-argument
