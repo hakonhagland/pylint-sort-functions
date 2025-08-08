@@ -3,7 +3,7 @@ ROOT := $(shell pwd)
 .PHONY: coverage docs eof-fix help mypy ruff-check ruff-fix ruff-format test test-plugin test-plugin-strict tox
 .PHONY: publish-to-pypi publish-to-pypi-minor publish-to-pypi-major rstcheck self-check
 .PHONY: build-docker-image run-docker-container stop-docker-container test-documentation
-.PHONY: changelog-add changelog-prepare changelog-validate
+.PHONY: changelog-add changelog-prepare changelog-validate commit
 
 # Changelog management targets
 changelog-add:
@@ -27,6 +27,15 @@ changelog-prepare:
 changelog-validate:
 	@echo "Validating changelog format..."
 	@python scripts/validate-changelog.py
+
+# Safe commit that runs pre-commit checks first
+commit:
+	@if [ -z "$(MSG)" ]; then \
+		echo "❌ Error: MSG is required"; \
+		echo "Usage: make commit MSG='Your commit message'"; \
+		exit 1; \
+	fi
+	@bash scripts/safe-commit.sh -m "$(MSG)"
 
 coverage:
 	coverage run -m pytest tests
@@ -74,6 +83,10 @@ help:
 	@echo "  publish-to-pypi       - Build and publish to PyPI (patch version bump)"
 	@echo "  publish-to-pypi-minor - Build and publish to PyPI (minor version bump)"
 	@echo "  publish-to-pypi-major - Build and publish to PyPI (major version bump)"
+	@echo ""
+	@echo "Git and commits:"
+	@echo "  commit                - Safe commit with pre-commit checks"
+	@echo "                          Usage: make commit MSG='Your message'"
 	@echo ""
 	@echo "Utilities:"
 	@echo "  eof-fix               - Fix missing newlines at end of files"

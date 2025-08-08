@@ -2,6 +2,12 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## ⚠️ CRITICAL: Always Use Safe Commits
+
+**MANDATORY FOR ALL COMMITS**: Use `make commit MSG='message'` instead of `git commit -m`
+- This prevents losing detailed commit messages due to pre-commit hook modifications
+- See "Git Workflow Requirements" section for full details
+
 ## Project Overview
 
 This is a PyLint plugin that enforces alphabetical sorting of functions and methods within Python classes and modules. The plugin helps maintain consistent code organization by ensuring:
@@ -206,27 +212,49 @@ When using Claude Code to make changes:
 - **Always activate virtual environment before running git commands**
 - **NEVER use `git commit --amend` without asking user first**: Creates duplicate commit messages, overwrites history, and can cause push conflicts that require complex merge resolution
 
-### Pre-commit Best Practices
+### MANDATORY: Safe Commit Workflow for Claude Code
 
-**CRITICAL**: Always run formatting and quality checks BEFORE committing to avoid post-commit formatting changes that tempt the use of `git commit --amend`:
+**IMPORTANT FOR CLAUDE CODE**: ALWAYS use the safe commit workflow to prevent losing commit messages:
 
 ```bash
-# Required workflow for all commits
-source .venv/bin/activate
+# ALWAYS use this instead of git commit:
+make commit MSG='Your detailed commit message'
 
-# 1. Run all checks and formatters FIRST
-make pre-commit  # Runs ruff format, mypy, coverage, etc.
+# Or for multi-line messages:
+make commit MSG="$(cat <<'EOF'
+feat: comprehensive feature description
 
-# 2. THEN stage and commit (hooks will pass cleanly)
-git add .
-git commit -m "your message"
+- Detailed bullet point
+- Another detail
+
+Co-Authored-By: Claude <noreply@anthropic.com>
+EOF
+)"
 ```
 
-**Why this prevents problems**:
-- Pre-commit hooks run formatters (like `ruff format`) that modify files
-- If you commit first, these modifications happen AFTER the commit
-- This creates unstaged changes that tempt using `git commit --amend`
-- Running checks first ensures everything is formatted before the commit
+**Why this is MANDATORY**:
+- The `make commit` target automatically runs pre-commit checks BEFORE committing
+- This prevents file modifications AFTER staging that cause commit message loss
+- Ensures comprehensive commit messages are preserved
+- Prevents the need for `git commit --amend`
+
+**Alternative if Make is unavailable**:
+```bash
+# If Make is not available, use the script directly:
+bash scripts/safe-commit.sh -m "Your commit message"
+```
+
+### Pre-commit Best Practices
+
+**The Problem**: Pre-commit hooks run formatters that modify files AFTER you stage them. If you commit without running checks first, the hooks modify files during the commit, which can:
+1. Cause the commit to fail, losing your detailed message
+2. Create unstaged changes that tempt using `git commit --amend`
+3. Result in generic "style fix" commits instead of comprehensive messages
+
+**The Solution**: The `make commit` target handles this automatically by:
+1. Running all pre-commit checks first
+2. Only committing if no changes are needed
+3. Preserving your complete commit message
 
 **If pre-commit hooks modify files anyway**:
 ```bash
