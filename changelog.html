@@ -62,9 +62,8 @@
 <li class="toctree-l1"><a class="reference internal" href="validation-system.html">Documentation Validation System</a></li>
 <li class="toctree-l1"><a class="reference internal" href="release.html">Release Management</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Changelog</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#recent-releases">Recent Releases</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#unreleased-changes">Unreleased Changes</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#version-1-0-0-2025-01-06">Version 1.0.0 (2025-01-06)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#full-changelog">Full Changelog</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#alternative-approaches">Alternative Approaches</a></li>
 </ul>
 </li>
 </ul>
@@ -110,82 +109,100 @@ For the most up-to-date version and contribution instructions, see:</p>
 <li><p><a class="reference internal" href="release.html"><span class="doc">Release Management</span></a> for information on adding changelog entries</p></li>
 </ul>
 </div>
-<section id="recent-releases">
-<h2>Recent Releases<a class="headerlink" href="#recent-releases" title="Link to this heading"></a></h2>
-<section id="unreleased-changes">
-<h3>Unreleased Changes<a class="headerlink" href="#unreleased-changes" title="Link to this heading"></a></h3>
-<p>The following changes are in development:</p>
+<section id="full-changelog">
+<h2>Full Changelog<a class="headerlink" href="#full-changelog" title="Link to this heading"></a></h2>
+<p>The complete changelog is automatically maintained in <code class="docutils literal notranslate"><span class="pre">CHANGELOG.md</span></code>.</p>
+<div style="background: #f8f9fa; padding: 15px; border-left: 4px solid #007acc; margin: 20px 0;">
+<p><strong>📋 Live Changelog</strong></p>
+<p>The content below is synchronized from the source file. For the best viewing experience with proper formatting, see the <a href="https://github.com/hakonhagland/pylint-sort-functions/blob/main/CHANGELOG.md">CHANGELOG.md on GitHub</a>.</p>
+</div><div class="highlight-default notranslate"><div class="highlight"><pre><span></span># Changelog
+
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [Unreleased]
+
+### Added
+
+- Automated changelog management with Make targets
+- GitHub Actions workflow for automated PyPI releases on tag push
+
+## [1.0.0] - 2025-01-06
+
+### Added
+- **Complete PyLint plugin** for enforcing alphabetical function and method sorting
+- **Auto-fix CLI tool** (`pylint-sort-functions`) for automatically reordering code
+- **Comment preservation** - comments move with their associated functions during sorting
+- **Class method sorting** in addition to module-level function sorting
+- **Framework integration** with decorator exclusions for Flask, Click, FastAPI, Django
+- **Configurable privacy detection** with customizable public API patterns
+- **Performance optimizations** with intelligent caching (146x speedup for import analysis)
+- **Cross-platform support** for Linux, macOS, and Windows
+- **Comprehensive documentation** including CLI reference, configuration guide, and algorithm details
+- **100% test coverage** across all functionality
+- **Enterprise-ready features** including error handling, verbose output, and backup creation
+
+### Features
+- **Message Types**:
+  - `W9001`: `unsorted-functions` - Functions not sorted alphabetically
+  - `W9002`: `unsorted-methods` - Class methods not sorted alphabetically
+  - `W9003`: `mixed-function-visibility` - Public/private functions not properly separated
+  - `W9004`: `function-should-be-private` - Function should be marked private based on usage analysis
+
+- **Configuration Options**:
+  - `public-api-patterns` - Customize which functions are always treated as public API
+  - `enable-privacy-detection` - Toggle privacy detection feature
+
+- **CLI Tool Features**:
+  - Check-only mode (default) - shows help and guidance
+  - Dry-run mode (`--dry-run`) - preview changes without modification
+  - Fix mode (`--fix`) - actually modify files with optional backup
+  - Verbose output (`--verbose`) - detailed processing information
+  - Decorator exclusions (`--ignore-decorators`) - framework-aware sorting
+  - Backup control (`--no-backup`) - disable automatic backup creation
+
+### Technical
+- **Python 3.11+ support** with type hints throughout
+- **Zero external dependencies** beyond PyLint and astroid
+- **AST-based analysis** using astroid enhanced syntax trees
+- **Import analysis** with real cross-module usage detection
+- **File modification caching** for performance optimization
+- **Modular architecture** designed for extensibility
+
+### Documentation
+- **Complete developer guide** (`docs/developer.rst`)
+- **CLI tool reference** (`docs/cli.rst`)
+- **Configuration guide** (`docs/pylintrc.rst`)
+- **Sorting algorithm documentation** (`docs/sorting.rst`)
+- **Usage examples** for all major frameworks
+- **API reference** for plugin developers
+
+### Quality Assurance
+- **Perfect 10.00/10 PyLint score** across all source code
+- **100% test coverage** with 112+ comprehensive tests
+- **Pre-commit hooks** for code quality enforcement
+- **Cross-platform CI/CD** testing on Linux, macOS, Windows
+- **Multiple Python version support** (3.11, 3.12, 3.13)
+
+### Performance
+- **Smart caching** prevents redundant AST parsing and import analysis
+- **File modification time tracking** for cache invalidation
+- **Minimal memory footprint** with efficient data structures
+- **Large project optimization** tested on 100+ file codebases
+
+[1.0.0]: https://github.com/hakonhagland/pylint-sort-functions/releases/tag/v1.0.0
+</pre></div>
+</div>
+<section id="alternative-approaches">
+<h3>Alternative Approaches<a class="headerlink" href="#alternative-approaches" title="Link to this heading"></a></h3>
+<p>If you prefer formatted display:</p>
 <ul class="simple">
-<li><p>Automated changelog management with Make targets</p></li>
-<li><p>GitHub Actions workflow for automated PyPI releases on tag push</p></li>
+<li><p><strong>GitHub</strong>: <a class="reference external" href="https://github.com/hakonhagland/pylint-sort-functions/blob/main/CHANGELOG.md">CHANGELOG.md</a> (recommended)</p></li>
+<li><p><strong>PyPI</strong>: Project page automatically displays changelog from this file</p></li>
+<li><p><strong>API</strong>: Access via GitHub API for integration with tools</p></li>
 </ul>
-</section>
-<section id="version-1-0-0-2025-01-06">
-<h3>Version 1.0.0 (2025-01-06)<a class="headerlink" href="#version-1-0-0-2025-01-06" title="Link to this heading"></a></h3>
-<p>Initial stable release with complete functionality:</p>
-<p><strong>Added</strong></p>
-<ul class="simple">
-<li><p><strong>Complete PyLint plugin</strong> for enforcing alphabetical function and method sorting</p></li>
-<li><p><strong>Auto-fix CLI tool</strong> (<code class="docutils literal notranslate"><span class="pre">pylint-sort-functions</span></code>) for automatically reordering code</p></li>
-<li><p><strong>Comment preservation</strong> - comments move with their associated functions during sorting</p></li>
-<li><p><strong>Class method sorting</strong> in addition to module-level function sorting</p></li>
-<li><p><strong>Framework integration</strong> with decorator exclusions for Flask, Click, FastAPI, Django</p></li>
-<li><p><strong>Configurable privacy detection</strong> with customizable public API patterns</p></li>
-<li><p><strong>Performance optimizations</strong> with intelligent caching (146x speedup for import analysis)</p></li>
-<li><p><strong>Cross-platform support</strong> for Linux, macOS, and Windows</p></li>
-<li><p><strong>Comprehensive documentation</strong> including CLI reference, configuration guide, and algorithm details</p></li>
-<li><p><strong>100% test coverage</strong> across all functionality</p></li>
-<li><p><strong>Enterprise-ready features</strong> including error handling, verbose output, and backup creation</p></li>
-</ul>
-<p><strong>Features</strong></p>
-<dl class="simple">
-<dt>Message Types:</dt><dd><ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">W9001</span></code>: <code class="docutils literal notranslate"><span class="pre">unsorted-functions</span></code> - Functions not sorted alphabetically</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">W9002</span></code>: <code class="docutils literal notranslate"><span class="pre">unsorted-methods</span></code> - Class methods not sorted alphabetically</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">W9003</span></code>: <code class="docutils literal notranslate"><span class="pre">mixed-function-visibility</span></code> - Public/private functions not properly separated</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">W9004</span></code>: <code class="docutils literal notranslate"><span class="pre">function-should-be-private</span></code> - Function should be marked private based on usage analysis</p></li>
-</ul>
-</dd>
-<dt>Configuration Options:</dt><dd><ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">public-api-patterns</span></code> - Customize which functions are always treated as public API</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">enable-privacy-detection</span></code> - Toggle privacy detection feature</p></li>
-</ul>
-</dd>
-<dt>CLI Tool Features:</dt><dd><ul class="simple">
-<li><p>Check-only mode (default) - shows help and guidance</p></li>
-<li><p>Dry-run mode (<code class="docutils literal notranslate"><span class="pre">--dry-run</span></code>) - preview changes without modification</p></li>
-<li><p>Fix mode (<code class="docutils literal notranslate"><span class="pre">--fix</span></code>) - actually modify files with optional backup</p></li>
-<li><p>Verbose output (<code class="docutils literal notranslate"><span class="pre">--verbose</span></code>) - detailed processing information</p></li>
-<li><p>Decorator exclusions (<code class="docutils literal notranslate"><span class="pre">--ignore-decorators</span></code>) - framework-aware sorting</p></li>
-<li><p>Backup control (<code class="docutils literal notranslate"><span class="pre">--no-backup</span></code>) - disable automatic backup creation</p></li>
-</ul>
-</dd>
-</dl>
-<p><strong>Technical</strong></p>
-<ul class="simple">
-<li><p><strong>Python 3.11+ support</strong> with type hints throughout</p></li>
-<li><p><strong>Zero external dependencies</strong> beyond PyLint and astroid</p></li>
-<li><p><strong>AST-based analysis</strong> using astroid enhanced syntax trees</p></li>
-<li><p><strong>Import analysis</strong> with real cross-module usage detection</p></li>
-<li><p><strong>File modification caching</strong> for performance optimization</p></li>
-<li><p><strong>Modular architecture</strong> designed for extensibility</p></li>
-</ul>
-<p><strong>Quality Assurance</strong></p>
-<ul class="simple">
-<li><p><strong>Perfect 10.00/10 PyLint score</strong> across all source code</p></li>
-<li><p><strong>100% test coverage</strong> with 112+ comprehensive tests</p></li>
-<li><p><strong>Pre-commit hooks</strong> for code quality enforcement</p></li>
-<li><p><strong>Cross-platform CI/CD</strong> testing on Linux, macOS, Windows</p></li>
-<li><p><strong>Multiple Python version support</strong> (3.11, 3.12, 3.13)</p></li>
-</ul>
-<p><strong>Performance</strong></p>
-<ul class="simple">
-<li><p><strong>Smart caching</strong> prevents redundant AST parsing and import analysis</p></li>
-<li><p><strong>File modification time tracking</strong> for cache invalidation</p></li>
-<li><p><strong>Minimal memory footprint</strong> with efficient data structures</p></li>
-<li><p><strong>Large project optimization</strong> tested on 100+ file codebases</p></li>
-</ul>
-<p>For complete details, see the <a class="reference external" href="https://github.com/hakonhagland/pylint-sort-functions/blob/main/CHANGELOG.md">full changelog</a>.</p>
 </section>
 </section>
 </section>
