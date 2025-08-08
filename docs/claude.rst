@@ -26,22 +26,31 @@ Pre-commit hooks run formatters (like ``ruff format``) that modify files AFTER s
 Required Workflow
 ~~~~~~~~~~~~~~~~~
 
-**Always use for commits:**
+**Always use for all commits (single command for all scenarios):**
 
 .. code-block:: bash
 
-   # For simple single-line messages
-   make commit MSG='Your commit message'
+   # Single command handles both simple and complex messages
+   bash scripts/safe-commit.sh 'Your commit message'
 
-   # For complex messages, use the script directly
-   bash scripts/safe-commit.sh -m "feat: comprehensive feature
+   # Works seamlessly with multi-line messages and special characters
+   bash scripts/safe-commit.sh 'feat: comprehensive feature description
 
    - Detailed bullet point
    - Another detail
+   - Handles quotes and special characters automatically
 
    🤖 Generated with [Claude Code](https://claude.ai/code)
 
-   Co-Authored-By: Claude <noreply@anthropic.com>"
+   Co-Authored-By: Claude <noreply@anthropic.com>'
+
+**Legacy compatibility (also supported):**
+
+.. code-block:: bash
+
+   # Traditional flag-based usage still works
+   bash scripts/safe-commit.sh -m "Your message"
+   bash scripts/safe-commit.sh --file path/to/message.txt
 
 **Never use:**
 
@@ -56,14 +65,16 @@ Required Workflow
 How Safe Commit Works
 ~~~~~~~~~~~~~~~~~~~~~
 
-The safe commit workflow:
+The enhanced safe commit workflow:
 
 1. Automatically activates virtual environment
 2. Runs pre-commit checks on staged files BEFORE committing
-3. Stops if files are modified, preserving your message
-4. Only commits if all checks pass cleanly
+3. Auto-retries if hooks make formatting changes (up to 3 attempts)
+4. Automatically stages any formatting changes made by hooks
+5. Only commits when all checks pass cleanly
+6. Preserves your complete commit message throughout the entire process
 
-This ensures comprehensive commit messages are always preserved.
+This unified approach eliminates confusion between different commit methods and ensures comprehensive commit messages are always preserved, regardless of complexity.
 
 Development Guidelines
 ----------------------
