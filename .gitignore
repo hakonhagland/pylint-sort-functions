@@ -11,3 +11,6 @@ __pycache__/
 
 # Integration test reports (generated automatically)
 test-validation/reports/
+
+# Temporary commit message files
+.commit_msg_tmp
