@@ -1,0 +1,372 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Release Management &mdash; pylint-sort-functions 0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=2709fde1"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Changelog" href="changelog.html" />
+    <link rel="prev" title="Documentation Validation System" href="validation-system.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            pylint-sort-functions
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli.html">Auto-Fix Tool Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="workarounds.html">Known Issues &amp; Workarounds</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Configuration:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="pylintrc.html">PyLint Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sorting.html">Function and Method Sorting Algorithm</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="developer.html">Developer Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="testing.html">Testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="validation-system.html">Documentation Validation System</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Release Management</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#changelog-management">Changelog Management</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#during-development">During Development</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scripts">Scripts</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#release-process">Release Process</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#local-release-recommended">Local Release (Recommended)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#github-actions-automation">GitHub Actions Automation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#token-configuration">Token Configuration</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#version-management">Version Management</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#manual-version-bumping">Manual Version Bumping</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#safe-commit-workflow">Safe Commit Workflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#best-practices">Best Practices</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#development-workflow">Development Workflow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#release-checklist">Release Checklist</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#troubleshooting">Troubleshooting</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#common-issues">Common Issues</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#manual-recovery">Manual Recovery</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="roadmap.html">Development Roadmap</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">pylint-sort-functions</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Release Management</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/hakonhagland/pylint-sort-functions/blob/main/docs/release.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="release-management">
+<h1>Release Management<a class="headerlink" href="#release-management" title="Link to this heading"></a></h1>
+<p>This document describes the automated release workflow for pylint-sort-functions.</p>
+<section id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Link to this heading"></a></h2>
+<p>The project includes comprehensive automation for:</p>
+<ul class="simple">
+<li><p><strong>Continuous changelog management</strong> - Update CHANGELOG.md as you develop</p></li>
+<li><p><strong>Automated releases</strong> - Single command handles version bumping, PyPI publishing, and GitHub releases</p></li>
+<li><p><strong>Safe commit workflow</strong> - Prevents losing commit messages due to pre-commit hook modifications</p></li>
+</ul>
+</section>
+<section id="changelog-management">
+<h2>Changelog Management<a class="headerlink" href="#changelog-management" title="Link to this heading"></a></h2>
+<section id="during-development">
+<h3>During Development<a class="headerlink" href="#during-development" title="Link to this heading"></a></h3>
+<p>Add changelog entries continuously as you work, not just at release time:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Add a bug fix entry</span>
+make<span class="w"> </span>changelog-add<span class="w"> </span><span class="nv">TYPE</span><span class="o">=</span><span class="s1">&#39;fixed&#39;</span><span class="w"> </span><span class="nv">MESSAGE</span><span class="o">=</span><span class="s1">&#39;Memory leak in parser&#39;</span>
+
+<span class="c1"># Add a feature with PR reference</span>
+make<span class="w"> </span>changelog-add<span class="w"> </span><span class="nv">TYPE</span><span class="o">=</span><span class="s1">&#39;added&#39;</span><span class="w"> </span><span class="nv">MESSAGE</span><span class="o">=</span><span class="s1">&#39;Dark mode support&#39;</span><span class="w"> </span><span class="nv">PR</span><span class="o">=</span><span class="m">45</span><span class="w"> </span><span class="nv">ISSUE</span><span class="o">=</span><span class="m">12</span>
+
+<span class="c1"># Add a breaking change</span>
+make<span class="w"> </span>changelog-add<span class="w"> </span><span class="nv">TYPE</span><span class="o">=</span><span class="s1">&#39;changed&#39;</span><span class="w"> </span><span class="nv">MESSAGE</span><span class="o">=</span><span class="s1">&#39;API redesign&#39;</span><span class="w"> </span><span class="nv">BREAKING</span><span class="o">=</span><span class="m">1</span>
+</pre></div>
+</div>
+<p>Valid entry types follow Keep a Changelog standard:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">added</span></code> - New features</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">changed</span></code> - Changes in existing functionality</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">deprecated</span></code> - Soon-to-be removed features</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">removed</span></code> - Now removed features</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">fixed</span></code> - Bug fixes</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">security</span></code> - Security vulnerabilities</p></li>
+</ul>
+</section>
+<section id="scripts">
+<h3>Scripts<a class="headerlink" href="#scripts" title="Link to this heading"></a></h3>
+<p>The changelog management system includes three scripts:</p>
+<dl class="simple">
+<dt><strong>add-changelog-entry.py</strong></dt><dd><p>Adds entries to the <code class="docutils literal notranslate"><span class="pre">[Unreleased]</span></code> section of CHANGELOG.md</p>
+</dd>
+<dt><strong>prepare-release-changelog.py</strong></dt><dd><p>Moves <code class="docutils literal notranslate"><span class="pre">[Unreleased]</span></code> entries to a versioned section during release</p>
+</dd>
+<dt><strong>validate-changelog.py</strong></dt><dd><p>Validates CHANGELOG.md format according to Keep a Changelog standards</p>
+</dd>
+</dl>
+</section>
+</section>
+<section id="release-process">
+<h2>Release Process<a class="headerlink" href="#release-process" title="Link to this heading"></a></h2>
+<section id="local-release-recommended">
+<h3>Local Release (Recommended)<a class="headerlink" href="#local-release-recommended" title="Link to this heading"></a></h3>
+<p>Use the integrated Makefile targets for releases:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Patch release (1.0.0 → 1.0.1) for bug fixes</span>
+make<span class="w"> </span>publish-to-pypi
+
+<span class="c1"># Minor release (1.0.0 → 1.1.0) for new features</span>
+make<span class="w"> </span>publish-to-pypi-minor
+
+<span class="c1"># Major release (1.0.0 → 2.0.0) for breaking changes</span>
+make<span class="w"> </span>publish-to-pypi-major
+</pre></div>
+</div>
+<p>These commands automatically:</p>
+<ol class="arabic simple">
+<li><p><strong>Prepare changelog</strong> - Move <code class="docutils literal notranslate"><span class="pre">[Unreleased]</span></code> entries to versioned section</p></li>
+<li><p><strong>Bump version</strong> - Update version in <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code></p></li>
+<li><p><strong>Build package</strong> - Create distribution artifacts</p></li>
+<li><p><strong>Upload to PyPI</strong> - Publish the new version</p></li>
+<li><p><strong>Create git tag</strong> - Tag the release and push to GitHub</p></li>
+<li><p><strong>Trigger GitHub release</strong> - Tag push triggers GitHub Actions</p></li>
+</ol>
+</section>
+<section id="github-actions-automation">
+<h3>GitHub Actions Automation<a class="headerlink" href="#github-actions-automation" title="Link to this heading"></a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">.github/workflows/release.yml</span></code> workflow provides multiple trigger methods:</p>
+<dl class="simple">
+<dt><strong>Tag Push (Primary)</strong></dt><dd><p>When local release creates and pushes a tag, GitHub Actions automatically creates a GitHub release with artifacts</p>
+</dd>
+<dt><strong>Manual Dispatch</strong></dt><dd><p>Use GitHub Actions UI to trigger test releases to Test PyPI</p>
+</dd>
+<dt><strong>GitHub Release UI</strong></dt><dd><p>Creating a release through GitHub web interface can trigger PyPI publication</p>
+</dd>
+</dl>
+</section>
+<section id="token-configuration">
+<h3>Token Configuration<a class="headerlink" href="#token-configuration" title="Link to this heading"></a></h3>
+<p>For GitHub Actions to publish to PyPI, configure repository secrets:</p>
+<ol class="arabic simple">
+<li><p>Go to GitHub repo → Settings → Secrets and variables → Actions</p></li>
+<li><p>Add <code class="docutils literal notranslate"><span class="pre">PYPI_API_TOKEN</span></code> with your PyPI API token</p></li>
+<li><p>Optionally add <code class="docutils literal notranslate"><span class="pre">TEST_PYPI_API_TOKEN</span></code> for testing</p></li>
+</ol>
+</section>
+</section>
+<section id="version-management">
+<h2>Version Management<a class="headerlink" href="#version-management" title="Link to this heading"></a></h2>
+<section id="manual-version-bumping">
+<h3>Manual Version Bumping<a class="headerlink" href="#manual-version-bumping" title="Link to this heading"></a></h3>
+<p>For testing version changes without releasing:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Test version bump (dry run)</span>
+python<span class="w"> </span>scripts/bump-version.py<span class="w"> </span>--dry-run<span class="w"> </span>patch
+
+<span class="c1"># Actual version bump with git commit</span>
+python<span class="w"> </span>scripts/bump-version.py<span class="w"> </span>patch
+
+<span class="c1"># Version bump without git commit</span>
+python<span class="w"> </span>scripts/bump-version.py<span class="w"> </span>--no-commit<span class="w"> </span>patch
+</pre></div>
+</div>
+</section>
+</section>
+<section id="safe-commit-workflow">
+<h2>Safe Commit Workflow<a class="headerlink" href="#safe-commit-workflow" title="Link to this heading"></a></h2>
+<p>The project includes a safe commit system to prevent losing commit messages when pre-commit hooks modify files.</p>
+<p><strong>Always use:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Single command for safe commits</span>
+make<span class="w"> </span>commit<span class="w"> </span><span class="nv">MSG</span><span class="o">=</span><span class="s1">&#39;Your detailed commit message&#39;</span>
+</pre></div>
+</div>
+<p><strong>For multi-line messages:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Use the script directly</span>
+bash<span class="w"> </span>scripts/safe-commit.sh<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;feat: comprehensive feature</span>
+
+<span class="s2">- Detailed bullet point</span>
+<span class="s2">- Another detail</span>
+
+<span class="s2">Co-Authored-By: Claude &lt;noreply@anthropic.com&gt;&quot;</span>
+</pre></div>
+</div>
+<p>The safe commit workflow:</p>
+<ol class="arabic simple">
+<li><p>Automatically activates virtual environment</p></li>
+<li><p>Runs pre-commit checks on staged files BEFORE committing</p></li>
+<li><p>Stops if files are modified, preserving your message</p></li>
+<li><p>Only commits if all checks pass cleanly</p></li>
+</ol>
+</section>
+<section id="best-practices">
+<h2>Best Practices<a class="headerlink" href="#best-practices" title="Link to this heading"></a></h2>
+<section id="development-workflow">
+<h3>Development Workflow<a class="headerlink" href="#development-workflow" title="Link to this heading"></a></h3>
+<ol class="arabic">
+<li><p><strong>Make changes</strong> to code</p></li>
+<li><p><strong>Add changelog entry</strong> for user-facing changes:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>changelog-add<span class="w"> </span><span class="nv">TYPE</span><span class="o">=</span><span class="s1">&#39;fixed&#39;</span><span class="w"> </span><span class="nv">MESSAGE</span><span class="o">=</span><span class="s1">&#39;Your fix description&#39;</span>
+</pre></div>
+</div>
+</li>
+<li><p><strong>Commit safely</strong> with detailed message:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>commit<span class="w"> </span><span class="nv">MSG</span><span class="o">=</span><span class="s1">&#39;feat: your feature description&#39;</span>
+</pre></div>
+</div>
+</li>
+<li><p><strong>Release when ready</strong>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>publish-to-pypi
+</pre></div>
+</div>
+</li>
+</ol>
+</section>
+<section id="release-checklist">
+<h3>Release Checklist<a class="headerlink" href="#release-checklist" title="Link to this heading"></a></h3>
+<p>Before releasing:</p>
+<ul class="simple">
+<li><p>✅ All tests pass: <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">test</span></code></p></li>
+<li><p>✅ Code quality checks pass: <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">pre-commit</span></code></p></li>
+<li><p>✅ Changelog has unreleased entries</p></li>
+<li><p>✅ Version bump is appropriate (patch/minor/major)</p></li>
+</ul>
+<p>The release automation handles:</p>
+<ul class="simple">
+<li><p>✅ Moving changelog entries to versioned section</p></li>
+<li><p>✅ Version bumping in <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code></p></li>
+<li><p>✅ Building and uploading to PyPI</p></li>
+<li><p>✅ Creating and pushing git tags</p></li>
+<li><p>✅ Triggering GitHub release creation</p></li>
+</ul>
+</section>
+</section>
+<section id="troubleshooting">
+<h2>Troubleshooting<a class="headerlink" href="#troubleshooting" title="Link to this heading"></a></h2>
+<section id="common-issues">
+<h3>Common Issues<a class="headerlink" href="#common-issues" title="Link to this heading"></a></h3>
+<dl>
+<dt><strong>“Pre-commit checks made changes”</strong></dt><dd><p>The safe commit workflow detected file modifications. Stage the changes and retry:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>add<span class="w"> </span>-A
+make<span class="w"> </span>commit<span class="w"> </span><span class="nv">MSG</span><span class="o">=</span><span class="s1">&#39;Your message&#39;</span>
+</pre></div>
+</div>
+</dd>
+<dt><strong>“Version mismatch between tag and project”</strong></dt><dd><p>GitHub Actions detected that the git tag doesn’t match pyproject.toml version. Ensure you’re using the automated release process.</p>
+</dd>
+<dt><strong>“PyPI upload failed - version already exists”</strong></dt><dd><p>The version already exists on PyPI. You cannot re-upload the same version. Bump to a new version.</p>
+</dd>
+</dl>
+</section>
+<section id="manual-recovery">
+<h3>Manual Recovery<a class="headerlink" href="#manual-recovery" title="Link to this heading"></a></h3>
+<p>If the automated process fails partway through:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Check current state</span>
+git<span class="w"> </span>status
+git<span class="w"> </span>log<span class="w"> </span>--oneline<span class="w"> </span>-5
+
+<span class="c1"># If version was bumped but not tagged:</span>
+<span class="nv">VERSION</span><span class="o">=</span><span class="k">$(</span>python<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;import tomllib; print(tomllib.load(open(&#39;pyproject.toml&#39;, &#39;rb&#39;))[&#39;project&#39;][&#39;version&#39;])&quot;</span><span class="k">)</span>
+git<span class="w"> </span>tag<span class="w"> </span>-a<span class="w"> </span><span class="s2">&quot;v</span><span class="nv">$VERSION</span><span class="s2">&quot;</span><span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;Release v</span><span class="nv">$VERSION</span><span class="s2">&quot;</span>
+git<span class="w"> </span>push<span class="w"> </span>origin<span class="w"> </span><span class="s2">&quot;v</span><span class="nv">$VERSION</span><span class="s2">&quot;</span>
+
+<span class="c1"># If PyPI upload failed but tag exists, manual upload:</span>
+uv<span class="w"> </span>build
+twine<span class="w"> </span>upload<span class="w"> </span>dist/*
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="validation-system.html" class="btn btn-neutral float-left" title="Documentation Validation System" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="changelog.html" class="btn btn-neutral float-right" title="Changelog" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Håkon Hægland.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
