@@ -184,6 +184,12 @@ class FunctionSortChecker(BaseChecker):
                 self.add_message(
                     "function-should-be-private", node=func, args=(func.name,)
                 )
+            elif utils.should_function_be_public(func, module_path, project_root):
+                # Report private function that should be public
+                # See docs/usage.rst for privacy detection feature
+                self.add_message(
+                    "function-should-be-public", node=func, args=(func.name,)
+                )
 
     def _check_function_privacy_heuristic(
         self,

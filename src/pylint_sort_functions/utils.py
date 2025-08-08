@@ -291,6 +291,49 @@ def should_function_be_private(
     return not is_used_externally
 
 
+def should_function_be_public(
+    func: nodes.FunctionDef,
+    module_path: Path,
+    project_root: Path,
+) -> bool:
+    """Detect if a private function should be public based on external usage analysis.
+
+    Analyzes actual usage patterns across the project to determine if a function
+    that is currently marked as private is actually used by other modules and
+    should therefore be made public.
+
+    Detection Logic:
+    1. Skip if already public (doesn't start with underscore)
+    2. Skip special methods (dunder methods like __init__, __str__, etc.)
+    3. Check if the private function is imported/used by other modules
+    4. If used externally, suggest making it public
+
+    :param func: Function definition node to analyze
+    :type func: nodes.FunctionDef
+    :param module_path: Path to the module file
+    :type module_path: Path
+    :param project_root: Root directory of the project
+    :type project_root: Path
+    :returns: True if the function should be made public
+    :rtype: bool
+    """
+    # Skip if already public (doesn't start with underscore)
+    if not is_private_function(func):
+        return False
+
+    # Skip special methods (dunder methods like __init__, __str__, etc.)
+    if _is_dunder_method(func):
+        return False
+
+    # Check if this private function is actually used by other modules
+    is_used_externally = _is_function_used_externally(
+        func.name, module_path, project_root
+    )
+
+    # If used externally, it should be public
+    return is_used_externally
+
+
 # Private functions
 
 

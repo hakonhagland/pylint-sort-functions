@@ -51,4 +51,12 @@ MESSAGES: dict[str, tuple[str, str, str]] = {
         "detect cross-module usage, so functions used by other modules won't be "
         "flagged (which reduces false positives).",
     ),
+    "W9005": (
+        "Function '%s' should be public (remove underscore prefix)",
+        "function-should-be-public",
+        "Functions that are currently marked as private (underscore prefix) but are "
+        "used by other modules should be made public by removing the underscore "
+        "prefix. This rule detects cross-module imports and usage of private "
+        "functions, indicating they are part of the module's public API.",
+    ),
 }

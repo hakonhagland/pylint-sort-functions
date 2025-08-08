@@ -706,3 +706,167 @@ def alpha_route():
             # No functions are sortable, so no sorting violation should be reported
             with self.assertNoMessages():
                 self.checker.visit_module(module)
+
+    def test_w9005_private_should_be_public(self) -> None:
+        """Test W9005 detection for private functions that should be public."""
+        # Test case: private function used by external module
+        module_content = """
+def _helper_function():
+    return "help"
+
+def _internal_function():
+    return "internal"
+
+def public_function():
+    return "public"
+"""
+        module = astroid.parse(module_content, module_name="test_module")
+
+        # Mock linter with privacy detection enabled
+        mock_linter = Mock()
+        mock_linter.config.public_api_patterns = {
+            "main",
+            "run",
+            "execute",
+            "start",
+            "stop",
+            "setup",
+            "teardown",
+        }
+        mock_linter.config.enable_privacy_detection = True
+        mock_linter.current_file = str(Path("/test/project/src/utils.py"))
+
+        # Mock path methods and privacy functions
+        with (
+            patch.object(self.checker, "linter", mock_linter),
+            patch.object(self.checker, "_get_project_root") as mock_project_root,
+            patch(
+                "pylint_sort_functions.utils.should_function_be_private"
+            ) as mock_should_be_private,
+            patch(
+                "pylint_sort_functions.utils.should_function_be_public"
+            ) as mock_should_be_public,
+        ):
+            # Set up path mocking
+            mock_project_root.return_value = Path("/test/project")
+            # should_function_be_private should return False to allow elif branch
+            mock_should_be_private.return_value = False
+            # Only _helper_function should be flagged as should be public
+            mock_should_be_public.side_effect = lambda func, *args: (
+                func.name == "_helper_function"
+            )
+
+            # Expect W9005 message for _helper_function only
+            with self.assertAddsMessages(
+                MessageTest(
+                    msg_id="function-should-be-public",
+                    line=2,  # _helper_function
+                    node=module.body[0],  # First function
+                    args=("_helper_function",),
+                    col_offset=0,
+                    end_line=2,
+                    end_col_offset=20,
+                ),
+            ):
+                # Run our checker on the parsed module
+                self.checker.visit_module(module)
+
+    def test_w9005_no_false_positives(self) -> None:
+        """Test that W9005 doesn't flag public/genuine private functions."""
+        # Test case: mix of public and genuinely private functions
+        module_content = """
+def public_function():
+    return "public"
+
+def _genuinely_private():
+    return "private"
+
+def __dunder_method__(self):
+    return "dunder"
+"""
+        module = astroid.parse(module_content, module_name="test_module")
+
+        # Mock linter with privacy detection enabled
+        mock_linter = Mock()
+        mock_linter.config.public_api_patterns = {
+            "main",
+            "run",
+            "execute",
+            "start",
+            "stop",
+            "setup",
+            "teardown",
+        }
+        mock_linter.config.enable_privacy_detection = True
+        mock_linter.current_file = str(Path("/test/project/src/utils.py"))
+
+        # Mock both privacy detection functions to return False
+        with (
+            patch.object(self.checker, "linter", mock_linter),
+            patch(
+                "pylint_sort_functions.utils.should_function_be_private"
+            ) as mock_should_be_private,
+            patch(
+                "pylint_sort_functions.utils.should_function_be_public"
+            ) as mock_should_be_public,
+        ):
+            mock_should_be_private.return_value = False
+            mock_should_be_public.return_value = False
+
+            # No privacy messages should be generated
+            with self.assertNoMessages():
+                self.checker.visit_module(module)
+
+    def test_w9005_mutually_exclusive_with_w9004(self) -> None:
+        """Test that W9005 and W9004 are mutually exclusive (elif logic)."""
+        # Test case: function that could theoretically trigger both
+        module_content = """
+def ambiguous_function():
+    return "ambiguous"
+"""
+        module = astroid.parse(module_content, module_name="test_module")
+
+        # Mock linter with privacy detection enabled
+        mock_linter = Mock()
+        mock_linter.config.public_api_patterns = {
+            "main",
+            "run",
+            "execute",
+            "start",
+            "stop",
+            "setup",
+            "teardown",
+        }
+        mock_linter.config.enable_privacy_detection = True
+        mock_linter.current_file = str(Path("/test/project/src/utils.py"))
+
+        # Mock should_function_be_private to return True (W9004)
+        # should_function_be_public should not even be called due to elif
+        with (
+            patch.object(self.checker, "linter", mock_linter),
+            patch(
+                "pylint_sort_functions.utils.should_function_be_private"
+            ) as mock_should_be_private,
+            patch(
+                "pylint_sort_functions.utils.should_function_be_public"
+            ) as mock_should_be_public,
+        ):
+            mock_should_be_private.return_value = True
+            mock_should_be_public.return_value = True  # Should not be called
+
+            # Should only get W9004, not W9005
+            with self.assertAddsMessages(
+                MessageTest(
+                    msg_id="function-should-be-private",
+                    line=2,  # ambiguous_function
+                    node=module.body[0],
+                    args=("ambiguous_function",),
+                    col_offset=0,
+                    end_line=2,
+                    end_col_offset=21,
+                ),
+            ):
+                self.checker.visit_module(module)
+
+            # Verify should_function_be_public was not called due to elif
+            mock_should_be_public.assert_not_called()

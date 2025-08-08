@@ -1,5 +1,6 @@
 """Tests for utility functions."""
 
+import tempfile
 from pathlib import Path
 from unittest.mock import Mock
 
@@ -257,7 +258,6 @@ class TestUtils:
 
     def test_find_python_files(self) -> None:
         """Test finding Python files in a directory."""
-        import tempfile
         from pathlib import Path
 
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -290,7 +290,6 @@ class TestUtils:
 
     def test_extract_imports_from_file(self) -> None:
         """Test extracting import information from Python files."""
-        import tempfile
         from pathlib import Path
 
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -343,7 +342,6 @@ def test_function():
 
     def test_extract_imports_from_file_syntax_error(self) -> None:
         """Test handling of files with syntax errors."""
-        import tempfile
         from pathlib import Path
 
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -367,7 +365,6 @@ def test_function():
 
     def test_build_cross_module_usage_graph(self) -> None:
         """Test building cross-module usage graph."""
-        import tempfile
         from pathlib import Path
 
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -403,7 +400,6 @@ def use_library():
 
     def test_is_function_used_externally(self) -> None:
         """Test checking if function is used externally."""
-        import tempfile
         from pathlib import Path
 
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -446,7 +442,6 @@ def use_library():
 
     def test_should_function_be_private_with_import_analysis(self) -> None:
         """Test enhanced privacy detection with import analysis."""
-        import tempfile
         from pathlib import Path
 
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -514,7 +509,6 @@ def use_library():
 
     def test_build_cross_module_usage_graph_handles_oserror(self) -> None:
         """Test that cross-module usage graph handles OSError gracefully."""
-        import tempfile
         from pathlib import Path
         from unittest.mock import patch
 
@@ -542,7 +536,6 @@ def use_library():
 
     def test_should_function_be_private_with_custom_public_patterns(self) -> None:
         """Test should_function_be_private with configurable public patterns."""
-        import tempfile
         from pathlib import Path
 
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -646,4 +639,159 @@ def main():
                     main_func, library_file, temp_path, empty_patterns
                 )
                 is True
+            )
+
+    def test_should_function_be_public_basic(self) -> None:
+        """Test should_function_be_public basic functionality."""
+        # Create test functions
+        public_func = astroid.extract_node("def public_function(): pass  #@")
+        dunder_func = astroid.extract_node("def __dunder_method__(self): pass  #@")
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_path = Path(temp_dir)
+            test_file = temp_path / "test_module.py"
+            test_file.write_text("# Test module")
+
+            # Public function should return False (already public)
+            assert (
+                utils.should_function_be_public(public_func, test_file, temp_path)
+                is False
+            )
+
+            # Dunder method should return False (special method)
+            assert (
+                utils.should_function_be_public(dunder_func, test_file, temp_path)
+                is False
+            )
+
+    def test_should_function_be_public_with_external_usage(self) -> None:
+        """Test should_function_be_public detects external usage correctly."""
+        from pathlib import Path
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_path = Path(temp_dir)
+
+            # Create main module that imports a private function
+            main_file = temp_path / "main.py"
+            main_file.write_text("""
+from utils import _helper_function
+
+def main():
+    return _helper_function()
+""")
+
+            # Create utils module with private function
+            utils_file = temp_path / "utils.py"
+            utils_file.write_text("""
+def _helper_function():
+    return "help"
+
+def _internal_only():
+    return "internal"
+""")
+
+            # Parse the functions
+            with open(utils_file, encoding="utf-8") as f:
+                content = f.read()
+            module = astroid.parse(content, module_name="utils")
+            helper_func = module.body[0]  # _helper_function
+            internal_func = module.body[1]  # _internal_only
+
+            # _helper_function should be flagged (used externally)
+            assert (
+                utils.should_function_be_public(helper_func, utils_file, temp_path)
+                is True
+            )
+
+            # _internal_only should not be flagged (not used externally)
+            assert (
+                utils.should_function_be_public(internal_func, utils_file, temp_path)
+                is False
+            )
+
+    def test_should_function_be_public_no_external_usage(self) -> None:
+        """Test should_function_be_public returns False for private functions."""
+        from pathlib import Path
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_path = Path(temp_dir)
+
+            # Create standalone module with only private functions
+            utils_file = temp_path / "standalone.py"
+            utils_file.write_text("""
+def _helper_one():
+    return _helper_two()
+
+def _helper_two():
+    return "help"
+
+def main():
+    return _helper_one()
+""")
+
+            # Parse the functions
+            with open(utils_file, encoding="utf-8") as f:
+                content = f.read()
+            module = astroid.parse(content, module_name="standalone")
+            helper_one = module.body[0]  # _helper_one
+            helper_two = module.body[1]  # _helper_two
+
+            # Both private functions should not be flagged (no external usage)
+            assert (
+                utils.should_function_be_public(helper_one, utils_file, temp_path)
+                is False
+            )
+            assert (
+                utils.should_function_be_public(helper_two, utils_file, temp_path)
+                is False
+            )
+
+    def test_should_function_be_public_cross_module_import(self) -> None:
+        """Test should_function_be_public detects cross-module imports."""
+        from pathlib import Path
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_path = Path(temp_dir)
+
+            # Create package structure
+            package_dir = temp_path / "mypackage"
+            package_dir.mkdir()
+            (package_dir / "__init__.py").touch()
+
+            # Create module A that exports a private function
+            module_a = package_dir / "module_a.py"
+            module_a.write_text("""
+def _shared_utility():
+    return "shared"
+
+def _truly_private():
+    return "private"
+""")
+
+            # Create module B that imports from A
+            module_b = package_dir / "module_b.py"
+            module_b.write_text("""
+from mypackage.module_a import _shared_utility
+
+def use_shared():
+    return _shared_utility()
+""")
+
+            # Parse module A functions
+            with open(module_a, encoding="utf-8") as f:
+                content = f.read()
+            module = astroid.parse(content, module_name="mypackage.module_a")
+            shared_func = module.body[0]  # _shared_utility
+            private_func = module.body[1]  # _truly_private
+
+            # _shared_utility should be flagged (imported by module B)
+            assert (
+                utils.should_function_be_public(shared_func, module_a, temp_path)
+                is True
+            )
+
+            # _truly_private should not be flagged (not used externally)
+            assert (
+                utils.should_function_be_public(private_func, module_a, temp_path)
+                is False
             )
