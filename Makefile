@@ -29,10 +29,12 @@ changelog-validate:
 	@python scripts/validate-changelog.py
 
 # Safe commit that runs pre-commit checks first
+# NOTE: For multi-line messages, use: bash scripts/multiline-commit.sh "message"
 commit:
 	@if [ -z "$(MSG)" ]; then \
 		echo "❌ Error: MSG is required"; \
 		echo "Usage: make commit MSG='Your commit message'"; \
+		echo "For multi-line messages: bash scripts/multiline-commit.sh 'message'"; \
 		exit 1; \
 	fi
 	@python scripts/write-commit-msg.py "$(MSG)" .commit_msg_tmp
@@ -89,6 +91,7 @@ help:
 	@echo "Git and commits:"
 	@echo "  commit                - Safe commit with pre-commit checks"
 	@echo "                          Usage: make commit MSG='Your message'"
+	@echo "                          Multi-line: bash scripts/multiline-commit.sh 'message'"
 	@echo ""
 	@echo "Utilities:"
 	@echo "  eof-fix               - Fix missing newlines at end of files"
