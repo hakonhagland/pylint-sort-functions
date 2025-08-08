@@ -56,9 +56,16 @@ while [[ $# -gt 0 ]]; do
             shift
             ;;
         *)
-            echo -e "${RED}❌ Unknown option: $1${NC}"
-            echo "Usage: $0 -m 'commit message' [--file path] [--amend] [--no-verify]"
-            exit 1
+            # If it starts with -, it's an unknown option
+            if [[ $1 == -* ]]; then
+                echo -e "${RED}❌ Unknown option: $1${NC}"
+                echo "Usage: $0 [-m] 'commit message' [--file path] [--amend] [--no-verify]"
+                exit 1
+            else
+                # Treat as commit message
+                COMMIT_MESSAGE="$1"
+                shift
+            fi
             ;;
     esac
 done
@@ -76,7 +83,9 @@ fi
 # Check if commit message is provided (unless amending)
 if [ -z "$COMMIT_MESSAGE" ] && [ -z "$AMEND_FLAG" ]; then
     echo -e "${RED}❌ Commit message required${NC}"
-    echo "Usage: $0 -m 'commit message'"
+    echo "Usage: $0 'commit message'"
+    echo "   or: $0 -m 'commit message'"
+    echo "   or: $0 --file path/to/message.txt"
     exit 1
 fi
 

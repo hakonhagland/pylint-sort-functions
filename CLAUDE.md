@@ -4,8 +4,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## ⚠️ CRITICAL: Always Use Safe Commits
 
-**MANDATORY FOR ALL COMMITS**: Use `make commit MSG='message'` instead of `git commit -m`
+**MANDATORY FOR ALL COMMITS**: Use `bash scripts/safe-commit.sh 'message'` instead of `git commit -m`
 - This prevents losing detailed commit messages due to pre-commit hook modifications
+- Supports both single-line and multi-line messages automatically
 - See "Git Workflow Requirements" section for full details
 
 ## Project Overview
@@ -218,30 +219,30 @@ When using Claude Code to make changes:
 
 ```bash
 # ALWAYS use this instead of git commit:
-make commit MSG='Your detailed commit message'
+bash scripts/safe-commit.sh 'Your detailed commit message'
 
-# Or for multi-line messages:
-make commit MSG="$(cat <<'EOF'
-feat: comprehensive feature description
+# Works seamlessly with multi-line messages:
+bash scripts/safe-commit.sh 'feat: comprehensive feature description
 
 - Detailed bullet point
 - Another detail
+- Handles quotes and special characters automatically
 
-Co-Authored-By: Claude <noreply@anthropic.com>
-EOF
-)"
+Co-Authored-By: Claude <noreply@anthropic.com>'
 ```
 
 **Why this is MANDATORY**:
-- The `make commit` target automatically runs pre-commit checks BEFORE committing
+- The `safe-commit.sh` script automatically runs pre-commit checks BEFORE committing
 - This prevents file modifications AFTER staging that cause commit message loss
 - Ensures comprehensive commit messages are preserved
+- Handles both single-line and multi-line messages automatically
 - Prevents the need for `git commit --amend`
 
-**Alternative if Make is unavailable**:
+**Alternative usage (legacy compatibility)**:
 ```bash
-# If Make is not available, use the script directly:
+# Also supports traditional flag-based usage:
 bash scripts/safe-commit.sh -m "Your commit message"
+bash scripts/safe-commit.sh --file path/to/message.txt
 ```
 
 ### Pre-commit Best Practices
@@ -251,10 +252,11 @@ bash scripts/safe-commit.sh -m "Your commit message"
 2. Create unstaged changes that tempt using `git commit --amend`
 3. Result in generic "style fix" commits instead of comprehensive messages
 
-**The Solution**: The `make commit` target handles this automatically by:
+**The Solution**: The `safe-commit.sh` script handles this automatically by:
 1. Running all pre-commit checks first
-2. Only committing if no changes are needed
-3. Preserving your complete commit message
+2. Auto-retrying if hooks make formatting changes (up to 3 attempts)
+3. Only committing when all checks pass
+4. Preserving your complete commit message throughout the process
 
 **If pre-commit hooks modify files anyway**:
 ```bash

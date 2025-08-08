@@ -3,7 +3,7 @@ ROOT := $(shell pwd)
 .PHONY: coverage docs eof-fix help mypy ruff-check ruff-fix ruff-format test test-plugin test-plugin-strict tox
 .PHONY: publish-to-pypi publish-to-pypi-minor publish-to-pypi-major rstcheck self-check
 .PHONY: build-docker-image run-docker-container stop-docker-container test-documentation
-.PHONY: changelog-add changelog-prepare changelog-validate commit
+.PHONY: changelog-add changelog-prepare changelog-validate
 
 # Changelog management targets
 changelog-add:
@@ -28,18 +28,6 @@ changelog-validate:
 	@echo "Validating changelog format..."
 	@python scripts/validate-changelog.py
 
-# Safe commit that runs pre-commit checks first
-# NOTE: For multi-line messages, use: bash scripts/multiline-commit.sh "message"
-commit:
-	@if [ -z "$(MSG)" ]; then \
-		echo "❌ Error: MSG is required"; \
-		echo "Usage: make commit MSG='Your commit message'"; \
-		echo "For multi-line messages: bash scripts/multiline-commit.sh 'message'"; \
-		exit 1; \
-	fi
-	@python scripts/write-commit-msg.py "$(MSG)" .commit_msg_tmp
-	@bash scripts/safe-commit.sh --file .commit_msg_tmp
-	@rm -f .commit_msg_tmp
 
 coverage:
 	coverage run -m pytest tests
@@ -89,9 +77,8 @@ help:
 	@echo "  publish-to-pypi-major - Build and publish to PyPI (major version bump)"
 	@echo ""
 	@echo "Git and commits:"
-	@echo "  commit                - Safe commit with pre-commit checks"
-	@echo "                          Usage: make commit MSG='Your message'"
-	@echo "                          Multi-line: bash scripts/multiline-commit.sh 'message'"
+	@echo "  bash scripts/safe-commit.sh 'message' - Safe commit with pre-commit checks"
+	@echo "                                           Supports both single-line and multi-line messages"
 	@echo ""
 	@echo "Utilities:"
 	@echo "  eof-fix               - Fix missing newlines at end of files"
