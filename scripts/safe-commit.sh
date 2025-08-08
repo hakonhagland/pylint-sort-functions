@@ -174,9 +174,14 @@ if [ -z "$NO_VERIFY_FLAG" ]; then
         # Check if any files were modified by the hooks
         MODIFIED_FILES=$(git status --porcelain)
         if [ -z "$MODIFIED_FILES" ]; then
-            # Save commit message to temporary file to avoid losing it
-            TEMP_MSG_FILE=$(mktemp /tmp/pylint-sort-functions-commit-msg-XXXXXX)
-            echo "$COMMIT_MESSAGE" > "$TEMP_MSG_FILE"
+            # Save commit message to temporary file to avoid losing it (only if not already using --file)
+            if [ -z "$COMMIT_MESSAGE_FILE" ]; then
+                TEMP_MSG_FILE=$(mktemp /tmp/pylint-sort-functions-commit-msg-XXXXXX)
+                echo "$COMMIT_MESSAGE" > "$TEMP_MSG_FILE"
+            else
+                # Already using a temp file from --file argument
+                TEMP_MSG_FILE="$COMMIT_MESSAGE_FILE"
+            fi
 
             echo -e "${RED}❌ Pre-commit validation failed${NC}"
             echo "This indicates a code quality issue that requires manual fixing."
@@ -206,9 +211,14 @@ if [ -z "$NO_VERIFY_FLAG" ]; then
         git add -A
 
         if [ $RETRY_COUNT -eq $MAX_RETRIES ]; then
-            # Save commit message to temporary file to avoid losing it
-            TEMP_MSG_FILE=$(mktemp /tmp/pylint-sort-functions-commit-msg-XXXXXX)
-            echo "$COMMIT_MESSAGE" > "$TEMP_MSG_FILE"
+            # Save commit message to temporary file to avoid losing it (only if not already using --file)
+            if [ -z "$COMMIT_MESSAGE_FILE" ]; then
+                TEMP_MSG_FILE=$(mktemp /tmp/pylint-sort-functions-commit-msg-XXXXXX)
+                echo "$COMMIT_MESSAGE" > "$TEMP_MSG_FILE"
+            else
+                # Already using a temp file from --file argument
+                TEMP_MSG_FILE="$COMMIT_MESSAGE_FILE"
+            fi
 
             echo -e "${RED}❌ Maximum retries reached${NC}"
             echo "Pre-commit hooks are still making formatting changes after $MAX_RETRIES attempts."
