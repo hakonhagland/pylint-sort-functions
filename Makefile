@@ -115,9 +115,11 @@ pre-commit:
 
 publish-to-pypi:
 	@echo "Publishing to PyPI with automatic version bump..."
+	python scripts/bump-version.py --no-commit patch
 	@echo "Preparing changelog for release..."
 	@python scripts/prepare-release-changelog.py || true
-	python scripts/bump-version.py patch
+	@echo "Committing version bump and changelog..."
+	git add -A && git commit -m "chore: bump version to $$(grep '^version' pyproject.toml | cut -d'"' -f2) and prepare changelog"
 	@echo "Cleaning old builds..."
 	rm -rf dist/
 	@echo "Building package..."
@@ -132,9 +134,11 @@ publish-to-pypi:
 
 publish-to-pypi-minor:
 	@echo "Publishing to PyPI with minor version bump..."
+	python scripts/bump-version.py --no-commit minor
 	@echo "Preparing changelog for release..."
 	@python scripts/prepare-release-changelog.py || true
-	python scripts/bump-version.py minor
+	@echo "Committing version bump and changelog..."
+	git add -A && git commit -m "chore: bump version to $$(grep '^version' pyproject.toml | cut -d'"' -f2) and prepare changelog"
 	@echo "Cleaning old builds..."
 	rm -rf dist/
 	@echo "Building package..."
@@ -149,9 +153,11 @@ publish-to-pypi-minor:
 
 publish-to-pypi-major:
 	@echo "Publishing to PyPI with major version bump..."
+	python scripts/bump-version.py --no-commit major
 	@echo "Preparing changelog for release..."
 	@python scripts/prepare-release-changelog.py || true
-	python scripts/bump-version.py major
+	@echo "Committing version bump and changelog..."
+	git add -A && git commit -m "chore: bump version to $$(grep '^version' pyproject.toml | cut -d'"' -f2) and prepare changelog"
 	@echo "Cleaning old builds..."
 	rm -rf dist/
 	@echo "Building package..."

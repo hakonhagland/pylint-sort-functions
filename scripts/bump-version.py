@@ -133,9 +133,15 @@ def check_git_status() -> None:
     )
 
     if result.stdout.strip():
-        raise RuntimeError(
-            "Git working directory is not clean. Please commit or stash changes first."
-        )
+        # Allow CHANGELOG.md changes from prepare-release-changelog.py
+        changes = result.stdout.strip().split("\n")
+        non_changelog_changes = [c for c in changes if "CHANGELOG.md" not in c]
+
+        if non_changelog_changes:
+            raise RuntimeError(
+                "Git working directory is not clean. "
+                "Please commit or stash changes first."
+            )
 
 
 def main() -> None:
