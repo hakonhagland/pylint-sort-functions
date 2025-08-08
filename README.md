@@ -126,3 +126,4 @@ See [hakonhagland.github.io/pylint-sort-functions](https://hakonhagland.github.i
 - **GitHub Repository**: [pylint-sort-functions](https://github.com/hakonhagland/pylint-sort-functions)
 - **Issue Tracker**: [GitHub Issues](https://github.com/hakonhagland/pylint-sort-functions/issues)
 # Test change
+# Test change
