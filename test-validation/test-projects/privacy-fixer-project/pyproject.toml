@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "privacy-fixer-test"
+version = "0.1.0"
+description = "Test project for privacy fixer integration"
+
+[tool.pylint.main]
+load-plugins = ["pylint_sort_functions"]
+disable = ["all"]
+enable = ["unsorted-functions", "function-should-be-private"]
+
+[tool.pylint."function-sort"]
+enable-privacy-detection = true
