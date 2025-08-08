@@ -9,8 +9,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Automated changelog management with Make targets
+- Automated changelog management with Make targets for continuous updates
 - GitHub Actions workflow for automated PyPI releases on tag push
+- Decorator exclusion support for framework-specific sorting (Flask, Click, FastAPI, Django)
+- Configurable section header detection patterns for function organization
+- Automatic section header insertion during auto-fix (adds # Public/Private comments)
+- Safe commit workflow to prevent commit message loss from pre-commit hooks
+- Docker-based documentation validation system for quality assurance
+- Comprehensive release management documentation (docs/release.rst)
+- Claude Code specific guidelines documentation (docs/claude.rst)
+- Auto-syncing CHANGELOG.md content in Sphinx documentation
+
+### Fixed
+
+- Section header displacement during function sorting
+- GitHub Actions integration test exit code failures
+- Pre-commit hook failures in CI/CD pipeline
+- Tox configuration for proper package installation
+- Documentation accuracy issues in pylintrc.rst
+
+### Changed
+
+- Enhanced auto-fix tool with section header detection and preservation
+- Improved tox.ini with quality checks and proper uv integration
+- Modernized installation and configuration documentation
 
 ## [1.0.0] - 2025-08-06
 
