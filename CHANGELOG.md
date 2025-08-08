@@ -12,11 +12,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Consolidated publish-to-pypi Makefile targets with robust safe-commit workflow
+
 ## [1.2.0] - 2025-08-08
 
 ### Changed
 
 - README.md comprehensive documentation alignment with current feature set
+
 ## [1.1.0] - 2025-08-08
 
 ### Added
