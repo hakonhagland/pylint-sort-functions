@@ -1,6 +1,6 @@
 ROOT := $(shell pwd)
 
-.PHONY: coverage docs help mypy ruff-check ruff-fix ruff-format test test-plugin test-plugin-strict tox
+.PHONY: coverage docs eof-fix help mypy ruff-check ruff-fix ruff-format test test-plugin test-plugin-strict tox
 .PHONY: publish-to-pypi publish-to-pypi-minor publish-to-pypi-major rstcheck self-check
 .PHONY: build-docker-image run-docker-container stop-docker-container test-documentation
 
@@ -15,11 +15,15 @@ coverage-html:
 docs:
 	cd "$(ROOT)"/docs && make clean && make html
 
+eof-fix:
+	pre-commit run end-of-file-fixer --all-files
+
 help:
 	@echo "Available targets:"
 	@echo "  coverage              - Run tests with coverage report"
 	@echo "  coverage-html         - Generate HTML coverage report"
 	@echo "  docs                  - Build documentation"
+	@echo "  eof-fix               - Fix missing newlines at end of files"
 	@echo "  help                  - Show this help message"
 	@echo "  mypy                  - Run type checking"
 	@echo "  pre-commit            - Run all pre-commit hooks"

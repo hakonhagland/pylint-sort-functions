@@ -137,6 +137,9 @@ make rstcheck
 
 # Run pre-commit hooks manually
 make pre-commit
+
+# Fix missing newlines at end of files
+make eof-fix
 ```
 
 
@@ -306,7 +309,7 @@ git commit --no-verify -m "message"
 
 The project includes these pre-commit hooks:
 - `trim-trailing-whitespace`: Remove trailing whitespace
-- `end-of-file-fixer`: Ensure files end with newline
+- `end-of-file-fixer`: Ensure files end with newline (run `make eof-fix` to fix manually)
 - `check-yaml`: Validate YAML syntax
 - `ruff`: Python linting
 - `ruff-format`: Python code formatting
@@ -340,6 +343,7 @@ Follow the Python style guide in `.cursor/rules/python.mdc`:
 - Import order: standard library → third-party → local (alphabetically sorted)
 - **Avoid inline imports**: Move all imports to the top of the file for better readability and maintainability
 - Functions/methods organized alphabetically within their scope
+- **ALWAYS ensure files end with a newline character** - Include trailing newline when editing/creating files to prevent pre-commit hook modifications
 - **Module imports**:
   - **Functions**: Prefer `from package import module` over `from package.module import function` for better readability and explicit provenance (e.g., `from pylint_sort_functions import utils` then use `utils.function()` instead of importing `function` directly)
   - **Classes**: Use author's judgment based on context - consider number of classes, name clarity, and usage patterns. Direct import of classes is acceptable when it improves readability (e.g., `from package.module import ClassName` is fine for clear configuration classes)
