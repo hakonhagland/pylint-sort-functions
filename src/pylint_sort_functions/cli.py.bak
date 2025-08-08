@@ -277,53 +277,8 @@ def _add_parser_arguments(parser: argparse.ArgumentParser) -> None:
     )
 
 
-def _find_project_root(start_path: Path) -> Path:
-    """Find the project root by looking for common project markers.
-
-    :param start_path: Starting path to search from
-    :type start_path: Path
-    :returns: Project root path
-    :rtype: Path
-    """
-    current = start_path.resolve()
-    if current.is_file():
-        current = current.parent
-
-    # Look for common project root indicators
-    markers = ["pyproject.toml", "setup.py", "setup.cfg", ".git", "requirements.txt"]
-
-    while current != current.parent:
-        for marker in markers:
-            if (current / marker).exists():
-                return current
-        current = current.parent
-
-    # Fallback to the original path's parent
-    return start_path.parent if start_path.is_file() else start_path
-
-
-def _find_python_files(paths: List[Path]) -> List[Path]:
-    """Find all Python files in the given paths.
-
-    :param paths: List of file or directory paths
-    :type paths: List[Path]
-    :returns: List of Python file paths
-    :rtype: List[Path]
-    """
-    python_files = []
-
-    for path in paths:
-        if path.is_file() and path.suffix == ".py":
-            python_files.append(path)
-        elif path.is_dir():
-            # Recursively find Python files
-            python_files.extend(path.rglob("*.py"))
-
-    return python_files
-
-
-def _handle_privacy_fixing(  # pylint: disable=too-many-locals
-    args: argparse.Namespace, python_files: List[Path], paths: List[Path]
+def _handle_privacy_fixing(
+    args: object, python_files: List[Path], paths: List[Path]
 ) -> int:
     """Handle privacy fixing workflow.
 
@@ -421,6 +376,51 @@ def _handle_privacy_fixing(  # pylint: disable=too-many-locals
         print("No functions found that need privacy fixes.")
 
     return 0
+
+
+def _find_project_root(start_path: Path) -> Path:
+    """Find the project root by looking for common project markers.
+
+    :param start_path: Starting path to search from
+    :type start_path: Path
+    :returns: Project root path
+    :rtype: Path
+    """
+    current = start_path.resolve()
+    if current.is_file():
+        current = current.parent
+
+    # Look for common project root indicators
+    markers = ["pyproject.toml", "setup.py", "setup.cfg", ".git", "requirements.txt"]
+
+    while current != current.parent:
+        for marker in markers:
+            if (current / marker).exists():
+                return current
+        current = current.parent
+
+    # Fallback to the original path's parent
+    return start_path.parent if start_path.is_file() else start_path
+
+
+def _find_python_files(paths: List[Path]) -> List[Path]:
+    """Find all Python files in the given paths.
+
+    :param paths: List of file or directory paths
+    :type paths: List[Path]
+    :returns: List of Python file paths
+    :rtype: List[Path]
+    """
+    python_files = []
+
+    for path in paths:
+        if path.is_file() and path.suffix == ".py":
+            python_files.append(path)
+        elif path.is_dir():
+            # Recursively find Python files
+            python_files.extend(path.rglob("*.py"))
+
+    return python_files
 
 
 if __name__ == "__main__":  # pragma: no cover
