@@ -723,5 +723,6 @@ See Also
 --------
 
 * :doc:`release` - Release management and changelog workflow for contributors
+* :doc:`claude` - Specific guidelines for Claude Code AI assistant
 * :doc:`testing` - Comprehensive testing guide
 * :doc:`api` - Complete API reference
