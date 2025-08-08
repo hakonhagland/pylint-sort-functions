@@ -234,8 +234,8 @@ class FunctionSorter:  # pylint: disable=too-many-public-methods,too-few-public-
                 # End where the next function's comments start
                 end_line = function_boundaries[i + 1][1]
             else:
-                # Last function, use end of file
-                end_line = len(lines)
+                # Last function, find the actual end (stop before __name__ == __main__)
+                end_line = self._find_function_end(lines, func)
 
             # Extract the text including comments
             text = "".join(lines[comment_start:end_line])
@@ -459,6 +459,46 @@ class FunctionSorter:  # pylint: disable=too-many-public-methods,too-few-public-
 
         return headers
 
+    def _find_function_end(self, lines: List[str], func: nodes.FunctionDef) -> int:
+        """Find the actual end line of a function, stopping before __name__ == __main__.
+
+        :param lines: Source file lines
+        :type lines: List[str]
+        :param func: Function node
+        :type func: nodes.FunctionDef
+        :returns: Line number where function ends (exclusive)
+        :rtype: int
+        """
+        # Start from the function's end line
+        func_end = func.end_lineno  # This is the last line of the function body
+
+        # Look forward from function end to find blank lines and comments
+        i = func_end
+        while i < len(lines):
+            line = lines[i].strip()
+
+            # Stop if we hit __name__ == __main__
+            if line.startswith('if __name__ == "__main__"'):
+                break
+
+            # Stop if we hit another function definition
+            if line.startswith("def ") or line.startswith("class "):
+                break  # pragma: no cover
+
+            # Stop if we hit non-blank, non-comment line (module-level code)
+            if (
+                line
+                and not line.startswith("#")
+                and not line.startswith(" ")
+                and not line.startswith("\t")
+            ):
+                # This could be module-level code, stop here
+                break  # pragma: no cover
+
+            i += 1
+
+        return int(i)
+
     def _has_mixed_visibility_functions(self, spans: List[FunctionSpan]) -> bool:
         """Check if spans contain both public and private functions.
 
@@ -663,7 +703,7 @@ class FunctionSorter:  # pylint: disable=too-many-public-methods,too-few-public-
         new_lines.extend(function_lines)
 
         # Add everything after the last function
-        if last_func_end < len(lines):  # pragma: no cover
+        if last_func_end < len(lines):
             new_lines.extend(lines[last_func_end:])
 
         return "".join(new_lines)

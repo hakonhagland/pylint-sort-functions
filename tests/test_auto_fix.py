@@ -1427,3 +1427,49 @@ def _zebra_private():
         # Should not have duplicate headers
         assert result.count("=== PUBLIC API ===") == 1
         assert result.count("=== INTERNAL ===") == 1
+
+    def test_preserve_main_block_at_end(self) -> None:
+        """Test that if __name__ == __main__ blocks are preserved at the end."""
+        content = '''"""Test module."""
+
+def zebra_function():
+    """Last function alphabetically."""
+    return "zebra"
+
+def alpha_function():
+    """First function alphabetically."""
+    return "alpha"
+
+if __name__ == "__main__":
+    print("This should stay at the end!")
+    alpha_function()
+    zebra_function()
+'''
+
+        config = AutoFixConfig(add_section_headers=False)
+        sorter = FunctionSorter(config)
+        result = sorter._sort_functions_in_content(content)
+
+        # Verify functions are sorted but main block stays at end
+        expected_lines = [
+            '"""Test module."""',
+            "",
+            "def alpha_function():",
+            '    """First function alphabetically."""',
+            '    return "alpha"',
+            "",
+            "def zebra_function():",
+            '    """Last function alphabetically."""',
+            '    return "zebra"',
+            "",
+            'if __name__ == "__main__":',
+            '    print("This should stay at the end!")',
+            "    alpha_function()",
+            "    zebra_function()",
+        ]
+
+        result_lines = result.strip().split("\n")
+        for i, expected in enumerate(expected_lines):
+            assert result_lines[i] == expected, (
+                f"Line {i}: expected '{expected}', got '{result_lines[i]}'"
+            )
