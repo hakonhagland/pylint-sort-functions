@@ -106,61 +106,13 @@ pre-commit:
 	pre-commit run --all-files
 
 publish-to-pypi:
-	@echo "Publishing to PyPI with automatic version bump..."
-	python scripts/bump-version.py --no-commit patch
-	@echo "Preparing changelog for release..."
-	@python scripts/prepare-release-changelog.py || true
-	@echo "Committing version bump and changelog..."
-	git add -A && git commit -m "chore: bump version to $$(grep '^version' pyproject.toml | cut -d'"' -f2) and prepare changelog"
-	@echo "Cleaning old builds..."
-	rm -rf dist/
-	@echo "Building package..."
-	uv build
-	@echo "Uploading to PyPI..."
-	twine upload dist/*
-	@echo "Creating git tag..."
-	@VERSION=$$(python -c "import tomllib; print(tomllib.load(open('pyproject.toml', 'rb'))['project']['version'])"); \
-	git tag -a "v$$VERSION" -m "Release v$$VERSION" && \
-	git push origin "v$$VERSION"
-	@echo "Successfully published new version to PyPI!"
+	python scripts/publish-to-pypi.py patch
 
 publish-to-pypi-minor:
-	@echo "Publishing to PyPI with minor version bump..."
-	python scripts/bump-version.py --no-commit minor
-	@echo "Preparing changelog for release..."
-	@python scripts/prepare-release-changelog.py || true
-	@echo "Committing version bump and changelog..."
-	git add -A && git commit -m "chore: bump version to $$(grep '^version' pyproject.toml | cut -d'"' -f2) and prepare changelog"
-	@echo "Cleaning old builds..."
-	rm -rf dist/
-	@echo "Building package..."
-	uv build
-	@echo "Uploading to PyPI..."
-	twine upload dist/*
-	@echo "Creating git tag..."
-	@VERSION=$$(python -c "import tomllib; print(tomllib.load(open('pyproject.toml', 'rb'))['project']['version'])"); \
-	git tag -a "v$$VERSION" -m "Release v$$VERSION" && \
-	git push origin "v$$VERSION"
-	@echo "Successfully published new version to PyPI!"
+	python scripts/publish-to-pypi.py minor
 
 publish-to-pypi-major:
-	@echo "Publishing to PyPI with major version bump..."
-	python scripts/bump-version.py --no-commit major
-	@echo "Preparing changelog for release..."
-	@python scripts/prepare-release-changelog.py || true
-	@echo "Committing version bump and changelog..."
-	git add -A && git commit -m "chore: bump version to $$(grep '^version' pyproject.toml | cut -d'"' -f2) and prepare changelog"
-	@echo "Cleaning old builds..."
-	rm -rf dist/
-	@echo "Building package..."
-	uv build
-	@echo "Uploading to PyPI..."
-	twine upload dist/*
-	@echo "Creating git tag..."
-	@VERSION=$$(python -c "import tomllib; print(tomllib.load(open('pyproject.toml', 'rb'))['project']['version'])"); \
-	git tag -a "v$$VERSION" -m "Release v$$VERSION" && \
-	git push origin "v$$VERSION"
-	@echo "Successfully published new version to PyPI!"
+	python scripts/publish-to-pypi.py major
 
 # NOTE: to avoid rstcheck to fail on info-level messages, we set the report-level to WARNING
 rstcheck:
