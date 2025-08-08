@@ -280,4 +280,4 @@ See Also
 
 * :doc:`developer` - General development guide
 * :doc:`release` - Release management process
-* ``CLAUDE.md`` - Project root file with additional Claude Code instructions
+* `CLAUDE.md <https://github.com/hakonhagland/pylint-sort-functions/blob/main/CLAUDE.md>`_ - Project root file with additional Claude Code instructions
