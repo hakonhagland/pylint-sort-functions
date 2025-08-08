@@ -16,6 +16,30 @@ A PyLint plugin that enforces alphabetical sorting of functions and methods with
 
 ## Installation
 
+### For Modern Python Projects (Recommended)
+
+Add as a development dependency:
+
+**Using pyproject.toml**:
+```toml
+[tool.uv.dev-dependencies]
+pylint-sort-functions = ">=1.0.0"
+pylint = ">=3.3.0"
+```
+
+**Using Poetry**:
+```toml
+[tool.poetry.group.dev.dependencies]
+pylint-sort-functions = "^1.0.0"
+pylint = "^3.3.0"
+```
+
+Then install:
+```bash
+uv sync          # or poetry install
+```
+
+### Traditional Installation
 ```bash
 pip install pylint-sort-functions
 ```
@@ -46,11 +70,23 @@ load-plugins = ["pylint_sort_functions"]
 
 ### 2. Auto-fix Violations
 
-Use the included CLI tool to automatically reorder functions:
+The CLI tool offers multiple modes for function reordering:
 
 ```bash
-pylint-sort-functions path/to/file.py  # Fix single file
-pylint-sort-functions src/            # Fix entire directory
+# Check what would be changed (dry-run)
+pylint-sort-functions --dry-run path/to/file.py
+
+# Fix single file with backup
+pylint-sort-functions --fix path/to/file.py
+
+# Fix directory without backup
+pylint-sort-functions --fix --no-backup src/
+
+# Add section headers for better organization
+pylint-sort-functions --fix --add-section-headers src/
+
+# Exclude framework decorators from sorting
+pylint-sort-functions --fix --ignore-decorators "@app.route" src/
 ```
 
 ### Example
@@ -88,26 +124,44 @@ class MyClass:
 - **W9001**: `unsorted-functions` - Functions not sorted alphabetically within their scope
 - **W9002**: `unsorted-methods` - Class methods not sorted alphabetically within their scope
 - **W9003**: `mixed-function-visibility` - Public and private functions not properly separated
+- **W9004**: `function-should-be-private` - Function should be private (prefix with underscore)
 
 ## Advanced Configuration
 
-### Framework Integration
+### Plugin Configuration
 
-Exclude framework decorators from sorting requirements:
+Configure the plugin through PyLint configuration:
 
-```ini
-[tool.pylint-sort-functions]
-ignore-decorators = ["@app.route", "@*.command", "@pytest.fixture"]
+**Using pyproject.toml** (Recommended):
+```toml
+[tool.pylint.MASTER]
+load-plugins = ["pylint_sort_functions"]
+
+[tool.pylint.function-sort]
+public-api-patterns = ["main", "run", "execute", "start", "stop", "setup", "teardown"]
+enable-privacy-detection = true
 ```
 
-### Privacy Detection
-
-Configure which functions are always considered public API:
-
+**Using .pylintrc**:
 ```ini
-[tool.pylint-sort-functions]
-public-api-patterns = ["main", "run", "setup", "teardown", "handler"]
-enable-privacy-detection = true
+[MASTER]
+load-plugins = pylint_sort_functions
+
+[function-sort]
+public-api-patterns = main,run,execute,start,stop,setup,teardown
+enable-privacy-detection = yes
+```
+
+### CLI Tool Options
+
+The CLI tool supports decorator exclusions and section headers:
+
+```bash
+# Exclude framework decorators from sorting
+pylint-sort-functions --fix --ignore-decorators "@app.route" --ignore-decorators "@*.command" src/
+
+# Add custom section headers
+pylint-sort-functions --fix --add-section-headers --public-header "=== PUBLIC API ===" src/
 ```
 
 ## Documentation
