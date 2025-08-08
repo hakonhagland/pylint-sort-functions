@@ -254,10 +254,11 @@ bash scripts/safe-commit.sh --file path/to/message.txt
 
 ### Handling Validation Failures
 
-**Smart Message Preservation**: When pre-commit validation fails (syntax errors, type checking, linting violations), the script automatically preserves your commit message:
+**Enhanced Message Preservation (v2.0)**: The script now preserves your commit message in ALL failure scenarios:
 
+#### Scenario 1: Validation Fails (No File Modifications)
 ```bash
-# Validation fails → message automatically saved
+# When validation fails with syntax/type errors that require manual fixes
 bash scripts/safe-commit.sh 'feat: comprehensive feature description
 
 - Detailed implementation notes
@@ -266,30 +267,50 @@ bash scripts/safe-commit.sh 'feat: comprehensive feature description
 
 # Output:
 # ❌ Pre-commit validation failed
-# 💾 Your commit message has been saved to: /tmp/tmp.abc123
-# 4. Re-run with saved message: bash scripts/safe-commit.sh --file '/tmp/tmp.abc123'
+# 💾 Your commit message has been saved to: /tmp/pylint-sort-functions-commit-msg-abc123
+# 4. Re-run with saved message: bash scripts/safe-commit.sh --file '/tmp/pylint-sort-functions-commit-msg-abc123'
 
 # Fix the validation issues, stage files, then recover message:
 git add fixed-files.py
-bash scripts/safe-commit.sh --file '/tmp/tmp.abc123'  # Message restored!
+bash scripts/safe-commit.sh --file '/tmp/pylint-sort-functions-commit-msg-abc123'  # Message restored!
 ```
 
-**Collision Detection**: If you try to commit with a new message while saved messages exist:
+#### Scenario 2: Maximum Retries Reached (NEW!)
+```bash
+# When pre-commit hooks keep making changes and hit retry limit
+bash scripts/safe-commit.sh 'fix: critical bug with detailed explanation
+
+- Multiple paragraphs of context
+- Implementation details'
+
+# Output (after 3 auto-retry attempts):
+# ❌ Maximum retries reached
+# 💾 Your commit message has been saved to: /tmp/pylint-sort-functions-commit-msg-xyz789
+# 3. Fix issues manually, stage fixes: git add <fixed-files>
+# 4. Re-run with saved message: bash scripts/safe-commit.sh --file '/tmp/pylint-sort-functions-commit-msg-xyz789'
+```
+
+**Collision Detection with Project-Specific Naming**: The script now uses project-specific temp file naming to prevent conflicts:
 
 ```bash
 bash scripts/safe-commit.sh 'different message'
 
 # Output:
 # ⚠️  Found 1 saved commit message(s) from previous validation failures:
-# 📝 /tmp/tmp.abc123
+# 📝 /tmp/pylint-sort-functions-commit-msg-abc123
 #    Preview: feat: comprehensive feature description...
 #
 # Options:
-# 1. Use most recent saved message: bash scripts/safe-commit.sh --file '/tmp/tmp.abc123'
+# 1. Use most recent saved message: bash scripts/safe-commit.sh --file '/tmp/pylint-sort-functions-commit-msg-abc123'
 # 2. Continue with new message (ignores saved messages)
-# 3. Clean up old messages: rm /tmp/tmp.*
+# 3. Clean up old messages: rm /tmp/pylint-sort-functions-commit-msg-*
 # 💡 Tip: Add --force flag to skip this check
 ```
+
+**Security Improvements**:
+- **Project-specific naming**: Uses `pylint-sort-functions-commit-msg-*` pattern instead of generic `tmp.*`
+- **Namespace isolation**: Prevents conflicts with other processes using `/tmp`
+- **Automatic cleanup**: Temp files are removed after successful commits
 
 **Force Override**: Skip saved message detection when intentional:
 ```bash

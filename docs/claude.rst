@@ -82,14 +82,58 @@ Required Workflow
 How Safe Commit Works
 ~~~~~~~~~~~~~~~~~~~~~
 
-The enhanced safe commit workflow:
+The enhanced safe commit workflow (v2.0):
 
 1. Automatically activates virtual environment
 2. Runs pre-commit checks on staged files BEFORE committing
 3. Auto-retries if hooks make formatting changes (up to 3 attempts)
 4. Automatically stages any formatting changes made by hooks
 5. Only commits when all checks pass cleanly
-6. Preserves your complete commit message throughout the entire process
+6. **NEW**: Preserves commit messages in ALL failure scenarios:
+
+   * **Validation failures**: Saves message when syntax/type errors require manual fixes
+   * **Max retries reached**: Saves message when persistent errors exhaust retry attempts
+
+7. **NEW**: Uses project-specific temp file naming (``pylint-sort-functions-commit-msg-*``) to prevent conflicts
+8. Automatically cleans up temporary message files after successful commits
+
+Message Preservation Examples
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+**Scenario 1: Validation Fails (No File Modifications)**
+
+.. code-block:: bash
+
+   # When validation fails with errors requiring manual fixes
+   bash scripts/safe-commit.sh 'feat: new feature with details'
+
+   # Output:
+   # ❌ Pre-commit validation failed
+   # 💾 Your commit message has been saved to: /tmp/pylint-sort-functions-commit-msg-abc123
+   # 4. Re-run with saved message: bash scripts/safe-commit.sh --file '/tmp/pylint-sort-functions-commit-msg-abc123'
+
+   # Fix issues, stage files, then recover message:
+   git add fixed-files.py
+   bash scripts/safe-commit.sh --file '/tmp/pylint-sort-functions-commit-msg-abc123'
+
+**Scenario 2: Maximum Retries Reached (NEW)**
+
+.. code-block:: bash
+
+   # When hooks keep making changes and hit retry limit
+   bash scripts/safe-commit.sh 'fix: critical bug fix'
+
+   # Output (after 3 auto-retry attempts):
+   # ❌ Maximum retries reached
+   # 💾 Your commit message has been saved to: /tmp/pylint-sort-functions-commit-msg-xyz789
+   # 3. Fix issues manually, stage fixes: git add <fixed-files>
+   # 4. Re-run with saved message: bash scripts/safe-commit.sh --file '/tmp/pylint-sort-functions-commit-msg-xyz789'
+
+**Security Improvements**:
+
+* **Project-specific naming**: Uses ``pylint-sort-functions-commit-msg-*`` pattern instead of generic ``tmp.*``
+* **Namespace isolation**: Prevents conflicts with other processes using ``/tmp``
+* **Automatic cleanup**: Temp files are removed after successful commits
 
 This unified approach eliminates confusion between different commit methods and ensures comprehensive commit messages are always preserved, regardless of complexity.
 
