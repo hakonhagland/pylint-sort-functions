@@ -33,6 +33,7 @@ fi
 
 # Parse arguments
 COMMIT_MESSAGE=""
+COMMIT_MESSAGE_FILE=""
 AMEND_FLAG=""
 NO_VERIFY_FLAG=""
 
@@ -40,6 +41,10 @@ while [[ $# -gt 0 ]]; do
     case $1 in
         -m|--message)
             COMMIT_MESSAGE="$2"
+            shift 2
+            ;;
+        --file)
+            COMMIT_MESSAGE_FILE="$2"
             shift 2
             ;;
         --amend)
@@ -52,11 +57,21 @@ while [[ $# -gt 0 ]]; do
             ;;
         *)
             echo -e "${RED}❌ Unknown option: $1${NC}"
-            echo "Usage: $0 -m 'commit message' [--amend] [--no-verify]"
+            echo "Usage: $0 -m 'commit message' [--file path] [--amend] [--no-verify]"
             exit 1
             ;;
     esac
 done
+
+# Read message from file if specified
+if [ -n "$COMMIT_MESSAGE_FILE" ]; then
+    if [ -f "$COMMIT_MESSAGE_FILE" ]; then
+        COMMIT_MESSAGE=$(cat "$COMMIT_MESSAGE_FILE")
+    else
+        echo -e "${RED}❌ Error: Commit message file not found: $COMMIT_MESSAGE_FILE${NC}"
+        exit 1
+    fi
+fi
 
 # Check if commit message is provided (unless amending)
 if [ -z "$COMMIT_MESSAGE" ] && [ -z "$AMEND_FLAG" ]; then

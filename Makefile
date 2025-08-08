@@ -35,7 +35,9 @@ commit:
 		echo "Usage: make commit MSG='Your commit message'"; \
 		exit 1; \
 	fi
-	@bash scripts/safe-commit.sh -m "$(MSG)"
+	@python scripts/write-commit-msg.py "$(MSG)" .commit_msg_tmp
+	@bash scripts/safe-commit.sh --file .commit_msg_tmp
+	@rm -f .commit_msg_tmp
 
 coverage:
 	coverage run -m pytest tests
