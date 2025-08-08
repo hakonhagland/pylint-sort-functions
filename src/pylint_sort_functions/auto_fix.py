@@ -200,7 +200,7 @@ class FunctionSorter:  # pylint: disable=too-many-public-methods,too-few-public-
         return result_lines
 
     def _extract_function_spans(
-        self, functions: List[nodes.FunctionDef], lines: List[str]
+        self, functions: List[nodes.FunctionDef], lines: List[str], module: nodes.Module
     ) -> List[FunctionSpan]:
         """Extract function text spans from the source.
 
@@ -208,6 +208,8 @@ class FunctionSorter:  # pylint: disable=too-many-public-methods,too-few-public-
         :type functions: List[nodes.FunctionDef]
         :param lines: Source file lines
         :type lines: List[str]
+        :param module: Module containing the functions
+        :type module: nodes.Module
         :returns: List of function spans with text
         :rtype: List[FunctionSpan]
         """
@@ -234,8 +236,8 @@ class FunctionSorter:  # pylint: disable=too-many-public-methods,too-few-public-
                 # End where the next function's comments start
                 end_line = function_boundaries[i + 1][1]
             else:
-                # Last function, find the actual end (stop before __name__ == __main__)
-                end_line = self._find_function_end(lines, func)
+                # Last function, find the actual end using AST boundary detection
+                end_line = self._find_function_end(lines, func, module)
 
             # Extract the text including comments
             text = "".join(lines[comment_start:end_line])
@@ -337,7 +339,7 @@ class FunctionSorter:  # pylint: disable=too-many-public-methods,too-few-public-
                 # Even if sorted, check if we need to add section headers
                 if self.config.add_section_headers:
                     function_spans = self._extract_function_spans(
-                        functions, content.splitlines()
+                        functions, content.splitlines(), module
                     )
                     if self._has_mixed_visibility_functions(function_spans):
                         return True
@@ -459,43 +461,61 @@ class FunctionSorter:  # pylint: disable=too-many-public-methods,too-few-public-
 
         return headers
 
-    def _find_function_end(self, lines: List[str], func: nodes.FunctionDef) -> int:
-        """Find the actual end line of a function, stopping before __name__ == __main__.
+    def _find_function_end(
+        self, lines: List[str], func: nodes.FunctionDef, module: nodes.Module
+    ) -> int:
+        """Find the actual end line of a function using AST-based boundary detection.
+
+        This method uses the module's AST to properly detect where module-level
+        constructs (assignments, if statements, other functions/classes) begin,
+        providing accurate boundaries without hardcoded pattern matching.
 
         :param lines: Source file lines
         :type lines: List[str]
         :param func: Function node
         :type func: nodes.FunctionDef
+        :param module: Module containing the function
+        :type module: nodes.Module
         :returns: Line number where function ends (exclusive)
         :rtype: int
         """
-        # Start from the function's end line
-        func_end = func.end_lineno  # This is the last line of the function body
+        func_end = func.end_lineno
 
-        # Look forward from function end to find blank lines and comments
-        i = func_end
-        while i < len(lines):
-            line = lines[i].strip()
-
-            # Stop if we hit __name__ == __main__
-            if line.startswith('if __name__ == "__main__"'):
+        # Find the next module-level construct after this function
+        next_construct_line = None
+        for node in module.body:
+            if node.lineno > func_end:
+                # This is the first construct after our function
+                next_construct_line = node.lineno
                 break
 
-            # Stop if we hit another function definition
-            if line.startswith("def ") or line.startswith("class "):
+        # If no module-level constructs follow, scan forward for trailing content
+        if next_construct_line is None:
+            # Look forward to include trailing comments/blank lines
+            i = func_end
+            while i < len(lines):
+                line = lines[i].strip()
+                # Include blank lines and comments that follow the function
+                if line == "" or line.startswith("#"):
+                    i += 1
+                    continue
+                # Stop at any non-empty, non-comment content
                 break  # pragma: no cover
+            return int(i)
 
-            # Stop if we hit non-blank, non-comment line (module-level code)
-            if (
-                line
-                and not line.startswith("#")
-                and not line.startswith(" ")
-                and not line.startswith("\t")
-            ):
-                # This could be module-level code, stop here
-                break  # pragma: no cover
+        # We have a next construct - scan up to it, including preceding comments
+        i = func_end
+        while i < next_construct_line and i < len(lines):
+            line = lines[i].strip()
 
-            i += 1
+            # Include blank lines and comments
+            if line == "" or line.startswith("#"):
+                i += 1
+                continue
+
+            # Stop if we hit content that belongs to the next construct
+            # (e.g., assignment statements, other code)
+            break
 
         return int(i)
 
@@ -839,7 +859,7 @@ class FunctionSorter:  # pylint: disable=too-many-public-methods,too-few-public-
             return content
 
         # Extract function spans
-        function_spans = self._extract_function_spans(functions, lines)
+        function_spans = self._extract_function_spans(functions, lines, module)
 
         # Sort the functions
         sorted_spans = self._sort_function_spans(function_spans)

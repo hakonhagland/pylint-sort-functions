@@ -1473,3 +1473,97 @@ if __name__ == "__main__":
             assert result_lines[i] == expected, (
                 f"Line {i}: expected '{expected}', got '{result_lines[i]}'"
             )
+
+    def test_ast_based_boundary_detection_various_patterns(self) -> None:
+        """Test AST-based boundary detection handles various __name__ patterns."""
+        content = '''"""Test module with various patterns."""
+
+def zebra_function():
+    return "zebra"
+
+def alpha_function():
+    return "alpha"
+
+# Module constants
+VERSION = "1.0"
+DEBUG = True
+
+# Single quotes pattern
+if __name__ == '__main__':
+    print(f"Version {VERSION}")
+    if DEBUG:
+        alpha_function()
+'''
+
+        config = AutoFixConfig(add_section_headers=False)
+        sorter = FunctionSorter(config)
+        result = sorter._sort_functions_in_content(content)
+
+        # Verify the AST-based approach correctly handles:
+        # 1. Functions sorted alphabetically
+        # 2. Module constants preserved in their original positions
+        # 3. Single-quote __name__ pattern detected without hardcoding
+        # 4. Comments between functions are correctly associated
+        expected_lines = [
+            '"""Test module with various patterns."""',
+            "",
+            "def alpha_function():",
+            '    return "alpha"',
+            "",
+            "# Module constants",
+            "",
+            "def zebra_function():",
+            '    return "zebra"',
+            "",
+            'VERSION = "1.0"',
+            "DEBUG = True",
+            "",
+            "# Single quotes pattern",
+            "if __name__ == '__main__':",
+            '    print(f"Version {VERSION}")',
+            "    if DEBUG:",
+            "        alpha_function()",
+        ]
+
+        result_lines = result.strip().split("\n")
+        for i, expected in enumerate(expected_lines):
+            assert result_lines[i] == expected, (
+                f"Line {i}: expected '{expected}', got '{result_lines[i]}'"
+            )
+
+    def test_ast_boundary_detection_end_of_file(self) -> None:
+        """Test AST boundary detection with functions at end of file."""
+        content = '''"""Test end-of-file boundary detection."""
+
+def zebra_function():
+    return "zebra"
+
+def alpha_function():
+    return "alpha"
+
+# Trailing comment
+'''
+
+        config = AutoFixConfig(add_section_headers=False)
+        sorter = FunctionSorter(config)
+        result = sorter._sort_functions_in_content(content)
+
+        # Verify functions are sorted and trailing content is correctly associated
+        # The comment after alpha_function moves with it during sorting
+        expected_lines = [
+            '"""Test end-of-file boundary detection."""',
+            "",
+            "def alpha_function():",
+            '    return "alpha"',
+            "",
+            "# Trailing comment",
+            "",
+            "def zebra_function():",
+            '    return "zebra"',
+        ]
+
+        result_lines = result.strip().split("\n")
+        for i, expected in enumerate(expected_lines):
+            assert result_lines[i] == expected, (
+                f"Line {i}: expected '{expected}', got '{result_lines[i]}'"
+            )
