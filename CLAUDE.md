@@ -218,7 +218,12 @@ When using Claude Code to make changes:
 **IMPORTANT FOR CLAUDE CODE**: ALWAYS use the safe commit workflow to prevent losing commit messages:
 
 ```bash
-# ALWAYS use this instead of git commit:
+# STEP 1: Always stage files BEFORE running safe-commit
+git add <file1> <file2>  # Stage specific files
+# OR
+git add -A               # Stage all changes
+
+# STEP 2: Then run safe-commit
 bash scripts/safe-commit.sh 'Your detailed commit message'
 
 # Works seamlessly with multi-line messages:
@@ -232,11 +237,13 @@ Co-Authored-By: Claude <noreply@anthropic.com>'
 ```
 
 **Why this is MANDATORY**:
-- The `safe-commit.sh` script automatically runs pre-commit checks BEFORE committing
-- This prevents file modifications AFTER staging that cause commit message loss
-- Ensures comprehensive commit messages are preserved
-- Handles both single-line and multi-line messages automatically
-- Prevents the need for `git commit --amend`
+- **Staging first prevents confusing workflows**: Without staging, pre-commit will temporarily stash unstaged files, creating cryptic warnings and potential confusion
+- **Clear intent**: Explicitly staging files shows exactly what you intend to commit
+- **Pre-commit runs cleanly**: The script runs pre-commit checks on staged files only, avoiding stash/restore operations
+- **Better error detection**: The improved script now detects staging issues upfront with helpful guidance
+- **Prevents commit message loss**: Ensures comprehensive commit messages are preserved throughout the process
+- **Handles multi-line messages**: Works seamlessly with detailed commit messages
+- **Avoids git commit --amend**: Prevents the need for potentially problematic history rewrites
 
 **Alternative usage (legacy compatibility)**:
 ```bash

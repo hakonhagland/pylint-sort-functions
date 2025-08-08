@@ -89,6 +89,38 @@ if [ -z "$COMMIT_MESSAGE" ] && [ -z "$AMEND_FLAG" ]; then
     exit 1
 fi
 
+# Check for staged and unstaged changes
+STAGED_FILES=$(git diff --cached --name-only)
+UNSTAGED_FILES=$(git diff --name-only)
+
+if [ -z "$STAGED_FILES" ] && [ -z "$UNSTAGED_FILES" ]; then
+    echo -e "${RED}❌ No changes to commit${NC}"
+    echo "Use 'git add <file>' to stage changes first"
+    exit 1
+fi
+
+if [ -z "$STAGED_FILES" ] && [ -n "$UNSTAGED_FILES" ]; then
+    echo -e "${YELLOW}⚠️  No files are staged for commit${NC}"
+    echo "Modified files found:"
+    git status --porcelain
+    echo ""
+    echo "Options:"
+    echo "1. Stage all files: git add -A && bash scripts/safe-commit.sh -m \"$COMMIT_MESSAGE\""
+    echo "2. Stage specific files: git add <file1> <file2> && bash scripts/safe-commit.sh -m \"$COMMIT_MESSAGE\""
+    echo "3. Review changes first: git diff"
+    exit 1
+fi
+
+if [ -n "$UNSTAGED_FILES" ]; then
+    echo -e "${YELLOW}⚠️  Warning: Unstaged files detected${NC}"
+    echo "These files have changes but are not staged:"
+    echo "$UNSTAGED_FILES" | sed 's/^/  /'
+    echo ""
+    echo "Pre-commit will temporarily stash these files during checks."
+    echo "Consider staging them first if they should be included in this commit."
+    echo ""
+fi
+
 # Skip pre-commit if --no-verify is specified
 if [ -z "$NO_VERIFY_FLAG" ]; then
     echo -e "${GREEN}🔍 Running pre-commit checks...${NC}"

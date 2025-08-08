@@ -3,10 +3,13 @@ Claude Code Guidelines
 
 This document provides specific guidance for Claude Code (claude.ai/code) when working with this repository.
 
+.. note::
+   **Comprehensive Guide Available**: For complete development commands, architecture details, and in-depth workflows, see `CLAUDE.md <https://github.com/hakonhagland/pylint-sort-functions/blob/main/CLAUDE.md>`_ in the project root. This document focuses on the essential Claude Code workflow.
+
 Overview
 --------
 
-Claude Code is Anthropic's AI coding assistant that can directly read, write, and execute code in your repository. This document contains important guidelines and workflows specifically designed for Claude Code sessions to ensure consistent, high-quality contributions.
+Claude Code is Anthropic's AI coding assistant that can directly read, write, and execute code in your repository. This document contains the essential workflow guidelines for Claude Code sessions.
 
 Critical: Safe Commit Workflow
 -------------------------------
@@ -26,7 +29,16 @@ Pre-commit hooks run formatters (like ``ruff format``) that modify files AFTER s
 Required Workflow
 ~~~~~~~~~~~~~~~~~
 
-**Always use for all commits (single command for all scenarios):**
+**STEP 1: Always stage files BEFORE running safe-commit**
+
+.. code-block:: bash
+
+   # Stage specific files
+   git add file1.py file2.py
+   # OR stage all changes
+   git add -A
+
+**STEP 2: Then run safe-commit**
 
 .. code-block:: bash
 
@@ -43,6 +55,11 @@ Required Workflow
    🤖 Generated with [Claude Code](https://claude.ai/code)
 
    Co-Authored-By: Claude <noreply@anthropic.com>'
+
+**Why staging first is important:**
+- Prevents confusing pre-commit warnings about unstaged files
+- Makes your commit intent explicit and clear
+- Allows pre-commit to run cleanly on staged files only
 
 **Legacy compatibility (also supported):**
 
@@ -79,16 +96,17 @@ This unified approach eliminates confusion between different commit methods and 
 Development Guidelines
 ----------------------
 
+.. note::
+   For complete development commands (``make test``, ``make coverage``, etc.) and detailed configuration, see `CLAUDE.md <https://github.com/hakonhagland/pylint-sort-functions/blob/main/CLAUDE.md>`_.
+
 Code Style
 ~~~~~~~~~~
 
-Claude Code should follow these Python style guidelines:
+Key Python style guidelines:
 
 * **Line length**: 88 characters (Black compatible)
 * **String formatting**: Use f-strings
-* **Docstrings**: reStructuredText format for all public APIs
 * **Type hints**: Always include for parameters and return types
-* **Import order**: standard library → third-party → local (alphabetically sorted)
 * **File endings**: ALWAYS ensure files end with a newline character
 
 Function Organization
