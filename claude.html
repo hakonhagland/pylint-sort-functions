@@ -64,6 +64,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#why-this-is-required">Why This Is Required</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#required-workflow">Required Workflow</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#how-safe-commit-works">How Safe Commit Works</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#message-preservation-examples">Message Preservation Examples</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#development-guidelines">Development Guidelines</a><ul>
@@ -200,15 +201,56 @@ git<span class="w"> </span>commit<span class="w"> </span>--amend
 </section>
 <section id="how-safe-commit-works">
 <h3>How Safe Commit Works<a class="headerlink" href="#how-safe-commit-works" title="Link to this heading"></a></h3>
-<p>The enhanced safe commit workflow:</p>
+<p>The enhanced safe commit workflow (v2.0):</p>
 <ol class="arabic simple">
 <li><p>Automatically activates virtual environment</p></li>
 <li><p>Runs pre-commit checks on staged files BEFORE committing</p></li>
 <li><p>Auto-retries if hooks make formatting changes (up to 3 attempts)</p></li>
 <li><p>Automatically stages any formatting changes made by hooks</p></li>
 <li><p>Only commits when all checks pass cleanly</p></li>
-<li><p>Preserves your complete commit message throughout the entire process</p></li>
+<li><p><strong>NEW</strong>: Preserves commit messages in ALL failure scenarios:</p>
+<ul class="simple">
+<li><p><strong>Validation failures</strong>: Saves message when syntax/type errors require manual fixes</p></li>
+<li><p><strong>Max retries reached</strong>: Saves message when persistent errors exhaust retry attempts</p></li>
+</ul>
+</li>
+<li><p><strong>NEW</strong>: Uses project-specific temp file naming (<code class="docutils literal notranslate"><span class="pre">pylint-sort-functions-commit-msg-*</span></code>) to prevent conflicts</p></li>
+<li><p>Automatically cleans up temporary message files after successful commits</p></li>
 </ol>
+</section>
+<section id="message-preservation-examples">
+<h3>Message Preservation Examples<a class="headerlink" href="#message-preservation-examples" title="Link to this heading"></a></h3>
+<p><strong>Scenario 1: Validation Fails (No File Modifications)</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># When validation fails with errors requiring manual fixes</span>
+bash<span class="w"> </span>scripts/safe-commit.sh<span class="w"> </span><span class="s1">&#39;feat: new feature with details&#39;</span>
+
+<span class="c1"># Output:</span>
+<span class="c1"># ❌ Pre-commit validation failed</span>
+<span class="c1"># 💾 Your commit message has been saved to: /tmp/pylint-sort-functions-commit-msg-abc123</span>
+<span class="c1"># 4. Re-run with saved message: bash scripts/safe-commit.sh --file &#39;/tmp/pylint-sort-functions-commit-msg-abc123&#39;</span>
+
+<span class="c1"># Fix issues, stage files, then recover message:</span>
+git<span class="w"> </span>add<span class="w"> </span>fixed-files.py
+bash<span class="w"> </span>scripts/safe-commit.sh<span class="w"> </span>--file<span class="w"> </span><span class="s1">&#39;/tmp/pylint-sort-functions-commit-msg-abc123&#39;</span>
+</pre></div>
+</div>
+<p><strong>Scenario 2: Maximum Retries Reached (NEW)</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># When hooks keep making changes and hit retry limit</span>
+bash<span class="w"> </span>scripts/safe-commit.sh<span class="w"> </span><span class="s1">&#39;fix: critical bug fix&#39;</span>
+
+<span class="c1"># Output (after 3 auto-retry attempts):</span>
+<span class="c1"># ❌ Maximum retries reached</span>
+<span class="c1"># 💾 Your commit message has been saved to: /tmp/pylint-sort-functions-commit-msg-xyz789</span>
+<span class="c1"># 3. Fix issues manually, stage fixes: git add &lt;fixed-files&gt;</span>
+<span class="c1"># 4. Re-run with saved message: bash scripts/safe-commit.sh --file &#39;/tmp/pylint-sort-functions-commit-msg-xyz789&#39;</span>
+</pre></div>
+</div>
+<p><strong>Security Improvements</strong>:</p>
+<ul class="simple">
+<li><p><strong>Project-specific naming</strong>: Uses <code class="docutils literal notranslate"><span class="pre">pylint-sort-functions-commit-msg-*</span></code> pattern instead of generic <code class="docutils literal notranslate"><span class="pre">tmp.*</span></code></p></li>
+<li><p><strong>Namespace isolation</strong>: Prevents conflicts with other processes using <code class="docutils literal notranslate"><span class="pre">/tmp</span></code></p></li>
+<li><p><strong>Automatic cleanup</strong>: Temp files are removed after successful commits</p></li>
+</ul>
 <p>This unified approach eliminates confusion between different commit methods and ensures comprehensive commit messages are always preserved, regardless of complexity.</p>
 </section>
 </section>
