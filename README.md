@@ -125,6 +125,3 @@ See [hakonhagland.github.io/pylint-sort-functions](https://hakonhagland.github.i
 - **PyPI Package**: [pylint-sort-functions](https://pypi.org/project/pylint-sort-functions/)
 - **GitHub Repository**: [pylint-sort-functions](https://github.com/hakonhagland/pylint-sort-functions)
 - **Issue Tracker**: [GitHub Issues](https://github.com/hakonhagland/pylint-sort-functions/issues)
-# Test change
-# Test change
-# Another test
