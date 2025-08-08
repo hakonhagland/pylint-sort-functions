@@ -3,7 +3,7 @@
 import tempfile
 from pathlib import Path
 from textwrap import dedent
-from typing import List
+from typing import Any, Dict, List
 
 import astroid  # type: ignore[import-untyped]
 import pytest
@@ -202,15 +202,15 @@ class TestPrivacyFixer:  # pylint: disable=attribute-defined-outside-init
         result = fixer.analyze_module(Path("test.py"), Path("/project"), {"main"})
         assert result == []
 
-    def test_apply_renames_placeholder(self) -> None:
-        """Test apply_renames placeholder implementation."""
-        # This tests the TODO implementation
+    def test_apply_renames_empty_candidates(self) -> None:
+        """Test apply_renames with empty candidates list."""
+        # This tests the new implementation with empty list
         fixer = PrivacyFixer()
         candidates: List[RenameCandidate] = []
         result = fixer.apply_renames(candidates)
         assert result["renamed"] == 0
         assert result["skipped"] == 0
-        assert result["reason"] == "Not implemented"
+        assert result["reason"] == "No candidates provided"
 
     def test_safety_validation_helper_methods(self) -> None:
         """Test the individual safety validation helper methods."""
@@ -601,3 +601,520 @@ class TestPrivacyFixerIntegration:  # pylint: disable=too-few-public-methods
             # For now, just test that we can create the fixer
             assert fixer.dry_run
             assert isinstance(fixer.rename_candidates, list)
+
+    def test_apply_renames_empty_list(self) -> None:
+        """Test apply_renames with empty candidate list."""
+        fixer = PrivacyFixer()
+        result = fixer.apply_renames([])
+
+        assert result["renamed"] == 0
+        assert result["skipped"] == 0
+        assert result["reason"] == "No candidates provided"
+
+    def test_apply_renames_dry_run_mode(self) -> None:
+        """Test apply_renames in dry-run mode."""
+        fixer = PrivacyFixer(dry_run=True)
+
+        # Create mock candidates
+        code = dedent("""
+            def test_function():
+                pass
+        """)
+        module = astroid.parse(code)
+        func_node = module.body[0]
+
+        safe_candidate = RenameCandidate(
+            function_node=func_node,
+            old_name="test_function",
+            new_name="_test_function",
+            references=[],
+            is_safe=True,
+            safety_issues=[],
+        )
+
+        unsafe_candidate = RenameCandidate(
+            function_node=func_node,
+            old_name="unsafe_function",
+            new_name="_unsafe_function",
+            references=[],
+            is_safe=False,
+            safety_issues=["Test safety issue"],
+        )
+
+        result = fixer.apply_renames([safe_candidate, unsafe_candidate])
+
+        assert result["renamed"] == 1  # Only safe candidate counted
+        assert result["skipped"] == 1  # Unsafe candidate skipped
+        assert "errors" in result
+
+    def test_apply_renames_to_content_simple(self) -> None:
+        """Test content modification with simple function rename."""
+        fixer = PrivacyFixer()
+
+        original_content = dedent("""
+            def helper_function():
+                return "help"
+
+            def main():
+                result = helper_function()
+                func_ref = helper_function
+                return result
+        """)
+
+        # Create mock candidate
+        code = dedent("""
+            def helper_function():
+                pass
+        """)
+        module = astroid.parse(code)
+        func_node = module.body[0]
+
+        candidate = RenameCandidate(
+            function_node=func_node,
+            old_name="helper_function",
+            new_name="_helper_function",
+            references=[],
+            is_safe=True,
+            safety_issues=[],
+        )
+
+        modified_content = fixer._apply_renames_to_content(
+            original_content, [candidate]
+        )
+
+        # Verify function definition was renamed
+        assert "def _helper_function():" in modified_content
+        assert "def helper_function():" not in modified_content
+
+        # Verify function calls were renamed
+        assert "result = _helper_function()" in modified_content
+        assert "func_ref = _helper_function" in modified_content
+
+        # Verify no partial matches were replaced
+        assert "result = helper_function()" not in modified_content
+
+    def test_apply_renames_to_content_word_boundaries(self) -> None:
+        """Test that word boundaries prevent partial matches."""
+        fixer = PrivacyFixer()
+
+        # Test content with similar function names
+        original_content = dedent("""
+            def test():
+                return "test"
+
+            def test_helper():
+                return "test_helper"
+
+            def my_test_function():
+                # This should not be affected when renaming 'test'
+                result = test()
+                return result
+        """)
+
+        code = dedent("""
+            def test():
+                pass
+        """)
+        module = astroid.parse(code)
+        func_node = module.body[0]
+
+        candidate = RenameCandidate(
+            function_node=func_node,
+            old_name="test",
+            new_name="_test",
+            references=[],
+            is_safe=True,
+            safety_issues=[],
+        )
+
+        modified_content = fixer._apply_renames_to_content(
+            original_content, [candidate]
+        )
+
+        # Verify exact function was renamed
+        assert "def _test():" in modified_content
+        assert "result = _test()" in modified_content
+
+        # Verify partial matches were NOT renamed
+        assert "def test_helper():" in modified_content
+        assert "def my_test_function():" in modified_content
+        assert "test_helper" in modified_content
+
+    def test_apply_renames_to_content_unsafe_candidates_skipped(self) -> None:
+        """Test that unsafe candidates are not processed."""
+        fixer = PrivacyFixer()
+
+        original_content = dedent("""
+            def safe_function():
+                return "safe"
+
+            def unsafe_function():
+                return "unsafe"
+        """)
+
+        code = dedent("""
+            def safe_function():
+                pass
+
+            def unsafe_function():
+                pass
+        """)
+        module = astroid.parse(code)
+        func_nodes = module.body
+
+        safe_candidate = RenameCandidate(
+            function_node=func_nodes[0],
+            old_name="safe_function",
+            new_name="_safe_function",
+            references=[],
+            is_safe=True,
+            safety_issues=[],
+        )
+
+        unsafe_candidate = RenameCandidate(
+            function_node=func_nodes[1],
+            old_name="unsafe_function",
+            new_name="_unsafe_function",
+            references=[],
+            is_safe=False,
+            safety_issues=["Dynamic references found"],
+        )
+
+        modified_content = fixer._apply_renames_to_content(
+            original_content, [safe_candidate, unsafe_candidate]
+        )
+
+        # Safe candidate should be processed
+        assert "def _safe_function():" in modified_content
+        assert "def safe_function():" not in modified_content
+
+        # Unsafe candidate should be skipped
+        assert "def unsafe_function():" in modified_content
+        assert "def _unsafe_function():" not in modified_content
+
+    def test_group_candidates_by_file(self) -> None:
+        """Test grouping candidates by file path."""
+        fixer = PrivacyFixer()
+
+        # Create mock function nodes with different root files
+        code1 = dedent("""
+            def function1():
+                pass
+        """)
+        module1 = astroid.parse(code1, "file1.py")
+        func_node1 = module1.body[0]
+
+        code2 = dedent("""
+            def function2():
+                pass
+        """)
+        module2 = astroid.parse(code2, "file2.py")
+        func_node2 = module2.body[0]
+
+        candidate1 = RenameCandidate(
+            function_node=func_node1,
+            old_name="function1",
+            new_name="_function1",
+            references=[],
+            is_safe=True,
+            safety_issues=[],
+        )
+
+        candidate2 = RenameCandidate(
+            function_node=func_node2,
+            old_name="function2",
+            new_name="_function2",
+            references=[],
+            is_safe=True,
+            safety_issues=[],
+        )
+
+        grouped = fixer._group_candidates_by_file([candidate1, candidate2])
+
+        # The implementation creates unique files based on node IDs when file
+        # path extraction fails
+        # Each candidate should be in a separate group (different file_*.py names)
+        assert len(grouped) == 2
+
+        # Check that candidates are grouped correctly - they should be in separate files
+        file_paths = list(grouped.keys())
+        candidate_lists = list(grouped.values())
+
+        # Each group should contain exactly one candidate
+        assert len(candidate_lists[0]) == 1
+        assert len(candidate_lists[1]) == 1
+
+        # The candidates should be in different files
+        assert file_paths[0] != file_paths[1]
+
+    def test_apply_renames_with_real_file_workflow(self) -> None:
+        """Test the complete workflow with real file modification."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_path = Path(temp_dir)
+            test_file = temp_path / "test_rename.py"
+
+            original_content = dedent("""
+                def helper_function():
+                    '''Internal helper function.'''
+                    return "helper"
+
+                def utility_method():
+                    '''Another internal function.'''
+                    return "utility"
+
+                def main():
+                    '''Main function.'''
+                    result1 = helper_function()
+                    result2 = utility_method()
+                    return f"{result1} and {result2}"
+            """).strip()
+
+            test_file.write_text(original_content)
+
+            # For real file workflow, we need candidates with proper file paths
+            # Create a simple test using _apply_renames_to_file directly
+            fixer = PrivacyFixer(backup=True)
+
+            # Create mock candidates - simplified for testing file operations
+            import astroid
+
+            module = astroid.parse(original_content)
+            func_nodes = [
+                node for node in module.body if isinstance(node, astroid.FunctionDef)
+            ]
+
+            candidates = []
+            for func_node in func_nodes[:2]:  # First two functions only
+                candidate = RenameCandidate(
+                    function_node=func_node,
+                    old_name=func_node.name,
+                    new_name=f"_{func_node.name}",
+                    references=[],
+                    is_safe=True,
+                    safety_issues=[],
+                )
+                candidates.append(candidate)
+
+            # Test the file-level renaming directly
+            result = fixer._apply_renames_to_file(test_file, candidates)
+
+            # Verify results
+            assert result["renamed"] == 2
+            assert result["skipped"] == 0
+            assert not result.get("errors", [])
+
+            # Verify file content was modified
+            modified_content = test_file.read_text()
+
+            # Function definitions should be renamed
+            assert "def _helper_function():" in modified_content
+            assert "def _utility_method():" in modified_content
+            assert "def helper_function():" not in modified_content
+            assert "def utility_method():" not in modified_content
+
+            # Function calls should be renamed
+            assert "result1 = _helper_function()" in modified_content
+            assert "result2 = _utility_method()" in modified_content
+
+            # Main function should be unchanged
+            assert "def main():" in modified_content
+
+            # Backup file should be created
+            backup_file = test_file.with_suffix(".py.bak")
+            assert backup_file.exists()
+
+            # Backup should contain original content
+            backup_content = backup_file.read_text()
+            assert "def helper_function():" in backup_content
+            assert "def utility_method():" in backup_content
+
+    def test_apply_renames_exception_handling(self) -> None:
+        """Test exception handling in apply_renames."""
+        fixer = PrivacyFixer()
+
+        # Create a mock candidate that will cause an exception in _apply_renames_to_file
+        code = dedent("""
+            def test_function():
+                pass
+        """)
+        module = astroid.parse(code)
+        func_node = module.body[0]
+
+        candidate = RenameCandidate(
+            function_node=func_node,
+            old_name="test_function",
+            new_name="_test_function",
+            references=[],
+            is_safe=True,
+            safety_issues=[],
+        )
+
+        # Mock _apply_renames_to_file to raise an exception
+        import unittest.mock
+
+        def mock_apply_renames_to_file(
+            file_path: Path, candidates: List[RenameCandidate]
+        ) -> Dict[str, Any]:
+            raise OSError("Simulated file error")
+
+        with unittest.mock.patch.object(
+            fixer, "_apply_renames_to_file", side_effect=mock_apply_renames_to_file
+        ):
+            result = fixer.apply_renames([candidate])
+
+            # Should handle exception gracefully
+            assert result["renamed"] == 0
+            assert result["skipped"] == 1
+            assert len(result["errors"]) == 1
+            assert "Error processing" in result["errors"][0]
+            assert "Simulated file error" in result["errors"][0]
+
+    def test_apply_renames_to_file_exception_handling(self) -> None:
+        """Test exception handling in _apply_renames_to_file."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_path = Path(temp_dir)
+
+            # Test with non-existent file to trigger exception
+            non_existent_file = temp_path / "non_existent.py"
+
+            fixer = PrivacyFixer()
+
+            # Create mock candidate
+            code = dedent("""
+                def test_function():
+                    pass
+            """)
+            module = astroid.parse(code)
+            func_node = module.body[0]
+
+            candidate = RenameCandidate(
+                function_node=func_node,
+                old_name="test_function",
+                new_name="_test_function",
+                references=[],
+                is_safe=True,
+                safety_issues=[],
+            )
+
+            # This should trigger the exception handling path in _apply_renames_to_file
+            result = fixer._apply_renames_to_file(non_existent_file, [candidate])
+
+            assert result["renamed"] == 0
+            assert result["skipped"] == 1
+            assert len(result["errors"]) == 1
+            assert "Failed to process" in result["errors"][0]
+
+    def test_group_candidates_by_file_exception_handling(self) -> None:
+        """Test exception handling in file path extraction."""
+        fixer = PrivacyFixer()
+
+        # Create a mock candidate with a function node that will cause exceptions
+        class MockFunctionNode:
+            """Mock function node for testing exception handling."""
+
+            def root(self) -> None:
+                """Mock root method that raises exception."""
+                raise RuntimeError("Simulated AST error")
+
+        mock_candidate = RenameCandidate(
+            function_node=MockFunctionNode(),
+            old_name="test_function",
+            new_name="_test_function",
+            references=[],
+            is_safe=True,
+            safety_issues=[],
+        )
+
+        # Should handle the exception and use fallback logic
+        grouped = fixer._group_candidates_by_file([mock_candidate])
+
+        # Should still group the candidate, using fallback file name
+        assert len(grouped) == 1
+        candidate_lists = list(grouped.values())
+
+        # Should contain the candidate despite the exception
+        assert len(candidate_lists[0]) == 1
+        assert candidate_lists[0][0] == mock_candidate
+
+    def test_apply_renames_with_file_errors(self) -> None:
+        """Test apply_renames when _apply_renames_to_file returns errors."""
+        fixer = PrivacyFixer()
+
+        code = dedent("""
+            def test_function():
+                pass
+        """)
+        module = astroid.parse(code)
+        func_node = module.body[0]
+
+        candidate = RenameCandidate(
+            function_node=func_node,
+            old_name="test_function",
+            new_name="_test_function",
+            references=[],
+            is_safe=True,
+            safety_issues=[],
+        )
+
+        # Mock _apply_renames_to_file to return errors
+        import unittest.mock
+
+        def mock_apply_renames_to_file(
+            file_path: Path,  # pylint: disable=unused-argument
+            candidates: List[RenameCandidate],  # pylint: disable=unused-argument
+        ) -> Dict[str, Any]:
+            return {
+                "renamed": 0,
+                "skipped": 1,
+                "errors": ["Simulated processing error", "Another error"],
+            }
+
+        with unittest.mock.patch.object(
+            fixer, "_apply_renames_to_file", side_effect=mock_apply_renames_to_file
+        ):
+            result = fixer.apply_renames([candidate])
+
+            # Should collect errors from _apply_renames_to_file
+            assert result["renamed"] == 0
+            assert result["skipped"] == 1
+            assert len(result["errors"]) == 2
+            assert "Simulated processing error" in result["errors"]
+            assert "Another error" in result["errors"]
+
+    def test_group_candidates_by_file_with_real_file_path(self) -> None:
+        """Test file grouping when AST node has a real file path."""
+        fixer = PrivacyFixer()
+
+        # Create a mock candidate with a function node that has a real file path
+        class MockRoot:
+            """Mock root node for testing."""
+
+            def __init__(self, file_path: str) -> None:
+                self.file = file_path
+                self.name = "module_name"
+
+        class MockFunctionNode:
+            """Mock function node for testing."""
+
+            def __init__(self, file_path: str) -> None:
+                self.mock_root = MockRoot(file_path)
+
+            def root(self) -> MockRoot:
+                """Return the mock root."""
+                return self.mock_root
+
+        candidate = RenameCandidate(
+            function_node=MockFunctionNode("/real/path/to/file.py"),
+            old_name="test_function",
+            new_name="_test_function",
+            references=[],
+            is_safe=True,
+            safety_issues=[],
+        )
+
+        grouped = fixer._group_candidates_by_file([candidate])
+
+        # Should use the real file path
+        assert len(grouped) == 1
+        file_paths = list(grouped.keys())
+        assert str(file_paths[0]) == "/real/path/to/file.py"

@@ -269,40 +269,48 @@ class PrivacyFixer:
 
     # Private methods
 
-    def _apply_renames_to_content(
-        self, content: str, candidates: List[RenameCandidate]
-    ) -> str:
-        """Apply function name renames to file content.
+    def _check_reference_contexts(self, candidate: RenameCandidate) -> List[str]:
+        """Check if all references are in contexts we can safely handle."""
+        safe_contexts = {"call", "assignment", "decorator", "reference"}
+        unsafe_contexts = []
 
-        This uses a conservative string replacement approach that:
-        1. Only processes safe candidates
-        2. Uses word boundaries to avoid partial matches
-        3. Preserves original formatting and structure
+        for ref in candidate.references:
+            if ref.context not in safe_contexts:
+                unsafe_contexts.append(ref.context)
 
-        :param content: Original file content
-        :param candidates: List of rename candidates
-        :returns: Modified file content
-        """
-        modified_content = content
+        return list(set(unsafe_contexts))  # Remove duplicates
 
-        # Only process safe candidates
-        safe_candidates = [c for c in candidates if c.is_safe]
+    def _has_dynamic_references(self, _candidate: RenameCandidate) -> bool:  # pylint: disable=unused-argument
+        """Check for dynamic references that we can't safely rename."""
+        # This is a placeholder - we'd need to scan the module AST for:
+        # - getattr(obj, "function_name")
+        # - hasattr(obj, "function_name")
+        # - __getattribute__, setattr, delattr with the function name
+        # - eval(), exec() with potential function references
 
-        for candidate in safe_candidates:
-            old_name = candidate.old_name
-            new_name = candidate.new_name
+        # For MVP, we'll be conservative and just check if any references
+        # are in contexts we don't recognize
+        return False
 
-            # Use word boundaries to ensure we only match complete function names
-            # This pattern matches:
-            # - Function definitions: def old_name(
-            # - Function calls: old_name(
-            # - Assignments: var = old_name
-            # - Decorators: @old_name
-            pattern = rf"\b{re.escape(old_name)}\b"
+    def _has_name_conflict(self, candidate: RenameCandidate) -> bool:  # pylint: disable=unused-argument
+        """Check if renaming would create a name conflict."""
+        # Get the module AST to check for existing private function
+        try:
+            # We need the module AST - for now, assume we'll pass it in
+            # TODO: Refactor to include module AST in candidate or pass separately
 
-            modified_content = re.sub(pattern, new_name, modified_content)
+            # For testing coverage: allow triggering exception path
+            if candidate.old_name == "test_exception_coverage":
+                raise RuntimeError("Test exception for coverage")
+            return False
+        except Exception:
+            return True  # Conservative: assume conflict if we can't check
 
-        return modified_content
+    def _has_string_references(self, _candidate: RenameCandidate) -> bool:  # pylint: disable=unused-argument
+        """Check for string literals containing the function name."""
+        # This would scan the module for string literals containing the function name
+        # For MVP, assume no string references for simplicity
+        return False
 
     def _apply_renames_to_file(
         self, file_path: Path, candidates: List[RenameCandidate]
@@ -356,16 +364,40 @@ class PrivacyFixer:
                 "errors": [f"Failed to process {file_path}: {str(e)}"],
             }
 
-    def _check_reference_contexts(self, candidate: RenameCandidate) -> List[str]:
-        """Check if all references are in contexts we can safely handle."""
-        safe_contexts = {"call", "assignment", "decorator", "reference"}
-        unsafe_contexts = []
+    def _apply_renames_to_content(
+        self, content: str, candidates: List[RenameCandidate]
+    ) -> str:
+        """Apply function name renames to file content.
 
-        for ref in candidate.references:
-            if ref.context not in safe_contexts:
-                unsafe_contexts.append(ref.context)
+        This uses a conservative string replacement approach that:
+        1. Only processes safe candidates
+        2. Uses word boundaries to avoid partial matches
+        3. Preserves original formatting and structure
 
-        return list(set(unsafe_contexts))  # Remove duplicates
+        :param content: Original file content
+        :param candidates: List of rename candidates
+        :returns: Modified file content
+        """
+        modified_content = content
+
+        # Only process safe candidates
+        safe_candidates = [c for c in candidates if c.is_safe]
+
+        for candidate in safe_candidates:
+            old_name = candidate.old_name
+            new_name = candidate.new_name
+
+            # Use word boundaries to ensure we only match complete function names
+            # This pattern matches:
+            # - Function definitions: def old_name(
+            # - Function calls: old_name(
+            # - Assignments: var = old_name
+            # - Decorators: @old_name
+            pattern = rf"\b{re.escape(old_name)}\b"
+
+            modified_content = re.sub(pattern, new_name, modified_content)
+
+        return modified_content
 
     def _group_candidates_by_file(
         self, candidates: List[RenameCandidate]
@@ -414,35 +446,3 @@ class PrivacyFixer:
             candidates_by_file[file_path].append(candidate)
 
         return dict(candidates_by_file)
-
-    def _has_dynamic_references(self, _candidate: RenameCandidate) -> bool:  # pylint: disable=unused-argument
-        """Check for dynamic references that we can't safely rename."""
-        # This is a placeholder - we'd need to scan the module AST for:
-        # - getattr(obj, "function_name")
-        # - hasattr(obj, "function_name")
-        # - __getattribute__, setattr, delattr with the function name
-        # - eval(), exec() with potential function references
-
-        # For MVP, we'll be conservative and just check if any references
-        # are in contexts we don't recognize
-        return False
-
-    def _has_name_conflict(self, candidate: RenameCandidate) -> bool:  # pylint: disable=unused-argument
-        """Check if renaming would create a name conflict."""
-        # Get the module AST to check for existing private function
-        try:
-            # We need the module AST - for now, assume we'll pass it in
-            # TODO: Refactor to include module AST in candidate or pass separately
-
-            # For testing coverage: allow triggering exception path
-            if candidate.old_name == "test_exception_coverage":
-                raise RuntimeError("Test exception for coverage")
-            return False
-        except Exception:
-            return True  # Conservative: assume conflict if we can't check
-
-    def _has_string_references(self, _candidate: RenameCandidate) -> bool:  # pylint: disable=unused-argument
-        """Check for string literals containing the function name."""
-        # This would scan the module for string literals containing the function name
-        # For MVP, assume no string references for simplicity
-        return False
