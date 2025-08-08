@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Consolidated publish-to-pypi Makefile targets with robust safe-commit workflow
 ## [1.2.0] - 2025-08-08
 
 ### Changed
