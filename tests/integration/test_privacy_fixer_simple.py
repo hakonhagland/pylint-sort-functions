@@ -60,9 +60,6 @@ class TestPrivacyFixerCLIIntegration:
         )
         return result.returncode, result.stdout, result.stderr
 
-    @pytest.mark.skip(
-        reason="CLI rejects conflicting --fix-privacy --privacy-dry-run options"
-    )
     def test_privacy_fixing_dry_run_cli(self) -> None:
         """Test privacy fixing dry-run through CLI."""
         content = '''"""Test module."""
@@ -84,9 +81,9 @@ def main():
         test_file = self.create_test_file("src/test_module.py", content)
         original_content = test_file.read_text()
 
-        # Run dry-run privacy fixing via CLI
+        # Run dry-run privacy fixing via CLI (standalone option)
         returncode, stdout, stderr = self.run_cli_command(
-            ["--fix-privacy", "--privacy-dry-run", "src/test_module.py"]
+            ["--privacy-dry-run", "src/test_module.py"]
         )
 
         # Should succeed (we don't expect specific output format yet)
@@ -190,9 +187,6 @@ def main():
             "Should include --privacy-dry-run option"
         )
 
-    @pytest.mark.skip(
-        reason="CLI rejects conflicting --fix-privacy --privacy-dry-run options"
-    )
     def test_multiple_files_processing(self) -> None:
         """Test processing multiple files at once."""
         # Create multiple test files
@@ -217,9 +211,9 @@ def helper_b():
         file1 = self.create_test_file("src/module1.py", content1)
         file2 = self.create_test_file("src/module2.py", content2)
 
-        # Run privacy fixing on multiple files
+        # Run privacy fixing on multiple files (standalone option)
         returncode, stdout, stderr = self.run_cli_command(
-            ["--fix-privacy", "--privacy-dry-run", "src/module1.py", "src/module2.py"]
+            ["--privacy-dry-run", "src/module1.py", "src/module2.py"]
         )
 
         # Should succeed
@@ -229,9 +223,6 @@ def helper_b():
         assert file1.read_text() == content1
         assert file2.read_text() == content2
 
-    @pytest.mark.skip(
-        reason="CLI rejects conflicting --fix-privacy --privacy-dry-run options"
-    )
     def test_performance_reasonable_on_multiple_files(self) -> None:
         """Test that privacy fixer has reasonable performance."""
         # Create several test files
@@ -246,13 +237,13 @@ def helper_{i}():
 '''
             self.create_test_file(f"src/module_{i}.py", content)
 
-        # Run privacy fixing on all files
+        # Run privacy fixing on all files (standalone option)
         module_files = ["src/module_0.py", "src/module_1.py", "src/module_2.py"]
 
         start_time = time.time()
 
         returncode, stdout, stderr = self.run_cli_command(
-            ["--fix-privacy", "--privacy-dry-run"] + module_files
+            ["--privacy-dry-run"] + module_files
         )
 
         end_time = time.time()

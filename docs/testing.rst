@@ -166,7 +166,7 @@ Test Types
    Test command-line interface functionality with real file systems
 
 **Privacy Fixer Integration**
-   Test privacy detection and fixing workflows (some tests currently skipped due to incomplete APIs)
+   Test privacy detection and fixing workflows. CLI integration tests are working (10 passing); API integration tests are blocked pending PrivacyFixer.detect_privacy_violations() implementation (9 skipped)
 
 **Cross-Module Testing**
    Test functionality across multiple Python modules and packages
@@ -188,7 +188,7 @@ Running Integration Tests
    # Run all tests (unit + integration)
    make test-all
 
-**Current Status**: Some integration tests are temporarily skipped because they test APIs that are still under development. Working integration tests demonstrate successful CLI functionality and pytest conversion.
+**Current Status**: Most integration tests are passing (10 passed, 9 skipped). The 9 remaining skipped tests are blocked by the incomplete PrivacyFixer API (GitHub issue #21). CLI integration tests demonstrate successful functionality and pytest conversion.
 
 Plugin Integration Testing
 ---------------------------
