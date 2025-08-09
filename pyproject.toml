@@ -52,6 +52,10 @@ select = ["E", "F", "W", "I"]  # Error, pyflakes, warning, import sorting
 known-first-party = ["pylint_sort_functions"]
 split-on-trailing-comma = true
 
+[tool.coverage.run]
+source = ["src"]
+omit = ["tests/*"]
+
 [tool.coverage.report]
 fail_under = 100
 
