@@ -528,6 +528,17 @@ class TestPrivacyFixer:  # pylint: disable=attribute-defined-outside-init,too-ma
         assert len(references3) == 1
         assert references3[0].context == "reference"
 
+    def test_detect_privacy_violations_empty_stub(self) -> None:
+        """Test detect_privacy_violations method stub returns empty list."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_path = Path(temp_dir)
+            test_file = temp_path / "test_module.py"
+            test_file.write_text("def test_func(): pass")
+
+            # Method should return empty list (stub implementation)
+            violations = self.fixer.detect_privacy_violations([test_file], temp_path)
+            assert violations == []
+
 
 class TestFunctionReference:  # pylint: disable=too-few-public-methods
     """Test the FunctionReference namedtuple."""

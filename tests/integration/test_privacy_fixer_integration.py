@@ -102,12 +102,12 @@ def main():
 
         # Run privacy detection
         fixer = PrivacyFixer()
-        violations = fixer.detect_privacy_violations(  # type: ignore[attr-defined]
+        violations = fixer.detect_privacy_violations(
             [calculator_file], self.project_root
         )
 
         # Should detect validate_input and format_output as private
-        violation_functions = {v.function_name for v in violations}
+        violation_functions = {v.old_name for v in violations}
         assert "validate_input" in violation_functions
         assert "format_output" in violation_functions
         assert "calculate_area" not in violation_functions  # Used externally
@@ -264,10 +264,10 @@ def use_module_a():
 
         # Run privacy detection on module A
         fixer = PrivacyFixer()
-        violations = fixer.detect_privacy_violations([module_a], self.project_root)  # type: ignore[attr-defined]
+        violations = fixer.detect_privacy_violations([module_a], self.project_root)
 
         # Should detect internal functions but not public_api (used by module_b)
-        violation_functions = {v.function_name for v in violations}
+        violation_functions = {v.old_name for v in violations}
         assert "helper_a" in violation_functions
         assert "unused_function" in violation_functions
         assert "public_api" not in violation_functions  # Used by module_b

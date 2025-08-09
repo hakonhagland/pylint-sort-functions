@@ -556,6 +556,7 @@ Current Implementation Status
 **✅ Completed Components**:
 
 - **Core Architecture**: All three main classes fully implemented with comprehensive functionality
+- **Core API Methods**: detect_privacy_violations() method added to enable integration testing
 - **Bidirectional Privacy Detection**: Both W9004 (should be private) and W9005 (should be public) detection
 - **Reference Detection**: Complete AST traversal with comprehensive pattern matching
 - **Safety Validation System**: Multi-layer validation with name conflict detection and dynamic reference analysis

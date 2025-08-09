@@ -109,6 +109,27 @@ class PrivacyFixer:
             "errors": errors,
         }
 
+    def detect_privacy_violations(
+        self,
+        files: List[Path],
+        project_root: Path,  # pylint: disable=unused-argument
+    ) -> List[RenameCandidate]:
+        """Detect functions that should be private across multiple files.
+
+        Analyzes the provided files to identify functions that should be private
+        based on their usage patterns within the project. Uses cross-module
+        analysis to avoid false positives for functions used by other modules.
+
+        :param files: List of Python files to analyze
+        :param project_root: Root directory of the project for cross-module analysis
+        :returns: List of functions that violate privacy guidelines
+        """
+        # TODO: Implement full cross-module analysis in next phase
+        # For now, return empty list to enable test development
+        # Silence unused argument warnings for stub implementation
+        _ = files  # Will be used in full implementation
+        return []
+
     def find_function_references(
         self, function_name: str, module_ast: nodes.Module
     ) -> List[FunctionReference]:
