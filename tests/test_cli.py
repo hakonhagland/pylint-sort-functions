@@ -32,7 +32,7 @@ class TestCLI:
 
             # Test finding root from nested directory
             result = _find_project_root(nested_dir)
-            assert result == temp_path.resolve()
+            assert result.resolve() == temp_path.resolve()
 
     def test_find_project_root_fallback(self) -> None:
         """Test project root finding fallback behavior."""
@@ -43,7 +43,7 @@ class TestCLI:
 
             # No project markers, should fallback to parent
             result = _find_project_root(nested_dir)
-            assert result == nested_dir.resolve()
+            assert result.resolve() == nested_dir.resolve()
 
     def test_find_python_files_with_directory(self) -> None:
         """Test finding Python files in a directory."""
