@@ -122,6 +122,7 @@ if [ -z "$COMMIT_MESSAGE_FILE" ] && [ -z "$FORCE_FLAG" ]; then
         echo ""
         echo -e "${YELLOW}💡 Tip: Add --force flag to skip this check: bash scripts/safe-commit.sh --force 'message'${NC}"
         echo ""
+        exit 1
     fi
 fi
 

@@ -340,7 +340,7 @@ bash scripts/safe-commit.sh --force 'intentionally new message'
 ```bash
 # If hooks still make changes, create a separate style commit
 git add .
-git commit -m "style: format code with pre-commit hooks"
+bash scripts/safe-commit.sh 'style: format code with pre-commit hooks'
 ```
 
 ### Handling Pre-commit Hook File Modifications
@@ -361,7 +361,7 @@ make pre-commit
 git add .
 
 # 4. Commit with confidence that hooks won't modify files
-git commit -m "your comprehensive commit message"
+bash scripts/safe-commit.sh 'your comprehensive commit message'
 ```
 
 2. **For comprehensive commits with detailed messages, use this workflow**:
@@ -378,25 +378,20 @@ git diff --staged
 
 # 4. Stage everything and commit with comprehensive message
 git add .
-git commit -m "$(cat <<'EOF'
-docs: comprehensive feature enhancement
+bash scripts/safe-commit.sh 'docs: comprehensive feature enhancement
 
 Detailed multi-line commit message
 with all the important details...
 
 🤖 Generated with [Claude Code](https://claude.ai/code)
-Co-Authored-By: Claude <noreply@anthropic.com>
-EOF
-)"
+Co-Authored-By: Claude <noreply@anthropic.com>'
 ```
 
-3. **If commit message gets lost due to hook modifications**:
+3. **If commit message gets lost due to validation failures**:
 ```bash
-# Use git commit --amend to restore the proper message
-git commit --amend -m "$(cat <<'EOF'
-your comprehensive commit message here
-EOF
-)"
+# safe-commit.sh v2.0+ automatically saves your message on failure
+# The script will show you the saved file path and recovery command:
+bash scripts/safe-commit.sh --file '/tmp/pylint-sort-functions-commit-msg-abc123'
 ```
 
 **Key Principle**: Separate formatting fixes from substantive commits to preserve detailed commit messages for important work.
@@ -404,7 +399,7 @@ EOF
 **Never use these anti-patterns**:
 ```bash
 # ❌ DON'T: Commit then amend with formatting changes
-git commit -m "fix: something"
+bash scripts/safe-commit.sh 'fix: something'
 # (pre-commit hooks modify files)
 git add .
 git commit --amend --no-edit  # NEVER DO THIS
@@ -412,7 +407,7 @@ git commit --amend --no-edit  # NEVER DO THIS
 # ✅ DO: Run checks first, then commit clean
 make pre-commit
 git add .
-git commit -m "fix: something"
+bash scripts/safe-commit.sh 'fix: something'
 ```
 
 ### Commit Message Format
@@ -468,8 +463,9 @@ In the Windows platform, the project supports both Windows (.venv) and WSL Linux
 source .venv/bin/activate
 make pre-commit
 
-# Bypass hooks only if absolutely necessary
-git commit --no-verify -m "message"
+# Note: safe-commit.sh handles pre-commit checks automatically
+# If you absolutely must bypass hooks (not recommended):
+bash scripts/safe-commit.sh --force 'message'
 ```
 
 The project includes these pre-commit hooks:
