@@ -249,7 +249,7 @@ pylint-sort-functions<span class="w"> </span>--fix<span class="w"> </span>--igno
 <dl class="simple">
 <dt><code class="docutils literal notranslate"><span class="pre">--fix-privacy</span></code></dt><dd><p>Apply automatic function renaming for privacy fixes (functions that should be private). Uses conservative safety validation before making changes.</p>
 </dd>
-<dt><code class="docutils literal notranslate"><span class="pre">--privacy-dry-run</span></code></dt><dd><p>Preview privacy fixes without applying changes. Shows which functions can be safely renamed and which cannot.</p>
+<dt><code class="docutils literal notranslate"><span class="pre">--privacy-dry-run</span></code></dt><dd><p>Analyze and preview privacy fixes without applying changes (standalone option). Shows which functions can be safely renamed and which cannot. This option works independently and should not be combined with <code class="docutils literal notranslate"><span class="pre">--fix-privacy</span></code>.</p>
 </dd>
 <dt><code class="docutils literal notranslate"><span class="pre">--auto-sort</span></code></dt><dd><p>Automatically apply function sorting after privacy fixes. Only takes effect when used with <code class="docutils literal notranslate"><span class="pre">--fix-privacy</span></code> or <code class="docutils literal notranslate"><span class="pre">--privacy-dry-run</span></code>.</p>
 </dd>

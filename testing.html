@@ -366,7 +366,7 @@ make<span class="w"> </span>coverage
 <dl class="simple">
 <dt><strong>CLI Integration Tests</strong></dt><dd><p>Test command-line interface functionality with real file systems</p>
 </dd>
-<dt><strong>Privacy Fixer Integration</strong></dt><dd><p>Test privacy detection and fixing workflows (some tests currently skipped due to incomplete APIs)</p>
+<dt><strong>Privacy Fixer Integration</strong></dt><dd><p>Test privacy detection and fixing workflows. CLI integration tests are working (10 passing); API integration tests are blocked pending PrivacyFixer.detect_privacy_violations() implementation (9 skipped)</p>
 </dd>
 <dt><strong>Cross-Module Testing</strong></dt><dd><p>Test functionality across multiple Python modules and packages</p>
 </dd>
@@ -387,7 +387,7 @@ pytest<span class="w"> </span>tests/integration/<span class="w"> </span>-v
 make<span class="w"> </span>test-all
 </pre></div>
 </div>
-<p><strong>Current Status</strong>: Some integration tests are temporarily skipped because they test APIs that are still under development. Working integration tests demonstrate successful CLI functionality and pytest conversion.</p>
+<p><strong>Current Status</strong>: Most integration tests are passing (10 passed, 9 skipped). The 9 remaining skipped tests are blocked by the incomplete PrivacyFixer API (GitHub issue #21). CLI integration tests demonstrate successful functionality and pytest conversion.</p>
 </section>
 </section>
 <section id="plugin-integration-testing">
