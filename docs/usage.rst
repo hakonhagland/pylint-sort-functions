@@ -310,10 +310,12 @@ W9004: function-should-be-private
 
 **Auto-fix availability**:
 - **Manual renaming**: Functions can be manually renamed following PyLint suggestions
-- **Automatic renaming**: Available via the privacy fixer feature
+- **Automatic renaming**: Available via the bidirectional privacy fixer feature
 
-  The privacy fixer feature provides:
+  The privacy fixer feature provides comprehensive privacy analysis:
 
+  - **W9004 Detection**: Rename public functions that should be private (add underscore prefix)
+  - **W9005 Detection**: Rename private functions that should be public (remove underscore prefix)
   - **Conservative safety checks**: Multiple validation layers ensure safe renaming
   - **Dry-run mode**: Preview changes before applying them (``--privacy-dry-run``)
   - **Comprehensive reference detection**: Finds all function calls, assignments, and decorators
@@ -602,17 +604,20 @@ If plugin configuration options aren't being recognized:
 Privacy Detection Issues
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-If ``function-should-be-private`` messages aren't appearing:
+If ``function-should-be-private`` (W9004) or ``function-should-be-public`` (W9005) messages aren't appearing:
 
 1. Verify privacy detection is enabled: ``enable-privacy-detection=y``
 2. Check that files are part of a Python project with project markers (pyproject.toml, setup.py, etc.)
 3. Ensure functions aren't in test files (automatically excluded)
-4. Verify functions aren't matching public API patterns
+4. For W9004: Verify functions aren't matching public API patterns
+5. For W9005: Confirm the private function is actually imported by other modules
 
 False Positives
 ~~~~~~~~~~~~~~~
 
-If you get false positives for ``function-should-be-private``:
+If you get false positives for privacy detection:
+
+**For W9004 (function-should-be-private)**:
 
 1. Ensure your ``__init__.py`` files properly export public APIs
 2. The detection is conservative and won't flag functions used across modules
@@ -624,6 +629,12 @@ If you get false positives for ``function-should-be-private``:
        public-api-patterns = ["main", "run", "setup", "custom_entry"]
 
 4. Use inline disables for legitimate cases: ``# pylint: disable=function-should-be-private``
+
+**For W9005 (function-should-be-public)**:
+
+1. Verify the function is genuinely used externally (not just in tests)
+2. Check if the external usage is intentional API design
+3. Use inline disables if the private usage is intentional: ``# pylint: disable=function-should-be-public``
 
 Performance Issues
 ~~~~~~~~~~~~~~~~~~
@@ -646,6 +657,7 @@ The plugin produces standard PyLint output:
     mymodule.py:25:0: W9002: Methods are not sorted alphabetically in class MyClass (unsorted-methods)
     mymodule.py:30:0: W9003: Public and private functions are not properly separated in module (mixed-function-visibility)
     mymodule.py:35:0: W9004: Function 'helper_function' should be private (prefix with underscore) (function-should-be-private)
+    mymodule.py:40:0: W9005: Function '_shared_util' should be public (remove underscore prefix) (function-should-be-public)
 
 Exit Codes
 ~~~~~~~~~~

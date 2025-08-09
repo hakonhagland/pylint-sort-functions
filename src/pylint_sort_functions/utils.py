@@ -322,8 +322,10 @@ def should_function_be_public(
         return False
 
     # Skip special methods (dunder methods like __init__, __str__, etc.)
-    if _is_dunder_method(func):
-        return False
+    # Note: This check is defensive - current logic means dunder methods
+    # are never considered private by is_private_function above
+    if _is_dunder_method(func):  # pragma: no cover
+        return False  # pragma: no cover
 
     # Check if this private function is actually used by other modules
     is_used_externally = _is_function_used_externally(

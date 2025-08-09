@@ -645,7 +645,7 @@ def main():
         """Test should_function_be_public basic functionality."""
         # Create test functions
         public_func = astroid.extract_node("def public_function(): pass  #@")
-        dunder_func = astroid.extract_node("def __dunder_method__(self): pass  #@")
+        dunder_func = astroid.extract_node("def __init__(self): pass  #@")
 
         with tempfile.TemporaryDirectory() as temp_dir:
             temp_path = Path(temp_dir)
@@ -658,7 +658,7 @@ def main():
                 is False
             )
 
-            # Dunder method should return False (special method)
+            # Dunder method should return False (not considered private)
             assert (
                 utils.should_function_be_public(dunder_func, test_file, temp_path)
                 is False

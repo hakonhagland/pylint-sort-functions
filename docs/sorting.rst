@@ -148,7 +148,12 @@ This is essential for framework compatibility where decorator order matters.
 Privacy Detection
 -----------------
 
-The plugin includes intelligent privacy detection to suggest functions that should be made private.
+The plugin includes intelligent bidirectional privacy detection to suggest functions that have incorrect privacy levels.
+
+**Bidirectional Analysis:**
+
+- **W9004 Detection**: Identifies public functions that should be private
+- **W9005 Detection**: Identifies private functions that should be public
 
 Detection Algorithm
 ~~~~~~~~~~~~~~~~~~~
@@ -178,6 +183,46 @@ Detection Algorithm
    # This function would NOT be flagged
    def get_user_data():  # Imported by user_service.py
        pass
+
+Advanced AST-Based Boundary Detection
+--------------------------------------
+
+The auto-fix tool uses sophisticated AST (Abstract Syntax Tree) analysis to accurately detect boundaries between functions and other module constructs. This ensures proper handling of complex Python patterns.
+
+**Accurate Boundary Detection:**
+
+The system correctly handles various Python constructs:
+
+.. code-block:: python
+
+    # Module-level constructs are properly preserved
+    import os
+
+    CONSTANT = "value"
+
+    def function_a():
+        pass
+
+    # Comments and docstrings preserved
+    """Module docstring after functions."""
+
+    def function_b():
+        pass
+
+    class MyClass:
+        pass
+
+    # Main blocks preserved at end of file
+    if __name__ == "__main__":
+        main()
+
+**Key Improvements:**
+
+- **AST-Based Analysis**: Uses Python's AST to understand code structure instead of pattern matching
+- **Accurate End Detection**: Finds actual function boundaries using AST node information
+- **Main Block Preservation**: Correctly handles ``if __name__ == "__main__":`` blocks
+- **Complex Constructs**: Properly sorts around classes, global variables, and imports
+- **Docstring Handling**: Preserves module-level docstrings and comments in correct positions
 
 Comment Preservation
 --------------------
@@ -440,7 +485,9 @@ Examples
 Message Types
 -------------
 
-The plugin reports three types of sorting violations:
+The plugin reports five types of violations:
+
+**Sorting Violations:**
 
 W9001: unsorted-functions
 ~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -453,6 +500,35 @@ Methods in a class are not sorted alphabetically within their visibility scope.
 W9003: mixed-function-visibility
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Public and private functions are not properly separated (public must come before private).
+
+**Privacy Violations:**
+
+W9004: function-should-be-private
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+A public function should be marked as private (add underscore prefix) because it's only used within its own module.
+
+**Example:**
+
+.. code-block:: python
+
+    # This function is only called within this module
+    def calculate_internal_hash(data):  # W9004: Should be _calculate_internal_hash
+        return hashlib.md5(data.encode()).hexdigest()
+
+W9005: function-should-be-public
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+A private function should be made public (remove underscore prefix) because it's imported and used by other modules.
+
+**Example:**
+
+.. code-block:: python
+
+    # utils.py
+    def _format_currency(amount):  # W9005: Should be format_currency
+        return f"${amount:.2f}"
+
+    # main.py imports it:
+    from utils import _format_currency  # External usage detected
 
 PyLint Integration
 ------------------

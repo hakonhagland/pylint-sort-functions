@@ -723,22 +723,11 @@ def public_function():
         module = astroid.parse(module_content, module_name="test_module")
 
         # Mock linter with privacy detection enabled
-        mock_linter = Mock()
-        mock_linter.config.public_api_patterns = {
-            "main",
-            "run",
-            "execute",
-            "start",
-            "stop",
-            "setup",
-            "teardown",
-        }
-        mock_linter.config.enable_privacy_detection = True
-        mock_linter.current_file = str(Path("/test/project/src/utils.py"))
+        self.checker.linter.config.enable_privacy_detection = True
+        self.checker.linter.current_file = str(Path("/test/project/src/utils.py"))
 
         # Mock path methods and privacy functions
         with (
-            patch.object(self.checker, "linter", mock_linter),
             patch.object(self.checker, "_get_project_root") as mock_project_root,
             patch(
                 "pylint_sort_functions.utils.should_function_be_private"
@@ -756,8 +745,15 @@ def public_function():
                 func.name == "_helper_function"
             )
 
-            # Expect W9005 message for _helper_function only
+            # Expect both mixed-function-visibility and W9005 messages
             with self.assertAddsMessages(
+                MessageTest(
+                    msg_id="mixed-function-visibility",
+                    line=0,  # Module-level message
+                    node=module,
+                    args=("module",),
+                    col_offset=0,
+                ),
                 MessageTest(
                     msg_id="function-should-be-public",
                     line=2,  # _helper_function
@@ -827,23 +823,13 @@ def ambiguous_function():
         module = astroid.parse(module_content, module_name="test_module")
 
         # Mock linter with privacy detection enabled
-        mock_linter = Mock()
-        mock_linter.config.public_api_patterns = {
-            "main",
-            "run",
-            "execute",
-            "start",
-            "stop",
-            "setup",
-            "teardown",
-        }
-        mock_linter.config.enable_privacy_detection = True
-        mock_linter.current_file = str(Path("/test/project/src/utils.py"))
+        self.checker.linter.config.enable_privacy_detection = True
+        self.checker.linter.current_file = str(Path("/test/project/src/utils.py"))
 
         # Mock should_function_be_private to return True (W9004)
         # should_function_be_public should not even be called due to elif
         with (
-            patch.object(self.checker, "linter", mock_linter),
+            patch.object(self.checker, "_get_project_root") as mock_project_root,
             patch(
                 "pylint_sort_functions.utils.should_function_be_private"
             ) as mock_should_be_private,
@@ -851,6 +837,8 @@ def ambiguous_function():
                 "pylint_sort_functions.utils.should_function_be_public"
             ) as mock_should_be_public,
         ):
+            # Set up path mocking
+            mock_project_root.return_value = Path("/test/project")
             mock_should_be_private.return_value = True
             mock_should_be_public.return_value = True  # Should not be called
 
@@ -863,7 +851,7 @@ def ambiguous_function():
                     args=("ambiguous_function",),
                     col_offset=0,
                     end_line=2,
-                    end_col_offset=21,
+                    end_col_offset=22,
                 ),
             ):
                 self.checker.visit_module(module)

@@ -277,7 +277,10 @@ Section Header Examples
 Privacy Fixer
 ~~~~~~~~~~~~~~
 
-The CLI tool includes automatic privacy fixing functionality to rename functions that should be private (detected by PyLint message W9004).
+The CLI tool includes automatic privacy fixing functionality with bidirectional analysis:
+
+- **W9004 Detection**: Rename public functions that should be private (add underscore prefix)
+- **W9005 Detection**: Rename private functions that should be public (remove underscore prefix)
 
 **Usage Examples:**
 
@@ -317,10 +320,11 @@ The CLI tool includes automatic privacy fixing functionality to rename functions
 
    Privacy Fix Analysis:
 
-   ✅ Can safely rename 3 functions:
-     • validate_input → _validate_input (2 references)
-     • helper_function → _helper_function (1 reference)
-     • format_data → _format_data (3 references)
+   ✅ Can safely rename 4 functions:
+     • validate_input → _validate_input (2 references) [W9004]
+     • helper_function → _helper_function (1 reference) [W9004]
+     • format_data → _format_data (3 references) [W9004]
+     • _shared_util → shared_util (3 external references) [W9005]
 
    ⚠️  Cannot safely rename 1 function:
      • process_item: Contains dynamic references (getattr, hasattr, etc.)

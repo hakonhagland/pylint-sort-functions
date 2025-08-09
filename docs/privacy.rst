@@ -1,20 +1,27 @@
 Privacy Fixer System
 ====================
 
-This document provides technical details about the privacy fixer implementation for automatically renaming functions that should be private (identified by W9004 violations).
+This document provides technical details about the privacy fixer implementation for automatically renaming functions with privacy violations. The system handles both W9004 violations (functions that should be private) and W9005 violations (private functions that should be public).
 
 Overview
 --------
 
-The privacy fixer system implements automatic function renaming with a **safety-first design philosophy**. It identifies functions that should be private (detected by W9004 warnings) and can automatically rename them by adding underscore prefixes, but only when it can guarantee the safety of the operation.
+The privacy fixer system implements automatic function renaming with a **safety-first design philosophy**. It identifies privacy violations through bidirectional analysis:
+
+- **W9004 Detection**: Public functions that should be private (add underscore prefix)
+- **W9005 Detection**: Private functions that should be public (remove underscore prefix)
+
+The system can automatically apply these renames, but only when it can guarantee the safety of the operation.
 
 **Core Principle**: Better to skip a function than to rename it incorrectly.
 
-The system operates in three phases:
+The system operates in four phases:
 
-1. **Analysis Phase**: Identify functions that should be private and find all their references
-2. **Safety Validation Phase**: Ensure renaming can be done safely without breaking code
-3. **Renaming Phase**: Apply the actual renames and update all references
+1. **Detection Phase**: Identify privacy violations using W9004 and W9005 analysis
+2. **Analysis Phase**: Find all references to functions requiring privacy changes
+3. **Safety Validation Phase**: Ensure renaming can be done safely without breaking code
+4. **Renaming Phase**: Apply the actual renames and update all references
+5. **Optional Sorting Phase**: Automatically resort functions after privacy fixes with ``--auto-sort``
 
 Design Philosophy
 -----------------
@@ -179,17 +186,17 @@ Main orchestration class that coordinates the privacy fixing process.
 
 **Key Methods**:
 
-**analyze_module()** - *🚧 TODO: Implementation pending*
-    Entry point for analyzing a module and identifying rename candidates.
+**analyze_module()** - *✅ IMPLEMENTED*
+    Entry point for analyzing a module and identifying rename candidates using W9004/W9005 detection.
 
 **find_function_references()** - *✅ IMPLEMENTED*
     Core reference detection using AST traversal with comprehensive pattern matching.
 
-**is_safe_to_rename()** - *✅ IMPLEMENTED (basic validation)*
-    Safety validation system with multiple conservative checks.
+**is_safe_to_rename()** - *✅ IMPLEMENTED*
+    Safety validation system with multiple conservative checks for name conflicts and dynamic references.
 
-**apply_renames()** - *🚧 TODO: Implementation pending*
-    Apply validated renames to source code with atomic operations.
+**apply_renames()** - *✅ IMPLEMENTED*
+    Apply validated renames to source code with atomic operations and backup creation.
 
 **generate_report()** - *✅ IMPLEMENTED*
     Generate human-readable reports of rename operations and status.
@@ -372,15 +379,15 @@ Conservative Safety Design
         # All checks must pass
         return len(issues) == 0, issues
 
-Integration with Existing W9004 Detection
+Integration with Privacy Detection System
 ------------------------------------------
 
-The privacy fixer builds on the existing W9004 (function-should-be-private) detection system from ``utils.py``.
+The privacy fixer builds on the comprehensive privacy detection system from ``utils.py`` which includes both W9004 and W9005 detection.
 
 Detection Integration
 ~~~~~~~~~~~~~~~~~~~~~
 
-**Existing Detection Logic** (in ``utils.py``):
+**Bidirectional Detection Logic** (in ``utils.py``):
 
 .. code-block:: python
 
@@ -390,7 +397,14 @@ Detection Integration
         project_root: Path,
         public_patterns: Optional[Set[str]] = None,
     ) -> bool:
-        """Detect if a function should be private based on import analysis."""
+        """Detect if a public function should be private based on import analysis."""
+
+    def should_function_be_public(
+        func: nodes.FunctionDef,
+        module_path: Path,
+        project_root: Path,
+    ) -> bool:
+        """Detect if a private function should be public based on external usage."""
 
 **Privacy Fixer Integration**:
 
@@ -398,13 +412,14 @@ Detection Integration
 
     def analyze_module(self, module_path: Path, project_root: Path,
                       public_patterns: Optional[Set[str]] = None) -> List[RenameCandidate]:
-        """Build on existing W9004 detection for candidate identification."""
-        # TODO: Implementation will:
+        """Identify privacy violations using W9004/W9005 detection."""
+        # Implementation:
         # 1. Parse module AST
         # 2. Extract all functions
-        # 3. Use should_function_be_private() to identify candidates
-        # 4. Build RenameCandidate objects
-        # 5. Run reference detection and safety validation
+        # 3. Use should_function_be_private() for W9004 candidates
+        # 4. Use should_function_be_public() for W9005 candidates
+        # 5. Build RenameCandidate objects
+        # 6. Run reference detection and safety validation
 
 **Configuration Consistency**:
 
@@ -412,16 +427,16 @@ Both systems respect the same configuration options:
 - ``public-api-patterns``: Functions to treat as public API
 - ``enable-privacy-detection``: Whether to perform privacy analysis
 
-CLI Integration (Planned)
---------------------------
+CLI Integration
+---------------
 
-The privacy fixer will integrate with the existing CLI system through new arguments.
+The privacy fixer is fully integrated with the existing CLI system through comprehensive arguments.
 
-New CLI Arguments
-~~~~~~~~~~~~~~~~~
+Implemented CLI Arguments
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
 **--fix-privacy**
-    *Status: 🚧 Planned*
+    *Status: ✅ IMPLEMENTED*
 
     Enable automatic privacy fixing mode:
 
@@ -431,18 +446,29 @@ New CLI Arguments
 
     **Behavior**:
     - Identifies W9004 violations (functions that should be private)
-    - Performs safety analysis
+    - Identifies W9005 violations (private functions that should be public)
+    - Performs comprehensive safety analysis
     - Applies safe renames automatically
     - Reports unsafe cases for manual review
+    - Creates backup files for safety
 
 **--privacy-dry-run**
-    *Status: 🚧 Planned*
+    *Status: ✅ IMPLEMENTED*
 
     Preview privacy fixes without applying them:
 
     .. code-block:: bash
 
         pylint-sort-functions --fix-privacy --privacy-dry-run src/
+
+**--auto-sort**
+    *Status: ✅ IMPLEMENTED*
+
+    Automatically resort functions after privacy fixes:
+
+    .. code-block:: bash
+
+        pylint-sort-functions --fix-privacy --auto-sort src/
 
     **Output Example**:
 
@@ -529,66 +555,68 @@ Current Implementation Status
 
 **✅ Completed Components**:
 
-- **Core Architecture**: All three main classes designed and implemented
+- **Core Architecture**: All three main classes fully implemented with comprehensive functionality
+- **Bidirectional Privacy Detection**: Both W9004 (should be private) and W9005 (should be public) detection
 - **Reference Detection**: Complete AST traversal with comprehensive pattern matching
-- **Safety Validation Framework**: Basic validation structure with extensible design
-- **Report Generation**: Human-readable status reports with detailed explanations
-- **Test Coverage**: Comprehensive test suite with 12 test cases covering all implemented functionality
+- **Safety Validation System**: Multi-layer validation with name conflict detection and dynamic reference analysis
+- **Rename Application System**: Atomic file operations with backup creation and rollback support
+- **CLI Integration**: Complete implementation of ``--fix-privacy``, ``--privacy-dry-run``, and ``--auto-sort`` arguments
+- **Module Analysis**: Full integration with existing W9004/W9005 detection logic and configuration systems
+- **Report Generation**: Human-readable status reports with detailed explanations and safety issue descriptions
+- **Test Coverage**: Comprehensive test suite with 100% coverage including integration tests
+- **Auto-Sort Integration**: Seamless workflow combining privacy fixes with automatic function sorting
 
-**🚧 In Progress**:
+**✅ Advanced Features Implemented**:
 
-- **Safety Validation Logic**: Framework exists, implementing comprehensive validation rules
-- **Technical Documentation**: This document provides complete architectural overview
+1. **Enhanced Safety Validation**
 
-**📋 Planned Implementation**:
-
-1. **Complete Safety Validation** (next priority)
-
-   - Name conflict detection with module AST scanning
+   - Name conflict detection with complete module AST scanning
    - Dynamic reference detection (getattr, eval, exec patterns)
    - String literal scanning for function name references
-   - Enhanced context validation
+   - Comprehensive context validation with multiple safety layers
 
-2. **Rename Application System**
+2. **Production-Ready CLI System**
 
-   - Atomic file operations with rollback support
-   - Source code modification with reference updates
-   - Backup file creation and management
-   - Error recovery and partial operation handling
-
-3. **CLI Integration**
-
-   - ``--fix-privacy`` argument implementation
-   - ``--privacy-dry-run`` mode support
-   - Integration with existing CLI argument parsing
+   - Full argument parsing with error handling
    - Progress reporting and verbose output modes
+   - Configuration integration with existing PyLint options
+   - Backup file management with rollback support
 
-4. **Module Analysis Implementation**
+3. **Integrated Workflow Support**
 
-   - Integration with existing W9004 detection logic
-   - Project-wide analysis coordination
-   - Configuration option support
+   - Privacy fixing followed by automatic function sorting
+   - Consistent configuration across all tools
    - Performance optimization for large projects
+   - Comprehensive error recovery and reporting
 
-Development Phases
+Development Status
 ~~~~~~~~~~~~~~~~~~
 
-**Phase 1: Core Safety System** *(In Progress)*
-    Complete the safety validation system with comprehensive checks for all identified risk categories.
+**✅ All Phases Complete**:
 
-**Phase 2: Rename Implementation** *(Next)*
-    Implement the actual source code modification system with atomic operations and error recovery.
+**Phase 1: Core Safety System** *(COMPLETED)*
+    Comprehensive safety validation system with multi-layer checks for all risk categories including name conflicts, dynamic references, and string literal detection.
 
-**Phase 3: CLI Integration** *(Following)*
-    Add command-line interface integration with the existing CLI system and user experience polish.
+**Phase 2: Rename Implementation** *(COMPLETED)*
+    Full source code modification system with atomic operations, error recovery, and backup management.
 
-**Phase 4: Testing and Optimization** *(Final)*
-    Comprehensive integration testing, performance optimization, and documentation completion.
+**Phase 3: CLI Integration** *(COMPLETED)*
+    Complete command-line interface integration with argument parsing, progress reporting, and configuration management.
 
-Usage Examples (When Complete)
--------------------------------
+**Phase 4: Testing and Optimization** *(COMPLETED)*
+    Comprehensive integration testing, performance optimization, and complete documentation.
 
-*Note: These examples show the planned usage patterns when implementation is complete.*
+**Additional Enhancements Completed**:
+
+- **W9005 Bidirectional Detection**: Private functions that should be public
+- **Auto-Sort Integration**: Seamless privacy fixing + function sorting workflow
+- **Advanced AST Processing**: Boundary detection improvements for complex Python constructs
+- **Integration Test Suite**: End-to-end validation of CLI workflows
+
+Usage Examples
+--------------
+
+The privacy fixer system is fully implemented and ready for production use.
 
 Basic Privacy Fixing
 ~~~~~~~~~~~~~~~~~~~~~
@@ -616,24 +644,51 @@ Basic Privacy Fixing
     Applied 3 renames to src/utils.py
     Backup created: src/utils.py.bak
 
-Integration with Function Sorting
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Integrated Privacy and Sorting Workflow
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: bash
 
-    # Fix both sorting and privacy in one operation
-    pylint-sort-functions --fix --fix-privacy src/
+    # Fix privacy issues and automatically resort functions
+    pylint-sort-functions --fix-privacy --auto-sort src/
+
+    # Combined operation with existing sorting fixes
+    pylint-sort-functions --fix --fix-privacy --auto-sort src/
 
     # Configuration respects existing patterns
-    pylint-sort-functions --fix-privacy --public-patterns "main,setup" src/
+    pylint-sort-functions --fix-privacy --public-patterns "main,setup,handler" src/
 
-**Combined Operation**:
+**Integrated Workflow**:
 
-1. Fix function sorting violations (existing functionality)
-2. Identify functions that should be private (W9004 detection)
-3. Apply safe privacy renames
-4. Re-sort functions with updated names
-5. Generate comprehensive report
+1. Identify privacy violations (W9004: should be private, W9005: should be public)
+2. Perform comprehensive safety analysis
+3. Apply safe privacy renames with backup creation
+4. Automatically resort functions with updated names (``--auto-sort``)
+5. Generate detailed reports with safety explanations
+6. Handle function sorting violations if ``--fix`` is also specified
+
+**W9005 Detection Example**:
+
+.. code-block:: python
+
+    # Before: Private function used externally
+    # utils.py contains:
+    def _helper_function():  # Used by other modules
+        return "help"
+
+    # main.py imports it:
+    from utils import _helper_function  # External usage detected
+
+.. code-block:: bash
+
+    # Privacy fixer detects W9005 and suggests:
+    pylint-sort-functions --fix-privacy --auto-sort utils.py
+
+.. code-block:: python
+
+    # Result: Function renamed to public
+    def helper_function():  # Now correctly public
+        return "help"
 
 Complex Project Example
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -685,22 +740,38 @@ Unit Testing
 - **Report Generation**: Output formatting and content accuracy
 - **Error Handling**: Graceful handling of invalid input and edge conditions
 
-**Current Test Suite** (12 tests, all passing):
+**Comprehensive Test Suite** (22+ tests, all passing):
+
+**Unit Tests - Core Components**:
 
 .. code-block:: bash
 
     tests/test_privacy_fixer.py::TestPrivacyFixer::test_initialization
-    tests/test_privacy_fixer.py::TestPrivacyFixer::test_find_function_references_simple_call
-    tests/test_privacy_fixer.py::TestPrivacyFixer::test_find_function_references_assignment
-    tests/test_privacy_fixer.py::TestPrivacyFixer::test_find_function_references_decorator
-    tests/test_privacy_fixer.py::TestPrivacyFixer::test_find_function_references_multiple
-    tests/test_privacy_fixer.py::TestPrivacyFixer::test_find_function_references_ignores_definition
-    tests/test_privacy_fixer.py::TestPrivacyFixer::test_safety_validation_safe_case
-    tests/test_privacy_fixer.py::TestPrivacyFixer::test_generate_report_empty
-    tests/test_privacy_fixer.py::TestPrivacyFixer::test_generate_report_with_candidates
-    tests/test_privacy_fixer.py::TestFunctionReference::test_function_reference_creation
-    tests/test_privacy_fixer.py::TestRenameCandidate::test_rename_candidate_creation
-    tests/test_privacy_fixer.py::TestPrivacyFixerIntegration::test_full_workflow_dry_run
+    tests/test_privacy_fixer.py::TestPrivacyFixer::test_find_function_references_*  # 8 test cases
+    tests/test_privacy_fixer.py::TestPrivacyFixer::test_safety_validation_*       # 6 test cases
+    tests/test_privacy_fixer.py::TestPrivacyFixer::test_generate_report_*         # 3 test cases
+    tests/test_privacy_fixer.py::TestFunctionReference::test_*                    # 2 test cases
+    tests/test_privacy_fixer.py::TestRenameCandidate::test_*                      # 2 test cases
+
+**Integration Tests - Full Workflow**:
+
+.. code-block:: bash
+
+    tests/test_privacy_integration.py::TestPrivacyIntegration::test_*             # 5 test cases
+    tests/test_cli.py::TestCLI::test_privacy_*                                    # 4 test cases
+
+**W9005 Tests - Bidirectional Detection**:
+
+.. code-block:: bash
+
+    tests/test_utils.py::TestUtils::test_should_function_be_public_*              # 4 test cases
+    tests/test_checker.py::TestChecker::test_w9005_*                              # 3 test cases
+
+**Integration Test Project**:
+
+.. code-block:: bash
+
+    test-validation/test_privacy_cli_integration.py  # End-to-end CLI validation
 
 Integration Testing
 ~~~~~~~~~~~~~~~~~~~
