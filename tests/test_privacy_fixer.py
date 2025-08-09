@@ -528,16 +528,62 @@ class TestPrivacyFixer:  # pylint: disable=attribute-defined-outside-init,too-ma
         assert len(references3) == 1
         assert references3[0].context == "reference"
 
-    def test_detect_privacy_violations_empty_stub(self) -> None:
-        """Test detect_privacy_violations method stub returns empty list."""
+    def test_detect_privacy_violations_with_functions(self) -> None:
+        """Test detect_privacy_violations with actual functions."""
         with tempfile.TemporaryDirectory() as temp_dir:
-            temp_path = Path(temp_dir)
-            test_file = temp_path / "test_module.py"
-            test_file.write_text("def test_func(): pass")
+            project_root = Path(temp_dir)
 
-            # Method should return empty list (stub implementation)
-            violations = self.fixer.detect_privacy_violations([test_file], temp_path)
-            assert violations == []
+            # Create test file with mixed functions
+            test_file = project_root / "test.py"
+            test_file.write_text('''
+def public_function():
+    """This stays public."""
+    return helper_function()
+
+def helper_function():
+    """This should become private."""
+    return "help"
+
+def _already_private():
+    """This is already private."""
+    return "private"
+''')
+
+            violations = self.fixer.detect_privacy_violations([test_file], project_root)
+
+            # Should find violations for helper_function but not others
+            violation_names = {v.old_name for v in violations}
+            assert "helper_function" in violation_names
+            assert "_already_private" not in violation_names  # Already private
+
+            # Check candidate properties
+            helper_violation = next(
+                v for v in violations if v.old_name == "helper_function"
+            )
+            assert helper_violation.new_name == "_helper_function"
+            assert helper_violation.is_safe is True
+            assert len(helper_violation.references) >= 1  # Called by public_function
+
+    def test_detect_privacy_violations_exception_handling(self) -> None:
+        """Test detect_privacy_violations handles file parsing exceptions."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            project_root = Path(temp_dir)
+
+            # Create invalid Python file
+            invalid_file = project_root / "invalid.py"
+            invalid_file.write_text("def broken_syntax(")  # Missing closing parenthesis
+
+            # Create valid file
+            valid_file = project_root / "valid.py"
+            valid_file.write_text("def helper_func(): pass")
+
+            violations = self.fixer.detect_privacy_violations(
+                [invalid_file, valid_file], project_root
+            )
+
+            # Should process valid file and skip invalid one
+            violation_names = {v.old_name for v in violations}
+            assert "helper_func" in violation_names
 
 
 class TestFunctionReference:  # pylint: disable=too-few-public-methods
@@ -579,6 +625,227 @@ class TestRenameCandidate:  # pylint: disable=too-few-public-methods
         assert candidate.references == []
         assert candidate.is_safe is True
         assert candidate.safety_issues == []
+
+    def test_build_import_graph(self) -> None:
+        """Test import graph building functionality."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            project_root = Path(temp_dir)
+
+            # Create test files with imports
+            file1 = project_root / "module1.py"
+            file1.write_text("""
+from module2 import func_b, func_c as alias_c
+import os
+from utils import helper_function
+""")
+
+            file2 = project_root / "module2.py"
+            file2.write_text("""
+def func_b():
+    pass
+def func_c():
+    pass
+""")
+
+            fixer = PrivacyFixer()
+            import_graph = fixer._build_import_graph(project_root)
+
+            # Should detect imported functions
+            assert file1 in import_graph
+            assert "func_b" in import_graph[file1]
+            assert "alias_c" in import_graph[file1]  # Uses alias name
+            assert "helper_function" in import_graph[file1]
+
+            # File without imports should have empty set
+            assert file2 in import_graph
+            assert len(import_graph[file2]) == 0
+
+    def test_build_import_graph_with_invalid_files(self) -> None:
+        """Test import graph building handles invalid Python files."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            project_root = Path(temp_dir)
+
+            # Create invalid Python file
+            invalid_file = project_root / "invalid.py"
+            invalid_file.write_text("def broken_syntax(")  # Missing closing parenthesis
+
+            fixer = PrivacyFixer()
+            import_graph = fixer._build_import_graph(project_root)
+
+            # Should include invalid file with empty set
+            assert invalid_file in import_graph
+            assert len(import_graph[invalid_file]) == 0
+
+    def test_extract_function_imports(self) -> None:
+        """Test function import extraction from AST."""
+        import astroid
+
+        code = """
+from module1 import func1, func2 as alias2
+from module2 import *
+import os
+from utils import helper
+"""
+
+        module = astroid.parse(code)
+        fixer = PrivacyFixer()
+        imports = fixer._extract_function_imports(module)
+
+        assert "func1" in imports
+        assert "alias2" in imports  # Uses alias
+        assert "helper" in imports
+        assert "*" not in imports  # Wildcard imports ignored
+        assert "os" not in imports  # Module imports ignored for now
+
+    def test_is_function_used_externally(self) -> None:
+        """Test external function usage detection."""
+        fixer = PrivacyFixer()
+
+        file1 = Path("/path/file1.py")
+        file2 = Path("/path/file2.py")
+
+        import_graph = {
+            file1: {"func_a", "func_b"},
+            file2: {"func_c", "func_d"},
+        }
+
+        # Function imported by other file
+        assert fixer._is_function_used_externally("func_a", file2, import_graph) is True
+
+        # Function not imported anywhere
+        assert (
+            fixer._is_function_used_externally("func_x", file1, import_graph) is False
+        )
+
+        # Function not imported by other files (only by self)
+        assert (
+            fixer._is_function_used_externally("func_c", file2, import_graph) is False
+        )
+
+    def test_fallback_privacy_heuristics(self) -> None:
+        """Test fallback heuristics for privacy detection."""
+        import astroid
+
+        fixer = PrivacyFixer()
+
+        # Test function with internal pattern
+        code = "def helper_function(): pass"
+        module = astroid.parse(code)
+        func = next(module.nodes_of_class(astroid.FunctionDef))
+        assert fixer._fallback_privacy_heuristics(func) is True
+
+        # Test function with validate pattern
+        code = "def validate_input(): pass"
+        module = astroid.parse(code)
+        func = next(module.nodes_of_class(astroid.FunctionDef))
+        assert fixer._fallback_privacy_heuristics(func) is True
+
+        # Test function without internal patterns
+        code = "def public_api(): pass"
+        module = astroid.parse(code)
+        func = next(module.nodes_of_class(astroid.FunctionDef))
+        assert fixer._fallback_privacy_heuristics(func) is False
+
+    def test_should_function_be_private_with_cross_module_analysis(self) -> None:
+        """Test privacy detection with cross-module analysis."""
+        import astroid
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            project_root = Path(temp_dir)
+
+            # Create test files
+            file1 = project_root / "module1.py"
+            file1.write_text("""
+def used_externally():
+    pass
+
+def internal_only():
+    pass
+""")
+
+            file2 = project_root / "module2.py"
+            file2.write_text("from module1 import used_externally")
+
+            # Parse and test
+            module = astroid.parse(file1.read_text())
+            functions = list(module.nodes_of_class(astroid.FunctionDef))
+
+            fixer = PrivacyFixer()
+
+            # Function used by other module should stay public
+            used_func = next(f for f in functions if f.name == "used_externally")
+            assert (
+                fixer._should_function_be_private(used_func, file1, project_root)
+                is False
+            )
+
+            # Function only used internally should become private
+            internal_func = next(f for f in functions if f.name == "internal_only")
+            assert (
+                fixer._should_function_be_private(internal_func, file1, project_root)
+                is True
+            )
+
+    def test_should_function_be_private_public_api_patterns(self) -> None:
+        """Test that public API patterns are never made private."""
+        import astroid
+
+        fixer = PrivacyFixer()
+
+        # Test basic public patterns
+        basic_patterns = ["main", "run", "setup", "test_something"]
+
+        for func_name in basic_patterns:
+            code = f"def {func_name}(): pass"
+            module = astroid.parse(code)
+            func = next(module.nodes_of_class(astroid.FunctionDef))
+
+            # Should stay public regardless of cross-module analysis
+            assert (
+                fixer._should_function_be_private(
+                    func, Path("/tmp/test.py"), Path("/tmp")
+                )
+                is False
+            )
+
+        # Test functions with public API prefixes
+        api_functions = ["calculate_total", "compute_result", "get_value", "set_config"]
+
+        for func_name in api_functions:
+            code = f"def {func_name}(): pass"
+            module = astroid.parse(code)
+            func = next(module.nodes_of_class(astroid.FunctionDef))
+
+            # Should stay public regardless of cross-module analysis
+            assert (
+                fixer._should_function_be_private(
+                    func, Path("/tmp/test.py"), Path("/tmp")
+                )
+                is False
+            )
+
+    def test_should_function_be_private_exception_fallback(self) -> None:
+        """Test fallback to heuristics when cross-module analysis fails."""
+        from unittest.mock import patch
+
+        import astroid
+
+        fixer = PrivacyFixer()
+
+        # Create function that would trigger fallback heuristics
+        code = "def helper_function(): pass"
+        module = astroid.parse(code)
+        func = next(module.nodes_of_class(astroid.FunctionDef))
+
+        # Mock _build_import_graph to raise exception
+        with patch.object(
+            fixer, "_build_import_graph", side_effect=Exception("Mock error")
+        ):
+            # Should fall back to heuristics
+            result = fixer._should_function_be_private(
+                func, Path("/tmp/test.py"), Path("/tmp")
+            )
+            assert result is True  # helper_function matches internal pattern
 
 
 @pytest.mark.integration

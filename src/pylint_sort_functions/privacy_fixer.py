@@ -17,7 +17,8 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Any, Dict, List, NamedTuple, Optional, Set, Tuple
 
-from astroid import nodes  # type: ignore[import-untyped]
+import astroid  # type: ignore[import-untyped]
+from astroid import nodes
 
 
 class FunctionReference(NamedTuple):
@@ -112,7 +113,7 @@ class PrivacyFixer:
     def detect_privacy_violations(
         self,
         files: List[Path],
-        project_root: Path,  # pylint: disable=unused-argument
+        project_root: Path,
     ) -> List[RenameCandidate]:
         """Detect functions that should be private across multiple files.
 
@@ -124,11 +125,44 @@ class PrivacyFixer:
         :param project_root: Root directory of the project for cross-module analysis
         :returns: List of functions that violate privacy guidelines
         """
-        # TODO: Implement full cross-module analysis in next phase
-        # For now, return empty list to enable test development
-        # Silence unused argument warnings for stub implementation
-        _ = files  # Will be used in full implementation
-        return []
+        violations = []
+
+        for file_path in files:
+            try:
+                # Parse the file
+                with open(file_path, "r", encoding="utf-8") as f:
+                    content = f.read()
+                module = astroid.parse(content, module_name=str(file_path))
+
+                # Get all functions in this module
+                functions = self._get_functions_from_module(module)
+
+                for func in functions:
+                    # Skip functions that are already private
+                    if func.name.startswith("_"):
+                        continue
+
+                    # Check if function should be private based on usage
+                    if self._should_function_be_private(func, file_path, project_root):
+                        # Find references for potential renaming
+                        references = self.find_function_references(func.name, module)
+
+                        # Create rename candidate
+                        candidate = RenameCandidate(
+                            function_node=func,
+                            old_name=func.name,
+                            new_name=f"_{func.name}",
+                            references=references,
+                            is_safe=True,  # Will be validated later
+                            safety_issues=[],
+                        )
+                        violations.append(candidate)
+
+            except Exception:  # pylint: disable=broad-exception-caught
+                # Skip files that can't be parsed
+                continue
+
+        return violations
 
     def find_function_references(
         self, function_name: str, module_ast: nodes.Module
@@ -377,6 +411,36 @@ class PrivacyFixer:
                 "errors": [f"Failed to process {file_path}: {str(e)}"],
             }
 
+    def _build_import_graph(self, project_root: Path) -> Dict[Path, Set[str]]:
+        """Build a graph of imports across the project.
+
+        Scans all Python files in the project to build a mapping from
+        file paths to the set of function names they import.
+
+        :param project_root: Root directory to scan for Python files
+        :returns: Dictionary mapping file paths to imported function names
+        """
+        import_graph: Dict[Path, Set[str]] = {}
+
+        # Find all Python files in the project
+        python_files = list(project_root.rglob("*.py"))
+
+        for file_path in python_files:
+            try:
+                with open(file_path, "r", encoding="utf-8") as f:
+                    content = f.read()
+
+                # Parse the file to extract imports
+                module = astroid.parse(content, module_name=str(file_path))
+                imported_functions = self._extract_function_imports(module)
+                import_graph[file_path] = imported_functions
+
+            except Exception:
+                # Skip files that can't be parsed
+                import_graph[file_path] = set()
+
+        return import_graph
+
     def _check_reference_contexts(self, candidate: RenameCandidate) -> List[str]:
         """Check if all references are in contexts we can safely handle."""
         safe_contexts = {"call", "assignment", "decorator", "reference"}
@@ -387,6 +451,60 @@ class PrivacyFixer:
                 unsafe_contexts.append(ref.context)
 
         return list(set(unsafe_contexts))  # Remove duplicates
+
+    def _extract_function_imports(self, module: nodes.Module) -> Set[str]:
+        """Extract function names that are imported by a module.
+
+        :param module: AST module node to analyze
+        :returns: Set of imported function names
+        """
+        imported_functions: Set[str] = set()
+
+        for node in module.nodes_of_class((nodes.ImportFrom, nodes.Import)):
+            if isinstance(node, nodes.ImportFrom):
+                # Handle: from module import func1, func2
+                if node.names:
+                    for name, alias in node.names:
+                        # Use alias if present, otherwise use original name
+                        import_name = alias if alias else name
+                        if import_name and import_name != "*":
+                            imported_functions.add(import_name)
+            elif isinstance(node, nodes.Import):
+                # Handle: import module (functions accessed as module.func)
+                # For now, we don't track module.function patterns
+                pass
+
+        return imported_functions
+
+    def _fallback_privacy_heuristics(self, func: nodes.FunctionDef) -> bool:
+        """Fallback heuristics when cross-module analysis isn't available.
+
+        :param func: Function definition node
+        :returns: True if function should be private based on heuristics
+        """
+        # Use simple pattern matching as fallback
+        internal_patterns = ["helper", "internal", "validate", "format"]
+
+        for pattern in internal_patterns:
+            if pattern in func.name.lower():
+                return True
+
+        return False
+
+    def _get_functions_from_module(
+        self, module: nodes.Module
+    ) -> List[nodes.FunctionDef]:
+        """Extract all function definitions from a module.
+
+        :param module: Astroid module node to analyze
+        :returns: List of function definition nodes
+        """
+        functions = []
+        for node in module.nodes_of_class(nodes.FunctionDef):
+            # Skip nested functions and class methods for now
+            if isinstance(node.parent, nodes.Module):
+                functions.append(node)
+        return functions
 
     def _group_candidates_by_file(
         self, candidates: List[RenameCandidate]
@@ -467,3 +585,76 @@ class PrivacyFixer:
         # This would scan the module for string literals containing the function name
         # For MVP, assume no string references for simplicity
         return False
+
+    def _is_function_used_externally(
+        self, func_name: str, file_path: Path, import_graph: Dict[Path, Set[str]]
+    ) -> bool:
+        """Check if a function is imported by other modules.
+
+        :param func_name: Name of the function to check
+        :param file_path: Path of the file containing the function
+        :param import_graph: Import graph from _build_import_graph
+        :returns: True if function is used by other modules
+        """
+        for other_file, imported_funcs in import_graph.items():
+            # Skip the file containing the function itself
+            if other_file == file_path:
+                continue
+
+            # Check if this function is imported
+            if func_name in imported_funcs:
+                return True
+
+        return False
+
+    def _should_function_be_private(
+        self,
+        func: nodes.FunctionDef,
+        file_path: Path,
+        project_root: Path,
+    ) -> bool:
+        """Determine if a function should be private based on cross-module usage.
+
+        Uses comprehensive import graph analysis to determine if a function is used
+        by other modules or only internally within its defining module.
+
+        :param func: Function definition node
+        :param file_path: Path to the file containing the function
+        :param project_root: Root directory of the project
+        :returns: True if function should be private
+        """
+        # Skip common public API patterns that should never be made private
+        public_patterns = {
+            "main",
+            "run",
+            "execute",
+            "start",
+            "stop",
+            "setup",
+            "teardown",
+            "test",
+            "public_api",
+            "api",
+            "handle",
+            "process",
+        }
+
+        if func.name in public_patterns or func.name.startswith("test"):
+            return False
+
+        # Also skip functions that look like public APIs
+        if any(
+            func.name.startswith(pattern)
+            for pattern in ["calculate_", "compute_", "get_", "set_"]
+        ):
+            return False
+
+        # Build import graph to check cross-module usage
+        try:
+            import_graph = self._build_import_graph(project_root)
+            return not self._is_function_used_externally(
+                func.name, file_path, import_graph
+            )
+        except Exception:
+            # If cross-module analysis fails, fall back to heuristics
+            return self._fallback_privacy_heuristics(func)
