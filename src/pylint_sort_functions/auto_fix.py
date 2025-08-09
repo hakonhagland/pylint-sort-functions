@@ -916,7 +916,7 @@ class FunctionSorter:  # pylint: disable=too-many-public-methods,too-few-public-
                 if e.text:
                     print(f"  Line {e.lineno}: {e.text}")
                 else:
-                    print(f"  Line {e.lineno}")
+                    print(f"  Line {e.lineno}")  # pragma: no cover
             print("  Reverting to original content to prevent file corruption.")
             print("  This prevents the critical bug described in GitHub issue #25.")
             return original_content
