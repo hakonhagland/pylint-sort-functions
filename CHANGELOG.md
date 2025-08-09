@@ -24,7 +24,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Test coverage now focuses on source code only, excluding test files from coverage measurement for more meaningful metrics ([#18](https://github.com/hakonhagland/pylint-sort-functions/issues/18))
-## [1.3.0] - 2025-08-08
+
+## [1.2.1] - 2025-08-08
 
 ### Added
 
@@ -113,8 +114,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Privacy fixes applied first, followed by automatic alphabetical sorting
   - Consistent backup creation across all automated operations
   - Unified CLI interface for streamlined developer experience
-
-## [1.2.1] - 2025-08-08
 
 ### Changed
 
