@@ -103,6 +103,15 @@ class FunctionSorter:  # pylint: disable=too-many-public-methods,too-few-public-
             if new_content == original_content:  # pragma: no cover
                 return False
 
+            # CRITICAL FIX: Validate syntax after transformation
+            validated_content = self._validate_syntax_and_rollback(
+                file_path, original_content, new_content
+            )
+
+            # If validation rolled back to original, no changes were made
+            if validated_content == original_content:
+                return False
+
             if self.config.dry_run:
                 print(f"Would modify: {file_path}")
                 return True
@@ -112,8 +121,8 @@ class FunctionSorter:  # pylint: disable=too-many-public-methods,too-few-public-
                 backup_path = file_path.with_suffix(f"{file_path.suffix}.bak")
                 shutil.copy2(file_path, backup_path)
 
-            # Write the sorted content
-            file_path.write_text(new_content, encoding="utf-8")
+            # Write the validated sorted content
+            file_path.write_text(validated_content, encoding="utf-8")
             return True
 
         # Broad exception catch ensures tool never crashes when modifying user files
@@ -731,7 +740,13 @@ class FunctionSorter:  # pylint: disable=too-many-public-methods,too-few-public-
     def _sort_class_methods(
         self, content: str, module: nodes.Module, lines: List[str]
     ) -> str:
-        """Sort methods within classes.
+        """Sort methods within classes using multi-class safe processing.
+
+        CRITICAL FIX for GitHub issue #25: This method now processes all classes
+        in a single pass to prevent line number corruption when multiple classes
+        are present. The original implementation processed classes sequentially,
+        which caused subsequent classes to extract methods from wrong positions
+        after the content string was modified by earlier classes.
 
         :param content: File content
         :type content: str
@@ -742,8 +757,11 @@ class FunctionSorter:  # pylint: disable=too-many-public-methods,too-few-public-
         :returns: Content with sorted class methods
         :rtype: str
         """
-        # Find all classes that need method sorting or section headers
-        classes_to_sort = []
+        # CRITICAL FIX: Extract ALL class information upfront before ANY
+        # modifications. This prevents line number corruption that causes
+        # class definitions to be lost
+        class_info = []
+
         for node in module.body:
             if isinstance(node, nodes.ClassDef):
                 methods = utils.get_methods_from_class(node)
@@ -753,22 +771,21 @@ class FunctionSorter:  # pylint: disable=too-many-public-methods,too-few-public-
                     )
                     # Process class if methods need sorting or adding section headers
                     if not methods_already_sorted or self.config.add_section_headers:
-                        classes_to_sort.append((node, methods))
+                        # Extract method spans NOW while lines array is still accurate
+                        method_spans = self._extract_method_spans(methods, lines, node)
+                        sorted_spans = self._sort_function_spans(method_spans)
+                        class_info.append((node, method_spans, sorted_spans))
 
-        if not classes_to_sort:
+        if not class_info:
             return content
 
-        # Sort each class's methods
-        for class_node, methods in classes_to_sort:
-            # Extract method spans for this class
-            method_spans = self._extract_method_spans(methods, lines, class_node)
-
-            # Sort the method spans
-            sorted_spans = self._sort_function_spans(method_spans)
-
+        # CRITICAL FIX: Process classes in REVERSE ORDER to preserve line numbers
+        # When we modify a class at the end of the file first, the line numbers
+        # for classes earlier in the file remain valid
+        for _, original_spans, sorted_spans in reversed(class_info):
             # Reconstruct the class content with sorted methods
             content = self._reconstruct_class_with_sorted_methods(
-                content, method_spans, sorted_spans
+                content, original_spans, sorted_spans
             )
 
         return content
@@ -868,6 +885,47 @@ class FunctionSorter:  # pylint: disable=too-many-public-methods,too-few-public-
         return self._reconstruct_content_with_sorted_functions(
             content, function_spans, sorted_spans
         )
+
+    def _validate_syntax_and_rollback(
+        self, file_path: Path, original_content: str, new_content: str
+    ) -> str:
+        """Validate syntax after transformation, rollback if invalid.
+
+        This is a critical safety measure to prevent the corruption described in
+        GitHub issue #25. If auto-sort creates syntax errors, we automatically
+        rollback to the original content to prevent data loss.
+
+        :param file_path: Path to the file being processed (for error reporting)
+        :type file_path: Path
+        :param original_content: Original file content before transformation
+        :type original_content: str
+        :param new_content: New content after auto-sort transformation
+        :type new_content: str
+        :returns: Validated content (new_content if valid, original_content if invalid)
+        :rtype: str
+        """
+        try:
+            # Attempt to compile the new content to check for syntax errors
+            compile(new_content, str(file_path), "exec")
+            return new_content
+        except SyntaxError as e:
+            # Log the syntax error and rollback to prevent corruption
+            print(f"WARNING: Auto-sort would create syntax error in {file_path}:")
+            print(f"  Error: {e}")
+            if hasattr(e, "lineno") and e.lineno:
+                if e.text:
+                    print(f"  Line {e.lineno}: {e.text}")
+                else:
+                    print(f"  Line {e.lineno}")
+            print("  Reverting to original content to prevent file corruption.")
+            print("  This prevents the critical bug described in GitHub issue #25.")
+            return original_content
+        except Exception as e:  # pragma: no cover
+            # pylint: disable=broad-exception-caught
+            # For any other compilation errors, be conservative and rollback
+            print(f"WARNING: Could not validate syntax for {file_path}: {e}")
+            print("  Reverting to original content as safety precaution.")
+            return original_content
 
 
 # Public functions
