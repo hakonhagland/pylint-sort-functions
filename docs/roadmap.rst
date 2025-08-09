@@ -138,7 +138,7 @@ Version 0.2.1 - Auto-fix Improvements
 - ✅ Comprehensive reference detection (calls, assignments, decorators)
 - ✅ Conservative safety validation system
 - ✅ Report generation with detailed analysis
-- ✅ 100% test coverage with comprehensive edge cases
+- ✅ 100% source code test coverage with comprehensive edge cases
 - ✅ Technical documentation (docs/privacy.rst)
 - 🚧 Function renaming application system
 - 📋 CLI integration (``--fix-privacy``, ``--privacy-dry-run`` arguments)

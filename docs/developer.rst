@@ -664,7 +664,7 @@ Code Quality Checks
     ruff check src tests
     ruff format src tests
 
-    # Coverage (must be 100%)
+    # Coverage (must be 100% on source code in src/)
     coverage run -m pytest tests
     coverage report -m
 

@@ -563,7 +563,7 @@ Current Implementation Status
 - **CLI Integration**: Complete implementation of ``--fix-privacy``, ``--privacy-dry-run``, and ``--auto-sort`` arguments
 - **Module Analysis**: Full integration with existing W9004/W9005 detection logic and configuration systems
 - **Report Generation**: Human-readable status reports with detailed explanations and safety issue descriptions
-- **Test Coverage**: Comprehensive test suite with 100% coverage including integration tests
+- **Test Coverage**: Comprehensive test suite with 100% source code coverage including integration tests
 - **Auto-Sort Integration**: Seamless workflow combining privacy fixes with automatic function sorting
 
 **✅ Advanced Features Implemented**:

@@ -128,7 +128,31 @@ Running Unit Tests
    make test
    make coverage
 
-The project enforces **100% test coverage** - all code must be tested.
+The project enforces **100% test coverage** of source code in the ``src/`` directory.
+
+Coverage Configuration
+~~~~~~~~~~~~~~~~~~~~~~
+
+Test coverage is configured to measure only source code quality, not test file execution:
+
+.. code-block:: toml
+
+   # pyproject.toml
+   [tool.coverage.run]
+   source = ["src"]
+   omit = ["tests/*"]
+
+   [tool.coverage.report]
+   fail_under = 100
+
+**Rationale**: Coverage measures how well tests exercise source code, following industry standard practices. Test files themselves are excluded from coverage measurement because:
+
+- **Logical Purpose**: The goal is measuring source code quality, not test execution completeness
+- **Meaningful Metrics**: Focuses coverage reports on actionable insights about production code
+- **Industry Standard**: Most Python projects exclude test directories from coverage measurement
+- **Cleaner Reports**: Eliminates noise from incomplete integration test execution
+
+**Coverage Scope**: Only files in ``src/pylint_sort_functions/`` are measured, ensuring 100% coverage reflects comprehensive testing of the actual plugin code.
 
 Integration Testing
 -------------------
