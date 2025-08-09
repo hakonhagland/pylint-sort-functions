@@ -237,7 +237,7 @@ When Asked to Fix a Bug
 
    .. code-block:: bash
 
-      make commit MSG='chore: investigating issue'
+      bash scripts/safe-commit.sh 'chore: investigating issue'
       grep -r "error_pattern" src/ tests/
 
 2. Fix the bug and add tests
@@ -252,7 +252,7 @@ When Asked to Fix a Bug
 
    .. code-block:: bash
 
-      make commit MSG='fix: clear description of the fix'
+      bash scripts/safe-commit.sh 'fix: clear description of the fix'
 
 When Asked to Add a Feature
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -314,7 +314,7 @@ If Commit Fails
    git add -A
 
    # Retry with safe commit
-   make commit MSG='Your message'
+   bash scripts/safe-commit.sh 'Your message'
 
 If Pre-commit Modifies Files
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -327,14 +327,14 @@ This is expected! The safe commit workflow handles this:
    # "Pre-commit checks made changes"
    # Simply:
    git add -A
-   make commit MSG='Your message'  # Retry
+   bash scripts/safe-commit.sh 'Your message'  # Retry
 
 Best Practices Summary
 ----------------------
 
 **DO:**
 
-* ✅ Use ``make commit`` for all commits
+* ✅ Use ``bash scripts/safe-commit.sh`` for all commits
 * ✅ Add changelog entries for user-facing changes
 * ✅ Run tests before committing
 * ✅ Keep functions alphabetically sorted

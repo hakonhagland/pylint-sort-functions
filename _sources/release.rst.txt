@@ -124,21 +124,6 @@ For testing version changes without releasing:
    # Version bump without git commit
    python scripts/bump-version.py --no-commit patch
 
-Safe Commit Workflow
---------------------
-
-The project includes a safe commit system to prevent losing commit messages when pre-commit hooks modify files.
-
-.. code-block:: bash
-
-   # Recommended for all commits
-   make commit MSG='Your commit message'
-
-This automatically runs pre-commit checks before committing, preventing file modifications that could cause message loss.
-
-.. note::
-
-   For Claude Code specific guidelines and detailed commit workflows, see :doc:`claude`.
 
 Best Practices
 --------------
@@ -153,11 +138,11 @@ Development Workflow
 
       make changelog-add TYPE='fixed' MESSAGE='Your fix description'
 
-3. **Commit safely** with detailed message:
+3. **Commit** with detailed message:
 
    .. code-block:: bash
 
-      make commit MSG='feat: your feature description'
+      git commit -m 'feat: your feature description'
 
 4. **Release when ready**:
 
@@ -190,12 +175,12 @@ Common Issues
 ~~~~~~~~~~~~~
 
 **"Pre-commit checks made changes"**
-   The safe commit workflow detected file modifications. Stage the changes and retry:
+   Pre-commit hooks modified files. Stage the changes and commit:
 
    .. code-block:: bash
 
       git add -A
-      make commit MSG='Your message'
+      git commit -m 'Your message'
 
 **"Version mismatch between tag and project"**
    GitHub Actions detected that the git tag doesn't match pyproject.toml version. Ensure you're using the automated release process.

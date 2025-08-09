@@ -79,7 +79,6 @@
 <li class="toctree-l3"><a class="reference internal" href="#manual-version-bumping">Manual Version Bumping</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#safe-commit-workflow">Safe Commit Workflow</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#best-practices">Best Practices</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#development-workflow">Development Workflow</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#release-checklist">Release Checklist</a></li>
@@ -234,19 +233,6 @@ python<span class="w"> </span>scripts/bump-version.py<span class="w"> </span>--n
 </div>
 </section>
 </section>
-<section id="safe-commit-workflow">
-<h2>Safe Commit Workflow<a class="headerlink" href="#safe-commit-workflow" title="Link to this heading"></a></h2>
-<p>The project includes a safe commit system to prevent losing commit messages when pre-commit hooks modify files.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Recommended for all commits</span>
-make<span class="w"> </span>commit<span class="w"> </span><span class="nv">MSG</span><span class="o">=</span><span class="s1">&#39;Your commit message&#39;</span>
-</pre></div>
-</div>
-<p>This automatically runs pre-commit checks before committing, preventing file modifications that could cause message loss.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>For Claude Code specific guidelines and detailed commit workflows, see <a class="reference internal" href="claude.html"><span class="doc">Claude Code Guidelines</span></a>.</p>
-</div>
-</section>
 <section id="best-practices">
 <h2>Best Practices<a class="headerlink" href="#best-practices" title="Link to this heading"></a></h2>
 <section id="development-workflow">
@@ -258,8 +244,8 @@ make<span class="w"> </span>commit<span class="w"> </span><span class="nv">MSG</
 </pre></div>
 </div>
 </li>
-<li><p><strong>Commit safely</strong> with detailed message:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>commit<span class="w"> </span><span class="nv">MSG</span><span class="o">=</span><span class="s1">&#39;feat: your feature description&#39;</span>
+<li><p><strong>Commit</strong> with detailed message:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s1">&#39;feat: your feature description&#39;</span>
 </pre></div>
 </div>
 </li>
@@ -294,9 +280,9 @@ make<span class="w"> </span>commit<span class="w"> </span><span class="nv">MSG</
 <section id="common-issues">
 <h3>Common Issues<a class="headerlink" href="#common-issues" title="Link to this heading"></a></h3>
 <dl>
-<dt><strong>“Pre-commit checks made changes”</strong></dt><dd><p>The safe commit workflow detected file modifications. Stage the changes and retry:</p>
+<dt><strong>“Pre-commit checks made changes”</strong></dt><dd><p>Pre-commit hooks modified files. Stage the changes and commit:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>add<span class="w"> </span>-A
-make<span class="w"> </span>commit<span class="w"> </span><span class="nv">MSG</span><span class="o">=</span><span class="s1">&#39;Your message&#39;</span>
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s1">&#39;Your message&#39;</span>
 </pre></div>
 </div>
 </dd>
