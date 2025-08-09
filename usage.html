@@ -67,6 +67,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#w9002-unsorted-methods">W9002: unsorted-methods</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#w9003-mixed-function-visibility">W9003: mixed-function-visibility</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#w9004-function-should-be-private">W9004: function-should-be-private</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#w9005-function-should-be-public">W9005: function-should-be-public</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#sorting-rules">Sorting Rules</a><ul>
@@ -405,18 +406,41 @@ pip<span class="w"> </span>install<span class="w"> </span>pylint-sort-functions<
 - <strong>Manual renaming</strong>: Functions can be manually renamed following PyLint suggestions
 - <strong>Automatic renaming</strong>: Available via the bidirectional privacy fixer feature</p>
 <blockquote>
-<div><p>The privacy fixer feature provides comprehensive privacy analysis:</p>
+<div><p>See privacy fixer documentation for comprehensive privacy analysis capabilities.</p>
+</div></blockquote>
+</section>
+<section id="w9005-function-should-be-public">
+<h3>W9005: function-should-be-public<a class="headerlink" href="#w9005-function-should-be-public" title="Link to this heading"></a></h3>
+<p><strong>Description</strong>: Private function should be public (remove underscore prefix)</p>
+<p><strong>When triggered</strong>: A private function (with underscore prefix) is imported and used by other modules based on cross-module usage analysis</p>
+<p><strong>Example violation</strong>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Bad: Private function used externally</span>
+<span class="c1"># utils.py contains:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_helper_function</span><span class="p">():</span>  <span class="c1"># Used by other modules</span>
+    <span class="k">return</span> <span class="s2">&quot;help&quot;</span>
+
+<span class="c1"># main.py imports it:</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">_helper_function</span>  <span class="c1"># External usage detected</span>
+</pre></div>
+</div>
+<p><strong>How to fix</strong>: Remove underscore prefix to make it public:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Good: Function correctly marked as public</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">helper_function</span><span class="p">():</span>
+    <span class="k">return</span> <span class="s2">&quot;help&quot;</span>
+</pre></div>
+</div>
+<p><strong>Detection Method</strong>: Uses comprehensive import analysis to identify private functions with external usage:</p>
 <ul class="simple">
-<li><p><strong>W9004 Detection</strong>: Rename public functions that should be private (add underscore prefix)</p></li>
-<li><p><strong>W9005 Detection</strong>: Rename private functions that should be public (remove underscore prefix)</p></li>
-<li><p><strong>Conservative safety checks</strong>: Multiple validation layers ensure safe renaming</p></li>
-<li><p><strong>Dry-run mode</strong>: Preview changes before applying them (<code class="docutils literal notranslate"><span class="pre">--privacy-dry-run</span></code>)</p></li>
-<li><p><strong>Comprehensive reference detection</strong>: Finds all function calls, assignments, and decorators</p></li>
-<li><p><strong>Backup creation</strong>: Automatic backups before applying changes</p></li>
-<li><p><strong>CLI integration</strong>: Use <code class="docutils literal notranslate"><span class="pre">--fix-privacy</span></code> and <code class="docutils literal notranslate"><span class="pre">--privacy-dry-run</span></code> arguments</p></li>
-<li><p><strong>Integrated sorting</strong>: Add <code class="docutils literal notranslate"><span class="pre">--auto-sort</span></code> for automatic function sorting after privacy fixes</p></li>
+<li><p><strong>Cross-module import detection</strong>: Scans all Python files to identify imports of private functions</p></li>
+<li><p><strong>Usage pattern analysis</strong>: Detects <code class="docutils literal notranslate"><span class="pre">from</span> <span class="pre">module</span> <span class="pre">import</span> <span class="pre">_function</span></code> and <code class="docutils literal notranslate"><span class="pre">module._function()</span></code> patterns</p></li>
+<li><p><strong>Conservative approach</strong>: Only flags private functions with clear external usage evidence</p></li>
+<li><p><strong>Test file exclusion</strong>: Ignores usage within test files to avoid false positives</p></li>
 </ul>
-<p>For technical details about the privacy fixer architecture, see the developer documentation.</p>
+<p><strong>Auto-fix availability</strong>:
+- <strong>Manual renaming</strong>: Functions can be manually renamed following PyLint suggestions
+- <strong>Automatic renaming</strong>: Available via the bidirectional privacy fixer feature</p>
+<blockquote>
+<div><p>See privacy fixer documentation for comprehensive privacy analysis capabilities.</p>
 </div></blockquote>
 </section>
 </section>
@@ -518,7 +542,8 @@ pip<span class="w"> </span>install<span class="w"> </span>pylint-sort-functions<
 <span class="na">enable</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">unsorted-functions,</span>
 <span class="w">         </span><span class="na">unsorted-methods,</span>
 <span class="w">         </span><span class="na">mixed-function-visibility,</span>
-<span class="w">         </span><span class="na">function-should-be-private</span>
+<span class="w">         </span><span class="na">function-should-be-private,</span>
+<span class="w">         </span><span class="na">function-should-be-public</span>
 </pre></div>
 </div>
 </section>
@@ -564,7 +589,7 @@ pylint<span class="w"> </span>--load-plugins<span class="o">=</span>pylint_sort_
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Check only plugin-specific violations</span>
 pylint<span class="w"> </span>--load-plugins<span class="o">=</span>pylint_sort_functions<span class="w"> </span><span class="se">\</span>
 <span class="w">       </span>--disable<span class="o">=</span>all<span class="w"> </span><span class="se">\</span>
-<span class="w">       </span>--enable<span class="o">=</span>unsorted-functions,unsorted-methods,mixed-function-visibility,function-should-be-private<span class="w"> </span><span class="se">\</span>
+<span class="w">       </span>--enable<span class="o">=</span>unsorted-functions,unsorted-methods,mixed-function-visibility,function-should-be-private,function-should-be-public<span class="w"> </span><span class="se">\</span>
 <span class="w">       </span>src/
 
 <span class="c1"># Make target equivalent (if available)</span>
@@ -747,7 +772,7 @@ mymodule.py:40:0: W9005: Function &#39;_shared_util&#39; should be public (remov
 <ul class="simple">
 <li><p>Alphabetical sorting of functions and methods</p></li>
 <li><p>Proper separation of public and private functions</p></li>
-<li><p>Clear identification of internal helper functions</p></li>
+<li><p>Clear identification of internal helper functions and externally-used private functions</p></li>
 </ul>
 <p>This leads to more maintainable and navigable codebases where developers can quickly locate functions and understand the public API surface.</p>
 </section>

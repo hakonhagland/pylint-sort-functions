@@ -312,18 +312,47 @@ W9004: function-should-be-private
 - **Manual renaming**: Functions can be manually renamed following PyLint suggestions
 - **Automatic renaming**: Available via the bidirectional privacy fixer feature
 
-  The privacy fixer feature provides comprehensive privacy analysis:
+  See privacy fixer documentation for comprehensive privacy analysis capabilities.
 
-  - **W9004 Detection**: Rename public functions that should be private (add underscore prefix)
-  - **W9005 Detection**: Rename private functions that should be public (remove underscore prefix)
-  - **Conservative safety checks**: Multiple validation layers ensure safe renaming
-  - **Dry-run mode**: Preview changes before applying them (``--privacy-dry-run``)
-  - **Comprehensive reference detection**: Finds all function calls, assignments, and decorators
-  - **Backup creation**: Automatic backups before applying changes
-  - **CLI integration**: Use ``--fix-privacy`` and ``--privacy-dry-run`` arguments
-  - **Integrated sorting**: Add ``--auto-sort`` for automatic function sorting after privacy fixes
+W9005: function-should-be-public
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-  For technical details about the privacy fixer architecture, see the developer documentation.
+**Description**: Private function should be public (remove underscore prefix)
+
+**When triggered**: A private function (with underscore prefix) is imported and used by other modules based on cross-module usage analysis
+
+**Example violation**:
+
+.. code-block:: python
+
+    # Bad: Private function used externally
+    # utils.py contains:
+    def _helper_function():  # Used by other modules
+        return "help"
+
+    # main.py imports it:
+    from utils import _helper_function  # External usage detected
+
+**How to fix**: Remove underscore prefix to make it public:
+
+.. code-block:: python
+
+    # Good: Function correctly marked as public
+    def helper_function():
+        return "help"
+
+**Detection Method**: Uses comprehensive import analysis to identify private functions with external usage:
+
+- **Cross-module import detection**: Scans all Python files to identify imports of private functions
+- **Usage pattern analysis**: Detects ``from module import _function`` and ``module._function()`` patterns
+- **Conservative approach**: Only flags private functions with clear external usage evidence
+- **Test file exclusion**: Ignores usage within test files to avoid false positives
+
+**Auto-fix availability**:
+- **Manual renaming**: Functions can be manually renamed following PyLint suggestions
+- **Automatic renaming**: Available via the bidirectional privacy fixer feature
+
+  See privacy fixer documentation for comprehensive privacy analysis capabilities.
 
 Sorting Rules
 -------------
@@ -436,7 +465,8 @@ Or enable only specific messages:
     enable = unsorted-functions,
              unsorted-methods,
              mixed-function-visibility,
-             function-should-be-private
+             function-should-be-private,
+             function-should-be-public
 
 Command Line Options
 --------------------
@@ -492,7 +522,7 @@ Focus exclusively on sorting violations for clean output:
     # Check only plugin-specific violations
     pylint --load-plugins=pylint_sort_functions \
            --disable=all \
-           --enable=unsorted-functions,unsorted-methods,mixed-function-visibility,function-should-be-private \
+           --enable=unsorted-functions,unsorted-methods,mixed-function-visibility,function-should-be-private,function-should-be-public \
            src/
 
     # Make target equivalent (if available)
@@ -680,7 +710,7 @@ The ``pylint-sort-functions`` plugin helps maintain consistent code organization
 
 - Alphabetical sorting of functions and methods
 - Proper separation of public and private functions
-- Clear identification of internal helper functions
+- Clear identification of internal helper functions and externally-used private functions
 
 This leads to more maintainable and navigable codebases where developers can quickly locate functions and understand the public API surface.
 

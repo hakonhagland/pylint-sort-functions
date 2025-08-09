@@ -49,6 +49,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#installation">Installation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#quick-start">Quick Start</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#message-codes">Message Codes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#advanced-configuration">Advanced Configuration</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="usage.html">User Guide</a></li>
@@ -106,12 +107,29 @@
 <li><p><strong>Function Organization</strong>: Enforces alphabetical sorting of functions within modules</p></li>
 <li><p><strong>Method Organization</strong>: Enforces alphabetical sorting of methods within classes</p></li>
 <li><p><strong>Public/Private Separation</strong>: Ensures public functions/methods come before private ones (underscore prefix)</p></li>
-<li><p><strong>Configurable Rules</strong>: Customizable message codes (W9001-W9003) for different violations</p></li>
+<li><p><strong>Privacy Detection</strong>: Identifies functions that should be private/public based on cross-module usage analysis</p></li>
+<li><p><strong>Automatic Fixing</strong>: CLI tool for automatically fixing function order and privacy violations</p></li>
+<li><p><strong>Configurable Rules</strong>: Customizable message codes (W9001-W9005) for different violations</p></li>
+<li><p><strong>Advanced Configuration</strong>: Public API patterns, privacy detection settings, and decorator exclusions</p></li>
 <li><p><strong>Clear Error Messages</strong>: Helpful messages indicating exactly what needs to be reordered</p></li>
 </ul>
 </section>
 <section id="installation">
 <h2>Installation<a class="headerlink" href="#installation" title="Link to this heading"></a></h2>
+<p><strong>Development Dependencies (Recommended)</strong></p>
+<p>Add to your project’s development dependencies for consistent team usage:</p>
+<div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span class="c1"># pyproject.toml</span>
+<span class="k">[tool.uv.dev-dependencies]</span>
+<span class="n">pylint-sort-functions</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;&gt;=1.0.0&quot;</span>
+<span class="n">pylint</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;&gt;=3.3.0&quot;</span>
+</pre></div>
+</div>
+<div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span class="c1"># Poetry</span>
+<span class="k">[tool.poetry.group.dev.dependencies]</span>
+<span class="n">pylint-sort-functions</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;^1.0.0&quot;</span>
+</pre></div>
+</div>
+<p><strong>Direct Installation</strong></p>
 <p>Install from PyPI:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>pylint-sort-functions
 </pre></div>
@@ -136,6 +154,29 @@
 <li><p><strong>W9001</strong>: <code class="docutils literal notranslate"><span class="pre">unsorted-functions</span></code> - Functions not sorted alphabetically within their scope</p></li>
 <li><p><strong>W9002</strong>: <code class="docutils literal notranslate"><span class="pre">unsorted-methods</span></code> - Class methods not sorted alphabetically within their scope</p></li>
 <li><p><strong>W9003</strong>: <code class="docutils literal notranslate"><span class="pre">mixed-function-visibility</span></code> - Public and private functions not properly separated</p></li>
+<li><p><strong>W9004</strong>: <code class="docutils literal notranslate"><span class="pre">function-should-be-private</span></code> - Function should be private (prefix with underscore)</p></li>
+<li><p><strong>W9005</strong>: <code class="docutils literal notranslate"><span class="pre">function-should-be-public</span></code> - Private function should be public (remove underscore prefix)</p></li>
+</ul>
+</section>
+<section id="advanced-configuration">
+<h2>Advanced Configuration<a class="headerlink" href="#advanced-configuration" title="Link to this heading"></a></h2>
+<p>The plugin supports advanced configuration options:</p>
+<p><strong>Using pyproject.toml</strong>:</p>
+<div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span class="k">[tool.pylint.function-sort]</span>
+<span class="n">public-api-patterns</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;main&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;run&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;setup&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;teardown&quot;</span><span class="p">]</span>
+<span class="n">enable-privacy-detection</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span>
+</pre></div>
+</div>
+<p><strong>Using .pylintrc</strong>:</p>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[function-sort]</span>
+<span class="na">public-api-patterns</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">main,run,setup,teardown</span>
+<span class="na">enable-privacy-detection</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">yes</span>
+</pre></div>
+</div>
+<p><strong>Configuration Options</strong>:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">public-api-patterns</span></code>: Function names to always treat as public API</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">enable-privacy-detection</span></code>: Enable cross-module usage analysis for privacy detection</p></li>
 </ul>
 </section>
 </section>
