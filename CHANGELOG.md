@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Standardize testing infrastructure from unittest to pytest format
+- Update all testing documentation to reflect new test structure and integration tests
 ## [1.3.0] - 2025-08-08
 
 ### Added

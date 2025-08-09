@@ -487,11 +487,30 @@ The project includes these pre-commit hooks:
 
 ## Testing
 
-- Target: 100% test coverage (enforced in pyproject.toml)
-- Uses pytest with PyLint's `CheckerTestCase` for plugin testing
-- Tests include both positive and negative cases for function/method sorting
-- AST-based testing using `astroid.extract_node()` for test case creation
-- Tests located in `tests/` directory with comprehensive edge case coverage
+**Test Organization Structure:**
+```
+tests/
+├── integration/              # End-to-end pytest tests
+│   ├── test_privacy_cli_integration.py    # CLI functionality
+│   ├── test_privacy_fixer_integration.py  # Privacy fixer API (some skipped)
+│   └── test_privacy_fixer_simple.py       # Simplified CLI tests
+├── files/                    # Test data and fixtures
+└── test_*.py                 # Unit tests (pytest + CheckerTestCase)
+```
+
+**Testing Frameworks:**
+- **Unit Tests**: Use pytest with PyLint's `CheckerTestCase` for plugin-specific testing
+- **Integration Tests**: Pure pytest for CLI and end-to-end functionality
+- **Target**: 100% test coverage (enforced in pyproject.toml)
+- **AST-based testing**: Uses `astroid.extract_node()` for test case creation
+
+**Running Tests:**
+```bash
+make test              # Unit tests only
+make test-integration  # Integration tests only
+make test-all         # All tests (unit + integration)
+make coverage         # Coverage report (must be 100%)
+```
 
 ## Code Style
 

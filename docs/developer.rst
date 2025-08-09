@@ -451,11 +451,83 @@ The plugin analyzes cross-module imports to detect functions that should be priv
 
 This real usage analysis provides accurate detection with minimal false positives.
 
-Testing
-~~~~~~~
+Testing Architecture
+~~~~~~~~~~~~~~~~~~~~
 
-For comprehensive testing documentation including unit tests, integration testing,
-and the Docker validation system, see :doc:`testing`.
+The plugin uses a multi-layered testing strategy designed for comprehensive validation of plugin functionality.
+
+**Test Organization**:
+
+.. code-block:: text
+
+   tests/
+   ├── integration/              # End-to-end pytest tests
+   │   ├── test_privacy_cli_integration.py    # CLI functionality
+   │   ├── test_privacy_fixer_integration.py  # Privacy fixer API (some skipped)
+   │   └── test_privacy_fixer_simple.py       # Simplified CLI tests
+   ├── files/                    # Test data and fixtures
+   └── test_*.py                 # Unit tests (pytest + CheckerTestCase)
+
+**Testing Frameworks**:
+
+- **Unit Tests**: Use pytest with PyLint's ``CheckerTestCase`` for plugin-specific testing
+- **Integration Tests**: Pure pytest for CLI and end-to-end functionality
+- **Docker Validation**: Separate system for testing documentation examples
+
+**Key Testing Patterns**:
+
+**Plugin Testing with CheckerTestCase**:
+
+.. code-block:: python
+
+   from pylint.testutils import CheckerTestCase
+   from pylint_sort_functions.checker import FunctionSortChecker
+
+   class TestFunctionSortChecker(CheckerTestCase):
+       CHECKER_CLASS = FunctionSortChecker
+
+       def test_unsorted_functions(self):
+           node = astroid.extract_node("""
+           def zebra_function():  #@
+               pass
+           def alpha_function():
+               pass
+           """)
+           with self.assertAddsMessages(
+               pylint.testutils.MessageTest(msg_id="W9001", node=node)
+           ):
+               self.checker.visit_module(node)
+
+**Integration Testing Approach**:
+
+.. code-block:: python
+
+   class TestCLIIntegration:
+       def setup_method(self):
+           self.test_dir = Path(tempfile.mkdtemp())
+
+       def test_cli_functionality(self):
+           # Create test files, run CLI, verify results
+           result = subprocess.run([sys.executable, cli_script, args])
+           assert result.returncode == 0
+
+**Developer Testing Guidelines**:
+
+1. **Unit Tests**: Add to ``tests/test_*.py`` for new utility functions or checker logic
+2. **Integration Tests**: Add to ``tests/integration/`` for CLI or cross-module functionality
+3. **Test Data**: Place fixtures in ``tests/files/`` organized by test type
+4. **Coverage**: Maintain 100% coverage on source code (``src/`` directory)
+
+**Running Tests During Development**:
+
+.. code-block:: bash
+
+   make test              # Unit tests only
+   make test-integration  # Integration tests only
+   make test-all         # All tests (unit + integration)
+   make coverage         # Coverage report (must be 100%)
+
+For complete testing documentation including Docker validation and framework testing, see :doc:`testing`.
 
 Extending the Plugin
 --------------------
