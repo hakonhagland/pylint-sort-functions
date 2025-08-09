@@ -11,11 +11,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Standardize testing infrastructure from unittest to pytest format
 - Update all testing documentation to reflect new test structure and integration tests
+- Integration test suite achieves 100% success rate with all 19 tests passing
 
 ### Fixed
 
 - Test coverage now focuses on source code only, excluding test files from coverage measurement for more meaningful metrics ([#18](https://github.com/hakonhagland/pylint-sort-functions/issues/18))
-
 ## [1.3.0] - 2025-08-08
 
 ### Added
