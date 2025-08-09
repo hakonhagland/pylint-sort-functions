@@ -177,7 +177,7 @@ Organize functions and methods alphabetically within their scope:
 Testing Requirements
 ~~~~~~~~~~~~~~~~~~~~
 
-* **Coverage**: Maintain 100% test coverage
+* **Coverage**: Maintain 100% test coverage of source code
 * **Run tests**: Always run ``make test`` before committing
 * **Check quality**: Run ``make pre-commit`` before commits
 
@@ -293,7 +293,7 @@ Quality Standards
 Before ANY commit:
 
 1. ✅ Tests pass: ``make test``
-2. ✅ Coverage 100%: ``make coverage``
+2. ✅ Coverage 100% (source code): ``make coverage``
 3. ✅ Linting clean: ``make pre-commit``
 4. ✅ Changelog updated (if user-facing)
 5. ✅ Safe commit used
