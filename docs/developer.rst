@@ -463,7 +463,7 @@ The plugin uses a multi-layered testing strategy designed for comprehensive vali
    tests/
    ├── integration/              # End-to-end pytest tests
    │   ├── test_privacy_cli_integration.py    # CLI functionality
-   │   ├── test_privacy_fixer_integration.py  # Privacy fixer API (some skipped)
+   │   ├── test_privacy_fixer_integration.py  # Privacy fixer API (all passing)
    │   └── test_privacy_fixer_simple.py       # Simplified CLI tests
    ├── files/                    # Test data and fixtures
    └── test_*.py                 # Unit tests (pytest + CheckerTestCase)
