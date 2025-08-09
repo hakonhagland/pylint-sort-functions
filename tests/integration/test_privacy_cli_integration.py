@@ -5,25 +5,23 @@ Minimal integration test for privacy fixer CLI functionality.
 This test validates that the privacy fixer CLI integration is working correctly.
 """
 
-# Import the CLI function directly
 import sys
 import tempfile
-import unittest
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
+import pytest
 
 from pylint_sort_functions.cli import main as cli_main
 
 
-class TestPrivacyFixerCLIIntegration(unittest.TestCase):
+class TestPrivacyFixerCLIIntegration:
     """Test privacy fixer CLI integration."""
 
-    def setUp(self) -> None:
+    def setup_method(self) -> None:
         """Set up test environment."""
         self.test_dir = Path(tempfile.mkdtemp())
 
-    def tearDown(self) -> None:
+    def teardown_method(self) -> None:
         """Clean up test environment."""
         import shutil
 
@@ -67,13 +65,13 @@ def main():
                 cli_main()
             except SystemExit as e:
                 # CLI exits normally, this is expected
-                self.assertEqual(e.code, 0, "CLI should exit cleanly")
+                assert e.code == 0, "CLI should exit cleanly"
 
         finally:
             sys.argv = original_argv
 
         # File should be unchanged
-        self.assertEqual(test_file.read_text(), content)
+        assert test_file.read_text() == content
 
     def test_integrated_privacy_and_sorting_cli(self) -> None:
         """Test integrated privacy and sorting CLI options."""
@@ -108,7 +106,7 @@ def helper_a():
             try:
                 cli_main()
             except SystemExit as e:
-                self.assertEqual(e.code, 0, "CLI should exit cleanly")
+                assert e.code == 0, "CLI should exit cleanly"
 
         finally:
             sys.argv = original_argv
@@ -119,22 +117,15 @@ def helper_a():
             original_argv = sys.argv
             sys.argv = ["pylint-sort-functions", "--help"]
 
-            with self.assertRaises(SystemExit) as cm:
+            with pytest.raises(SystemExit) as exc_info:
                 cli_main()
 
             # Help should exit with code 0
-            self.assertEqual(cm.exception.code, 0)
+            assert exc_info.value.code == 0
 
         finally:
             sys.argv = original_argv
 
 
 if __name__ == "__main__":
-    print("Running Privacy Fixer CLI Integration Tests")
-    print("=" * 45)
-
-    # Run the tests
-    unittest.main(verbosity=2, exit=False, buffer=True)
-
-    print("\n" + "=" * 45)
-    print("✅ Privacy fixer CLI integration validated!")
+    pytest.main([__file__, "-v"])
