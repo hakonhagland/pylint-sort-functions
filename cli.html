@@ -72,6 +72,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#pattern-syntax">Pattern Syntax</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#common-framework-examples">Common Framework Examples</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#section-header-examples">Section Header Examples</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#privacy-fixer">Privacy Fixer</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#exit-codes">Exit Codes</a></li>
@@ -108,6 +109,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="developer.html">Developer Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="privacy.html">Privacy Fixer System</a></li>
 <li class="toctree-l1"><a class="reference internal" href="claude.html">Claude Code Guidelines</a></li>
 <li class="toctree-l1"><a class="reference internal" href="testing.html">Testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="validation-system.html">Documentation Validation System</a></li>
@@ -242,6 +244,15 @@ pylint-sort-functions<span class="w"> </span>--fix<span class="w"> </span>--igno
 </dd>
 <dt><code class="docutils literal notranslate"><span class="pre">--section-headers-case-sensitive</span></code></dt><dd><p>Make section header detection case-sensitive (default: case-insensitive).</p>
 </dd>
+</dl>
+<p><strong>Privacy Fixer Options</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">--fix-privacy</span></code></dt><dd><p>Apply automatic function renaming for privacy fixes (functions that should be private). Uses conservative safety validation before making changes.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">--privacy-dry-run</span></code></dt><dd><p>Preview privacy fixes without applying changes. Shows which functions can be safely renamed and which cannot.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">--auto-sort</span></code></dt><dd><p>Automatically apply function sorting after privacy fixes. Only takes effect when used with <code class="docutils literal notranslate"><span class="pre">--fix-privacy</span></code> or <code class="docutils literal notranslate"><span class="pre">--privacy-dry-run</span></code>.</p>
+</dd>
 <dt><code class="docutils literal notranslate"><span class="pre">--verbose,</span> <span class="pre">-v</span></code></dt><dd><p>Enable verbose output showing processing details.</p>
 </dd>
 <dt><code class="docutils literal notranslate"><span class="pre">--help,</span> <span class="pre">-h</span></code></dt><dd><p>Show help message and exit.</p>
@@ -355,6 +366,74 @@ pylint-sort-functions<span class="w"> </span>--fix<span class="w"> </span>--add-
 <span class="w">    </span>src/
 </pre></div>
 </div>
+</section>
+<section id="privacy-fixer">
+<h3>Privacy Fixer<a class="headerlink" href="#privacy-fixer" title="Link to this heading"></a></h3>
+<p>The CLI tool includes automatic privacy fixing functionality with bidirectional analysis:</p>
+<ul class="simple">
+<li><p><strong>W9004 Detection</strong>: Rename public functions that should be private (add underscore prefix)</p></li>
+<li><p><strong>W9005 Detection</strong>: Rename private functions that should be public (remove underscore prefix)</p></li>
+</ul>
+<p><strong>Usage Examples:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Preview privacy fixes (dry-run mode)</span>
+pylint-sort-functions<span class="w"> </span>--privacy-dry-run<span class="w"> </span>src/
+
+<span class="c1"># Apply privacy fixes with safety checks</span>
+pylint-sort-functions<span class="w"> </span>--fix-privacy<span class="w"> </span>src/
+
+<span class="c1"># Privacy fixes with automatic sorting</span>
+pylint-sort-functions<span class="w"> </span>--fix-privacy<span class="w"> </span>--auto-sort<span class="w"> </span>src/
+
+<span class="c1"># Preview privacy fixes AND sorting changes</span>
+pylint-sort-functions<span class="w"> </span>--privacy-dry-run<span class="w"> </span>--auto-sort<span class="w"> </span>src/
+</pre></div>
+</div>
+<p><strong>Key Features</strong>:</p>
+<ul class="simple">
+<li><p><strong>Conservative safety validation</strong>: Multiple validation layers ensure safe renaming</p></li>
+<li><p><strong>Comprehensive reference detection</strong>: Finds function calls, assignments, decorators</p></li>
+<li><p><strong>Dry-run preview</strong>: Review changes before applying them</p></li>
+<li><p><strong>Automatic backups</strong>: Creates <code class="docutils literal notranslate"><span class="pre">.bak</span></code> files before modifying originals</p></li>
+<li><p><strong>Integrated sorting</strong>: Use <code class="docutils literal notranslate"><span class="pre">--auto-sort</span></code> to automatically apply function sorting after privacy fixes</p></li>
+<li><p><strong>Flexible workflow</strong>: Use privacy fixes alone or combined with automatic sorting</p></li>
+</ul>
+<p><strong>Safety Checks</strong>:</p>
+<ul class="simple">
+<li><p>Validates no name conflicts with existing private functions</p></li>
+<li><p>Ensures all references can be safely renamed</p></li>
+<li><p>Detects dynamic references (<code class="docutils literal notranslate"><span class="pre">getattr</span></code>, <code class="docutils literal notranslate"><span class="pre">hasattr</span></code>) that prevent safe renaming</p></li>
+<li><p>Prevents renaming functions used in string literals</p></li>
+</ul>
+<p><strong>Example Output:</strong></p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Privacy Fix Analysis:
+
+✅ Can safely rename 4 functions:
+  • validate_input → _validate_input (2 references) [W9004]
+  • helper_function → _helper_function (1 reference) [W9004]
+  • format_data → _format_data (3 references) [W9004]
+  • _shared_util → shared_util (3 external references) [W9005]
+
+⚠️  Cannot safely rename 1 function:
+  • process_item: Contains dynamic references (getattr, hasattr, etc.)
+</pre></div>
+</div>
+<p><strong>Integrated Workflow Example with –auto-sort:</strong></p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>$ pylint-sort-functions --fix-privacy --auto-sort --no-backup src/utils.py
+
+Privacy Fix Analysis:
+
+✅ Can safely rename 2 functions:
+  • helper_function → _helper_function (1 reference)
+  • validate_data → _validate_data (2 references)
+
+Renamed 2 functions.
+
+=== Applying Automatic Sorting ===
+Sorted 1 of 1 files
+</pre></div>
+</div>
+<p>This workflow first applies privacy fixes (renaming functions to be private), then automatically sorts all functions alphabetically within their visibility groups (public functions first, then private functions).</p>
+<p>For technical implementation details, see the developer documentation.</p>
 </section>
 </section>
 <section id="exit-codes">

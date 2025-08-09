@@ -57,6 +57,7 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="developer.html">Developer Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="privacy.html">Privacy Fixer System</a></li>
 <li class="toctree-l1"><a class="reference internal" href="claude.html">Claude Code Guidelines</a></li>
 <li class="toctree-l1"><a class="reference internal" href="testing.html">Testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="validation-system.html">Documentation Validation System</a></li>
@@ -79,16 +80,17 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#version-0-2-1-auto-fix-improvements">Version 0.2.1 - Auto-fix Improvements</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#class-method-sorting-in-auto-fix">1. Class Method Sorting in Auto-fix 🔧</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#automatic-privacy-fixing">1. Automatic Privacy Fixing 🔒</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#class-method-sorting-in-auto-fix">2. Class Method Sorting in Auto-fix 🔧</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#version-0-3-0-advanced-features">Version 0.3.0 - Advanced Features</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#id5">High Priority Features</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#priority-features-for-0-3-0">Priority Features for 0.3.0</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#batch-fix-utility">7. Batch Fix Utility 🛠️</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#scope-specific-configuration">8. Scope-Specific Configuration 🎯</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#id7">Medium Priority Features</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#secondary-features-for-0-3-0">Secondary Features for 0.3.0</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#auto-formatter-integration">9. Auto-formatter Integration 📐</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#edge-case-investigation">10. Edge Case Investigation 🔍</a></li>
 </ul>
@@ -234,8 +236,46 @@
 <section id="version-0-2-1-auto-fix-improvements">
 <h2>Version 0.2.1 - Auto-fix Improvements<a class="headerlink" href="#version-0-2-1-auto-fix-improvements" title="Link to this heading"></a></h2>
 <p><strong>Target</strong>: Patch release for auto-fix enhancements</p>
+<section id="automatic-privacy-fixing">
+<h3>1. Automatic Privacy Fixing 🔒<a class="headerlink" href="#automatic-privacy-fixing" title="Link to this heading"></a></h3>
+<p><strong>Issue</strong>: <a class="reference external" href="https://github.com/hakonhagland/pylint-sort-functions/issues/12">#12</a> - Functions flagged with W9004 require manual renaming</p>
+<p><strong>Status</strong>: 🚧 <strong>In Active Development</strong></p>
+<p><strong>Impact</strong>: High - automates tedious manual fixes for privacy violations</p>
+<p><strong>Complexity</strong>: High</p>
+<p><strong>Implementation</strong>:</p>
+<ul class="simple">
+<li><p>✅ Core architecture (FunctionReference, RenameCandidate, PrivacyFixer classes)</p></li>
+<li><p>✅ Comprehensive reference detection (calls, assignments, decorators)</p></li>
+<li><p>✅ Conservative safety validation system</p></li>
+<li><p>✅ Report generation with detailed analysis</p></li>
+<li><p>✅ 100% test coverage with comprehensive edge cases</p></li>
+<li><p>✅ Technical documentation (docs/privacy.rst)</p></li>
+<li><p>🚧 Function renaming application system</p></li>
+<li><p>📋 CLI integration (<code class="docutils literal notranslate"><span class="pre">--fix-privacy</span></code>, <code class="docutils literal notranslate"><span class="pre">--privacy-dry-run</span></code> arguments)</p></li>
+</ul>
+<p><strong>Safety Features</strong>:</p>
+<ul class="simple">
+<li><p>Multiple validation layers prevent unsafe renames</p></li>
+<li><p>Detects name conflicts with existing private functions</p></li>
+<li><p>Identifies dynamic references (<code class="docutils literal notranslate"><span class="pre">getattr</span></code>, <code class="docutils literal notranslate"><span class="pre">hasattr</span></code>)</p></li>
+<li><p>Finds function names in string literals</p></li>
+<li><p>Creates automatic backups before applying changes</p></li>
+<li><p>Dry-run mode for preview before changes</p></li>
+</ul>
+<p><strong>Usage Examples</strong>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Preview privacy fixes</span>
+<span class="n">pylint</span><span class="o">-</span><span class="n">sort</span><span class="o">-</span><span class="n">functions</span> <span class="o">--</span><span class="n">privacy</span><span class="o">-</span><span class="n">dry</span><span class="o">-</span><span class="n">run</span> <span class="n">src</span><span class="o">/</span>
+
+<span class="c1"># Apply privacy fixes with safety validation</span>
+<span class="n">pylint</span><span class="o">-</span><span class="n">sort</span><span class="o">-</span><span class="n">functions</span> <span class="o">--</span><span class="n">fix</span><span class="o">-</span><span class="n">privacy</span> <span class="n">src</span><span class="o">/</span>
+
+<span class="c1"># Combined sorting and privacy fixing</span>
+<span class="n">pylint</span><span class="o">-</span><span class="n">sort</span><span class="o">-</span><span class="n">functions</span> <span class="o">--</span><span class="n">fix</span> <span class="o">--</span><span class="n">fix</span><span class="o">-</span><span class="n">privacy</span> <span class="n">src</span><span class="o">/</span>
+</pre></div>
+</div>
+</section>
 <section id="class-method-sorting-in-auto-fix">
-<h3>1. Class Method Sorting in Auto-fix 🔧<a class="headerlink" href="#class-method-sorting-in-auto-fix" title="Link to this heading"></a></h3>
+<h3>2. Class Method Sorting in Auto-fix 🔧<a class="headerlink" href="#class-method-sorting-in-auto-fix" title="Link to this heading"></a></h3>
 <p><strong>Issue</strong>: Auto-fix tool currently only sorts module-level functions, not class methods</p>
 <p><strong>Impact</strong>: High - feature parity with PyLint plugin</p>
 <p><strong>Complexity</strong>: Medium</p>
@@ -250,8 +290,8 @@
 <section id="version-0-3-0-advanced-features">
 <h2>Version 0.3.0 - Advanced Features<a class="headerlink" href="#version-0-3-0-advanced-features" title="Link to this heading"></a></h2>
 <p><strong>Target</strong>: Minor release with auto-fixing and scope-specific rules</p>
-<section id="id5">
-<h3>High Priority Features<a class="headerlink" href="#id5" title="Link to this heading"></a></h3>
+<section id="priority-features-for-0-3-0">
+<h3>Priority Features for 0.3.0<a class="headerlink" href="#priority-features-for-0-3-0" title="Link to this heading"></a></h3>
 <section id="batch-fix-utility">
 <h4>7. Batch Fix Utility 🛠️<a class="headerlink" href="#batch-fix-utility" title="Link to this heading"></a></h4>
 <p><strong>Issue</strong>: <a class="reference external" href="https://github.com/hakonhagland/pylint-sort-functions/issues/4">#4</a> - Manually fixing many files is time-consuming</p>
@@ -283,8 +323,8 @@
 </div>
 </section>
 </section>
-<section id="id7">
-<h3>Medium Priority Features<a class="headerlink" href="#id7" title="Link to this heading"></a></h3>
+<section id="secondary-features-for-0-3-0">
+<h3>Secondary Features for 0.3.0<a class="headerlink" href="#secondary-features-for-0-3-0" title="Link to this heading"></a></h3>
 <section id="auto-formatter-integration">
 <h4>9. Auto-formatter Integration 📐<a class="headerlink" href="#auto-formatter-integration" title="Link to this heading"></a></h4>
 <p><strong>Issue</strong>: Ensure compatibility with black, ruff format, etc.</p>

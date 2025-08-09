@@ -58,6 +58,7 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="developer.html">Developer Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="privacy.html">Privacy Fixer System</a></li>
 <li class="toctree-l1"><a class="reference internal" href="claude.html">Claude Code Guidelines</a></li>
 <li class="toctree-l1"><a class="reference internal" href="testing.html">Testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="validation-system.html">Documentation Validation System</a></li>
@@ -124,6 +125,96 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [1.3.0] - 2025-08-08
+
+### Added
+
+- **Privacy Fixer System** - Comprehensive automatic function renaming for privacy violations
+  - **W9004 Detection**: Identifies public functions that should be private (add underscore prefix)
+  - **W9005 Detection**: Identifies private functions that should be public (remove underscore prefix)
+  - **Bidirectional Analysis**: Complete privacy analysis in both directions with mutually exclusive detection
+  - **Conservative Safety Validation**: Multiple validation layers ensure safe renaming operations
+  - **Comprehensive Reference Detection**: Finds function calls, assignments, decorators using AST traversal
+  - **Dynamic Reference Detection**: Prevents unsafe renaming of functions used with getattr, eval, exec
+  - **String Literal Scanning**: Detects function names in string literals to prevent breaking references
+  - **Name Conflict Prevention**: Validates no conflicts with existing function names
+  - **Automatic Backup Creation**: Creates .bak files before applying changes for safety
+
+- **CLI Integration** - Complete command-line interface for privacy fixing
+  - `--fix-privacy` - Apply automatic privacy fixes with safety validation
+  - `--privacy-dry-run` - Preview privacy fixes without applying changes
+  - `--auto-sort` - Automatically resort functions after privacy fixes for integrated workflow
+
+- **Advanced AST-Based Sorting** - Improved function sorting with proper boundary detection
+  - **AST Boundary Detection**: Accurate detection of function boundaries using Abstract Syntax Tree analysis
+  - **Main Block Preservation**: Correctly handles `if __name__ == &quot;__main__&quot;:` blocks at end of files
+  - **Complex Construct Support**: Proper sorting around classes, global variables, imports, and docstrings
+  - **Module Structure Preservation**: Maintains proper Python module organization during sorting
+
+- **Integration Test Infrastructure** - End-to-end validation of privacy fixing workflows
+  - **Docker-based Testing**: Complete validation environment for privacy fixer functionality
+  - **CLI Integration Tests**: Validates command-line interface with real file processing
+  - **Multi-framework Compatibility**: Tests privacy detection with Flask, Django, FastAPI, Click patterns
+
+### Enhanced
+
+- **PyLint Plugin** - Extended with bidirectional privacy detection
+  - Added W9005 message type for private functions that should be public
+  - Mutually exclusive W9004/W9005 detection prevents conflicting suggestions
+  - Enhanced configuration options for privacy detection patterns
+  - Improved error handling and edge case coverage
+
+- **Documentation System** - Comprehensive updates across all documentation files
+  - **Privacy Fixer Architecture** (docs/privacy.rst) - Complete technical implementation details
+  - **Bidirectional Detection Examples** - W9004 and W9005 usage patterns and troubleshooting
+  - **Advanced Sorting Algorithm** (docs/sorting.rst) - AST-based boundary detection documentation
+  - **CLI Reference** (docs/cli.rst) - Complete privacy fixer command-line documentation
+  - **User Guide** (docs/usage.rst) - Enhanced with bidirectional privacy detection guidance
+
+- **Test Coverage** - Expanded to maintain 100% coverage with new features
+  - **22+ Privacy Fixer Tests** - Comprehensive unit and integration test coverage
+  - **W9005 Detection Tests** - Complete validation of bidirectional privacy analysis
+  - **Integration Workflow Tests** - End-to-end privacy fixing + sorting workflow validation
+  - **Safety Validation Tests** - Extensive coverage of all safety check scenarios
+
+### Fixed
+
+- **Function Boundary Detection** - Resolved auto-sort issues with complex Python constructs
+  - Fixed `if __name__ == &quot;__main__&quot;:` block displacement during function sorting
+  - Eliminated hardcoded pattern matching in favor of AST-based boundary analysis
+  - Improved handling of module-level docstrings, comments, and complex syntax
+
+- **Reference Detection Edge Cases** - Enhanced AST traversal for comprehensive reference finding
+  - Prevents double-counting of decorator nodes during AST traversal
+  - Handles complex nested scopes and function definitions correctly
+  - Improved detection of assignment references and function call patterns
+
+### Technical Improvements
+
+- **Architecture Enhancement** - Modular privacy fixer system with extensible design
+  - FunctionReference, RenameCandidate, and PrivacyFixer classes for clean separation of concerns
+  - Comprehensive error handling with graceful degradation for edge cases
+  - Performance optimizations for large project analysis with intelligent caching
+
+- **Safety-First Design** - Multiple validation layers prioritize correctness over completeness
+  - Conservative approach: skips functions rather than risk incorrect renaming
+  - Atomic operations with rollback support for failed rename attempts
+  - Extensive logging and reporting for transparency in automated decisions
+
+### Performance
+
+- **Enhanced Import Analysis** - Improved cross-module usage detection for privacy analysis
+  - Optimized AST parsing with caching to prevent redundant analysis
+  - Intelligent file filtering to skip test files and generated code
+  - Memory-efficient data structures for large project processing
+
+### Workflow Integration
+
+- **Integrated Privacy + Sorting** - Seamless workflow combining privacy fixes with function sorting
+  - Privacy fixes applied first, followed by automatic alphabetical sorting
+  - Consistent backup creation across all automated operations
+  - Unified CLI interface for streamlined developer experience
 
 ## [1.2.1] - 2025-08-08
 
@@ -229,6 +320,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Minimal memory footprint** with efficient data structures
 - **Large project optimization** tested on 100+ file codebases
 
+[1.3.0]: https://github.com/hakonhagland/pylint-sort-functions/releases/tag/v1.3.0
 [1.2.1]: https://github.com/hakonhagland/pylint-sort-functions/releases/tag/v1.2.1
 [1.2.0]: https://github.com/hakonhagland/pylint-sort-functions/releases/tag/v1.2.0
 [1.1.0]: https://github.com/hakonhagland/pylint-sort-functions/releases/tag/v1.1.0

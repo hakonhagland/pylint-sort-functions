@@ -1,0 +1,929 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Privacy Fixer System &mdash; pylint-sort-functions 0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=2709fde1"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Claude Code Guidelines" href="claude.html" />
+    <link rel="prev" title="Developer Guide" href="developer.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            pylint-sort-functions
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli.html">Auto-Fix Tool Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="workarounds.html">Known Issues &amp; Workarounds</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Configuration:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="pylintrc.html">PyLint Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sorting.html">Function and Method Sorting Algorithm</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="developer.html">Developer Guide</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Privacy Fixer System</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#design-philosophy">Design Philosophy</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#safety-first-architecture">Safety-First Architecture</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#user-control-and-transparency">User Control and Transparency</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#architecture-overview">Architecture Overview</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#core-components">Core Components</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#integration-points">Integration Points</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#implementation-details">Implementation Details</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#functionreference-class">1. FunctionReference Class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#renamecandidate-class">2. RenameCandidate Class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#privacyfixer-class">3. PrivacyFixer Class</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#reference-detection-algorithm">Reference Detection Algorithm</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#ast-traversal-strategy">AST Traversal Strategy</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#safety-validation-system">Safety Validation System</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#validation-categories">Validation Categories</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#conservative-safety-design">Conservative Safety Design</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#integration-with-privacy-detection-system">Integration with Privacy Detection System</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#detection-integration">Detection Integration</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#cli-integration">CLI Integration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#implemented-cli-arguments">Implemented CLI Arguments</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#error-handling-and-edge-cases">Error Handling and Edge Cases</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#file-system-errors">File System Errors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ast-parsing-errors">AST Parsing Errors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#reference-detection-edge-cases">Reference Detection Edge Cases</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#implementation-status-and-roadmap">Implementation Status and Roadmap</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#current-implementation-status">Current Implementation Status</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#development-status">Development Status</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#usage-examples">Usage Examples</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#basic-privacy-fixing">Basic Privacy Fixing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#integrated-privacy-and-sorting-workflow">Integrated Privacy and Sorting Workflow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#complex-project-example">Complex Project Example</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#testing-strategy">Testing Strategy</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#unit-testing">Unit Testing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#integration-testing">Integration Testing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#safety-testing">Safety Testing</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#conclusion">Conclusion</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#see-also">See Also</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="claude.html">Claude Code Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="testing.html">Testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="validation-system.html">Documentation Validation System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="release.html">Release Management</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="roadmap.html">Development Roadmap</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">pylint-sort-functions</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Privacy Fixer System</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/hakonhagland/pylint-sort-functions/blob/main/docs/privacy.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="privacy-fixer-system">
+<h1>Privacy Fixer System<a class="headerlink" href="#privacy-fixer-system" title="Link to this heading"></a></h1>
+<p>This document provides technical details about the privacy fixer implementation for automatically renaming functions with privacy violations. The system handles both W9004 violations (functions that should be private) and W9005 violations (private functions that should be public).</p>
+<section id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Link to this heading"></a></h2>
+<p>The privacy fixer system implements automatic function renaming with a <strong>safety-first design philosophy</strong>. It identifies privacy violations through bidirectional analysis:</p>
+<ul class="simple">
+<li><p><strong>W9004 Detection</strong>: Public functions that should be private (add underscore prefix)</p></li>
+<li><p><strong>W9005 Detection</strong>: Private functions that should be public (remove underscore prefix)</p></li>
+</ul>
+<p>The system can automatically apply these renames, but only when it can guarantee the safety of the operation.</p>
+<p><strong>Core Principle</strong>: Better to skip a function than to rename it incorrectly.</p>
+<p>The system operates in four phases:</p>
+<ol class="arabic simple">
+<li><p><strong>Detection Phase</strong>: Identify privacy violations using W9004 and W9005 analysis</p></li>
+<li><p><strong>Analysis Phase</strong>: Find all references to functions requiring privacy changes</p></li>
+<li><p><strong>Safety Validation Phase</strong>: Ensure renaming can be done safely without breaking code</p></li>
+<li><p><strong>Renaming Phase</strong>: Apply the actual renames and update all references</p></li>
+<li><p><strong>Optional Sorting Phase</strong>: Automatically resort functions after privacy fixes with <code class="docutils literal notranslate"><span class="pre">--auto-sort</span></code></p></li>
+</ol>
+</section>
+<section id="design-philosophy">
+<h2>Design Philosophy<a class="headerlink" href="#design-philosophy" title="Link to this heading"></a></h2>
+<section id="safety-first-architecture">
+<h3>Safety-First Architecture<a class="headerlink" href="#safety-first-architecture" title="Link to this heading"></a></h3>
+<p>The implementation prioritizes safety over completeness:</p>
+<ul class="simple">
+<li><p><strong>Conservative Approach</strong>: Only rename functions where ALL references can be found and validated</p></li>
+<li><p><strong>Comprehensive Analysis</strong>: Analyze all possible reference types (calls, assignments, decorators, etc.)</p></li>
+<li><p><strong>Validation Guards</strong>: Multiple safety checks prevent unsafe operations</p></li>
+<li><p><strong>Dry-Run Support</strong>: Preview changes before applying them</p></li>
+<li><p><strong>Backup Creation</strong>: Automatic backup files for safety</p></li>
+</ul>
+<p><strong>Trade-off</strong>: Some valid renamings may be skipped to ensure zero false positives.</p>
+</section>
+<section id="user-control-and-transparency">
+<h3>User Control and Transparency<a class="headerlink" href="#user-control-and-transparency" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>Explicit Opt-in</strong>: Users must explicitly request privacy fixes (<code class="docutils literal notranslate"><span class="pre">--fix-privacy</span></code> flag)</p></li>
+<li><p><strong>Clear Reporting</strong>: Detailed reports explain what can/cannot be renamed and why</p></li>
+<li><p><strong>Incremental Processing</strong>: Users can apply fixes file-by-file for better control</p></li>
+<li><p><strong>Rollback Support</strong>: Backup files allow easy rollback of changes</p></li>
+</ul>
+</section>
+</section>
+<section id="architecture-overview">
+<h2>Architecture Overview<a class="headerlink" href="#architecture-overview" title="Link to this heading"></a></h2>
+<section id="core-components">
+<h3>Core Components<a class="headerlink" href="#core-components" title="Link to this heading"></a></h3>
+<p>The privacy fixer consists of three main classes:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>┌─────────────────┐    ┌──────────────────┐    ┌──────────────────┐
+│ FunctionReference │    │  RenameCandidate │    │   PrivacyFixer   │
+│                 │    │                  │    │                  │
+│ - AST node      │    │ - Function node  │    │ - Analysis logic │
+│ - Location info │    │ - Old/new names  │    │ - Safety checks  │
+│ - Context type  │    │ - References     │    │ - Apply renames  │
+│                 │    │ - Safety status  │    │ - Generate report│
+└─────────────────┘    └──────────────────┘    └──────────────────┘
+</pre></div>
+</div>
+<p><strong>Data Flow</strong>:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Module AST -&gt; Find References -&gt; Safety Validation -&gt; Rename Application
+                   |                       |                      |
+                   v                       v                      v
+          FunctionReference    RenameCandidate      Updated Source
+</pre></div>
+</div>
+</section>
+<section id="integration-points">
+<h3>Integration Points<a class="headerlink" href="#integration-points" title="Link to this heading"></a></h3>
+<p>The privacy fixer integrates with existing system components:</p>
+<ul class="simple">
+<li><p><strong>W9004 Detection</strong>: Uses existing <code class="docutils literal notranslate"><span class="pre">should_function_be_private()</span></code> logic from <code class="docutils literal notranslate"><span class="pre">utils.py</span></code></p></li>
+<li><p><strong>AST Analysis</strong>: Leverages same <code class="docutils literal notranslate"><span class="pre">astroid</span></code> infrastructure as the PyLint plugin</p></li>
+<li><p><strong>CLI Integration</strong>: Extends existing CLI with <code class="docutils literal notranslate"><span class="pre">--fix-privacy</span></code> argument</p></li>
+<li><p><strong>Configuration</strong>: Respects existing <code class="docutils literal notranslate"><span class="pre">public-api-patterns</span></code> configuration</p></li>
+</ul>
+</section>
+</section>
+<section id="implementation-details">
+<h2>Implementation Details<a class="headerlink" href="#implementation-details" title="Link to this heading"></a></h2>
+<section id="functionreference-class">
+<h3>1. FunctionReference Class<a class="headerlink" href="#functionreference-class" title="Link to this heading"></a></h3>
+<p>Represents a single reference to a function within a module.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">FunctionReference</span><span class="p">(</span><span class="n">NamedTuple</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Represents a reference to a function within a module.&quot;&quot;&quot;</span>
+
+    <span class="n">node</span><span class="p">:</span> <span class="n">nodes</span><span class="o">.</span><span class="n">NodeNG</span>      <span class="c1"># AST node containing the reference</span>
+    <span class="n">line</span><span class="p">:</span> <span class="nb">int</span>               <span class="c1"># Line number of the reference</span>
+    <span class="n">col</span><span class="p">:</span> <span class="nb">int</span>                <span class="c1"># Column offset of the reference</span>
+    <span class="n">context</span><span class="p">:</span> <span class="nb">str</span>            <span class="c1"># Type of reference</span>
+</pre></div>
+</div>
+<p><strong>Reference Context Types</strong>:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;call&quot;</span></code>: Function call (<code class="docutils literal notranslate"><span class="pre">function_name()</span></code>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;assignment&quot;</span></code>: Variable assignment (<code class="docutils literal notranslate"><span class="pre">var</span> <span class="pre">=</span> <span class="pre">function_name</span></code>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;decorator&quot;</span></code>: Decorator usage (<code class="docutils literal notranslate"><span class="pre">&#64;function_name</span></code>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;reference&quot;</span></code>: Generic name reference</p></li>
+</ul>
+<p><strong>Usage Example</strong>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># For code: result = helper_function()</span>
+<span class="n">ref</span> <span class="o">=</span> <span class="n">FunctionReference</span><span class="p">(</span>
+    <span class="n">node</span><span class="o">=</span><span class="n">call_node</span><span class="p">,</span>
+    <span class="n">line</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span>
+    <span class="n">col</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
+    <span class="n">context</span><span class="o">=</span><span class="s2">&quot;call&quot;</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="renamecandidate-class">
+<h3>2. RenameCandidate Class<a class="headerlink" href="#renamecandidate-class" title="Link to this heading"></a></h3>
+<p>Represents a function that potentially can be renamed to private.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">RenameCandidate</span><span class="p">(</span><span class="n">NamedTuple</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Represents a function that can be safely renamed.&quot;&quot;&quot;</span>
+
+    <span class="n">function_node</span><span class="p">:</span> <span class="n">nodes</span><span class="o">.</span><span class="n">FunctionDef</span>    <span class="c1"># Original function AST node</span>
+    <span class="n">old_name</span><span class="p">:</span> <span class="nb">str</span>                       <span class="c1"># Current function name</span>
+    <span class="n">new_name</span><span class="p">:</span> <span class="nb">str</span>                       <span class="c1"># Proposed private name</span>
+    <span class="n">references</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">FunctionReference</span><span class="p">]</span> <span class="c1"># All found references</span>
+    <span class="n">is_safe</span><span class="p">:</span> <span class="nb">bool</span>                      <span class="c1"># Safety validation result</span>
+    <span class="n">safety_issues</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>           <span class="c1"># Reasons if unsafe</span>
+</pre></div>
+</div>
+<p><strong>Lifecycle</strong>:</p>
+<ol class="arabic simple">
+<li><p><strong>Creation</strong>: Built from W9004 detection results</p></li>
+<li><p><strong>Reference Analysis</strong>: Populated with all found references</p></li>
+<li><p><strong>Safety Validation</strong>: <code class="docutils literal notranslate"><span class="pre">is_safe</span></code> and <code class="docutils literal notranslate"><span class="pre">safety_issues</span></code> determined</p></li>
+<li><p><strong>Processing</strong>: Either applied (if safe) or skipped (if unsafe)</p></li>
+</ol>
+<p><strong>Status Examples</strong>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Safe to rename</span>
+<span class="n">safe_candidate</span> <span class="o">=</span> <span class="n">RenameCandidate</span><span class="p">(</span>
+    <span class="n">function_node</span><span class="o">=</span><span class="n">func_ast</span><span class="p">,</span>
+    <span class="n">old_name</span><span class="o">=</span><span class="s2">&quot;helper_function&quot;</span><span class="p">,</span>
+    <span class="n">new_name</span><span class="o">=</span><span class="s2">&quot;_helper_function&quot;</span><span class="p">,</span>
+    <span class="n">references</span><span class="o">=</span><span class="p">[</span><span class="n">ref1</span><span class="p">,</span> <span class="n">ref2</span><span class="p">],</span>
+    <span class="n">is_safe</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">safety_issues</span><span class="o">=</span><span class="p">[]</span>
+<span class="p">)</span>
+
+<span class="c1"># Unsafe to rename</span>
+<span class="n">unsafe_candidate</span> <span class="o">=</span> <span class="n">RenameCandidate</span><span class="p">(</span>
+    <span class="n">function_node</span><span class="o">=</span><span class="n">func_ast</span><span class="p">,</span>
+    <span class="n">old_name</span><span class="o">=</span><span class="s2">&quot;complex_function&quot;</span><span class="p">,</span>
+    <span class="n">new_name</span><span class="o">=</span><span class="s2">&quot;_complex_function&quot;</span><span class="p">,</span>
+    <span class="n">references</span><span class="o">=</span><span class="p">[</span><span class="n">ref1</span><span class="p">],</span>
+    <span class="n">is_safe</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">safety_issues</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Function name found in string literals&quot;</span><span class="p">]</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="privacyfixer-class">
+<h3>3. PrivacyFixer Class<a class="headerlink" href="#privacyfixer-class" title="Link to this heading"></a></h3>
+<p>Main orchestration class that coordinates the privacy fixing process.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">PrivacyFixer</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Handles automatic renaming of functions that should be private.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dry_run</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">backup</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dry_run</span> <span class="o">=</span> <span class="n">dry_run</span>      <span class="c1"># Preview mode</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">backup</span> <span class="o">=</span> <span class="n">backup</span>        <span class="c1"># Create .bak files</span>
+</pre></div>
+</div>
+<p><strong>Key Methods</strong>:</p>
+<dl class="simple">
+<dt><strong>analyze_module()</strong> - <em>✅ IMPLEMENTED</em></dt><dd><p>Entry point for analyzing a module and identifying rename candidates using W9004/W9005 detection.</p>
+</dd>
+<dt><strong>find_function_references()</strong> - <em>✅ IMPLEMENTED</em></dt><dd><p>Core reference detection using AST traversal with comprehensive pattern matching.</p>
+</dd>
+<dt><strong>is_safe_to_rename()</strong> - <em>✅ IMPLEMENTED</em></dt><dd><p>Safety validation system with multiple conservative checks for name conflicts and dynamic references.</p>
+</dd>
+<dt><strong>apply_renames()</strong> - <em>✅ IMPLEMENTED</em></dt><dd><p>Apply validated renames to source code with atomic operations and backup creation.</p>
+</dd>
+<dt><strong>generate_report()</strong> - <em>✅ IMPLEMENTED</em></dt><dd><p>Generate human-readable reports of rename operations and status.</p>
+</dd>
+</dl>
+</section>
+</section>
+<section id="reference-detection-algorithm">
+<h2>Reference Detection Algorithm<a class="headerlink" href="#reference-detection-algorithm" title="Link to this heading"></a></h2>
+<p>The reference detection system uses recursive AST traversal to find all possible references to a target function.</p>
+<section id="ast-traversal-strategy">
+<h3>AST Traversal Strategy<a class="headerlink" href="#ast-traversal-strategy" title="Link to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">find_function_references</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">function_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">module_ast</span><span class="p">:</span> <span class="n">nodes</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Find all references using recursive AST traversal.&quot;&quot;&quot;</span>
+
+    <span class="n">references</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">decorator_nodes</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>  <span class="c1"># Prevent double-counting</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_check_node</span><span class="p">(</span><span class="n">node</span><span class="p">):</span>
+        <span class="c1"># 1. Check for function calls</span>
+        <span class="c1"># 2. Check for decorator usage</span>
+        <span class="c1"># 3. Check for name references</span>
+        <span class="c1"># 4. Recursively process children</span>
+        <span class="k">pass</span>
+
+    <span class="n">_check_node</span><span class="p">(</span><span class="n">module_ast</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">references</span>
+</pre></div>
+</div>
+<p><strong>Reference Type Detection</strong>:</p>
+<ol class="arabic">
+<li><p><strong>Function Calls</strong>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Detects: function_name()</span>
+<span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">nodes</span><span class="o">.</span><span class="n">Call</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">func</span><span class="p">,</span> <span class="n">nodes</span><span class="o">.</span><span class="n">Name</span><span class="p">)</span> <span class="ow">and</span> <span class="n">node</span><span class="o">.</span><span class="n">func</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">function_name</span><span class="p">:</span>
+        <span class="c1"># Found function call</span>
+        <span class="k">pass</span>
+</pre></div>
+</div>
+</li>
+<li><p><strong>Decorator References</strong>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Detects: @function_name</span>
+<span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="s1">&#39;decorators&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">node</span><span class="o">.</span><span class="n">decorators</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">decorator</span> <span class="ow">in</span> <span class="n">node</span><span class="o">.</span><span class="n">decorators</span><span class="o">.</span><span class="n">nodes</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">decorator</span><span class="p">,</span> <span class="n">nodes</span><span class="o">.</span><span class="n">Name</span><span class="p">)</span> <span class="ow">and</span> <span class="n">decorator</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">function_name</span><span class="p">:</span>
+            <span class="c1"># Found decorator usage</span>
+            <span class="k">pass</span>
+</pre></div>
+</div>
+</li>
+<li><p><strong>Assignment References</strong>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Detects: var = function_name</span>
+<span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">nodes</span><span class="o">.</span><span class="n">Name</span><span class="p">)</span> <span class="ow">and</span> <span class="n">node</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">function_name</span><span class="p">:</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">parent</span><span class="p">,</span> <span class="n">nodes</span><span class="o">.</span><span class="n">Assign</span><span class="p">):</span>
+        <span class="c1"># Found assignment reference</span>
+        <span class="k">pass</span>
+</pre></div>
+</div>
+</li>
+</ol>
+<p><strong>Duplicate Prevention</strong>:</p>
+<p>The algorithm prevents double-counting of decorator nodes that appear both as decorators and as name references during AST traversal:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">decorator_nodes</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+
+<span class="c1"># Mark decorator nodes to prevent double-counting</span>
+<span class="n">decorator_nodes</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="nb">id</span><span class="p">(</span><span class="n">decorator</span><span class="p">))</span>
+
+<span class="c1"># Skip if already processed as decorator</span>
+<span class="k">if</span> <span class="nb">id</span><span class="p">(</span><span class="n">node</span><span class="p">)</span> <span class="ow">in</span> <span class="n">decorator_nodes</span><span class="p">:</span>
+    <span class="k">pass</span>
+</pre></div>
+</div>
+<p><strong>Edge Cases Handled</strong>:</p>
+<ul class="simple">
+<li><p><strong>Function Definitions</strong>: Skips the function definition itself</p></li>
+<li><p><strong>Call Node Functions</strong>: Avoids double-counting <code class="docutils literal notranslate"><span class="pre">func</span></code> in <code class="docutils literal notranslate"><span class="pre">func()</span></code></p></li>
+<li><p><strong>Complex Decorators</strong>: Handles <code class="docutils literal notranslate"><span class="pre">&#64;module.decorator</span></code> patterns</p></li>
+<li><p><strong>Nested References</strong>: Recursively finds references in nested scopes</p></li>
+</ul>
+</section>
+</section>
+<section id="safety-validation-system">
+<h2>Safety Validation System<a class="headerlink" href="#safety-validation-system" title="Link to this heading"></a></h2>
+<p>The safety validation system implements multiple conservative checks to ensure renaming operations won’t break code.</p>
+<section id="validation-categories">
+<h3>Validation Categories<a class="headerlink" href="#validation-categories" title="Link to this heading"></a></h3>
+<ol class="arabic">
+<li><p><strong>Name Conflict Detection</strong>
+<em>Status: 🚧 Basic framework implemented, full implementation pending</em></p>
+<p>Checks if the proposed private name already exists:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_has_name_conflict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">candidate</span><span class="p">:</span> <span class="n">RenameCandidate</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="c1"># TODO: Check module AST for existing function with new_name</span>
+    <span class="c1"># For now, conservatively assumes no conflicts</span>
+    <span class="k">return</span> <span class="kc">False</span>
+</pre></div>
+</div>
+</li>
+<li><p><strong>Dynamic Reference Detection</strong>
+<em>Status: 🚧 Framework implemented, detection logic pending</em></p>
+<p>Identifies dynamic references that can’t be safely renamed:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># These patterns make renaming unsafe:</span>
+<span class="nb">getattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s2">&quot;function_name&quot;</span><span class="p">)</span>         <span class="c1"># Dynamic attribute access</span>
+<span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s2">&quot;function_name&quot;</span><span class="p">)</span>         <span class="c1"># Dynamic attribute check</span>
+<span class="nb">setattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s2">&quot;function_name&quot;</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>  <span class="c1"># Dynamic attribute setting</span>
+<span class="nb">eval</span><span class="p">(</span><span class="s2">&quot;function_name()&quot;</span><span class="p">)</span>               <span class="c1"># Code evaluation</span>
+<span class="n">exec</span><span class="p">(</span><span class="s2">&quot;result = function_name()&quot;</span><span class="p">)</span>      <span class="c1"># Code execution</span>
+</pre></div>
+</div>
+</li>
+<li><p><strong>String Literal Detection</strong>
+<em>Status: 🚧 Framework implemented, scanning pending</em></p>
+<p>Finds function names embedded in string literals:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># These make renaming potentially unsafe:</span>
+<span class="n">sql_query</span> <span class="o">=</span> <span class="s2">&quot;SELECT * FROM helper_function_results&quot;</span>
+<span class="n">log_message</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Calling helper_function with args </span><span class="si">{</span><span class="n">args</span><span class="si">}</span><span class="s2">&quot;</span>
+<span class="n">documentation</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;The helper_function does...&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+</li>
+<li><p><strong>Reference Context Validation</strong>
+<em>Status: ✅ Implemented</em></p>
+<p>Ensures all references are in contexts we can handle:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">validate_contexts</span><span class="p">(</span><span class="n">candidate</span><span class="p">):</span>
+    <span class="n">safe_contexts</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;call&quot;</span><span class="p">,</span> <span class="s2">&quot;assignment&quot;</span><span class="p">,</span> <span class="s2">&quot;decorator&quot;</span><span class="p">,</span> <span class="s2">&quot;reference&quot;</span><span class="p">}</span>
+    <span class="n">issues</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="c1"># Any reference in an unknown context is considered unsafe</span>
+    <span class="k">for</span> <span class="n">ref</span> <span class="ow">in</span> <span class="n">candidate</span><span class="o">.</span><span class="n">references</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">ref</span><span class="o">.</span><span class="n">context</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">safe_contexts</span><span class="p">:</span>
+            <span class="n">issues</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unsafe context: </span><span class="si">{</span><span class="n">ref</span><span class="o">.</span><span class="n">context</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">issues</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span>
+</pre></div>
+</div>
+</li>
+</ol>
+</section>
+<section id="conservative-safety-design">
+<h3>Conservative Safety Design<a class="headerlink" href="#conservative-safety-design" title="Link to this heading"></a></h3>
+<p><strong>Default to Unsafe</strong>: When validation cannot be completed, the system assumes unsafe conditions.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_has_name_conflict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">candidate</span><span class="p">:</span> <span class="n">RenameCandidate</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># Attempt to check for conflicts</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_module_for_conflicts</span><span class="p">(</span><span class="n">candidate</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">True</span>  <span class="c1"># Conservative: assume conflict exists</span>
+</pre></div>
+</div>
+<p><strong>Multiple Validation Layers</strong>: All checks must pass for a rename to be considered safe:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">is_safe_to_rename</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">candidate</span><span class="p">:</span> <span class="n">RenameCandidate</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span>
+    <span class="n">issues</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_has_name_conflict</span><span class="p">(</span><span class="n">candidate</span><span class="p">):</span>
+        <span class="n">issues</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;Name conflict detected&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_has_dynamic_references</span><span class="p">(</span><span class="n">candidate</span><span class="p">):</span>
+        <span class="n">issues</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;Dynamic references found&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_has_string_references</span><span class="p">(</span><span class="n">candidate</span><span class="p">):</span>
+        <span class="n">issues</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;String references found&quot;</span><span class="p">)</span>
+
+    <span class="c1"># All checks must pass</span>
+    <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">issues</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="n">issues</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="integration-with-privacy-detection-system">
+<h2>Integration with Privacy Detection System<a class="headerlink" href="#integration-with-privacy-detection-system" title="Link to this heading"></a></h2>
+<p>The privacy fixer builds on the comprehensive privacy detection system from <code class="docutils literal notranslate"><span class="pre">utils.py</span></code> which includes both W9004 and W9005 detection.</p>
+<section id="detection-integration">
+<h3>Detection Integration<a class="headerlink" href="#detection-integration" title="Link to this heading"></a></h3>
+<p><strong>Bidirectional Detection Logic</strong> (in <code class="docutils literal notranslate"><span class="pre">utils.py</span></code>):</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">should_function_be_private</span><span class="p">(</span>
+    <span class="n">func</span><span class="p">:</span> <span class="n">nodes</span><span class="o">.</span><span class="n">FunctionDef</span><span class="p">,</span>
+    <span class="n">module_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
+    <span class="n">project_root</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
+    <span class="n">public_patterns</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Set</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Detect if a public function should be private based on import analysis.&quot;&quot;&quot;</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">should_function_be_public</span><span class="p">(</span>
+    <span class="n">func</span><span class="p">:</span> <span class="n">nodes</span><span class="o">.</span><span class="n">FunctionDef</span><span class="p">,</span>
+    <span class="n">module_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
+    <span class="n">project_root</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Detect if a private function should be public based on external usage.&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<p><strong>Privacy Fixer Integration</strong>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">analyze_module</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">module_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">project_root</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
+                  <span class="n">public_patterns</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Set</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">RenameCandidate</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Identify privacy violations using W9004/W9005 detection.&quot;&quot;&quot;</span>
+    <span class="c1"># Implementation:</span>
+    <span class="c1"># 1. Parse module AST</span>
+    <span class="c1"># 2. Extract all functions</span>
+    <span class="c1"># 3. Use should_function_be_private() for W9004 candidates</span>
+    <span class="c1"># 4. Use should_function_be_public() for W9005 candidates</span>
+    <span class="c1"># 5. Build RenameCandidate objects</span>
+    <span class="c1"># 6. Run reference detection and safety validation</span>
+</pre></div>
+</div>
+<p><strong>Configuration Consistency</strong>:</p>
+<p>Both systems respect the same configuration options:
+- <code class="docutils literal notranslate"><span class="pre">public-api-patterns</span></code>: Functions to treat as public API
+- <code class="docutils literal notranslate"><span class="pre">enable-privacy-detection</span></code>: Whether to perform privacy analysis</p>
+</section>
+</section>
+<section id="cli-integration">
+<h2>CLI Integration<a class="headerlink" href="#cli-integration" title="Link to this heading"></a></h2>
+<p>The privacy fixer is fully integrated with the existing CLI system through comprehensive arguments.</p>
+<section id="implemented-cli-arguments">
+<h3>Implemented CLI Arguments<a class="headerlink" href="#implemented-cli-arguments" title="Link to this heading"></a></h3>
+<dl>
+<dt><strong>–fix-privacy</strong></dt><dd><p><em>Status: ✅ IMPLEMENTED</em></p>
+<p>Enable automatic privacy fixing mode:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pylint-sort-functions<span class="w"> </span>--fix-privacy<span class="w"> </span>src/
+</pre></div>
+</div>
+<p><strong>Behavior</strong>:
+- Identifies W9004 violations (functions that should be private)
+- Identifies W9005 violations (private functions that should be public)
+- Performs comprehensive safety analysis
+- Applies safe renames automatically
+- Reports unsafe cases for manual review
+- Creates backup files for safety</p>
+</dd>
+<dt><strong>–privacy-dry-run</strong></dt><dd><p><em>Status: ✅ IMPLEMENTED</em></p>
+<p>Preview privacy fixes without applying them:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pylint-sort-functions<span class="w"> </span>--fix-privacy<span class="w"> </span>--privacy-dry-run<span class="w"> </span>src/
+</pre></div>
+</div>
+</dd>
+<dt><strong>–auto-sort</strong></dt><dd><p><em>Status: ✅ IMPLEMENTED</em></p>
+<p>Automatically resort functions after privacy fixes:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pylint-sort-functions<span class="w"> </span>--fix-privacy<span class="w"> </span>--auto-sort<span class="w"> </span>src/
+</pre></div>
+</div>
+<p><strong>Output Example</strong>:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Privacy Fix Analysis:
+
+✅ Can safely rename 2 functions:
+  • helper_function → _helper_function (3 references)
+  • utility_func → _utility_func (1 reference)
+
+⚠️  Cannot safely rename 1 function:
+  • complex_helper: Function name found in string literals
+</pre></div>
+</div>
+</dd>
+</dl>
+<p><strong>Integration with Existing Options</strong>:</p>
+<p>The privacy fixer respects existing configuration:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Respect public API patterns</span>
+pylint-sort-functions<span class="w"> </span>--fix-privacy<span class="w"> </span>--public-patterns<span class="w"> </span><span class="s2">&quot;main,setup,run&quot;</span><span class="w"> </span>src/
+
+<span class="c1"># Create backups (default behavior)</span>
+pylint-sort-functions<span class="w"> </span>--fix-privacy<span class="w"> </span>--backup<span class="w"> </span>src/
+
+<span class="c1"># Disable backups</span>
+pylint-sort-functions<span class="w"> </span>--fix-privacy<span class="w"> </span>--no-backup<span class="w"> </span>src/
+</pre></div>
+</div>
+</section>
+</section>
+<section id="error-handling-and-edge-cases">
+<h2>Error Handling and Edge Cases<a class="headerlink" href="#error-handling-and-edge-cases" title="Link to this heading"></a></h2>
+<p>The system handles various error conditions gracefully.</p>
+<section id="file-system-errors">
+<h3>File System Errors<a class="headerlink" href="#file-system-errors" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>Permission Errors</strong>: Skip files that cannot be read/written</p></li>
+<li><p><strong>Missing Files</strong>: Report clearly and continue with remaining files</p></li>
+<li><p><strong>Backup Failures</strong>: Abort rename if backup cannot be created (when enabled)</p></li>
+</ul>
+</section>
+<section id="ast-parsing-errors">
+<h3>AST Parsing Errors<a class="headerlink" href="#ast-parsing-errors" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>Syntax Errors</strong>: Skip files with invalid Python syntax</p></li>
+<li><p><strong>Encoding Issues</strong>: Handle files with non-UTF-8 encoding gracefully</p></li>
+<li><p><strong>Large Files</strong>: Process files of any size without memory issues</p></li>
+</ul>
+</section>
+<section id="reference-detection-edge-cases">
+<h3>Reference Detection Edge Cases<a class="headerlink" href="#reference-detection-edge-cases" title="Link to this heading"></a></h3>
+<p><strong>Import Aliases</strong>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">helper_function</span> <span class="k">as</span> <span class="n">helper</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">helper</span><span class="p">()</span>  <span class="c1"># Should be detected and renamed</span>
+</pre></div>
+</div>
+<p><strong>Nested Scopes</strong>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">outer</span><span class="p">():</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">inner</span><span class="p">():</span>
+        <span class="n">helper_function</span><span class="p">()</span>  <span class="c1"># Must be found in nested scope</span>
+    <span class="k">return</span> <span class="n">inner</span>
+</pre></div>
+</div>
+<p><strong>Dynamic Code Patterns</strong>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># These make the function unsafe to rename</span>
+<span class="n">func_name</span> <span class="o">=</span> <span class="s2">&quot;helper_function&quot;</span>
+<span class="nb">globals</span><span class="p">()[</span><span class="n">func_name</span><span class="p">]()</span>
+
+<span class="c1"># String formatting with function names</span>
+<span class="n">query</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;CALL </span><span class="si">{</span><span class="n">helper_function</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">()&quot;</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="implementation-status-and-roadmap">
+<h2>Implementation Status and Roadmap<a class="headerlink" href="#implementation-status-and-roadmap" title="Link to this heading"></a></h2>
+<section id="current-implementation-status">
+<h3>Current Implementation Status<a class="headerlink" href="#current-implementation-status" title="Link to this heading"></a></h3>
+<p><strong>✅ Completed Components</strong>:</p>
+<ul class="simple">
+<li><p><strong>Core Architecture</strong>: All three main classes fully implemented with comprehensive functionality</p></li>
+<li><p><strong>Bidirectional Privacy Detection</strong>: Both W9004 (should be private) and W9005 (should be public) detection</p></li>
+<li><p><strong>Reference Detection</strong>: Complete AST traversal with comprehensive pattern matching</p></li>
+<li><p><strong>Safety Validation System</strong>: Multi-layer validation with name conflict detection and dynamic reference analysis</p></li>
+<li><p><strong>Rename Application System</strong>: Atomic file operations with backup creation and rollback support</p></li>
+<li><p><strong>CLI Integration</strong>: Complete implementation of <code class="docutils literal notranslate"><span class="pre">--fix-privacy</span></code>, <code class="docutils literal notranslate"><span class="pre">--privacy-dry-run</span></code>, and <code class="docutils literal notranslate"><span class="pre">--auto-sort</span></code> arguments</p></li>
+<li><p><strong>Module Analysis</strong>: Full integration with existing W9004/W9005 detection logic and configuration systems</p></li>
+<li><p><strong>Report Generation</strong>: Human-readable status reports with detailed explanations and safety issue descriptions</p></li>
+<li><p><strong>Test Coverage</strong>: Comprehensive test suite with 100% coverage including integration tests</p></li>
+<li><p><strong>Auto-Sort Integration</strong>: Seamless workflow combining privacy fixes with automatic function sorting</p></li>
+</ul>
+<p><strong>✅ Advanced Features Implemented</strong>:</p>
+<ol class="arabic simple">
+<li><p><strong>Enhanced Safety Validation</strong></p>
+<ul class="simple">
+<li><p>Name conflict detection with complete module AST scanning</p></li>
+<li><p>Dynamic reference detection (getattr, eval, exec patterns)</p></li>
+<li><p>String literal scanning for function name references</p></li>
+<li><p>Comprehensive context validation with multiple safety layers</p></li>
+</ul>
+</li>
+<li><p><strong>Production-Ready CLI System</strong></p>
+<ul class="simple">
+<li><p>Full argument parsing with error handling</p></li>
+<li><p>Progress reporting and verbose output modes</p></li>
+<li><p>Configuration integration with existing PyLint options</p></li>
+<li><p>Backup file management with rollback support</p></li>
+</ul>
+</li>
+<li><p><strong>Integrated Workflow Support</strong></p>
+<ul class="simple">
+<li><p>Privacy fixing followed by automatic function sorting</p></li>
+<li><p>Consistent configuration across all tools</p></li>
+<li><p>Performance optimization for large projects</p></li>
+<li><p>Comprehensive error recovery and reporting</p></li>
+</ul>
+</li>
+</ol>
+</section>
+<section id="development-status">
+<h3>Development Status<a class="headerlink" href="#development-status" title="Link to this heading"></a></h3>
+<p><strong>✅ All Phases Complete</strong>:</p>
+<dl class="simple">
+<dt><strong>Phase 1: Core Safety System</strong> <em>(COMPLETED)</em></dt><dd><p>Comprehensive safety validation system with multi-layer checks for all risk categories including name conflicts, dynamic references, and string literal detection.</p>
+</dd>
+<dt><strong>Phase 2: Rename Implementation</strong> <em>(COMPLETED)</em></dt><dd><p>Full source code modification system with atomic operations, error recovery, and backup management.</p>
+</dd>
+<dt><strong>Phase 3: CLI Integration</strong> <em>(COMPLETED)</em></dt><dd><p>Complete command-line interface integration with argument parsing, progress reporting, and configuration management.</p>
+</dd>
+<dt><strong>Phase 4: Testing and Optimization</strong> <em>(COMPLETED)</em></dt><dd><p>Comprehensive integration testing, performance optimization, and complete documentation.</p>
+</dd>
+</dl>
+<p><strong>Additional Enhancements Completed</strong>:</p>
+<ul class="simple">
+<li><p><strong>W9005 Bidirectional Detection</strong>: Private functions that should be public</p></li>
+<li><p><strong>Auto-Sort Integration</strong>: Seamless privacy fixing + function sorting workflow</p></li>
+<li><p><strong>Advanced AST Processing</strong>: Boundary detection improvements for complex Python constructs</p></li>
+<li><p><strong>Integration Test Suite</strong>: End-to-end validation of CLI workflows</p></li>
+</ul>
+</section>
+</section>
+<section id="usage-examples">
+<h2>Usage Examples<a class="headerlink" href="#usage-examples" title="Link to this heading"></a></h2>
+<p>The privacy fixer system is fully implemented and ready for production use.</p>
+<section id="basic-privacy-fixing">
+<h3>Basic Privacy Fixing<a class="headerlink" href="#basic-privacy-fixing" title="Link to this heading"></a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Analyze and fix privacy issues automatically</span>
+pylint-sort-functions<span class="w"> </span>--fix-privacy<span class="w"> </span>src/
+
+<span class="c1"># Preview changes without applying them</span>
+pylint-sort-functions<span class="w"> </span>--fix-privacy<span class="w"> </span>--privacy-dry-run<span class="w"> </span>src/
+</pre></div>
+</div>
+<p><strong>Example Output</strong>:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Processing src/utils.py...
+Privacy Fix Analysis:
+
+✅ Can safely rename 3 functions:
+  • format_output → _format_output (2 references)
+  • validate_input → _validate_input (4 references)
+  • calculate_hash → _calculate_hash (1 reference)
+
+Applied 3 renames to src/utils.py
+Backup created: src/utils.py.bak
+</pre></div>
+</div>
+</section>
+<section id="integrated-privacy-and-sorting-workflow">
+<h3>Integrated Privacy and Sorting Workflow<a class="headerlink" href="#integrated-privacy-and-sorting-workflow" title="Link to this heading"></a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Fix privacy issues and automatically resort functions</span>
+pylint-sort-functions<span class="w"> </span>--fix-privacy<span class="w"> </span>--auto-sort<span class="w"> </span>src/
+
+<span class="c1"># Combined operation with existing sorting fixes</span>
+pylint-sort-functions<span class="w"> </span>--fix<span class="w"> </span>--fix-privacy<span class="w"> </span>--auto-sort<span class="w"> </span>src/
+
+<span class="c1"># Configuration respects existing patterns</span>
+pylint-sort-functions<span class="w"> </span>--fix-privacy<span class="w"> </span>--public-patterns<span class="w"> </span><span class="s2">&quot;main,setup,handler&quot;</span><span class="w"> </span>src/
+</pre></div>
+</div>
+<p><strong>Integrated Workflow</strong>:</p>
+<ol class="arabic simple">
+<li><p>Identify privacy violations (W9004: should be private, W9005: should be public)</p></li>
+<li><p>Perform comprehensive safety analysis</p></li>
+<li><p>Apply safe privacy renames with backup creation</p></li>
+<li><p>Automatically resort functions with updated names (<code class="docutils literal notranslate"><span class="pre">--auto-sort</span></code>)</p></li>
+<li><p>Generate detailed reports with safety explanations</p></li>
+<li><p>Handle function sorting violations if <code class="docutils literal notranslate"><span class="pre">--fix</span></code> is also specified</p></li>
+</ol>
+<p><strong>W9005 Detection Example</strong>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Before: Private function used externally</span>
+<span class="c1"># utils.py contains:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_helper_function</span><span class="p">():</span>  <span class="c1"># Used by other modules</span>
+    <span class="k">return</span> <span class="s2">&quot;help&quot;</span>
+
+<span class="c1"># main.py imports it:</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">_helper_function</span>  <span class="c1"># External usage detected</span>
+</pre></div>
+</div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Privacy fixer detects W9005 and suggests:</span>
+pylint-sort-functions<span class="w"> </span>--fix-privacy<span class="w"> </span>--auto-sort<span class="w"> </span>utils.py
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Result: Function renamed to public</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">helper_function</span><span class="p">():</span>  <span class="c1"># Now correctly public</span>
+    <span class="k">return</span> <span class="s2">&quot;help&quot;</span>
+</pre></div>
+</div>
+</section>
+<section id="complex-project-example">
+<h3>Complex Project Example<a class="headerlink" href="#complex-project-example" title="Link to this heading"></a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Large project with custom configuration</span>
+pylint-sort-functions<span class="w"> </span>--fix-privacy<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--public-patterns<span class="w"> </span><span class="s2">&quot;main,run,setup,teardown,app_factory&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--verbose<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--backup<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>src/<span class="w"> </span>tests/
+</pre></div>
+</div>
+<p><strong>Advanced Safety Example</strong>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Before: Unsafe to rename due to string references</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">helper_function</span><span class="p">():</span>
+    <span class="k">return</span> <span class="s2">&quot;help&quot;</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
+    <span class="c1"># This string reference makes renaming unsafe</span>
+    <span class="n">sql</span> <span class="o">=</span> <span class="s2">&quot;SELECT * FROM helper_function_cache&quot;</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">helper_function</span><span class="p">()</span>
+</pre></div>
+</div>
+<p><strong>Privacy Fixer Output</strong>:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>⚠️  Cannot safely rename 1 function:
+  • helper_function: Function name found in string literals
+    Line 6: sql = &quot;SELECT * FROM helper_function_cache&quot;
+</pre></div>
+</div>
+<p>This conservative approach prevents breaking SQL queries, log messages, or other string-based references to function names.</p>
+</section>
+</section>
+<section id="testing-strategy">
+<h2>Testing Strategy<a class="headerlink" href="#testing-strategy" title="Link to this heading"></a></h2>
+<p>The privacy fixer includes comprehensive testing to ensure reliability and safety.</p>
+<section id="unit-testing">
+<h3>Unit Testing<a class="headerlink" href="#unit-testing" title="Link to this heading"></a></h3>
+<p><strong>Test Coverage Areas</strong>:</p>
+<ul class="simple">
+<li><p><strong>Reference Detection</strong>: All reference types and edge cases</p></li>
+<li><p><strong>Safety Validation</strong>: Each validation rule with positive and negative cases</p></li>
+<li><p><strong>Report Generation</strong>: Output formatting and content accuracy</p></li>
+<li><p><strong>Error Handling</strong>: Graceful handling of invalid input and edge conditions</p></li>
+</ul>
+<p><strong>Comprehensive Test Suite</strong> (22+ tests, all passing):</p>
+<p><strong>Unit Tests - Core Components</strong>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>tests/test_privacy_fixer.py::TestPrivacyFixer::test_initialization
+tests/test_privacy_fixer.py::TestPrivacyFixer::test_find_function_references_*<span class="w">  </span><span class="c1"># 8 test cases</span>
+tests/test_privacy_fixer.py::TestPrivacyFixer::test_safety_validation_*<span class="w">       </span><span class="c1"># 6 test cases</span>
+tests/test_privacy_fixer.py::TestPrivacyFixer::test_generate_report_*<span class="w">         </span><span class="c1"># 3 test cases</span>
+tests/test_privacy_fixer.py::TestFunctionReference::test_*<span class="w">                    </span><span class="c1"># 2 test cases</span>
+tests/test_privacy_fixer.py::TestRenameCandidate::test_*<span class="w">                      </span><span class="c1"># 2 test cases</span>
+</pre></div>
+</div>
+<p><strong>Integration Tests - Full Workflow</strong>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>tests/test_privacy_integration.py::TestPrivacyIntegration::test_*<span class="w">             </span><span class="c1"># 5 test cases</span>
+tests/test_cli.py::TestCLI::test_privacy_*<span class="w">                                    </span><span class="c1"># 4 test cases</span>
+</pre></div>
+</div>
+<p><strong>W9005 Tests - Bidirectional Detection</strong>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>tests/test_utils.py::TestUtils::test_should_function_be_public_*<span class="w">              </span><span class="c1"># 4 test cases</span>
+tests/test_checker.py::TestChecker::test_w9005_*<span class="w">                              </span><span class="c1"># 3 test cases</span>
+</pre></div>
+</div>
+<p><strong>Integration Test Project</strong>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>test-validation/test_privacy_cli_integration.py<span class="w">  </span><span class="c1"># End-to-end CLI validation</span>
+</pre></div>
+</div>
+</section>
+<section id="integration-testing">
+<h3>Integration Testing<a class="headerlink" href="#integration-testing" title="Link to this heading"></a></h3>
+<p><strong>Planned Integration Tests</strong>:</p>
+<ul class="simple">
+<li><p><strong>End-to-End Workflow</strong>: Complete privacy fixing process on real code samples</p></li>
+<li><p><strong>CLI Integration</strong>: Command-line interface with various argument combinations</p></li>
+<li><p><strong>Configuration Integration</strong>: Interaction with existing PyLint configuration options</p></li>
+<li><p><strong>Performance Testing</strong>: Large codebase processing with timing measurements</p></li>
+</ul>
+</section>
+<section id="safety-testing">
+<h3>Safety Testing<a class="headerlink" href="#safety-testing" title="Link to this heading"></a></h3>
+<p><strong>Critical Safety Scenarios</strong>:</p>
+<ul class="simple">
+<li><p><strong>False Positive Prevention</strong>: Ensure safe functions are never incorrectly renamed</p></li>
+<li><p><strong>Partial Failure Handling</strong>: Verify system behavior when some renames fail</p></li>
+<li><p><strong>Backup Integrity</strong>: Confirm backup files allow complete rollback</p></li>
+<li><p><strong>Concurrent Access</strong>: Handle files being modified during processing</p></li>
+</ul>
+<p><strong>Test Data Sets</strong>:</p>
+<ul class="simple">
+<li><p><strong>Safe Rename Cases</strong>: Functions with clear, simple references</p></li>
+<li><p><strong>Unsafe Rename Cases</strong>: Functions with dynamic references, string literals, conflicts</p></li>
+<li><p><strong>Edge Cases</strong>: Complex inheritance, decorators, nested scopes, import aliases</p></li>
+<li><p><strong>Real-World Code</strong>: Actual project code with realistic complexity</p></li>
+</ul>
+</section>
+</section>
+<section id="conclusion">
+<h2>Conclusion<a class="headerlink" href="#conclusion" title="Link to this heading"></a></h2>
+<p>The privacy fixer system provides a robust, safety-first approach to automatically renaming functions that should be private. The conservative design prioritizes correctness over completeness, ensuring that users can trust the automated renames while providing clear feedback about cases that require manual review.</p>
+<p><strong>Key Strengths</strong>:</p>
+<ul class="simple">
+<li><p><strong>Safety-First Design</strong>: Multiple validation layers prevent incorrect renames</p></li>
+<li><p><strong>Comprehensive Analysis</strong>: Finds all reference types through AST traversal</p></li>
+<li><p><strong>Clear User Feedback</strong>: Detailed reports explain decisions and limitations</p></li>
+<li><p><strong>Integration</strong>: Builds on existing W9004 detection and configuration systems</p></li>
+<li><p><strong>Testability</strong>: Designed with comprehensive testing in mind</p></li>
+</ul>
+<p><strong>Future Enhancement Opportunities</strong>:</p>
+<ul class="simple">
+<li><p><strong>Machine Learning</strong>: Could potentially improve dynamic reference detection</p></li>
+<li><p><strong>Interactive Mode</strong>: Allow users to review and approve individual renames</p></li>
+<li><p><strong>Batch Processing</strong>: Optimize for processing multiple files simultaneously</p></li>
+<li><p><strong>IDE Integration</strong>: Provide integration points for development environments</p></li>
+</ul>
+<p>The system represents a significant step forward in automated code organization while maintaining the safety and reliability standards expected in professional development environments.</p>
+</section>
+<section id="see-also">
+<h2>See Also<a class="headerlink" href="#see-also" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="developer.html"><span class="doc">Developer Guide</span></a> - Complete development guide and architecture overview</p></li>
+<li><p><a class="reference internal" href="sorting.html"><span class="doc">Function and Method Sorting Algorithm</span></a> - Function sorting rules and algorithm details</p></li>
+<li><p><a class="reference internal" href="testing.html"><span class="doc">Testing</span></a> - Testing strategies and validation approaches</p></li>
+<li><p><a class="reference internal" href="api.html"><span class="doc">API Reference</span></a> - API reference for privacy fixer classes and methods</p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="developer.html" class="btn btn-neutral float-left" title="Developer Guide" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="claude.html" class="btn btn-neutral float-right" title="Claude Code Guidelines" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Håkon Hægland.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

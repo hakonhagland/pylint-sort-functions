@@ -19,7 +19,7 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Claude Code Guidelines" href="claude.html" />
+    <link rel="next" title="Privacy Fixer System" href="privacy.html" />
     <link rel="prev" title="API Reference" href="api.html" /> 
 </head>
 
@@ -125,6 +125,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#see-also">See Also</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="privacy.html">Privacy Fixer System</a></li>
 <li class="toctree-l1"><a class="reference internal" href="claude.html">Claude Code Guidelines</a></li>
 <li class="toctree-l1"><a class="reference internal" href="testing.html">Testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="validation-system.html">Documentation Validation System</a></li>
@@ -322,6 +323,7 @@
 <li><p><strong>Message Reporting</strong>: Report <code class="docutils literal notranslate"><span class="pre">W9004</span></code> (function-should-be-private) for internal-only functions</p></li>
 </ol>
 <p>The privacy detection gracefully falls back to heuristic mode when path information is unavailable (rare in normal PyLint usage).</p>
+<p><strong>Automatic Privacy Fixing</strong>: The plugin also includes an experimental privacy fixer system that can automatically rename functions identified by W9004 to be private. For complete technical details about the privacy fixer architecture, safety validation, and implementation status, see <a class="reference internal" href="privacy.html"><span class="doc">Privacy Fixer System</span></a>.</p>
 <p><strong>AST Analysis Flow</strong>:</p>
 <ol class="arabic simple">
 <li><p>PyLint parses Python code using <code class="docutils literal notranslate"><span class="pre">astroid</span></code> (enhanced AST library)</p></li>
@@ -840,7 +842,7 @@ pylint<span class="w"> </span>--load-plugins<span class="o">=</span>pylint_sort_
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="api.html" class="btn btn-neutral float-left" title="API Reference" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="claude.html" class="btn btn-neutral float-right" title="Claude Code Guidelines" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="privacy.html" class="btn btn-neutral float-right" title="Privacy Fixer System" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

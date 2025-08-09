@@ -81,7 +81,7 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#command-line-options">Command Line Options</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#id1">Plugin Configuration Options</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#command-line-plugin-configuration">Command-Line Plugin Configuration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#self-check-pattern">Self-Check Pattern</a></li>
 </ul>
 </li>
@@ -120,6 +120,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="developer.html">Developer Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="privacy.html">Privacy Fixer System</a></li>
 <li class="toctree-l1"><a class="reference internal" href="claude.html">Claude Code Guidelines</a></li>
 <li class="toctree-l1"><a class="reference internal" href="testing.html">Testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="validation-system.html">Documentation Validation System</a></li>
@@ -400,7 +401,23 @@ pip<span class="w"> </span>install<span class="w"> </span>pylint-sort-functions<
 <li><p><strong>Smart exclusions</strong>: Skips common public API patterns (<code class="docutils literal notranslate"><span class="pre">main</span></code>, <code class="docutils literal notranslate"><span class="pre">run</span></code>, <code class="docutils literal notranslate"><span class="pre">setup</span></code>) and test files</p></li>
 <li><p><strong>False positive prevention</strong>: Only flags functions with zero external usage, ensuring accuracy</p></li>
 </ul>
-<p><strong>Auto-fix limitation</strong>: Currently requires manual renaming. See <a class="reference external" href="https://github.com/hakonhagland/pylint-sort-functions/issues/12">GitHub Issue #12</a> for planned automatic renaming support in the CLI tool.</p>
+<p><strong>Auto-fix availability</strong>:
+- <strong>Manual renaming</strong>: Functions can be manually renamed following PyLint suggestions
+- <strong>Automatic renaming</strong>: Available via the bidirectional privacy fixer feature</p>
+<blockquote>
+<div><p>The privacy fixer feature provides comprehensive privacy analysis:</p>
+<ul class="simple">
+<li><p><strong>W9004 Detection</strong>: Rename public functions that should be private (add underscore prefix)</p></li>
+<li><p><strong>W9005 Detection</strong>: Rename private functions that should be public (remove underscore prefix)</p></li>
+<li><p><strong>Conservative safety checks</strong>: Multiple validation layers ensure safe renaming</p></li>
+<li><p><strong>Dry-run mode</strong>: Preview changes before applying them (<code class="docutils literal notranslate"><span class="pre">--privacy-dry-run</span></code>)</p></li>
+<li><p><strong>Comprehensive reference detection</strong>: Finds all function calls, assignments, and decorators</p></li>
+<li><p><strong>Backup creation</strong>: Automatic backups before applying changes</p></li>
+<li><p><strong>CLI integration</strong>: Use <code class="docutils literal notranslate"><span class="pre">--fix-privacy</span></code> and <code class="docutils literal notranslate"><span class="pre">--privacy-dry-run</span></code> arguments</p></li>
+<li><p><strong>Integrated sorting</strong>: Add <code class="docutils literal notranslate"><span class="pre">--auto-sort</span></code> for automatic function sorting after privacy fixes</p></li>
+</ul>
+<p>For technical details about the privacy fixer architecture, see the developer documentation.</p>
+</div></blockquote>
 </section>
 </section>
 <section id="sorting-rules">
@@ -526,9 +543,9 @@ pylint<span class="w"> </span>--load-plugins<span class="o">=</span>pylint_sort_
 pylint<span class="w"> </span>--load-plugins<span class="o">=</span>pylint_sort_functions<span class="w"> </span>--reports<span class="o">=</span>yes<span class="w"> </span>mymodule.py
 </pre></div>
 </div>
-<section id="id1">
-<h3>Plugin Configuration Options<a class="headerlink" href="#id1" title="Link to this heading"></a></h3>
-<p>Configure plugin behavior through PyLint options:</p>
+<section id="command-line-plugin-configuration">
+<h3>Command-Line Plugin Configuration<a class="headerlink" href="#command-line-plugin-configuration" title="Link to this heading"></a></h3>
+<p>Configure plugin behavior through PyLint command-line options:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Configure public API patterns</span>
 pylint<span class="w"> </span>--load-plugins<span class="o">=</span>pylint_sort_functions<span class="w"> </span><span class="se">\</span>
 <span class="w">       </span>--public-api-patterns<span class="o">=</span>main,run,custom_entry<span class="w"> </span><span class="se">\</span>
@@ -658,17 +675,19 @@ make<span class="w"> </span>self-check
 </section>
 <section id="privacy-detection-issues">
 <h3>Privacy Detection Issues<a class="headerlink" href="#privacy-detection-issues" title="Link to this heading"></a></h3>
-<p>If <code class="docutils literal notranslate"><span class="pre">function-should-be-private</span></code> messages aren’t appearing:</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">function-should-be-private</span></code> (W9004) or <code class="docutils literal notranslate"><span class="pre">function-should-be-public</span></code> (W9005) messages aren’t appearing:</p>
 <ol class="arabic simple">
 <li><p>Verify privacy detection is enabled: <code class="docutils literal notranslate"><span class="pre">enable-privacy-detection=y</span></code></p></li>
 <li><p>Check that files are part of a Python project with project markers (pyproject.toml, setup.py, etc.)</p></li>
 <li><p>Ensure functions aren’t in test files (automatically excluded)</p></li>
-<li><p>Verify functions aren’t matching public API patterns</p></li>
+<li><p>For W9004: Verify functions aren’t matching public API patterns</p></li>
+<li><p>For W9005: Confirm the private function is actually imported by other modules</p></li>
 </ol>
 </section>
 <section id="false-positives">
 <h3>False Positives<a class="headerlink" href="#false-positives" title="Link to this heading"></a></h3>
-<p>If you get false positives for <code class="docutils literal notranslate"><span class="pre">function-should-be-private</span></code>:</p>
+<p>If you get false positives for privacy detection:</p>
+<p><strong>For W9004 (function-should-be-private)</strong>:</p>
 <ol class="arabic">
 <li><p>Ensure your <code class="docutils literal notranslate"><span class="pre">__init__.py</span></code> files properly export public APIs</p></li>
 <li><p>The detection is conservative and won’t flag functions used across modules</p></li>
@@ -679,6 +698,12 @@ make<span class="w"> </span>self-check
 </div>
 </li>
 <li><p>Use inline disables for legitimate cases: <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">pylint:</span> <span class="pre">disable=function-should-be-private</span></code></p></li>
+</ol>
+<p><strong>For W9005 (function-should-be-public)</strong>:</p>
+<ol class="arabic simple">
+<li><p>Verify the function is genuinely used externally (not just in tests)</p></li>
+<li><p>Check if the external usage is intentional API design</p></li>
+<li><p>Use inline disables if the private usage is intentional: <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">pylint:</span> <span class="pre">disable=function-should-be-public</span></code></p></li>
 </ol>
 </section>
 <section id="performance-issues">
@@ -699,6 +724,7 @@ mymodule.py:10:0: W9001: Functions are not sorted alphabetically in module scope
 mymodule.py:25:0: W9002: Methods are not sorted alphabetically in class MyClass (unsorted-methods)
 mymodule.py:30:0: W9003: Public and private functions are not properly separated in module (mixed-function-visibility)
 mymodule.py:35:0: W9004: Function &#39;helper_function&#39; should be private (prefix with underscore) (function-should-be-private)
+mymodule.py:40:0: W9005: Function &#39;_shared_util&#39; should be public (remove underscore prefix) (function-should-be-public)
 </pre></div>
 </div>
 <section id="exit-codes">

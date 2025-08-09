@@ -72,6 +72,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#detection-algorithm">Detection Algorithm</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#advanced-ast-based-boundary-detection">Advanced AST-Based Boundary Detection</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#comment-preservation">Comment Preservation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#automatic-section-headers">Automatic Section Headers</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#configuration">Configuration</a></li>
@@ -84,6 +85,8 @@
 <li class="toctree-l3"><a class="reference internal" href="#w9001-unsorted-functions">W9001: unsorted-functions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#w9002-unsorted-methods">W9002: unsorted-methods</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#w9003-mixed-function-visibility">W9003: mixed-function-visibility</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#w9004-function-should-be-private">W9004: function-should-be-private</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#w9005-function-should-be-public">W9005: function-should-be-public</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#pylint-integration">PyLint Integration</a></li>
@@ -101,6 +104,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="developer.html">Developer Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="privacy.html">Privacy Fixer System</a></li>
 <li class="toctree-l1"><a class="reference internal" href="claude.html">Claude Code Guidelines</a></li>
 <li class="toctree-l1"><a class="reference internal" href="testing.html">Testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="validation-system.html">Documentation Validation System</a></li>
@@ -269,7 +273,12 @@ This is essential for framework compatibility where decorator order matters.</p>
 </section>
 <section id="privacy-detection">
 <h2>Privacy Detection<a class="headerlink" href="#privacy-detection" title="Link to this heading"></a></h2>
-<p>The plugin includes intelligent privacy detection to suggest functions that should be made private.</p>
+<p>The plugin includes intelligent bidirectional privacy detection to suggest functions that have incorrect privacy levels.</p>
+<p><strong>Bidirectional Analysis:</strong></p>
+<ul class="simple">
+<li><p><strong>W9004 Detection</strong>: Identifies public functions that should be private</p></li>
+<li><p><strong>W9005 Detection</strong>: Identifies private functions that should be public</p></li>
+</ul>
 <section id="detection-algorithm">
 <h3>Detection Algorithm<a class="headerlink" href="#detection-algorithm" title="Link to this heading"></a></h3>
 <ol class="arabic simple">
@@ -299,6 +308,42 @@ This is essential for framework compatibility where decorator order matters.</p>
 </pre></div>
 </div>
 </section>
+</section>
+<section id="advanced-ast-based-boundary-detection">
+<h2>Advanced AST-Based Boundary Detection<a class="headerlink" href="#advanced-ast-based-boundary-detection" title="Link to this heading"></a></h2>
+<p>The auto-fix tool uses sophisticated AST (Abstract Syntax Tree) analysis to accurately detect boundaries between functions and other module constructs. This ensures proper handling of complex Python patterns.</p>
+<p><strong>Accurate Boundary Detection:</strong></p>
+<p>The system correctly handles various Python constructs:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Module-level constructs are properly preserved</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+
+<span class="n">CONSTANT</span> <span class="o">=</span> <span class="s2">&quot;value&quot;</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">function_a</span><span class="p">():</span>
+    <span class="k">pass</span>
+
+<span class="c1"># Comments and docstrings preserved</span>
+<span class="sd">&quot;&quot;&quot;Module docstring after functions.&quot;&quot;&quot;</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">function_b</span><span class="p">():</span>
+    <span class="k">pass</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">MyClass</span><span class="p">:</span>
+    <span class="k">pass</span>
+
+<span class="c1"># Main blocks preserved at end of file</span>
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+</pre></div>
+</div>
+<p><strong>Key Improvements:</strong></p>
+<ul class="simple">
+<li><p><strong>AST-Based Analysis</strong>: Uses Python’s AST to understand code structure instead of pattern matching</p></li>
+<li><p><strong>Accurate End Detection</strong>: Finds actual function boundaries using AST node information</p></li>
+<li><p><strong>Main Block Preservation</strong>: Correctly handles <code class="docutils literal notranslate"><span class="pre">if</span> <span class="pre">__name__</span> <span class="pre">==</span> <span class="pre">&quot;__main__&quot;:</span></code> blocks</p></li>
+<li><p><strong>Complex Constructs</strong>: Properly sorts around classes, global variables, and imports</p></li>
+<li><p><strong>Docstring Handling</strong>: Preserves module-level docstrings and comments in correct positions</p></li>
+</ul>
 </section>
 <section id="comment-preservation">
 <h2>Comment Preservation<a class="headerlink" href="#comment-preservation" title="Link to this heading"></a></h2>
@@ -532,7 +577,8 @@ different visibility levels, while avoiding unnecessary headers for single-visib
 </section>
 <section id="message-types">
 <h2>Message Types<a class="headerlink" href="#message-types" title="Link to this heading"></a></h2>
-<p>The plugin reports three types of sorting violations:</p>
+<p>The plugin reports five types of violations:</p>
+<p><strong>Sorting Violations:</strong></p>
 <section id="w9001-unsorted-functions">
 <h3>W9001: unsorted-functions<a class="headerlink" href="#w9001-unsorted-functions" title="Link to this heading"></a></h3>
 <p>Functions in a module are not sorted alphabetically within their visibility scope.</p>
@@ -544,6 +590,30 @@ different visibility levels, while avoiding unnecessary headers for single-visib
 <section id="w9003-mixed-function-visibility">
 <h3>W9003: mixed-function-visibility<a class="headerlink" href="#w9003-mixed-function-visibility" title="Link to this heading"></a></h3>
 <p>Public and private functions are not properly separated (public must come before private).</p>
+<p><strong>Privacy Violations:</strong></p>
+</section>
+<section id="w9004-function-should-be-private">
+<h3>W9004: function-should-be-private<a class="headerlink" href="#w9004-function-should-be-private" title="Link to this heading"></a></h3>
+<p>A public function should be marked as private (add underscore prefix) because it’s only used within its own module.</p>
+<p><strong>Example:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># This function is only called within this module</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">calculate_internal_hash</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>  <span class="c1"># W9004: Should be _calculate_internal_hash</span>
+    <span class="k">return</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">md5</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">encode</span><span class="p">())</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+<section id="w9005-function-should-be-public">
+<h3>W9005: function-should-be-public<a class="headerlink" href="#w9005-function-should-be-public" title="Link to this heading"></a></h3>
+<p>A private function should be made public (remove underscore prefix) because it’s imported and used by other modules.</p>
+<p><strong>Example:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># utils.py</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_format_currency</span><span class="p">(</span><span class="n">amount</span><span class="p">):</span>  <span class="c1"># W9005: Should be format_currency</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;$</span><span class="si">{</span><span class="n">amount</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span>
+
+<span class="c1"># main.py imports it:</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">_format_currency</span>  <span class="c1"># External usage detected</span>
+</pre></div>
+</div>
 </section>
 </section>
 <section id="pylint-integration">

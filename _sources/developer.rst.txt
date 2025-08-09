@@ -174,6 +174,8 @@ Core Components
 
 The privacy detection gracefully falls back to heuristic mode when path information is unavailable (rare in normal PyLint usage).
 
+**Automatic Privacy Fixing**: The plugin also includes an experimental privacy fixer system that can automatically rename functions identified by W9004 to be private. For complete technical details about the privacy fixer architecture, safety validation, and implementation status, see :doc:`privacy`.
+
 **AST Analysis Flow**:
 
 1. PyLint parses Python code using ``astroid`` (enhanced AST library)
