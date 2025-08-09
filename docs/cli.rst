@@ -133,7 +133,7 @@ Optional Arguments
   Apply automatic function renaming for privacy fixes (functions that should be private). Uses conservative safety validation before making changes.
 
 ``--privacy-dry-run``
-  Preview privacy fixes without applying changes. Shows which functions can be safely renamed and which cannot.
+  Analyze and preview privacy fixes without applying changes (standalone option). Shows which functions can be safely renamed and which cannot. This option works independently and should not be combined with ``--fix-privacy``.
 
 ``--auto-sort``
   Automatically apply function sorting after privacy fixes. Only takes effect when used with ``--fix-privacy`` or ``--privacy-dry-run``.

@@ -273,7 +273,7 @@ def _add_parser_arguments(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "--privacy-dry-run",
         action="store_true",
-        help="Show which functions would be renamed to private without modifying files",
+        help="Show functions that would be renamed to private (standalone option)",
     )
 
     parser.add_argument(
