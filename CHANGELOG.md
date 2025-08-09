@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.0] - 2025-08-09
+
+### Added
+
+- Cross-module import analysis for enhanced privacy detection accuracy
+- PrivacyFixer.detect_privacy_violations() API method for programmatic privacy analysis
+- W9005 message type for detecting private functions that should be public
+
 ### Changed
 
 - Standardize testing infrastructure from unittest to pytest format
