@@ -12,28 +12,34 @@ Overview
 
 The plugin provides multiple testing approaches for different use cases:
 
-**Unit Testing**
-   Fast, isolated tests using PyLint's testing framework
+**Unit Testing** (``tests/test_*.py``)
+   Fast, isolated tests using pytest and PyLint's CheckerTestCase framework
+
+**Integration Testing** (``tests/integration/``)
+   End-to-end tests validating CLI functionality and cross-module behavior using pytest
 
 **Plugin Integration Testing**
-   Testing the plugin with real PyLint execution
+   Testing the plugin with real PyLint execution in production scenarios
 
-**CLI Tool Testing**
-   Testing the standalone auto-fix tool
-
-**Documentation Validation**
-   Docker-based system for validating all configuration examples
+**Documentation Validation** (``test-validation/``)
+   Docker-based system for validating all configuration examples against real frameworks
 
 **Framework Integration Testing**
-   Testing decorator exclusions with real framework code
+   Testing decorator exclusions with real framework code (Flask, Django, FastAPI, etc.)
 
 Quick Start
 -----------
 
 .. code-block:: bash
 
-   # Run all tests
+   # Run all tests (unit + integration)
+   make test-all
+
+   # Run unit tests only
    make test
+
+   # Run integration tests only
+   make test-integration
 
    # Run with coverage
    make coverage
@@ -80,16 +86,28 @@ The plugin uses PyLint's ``CheckerTestCase`` framework for unit testing:
 Test Structure
 ~~~~~~~~~~~~~~
 
-Tests are organized in ``tests/`` directory:
+Tests are organized in ``tests/`` directory with clear separation between unit and integration tests:
 
 .. code-block:: text
 
    tests/
-   ├── test_checker.py          # Main checker functionality
-   ├── test_utils.py            # Utility functions
-   ├── test_cli.py              # CLI tool testing
-   ├── test_auto_fix.py         # Auto-fix functionality
-   └── test_coverage_gaps.py    # Coverage gap validation
+   ├── integration/                    # Integration tests (pytest)
+   │   ├── test_privacy_cli_integration.py      # CLI integration tests
+   │   ├── test_privacy_fixer_integration.py    # Privacy fixer API tests
+   │   └── test_privacy_fixer_simple.py         # Simplified CLI tests
+   ├── files/                          # Test data files
+   │   ├── classes/                    # Class test cases
+   │   ├── import_analysis/            # Import analysis test data
+   │   └── modules/                    # Module test cases
+   ├── test_auto_fix.py                # Auto-fix functionality
+   ├── test_checker.py                 # Main checker functionality
+   ├── test_cli.py                     # CLI tool unit tests
+   ├── test_coverage_gaps.py           # Coverage gap validation
+   ├── test_decorator_exclusions.py    # Decorator exclusion testing
+   ├── test_init.py                    # Plugin initialization tests
+   ├── test_privacy_fixer.py           # Privacy fixer unit tests
+   ├── test_privacy_integration.py     # Privacy integration tests
+   └── test_utils.py                   # Utility function tests
 
 Running Unit Tests
 ~~~~~~~~~~~~~~~~~~
@@ -111,6 +129,42 @@ Running Unit Tests
    make coverage
 
 The project enforces **100% test coverage** - all code must be tested.
+
+Integration Testing
+-------------------
+
+Integration tests validate end-to-end functionality and CLI behavior. These tests are located in ``tests/integration/`` and use pytest exclusively.
+
+Test Types
+~~~~~~~~~~
+
+**CLI Integration Tests**
+   Test command-line interface functionality with real file systems
+
+**Privacy Fixer Integration**
+   Test privacy detection and fixing workflows (some tests currently skipped due to incomplete APIs)
+
+**Cross-Module Testing**
+   Test functionality across multiple Python modules and packages
+
+Running Integration Tests
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: bash
+
+   # Run all integration tests
+   make test-integration
+
+   # Run specific integration test file
+   pytest tests/integration/test_privacy_cli_integration.py -v
+
+   # Run integration tests with verbose output
+   pytest tests/integration/ -v
+
+   # Run all tests (unit + integration)
+   make test-all
+
+**Current Status**: Some integration tests are temporarily skipped because they test APIs that are still under development. Working integration tests demonstrate successful CLI functionality and pytest conversion.
 
 Plugin Integration Testing
 ---------------------------

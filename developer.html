@@ -90,7 +90,7 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#advanced-features">Advanced Features</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#import-analysis">Import Analysis</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#testing">Testing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#testing-architecture">Testing Architecture</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#extending-the-plugin">Extending the Plugin</a><ul>
@@ -576,10 +576,72 @@ The plugin includes sophisticated import analysis to suggest when public functio
 </ol>
 <p>This real usage analysis provides accurate detection with minimal false positives.</p>
 </section>
-<section id="testing">
-<h3>Testing<a class="headerlink" href="#testing" title="Link to this heading"></a></h3>
-<p>For comprehensive testing documentation including unit tests, integration testing,
-and the Docker validation system, see <a class="reference internal" href="testing.html"><span class="doc">Testing</span></a>.</p>
+<section id="testing-architecture">
+<h3>Testing Architecture<a class="headerlink" href="#testing-architecture" title="Link to this heading"></a></h3>
+<p>The plugin uses a multi-layered testing strategy designed for comprehensive validation of plugin functionality.</p>
+<p><strong>Test Organization</strong>:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>tests/
+├── integration/              # End-to-end pytest tests
+│   ├── test_privacy_cli_integration.py    # CLI functionality
+│   ├── test_privacy_fixer_integration.py  # Privacy fixer API (some skipped)
+│   └── test_privacy_fixer_simple.py       # Simplified CLI tests
+├── files/                    # Test data and fixtures
+└── test_*.py                 # Unit tests (pytest + CheckerTestCase)
+</pre></div>
+</div>
+<p><strong>Testing Frameworks</strong>:</p>
+<ul class="simple">
+<li><p><strong>Unit Tests</strong>: Use pytest with PyLint’s <code class="docutils literal notranslate"><span class="pre">CheckerTestCase</span></code> for plugin-specific testing</p></li>
+<li><p><strong>Integration Tests</strong>: Pure pytest for CLI and end-to-end functionality</p></li>
+<li><p><strong>Docker Validation</strong>: Separate system for testing documentation examples</p></li>
+</ul>
+<p><strong>Key Testing Patterns</strong>:</p>
+<p><strong>Plugin Testing with CheckerTestCase</strong>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pylint.testutils</span><span class="w"> </span><span class="kn">import</span> <span class="n">CheckerTestCase</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pylint_sort_functions.checker</span><span class="w"> </span><span class="kn">import</span> <span class="n">FunctionSortChecker</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">TestFunctionSortChecker</span><span class="p">(</span><span class="n">CheckerTestCase</span><span class="p">):</span>
+    <span class="n">CHECKER_CLASS</span> <span class="o">=</span> <span class="n">FunctionSortChecker</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_unsorted_functions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">node</span> <span class="o">=</span> <span class="n">astroid</span><span class="o">.</span><span class="n">extract_node</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">        def zebra_function():  #@</span>
+<span class="s2">            pass</span>
+<span class="s2">        def alpha_function():</span>
+<span class="s2">            pass</span>
+<span class="s2">        &quot;&quot;&quot;</span><span class="p">)</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">assertAddsMessages</span><span class="p">(</span>
+            <span class="n">pylint</span><span class="o">.</span><span class="n">testutils</span><span class="o">.</span><span class="n">MessageTest</span><span class="p">(</span><span class="n">msg_id</span><span class="o">=</span><span class="s2">&quot;W9001&quot;</span><span class="p">,</span> <span class="n">node</span><span class="o">=</span><span class="n">node</span><span class="p">)</span>
+        <span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">checker</span><span class="o">.</span><span class="n">visit_module</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>Integration Testing Approach</strong>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">TestCLIIntegration</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">setup_method</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">test_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">tempfile</span><span class="o">.</span><span class="n">mkdtemp</span><span class="p">())</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_cli_functionality</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># Create test files, run CLI, verify results</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="n">sys</span><span class="o">.</span><span class="n">executable</span><span class="p">,</span> <span class="n">cli_script</span><span class="p">,</span> <span class="n">args</span><span class="p">])</span>
+        <span class="k">assert</span> <span class="n">result</span><span class="o">.</span><span class="n">returncode</span> <span class="o">==</span> <span class="mi">0</span>
+</pre></div>
+</div>
+<p><strong>Developer Testing Guidelines</strong>:</p>
+<ol class="arabic simple">
+<li><p><strong>Unit Tests</strong>: Add to <code class="docutils literal notranslate"><span class="pre">tests/test_*.py</span></code> for new utility functions or checker logic</p></li>
+<li><p><strong>Integration Tests</strong>: Add to <code class="docutils literal notranslate"><span class="pre">tests/integration/</span></code> for CLI or cross-module functionality</p></li>
+<li><p><strong>Test Data</strong>: Place fixtures in <code class="docutils literal notranslate"><span class="pre">tests/files/</span></code> organized by test type</p></li>
+<li><p><strong>Coverage</strong>: Maintain 100% coverage on source code (<code class="docutils literal notranslate"><span class="pre">src/</span></code> directory)</p></li>
+</ol>
+<p><strong>Running Tests During Development</strong>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span><span class="nb">test</span><span class="w">              </span><span class="c1"># Unit tests only</span>
+make<span class="w"> </span>test-integration<span class="w">  </span><span class="c1"># Integration tests only</span>
+make<span class="w"> </span>test-all<span class="w">         </span><span class="c1"># All tests (unit + integration)</span>
+make<span class="w"> </span>coverage<span class="w">         </span><span class="c1"># Coverage report (must be 100%)</span>
+</pre></div>
+</div>
+<p>For complete testing documentation including Docker validation and framework testing, see <a class="reference internal" href="testing.html"><span class="doc">Testing</span></a>.</p>
 </section>
 </section>
 <section id="extending-the-plugin">
