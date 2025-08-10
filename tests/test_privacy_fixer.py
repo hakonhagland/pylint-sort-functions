@@ -1580,7 +1580,7 @@ def incomplete_function(
             mock_method.assert_called_once_with(module_mock)
             assert result == [mock_function]
 
-    def test_analyze_module_backward_compatibility(self) -> None:
+    def test_analyze_module_backward_compatibility(self) -> None:  # pylint: disable=too-many-locals
         """Test analyze_module backward compatibility with old Path signature."""
         from pathlib import Path
         from unittest.mock import Mock, patch

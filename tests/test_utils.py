@@ -1,4 +1,5 @@
 """Tests for utility functions."""
+# pylint: disable=mixed-function-visibility,too-many-lines  # Test helpers mixed; large comprehensive test file
 
 import tempfile
 from pathlib import Path

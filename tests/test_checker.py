@@ -1,4 +1,5 @@
 """Tests for the FunctionSortChecker."""
+# pylint: disable=too-many-lines  # Large comprehensive test file - see issue #35 for refactoring
 
 from pathlib import Path
 from unittest.mock import Mock, patch
@@ -1021,7 +1022,7 @@ def helper_function():
         from unittest.mock import Mock
 
         # Create a mock that raises AttributeError when accessed
-        class ExceptionMock:
+        class ExceptionMock:  # pylint: disable=too-few-public-methods
             """Mock class that raises AttributeError on attribute access."""
 
             def __getattr__(self, name: str) -> None:
@@ -1040,7 +1041,7 @@ def helper_function():
             assert config["override_test_detection"] is False
 
         # Test TypeError handling as well
-        class TypeErrorMock:
+        class TypeErrorMock:  # pylint: disable=too-few-public-methods
             """Mock class that raises TypeError on getattr."""
 
             def __getattr__(self, name: str) -> None:

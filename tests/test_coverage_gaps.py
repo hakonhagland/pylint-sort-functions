@@ -387,7 +387,7 @@ def main():
             backup_path.unlink()  # Remove backup
             file_ops.restore_from_backup(test_file, backup_path)  # Should not raise
 
-    def test_privacy_analyzer_safety_validation(self) -> None:
+    def test_privacy_analyzer_safety_validation(self) -> None:  # pylint: disable=too-many-locals
         """Test privacy_analyzer safety validation methods."""
         import tempfile
         from pathlib import Path

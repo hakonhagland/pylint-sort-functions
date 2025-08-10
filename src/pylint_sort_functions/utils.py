@@ -227,7 +227,7 @@ def is_private_function(func: nodes.FunctionDef) -> bool:
     return func.name.startswith("_") and not _is_dunder_method(func)
 
 
-def is_unittest_file(  # pylint: disable=function-should-be-private
+def is_unittest_file(  # pylint: disable=function-should-be-private,too-many-return-statements,too-many-branches
     module_name: str, privacy_config: dict[str, Any] | None = None
 ) -> bool:
     """Check if a module name indicates a unit test file.
