@@ -424,6 +424,7 @@ Detection Integration
 **Configuration Consistency**:
 
 Both systems respect the same configuration options:
+
 - ``public-api-patterns``: Functions to treat as public API
 - ``enable-privacy-detection``: Whether to perform privacy analysis
 

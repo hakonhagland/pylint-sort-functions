@@ -11,12 +11,14 @@ Current Status Summary
 -----------------------
 
 ✅ **RESOLVED (Modern Solutions Available)**:
+
 - Framework decorator conflicts (Click, Flask, FastAPI) - Use ``ignore-decorators`` configuration
 - pyproject.toml configuration support - Fully supported via ``[tool.pylint.function-sort]``
 - Bulk fixing automation - Comprehensive CLI auto-fix tool available
 - Privacy detection and fixing - Built-in ``--fix-privacy`` feature
 
 🟡 **ACTIVE LIMITATIONS (Workarounds Available)**:
+
 - Enhanced error messages - CLI tool provides better analysis, plugin improvements planned
 - Test method conventional ordering - Use class-level disables or ignore decorators
 - Magic method conventional ordering - Use class-level disables
@@ -149,6 +151,7 @@ Automated Bulk Fixing
         --private-header "=== Internal ===" src/
 
 **Safety Features**:
+
 - Automatic backup creation (disable with ``--no-backup``)
 - Dry-run mode for safe previewing
 - AST-based parsing preserves comments and formatting

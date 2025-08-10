@@ -358,6 +358,7 @@ W9004: function-should-be-private
 - **False positive prevention**: Only flags functions with zero external usage (excluding tests), ensuring accuracy
 
 **Auto-fix availability**:
+
 - **Manual renaming**: Functions can be manually renamed following PyLint suggestions
 - **Automatic renaming**: Available via the bidirectional privacy fixer feature
 
@@ -398,6 +399,7 @@ W9005: function-should-be-public
 - **Test file exclusion**: Automatically ignores usage within ``tests/``, ``test_*.py``, ``*_test.py``, and ``conftest.py`` files to avoid false positives from test code
 
 **Auto-fix availability**:
+
 - **Manual renaming**: Functions can be manually renamed following PyLint suggestions
 - **Automatic renaming**: Available via the bidirectional privacy fixer feature
 

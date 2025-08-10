@@ -115,6 +115,7 @@ Core Components
 **Purpose**: Entry point for PyLint plugin system
 
 **Key Function**:
+
 - ``register(linter: PyLinter) -> None``: Required by PyLint, registers the ``FunctionSortChecker``
 
 **Integration Point**: This is where PyLint discovers and loads our checker.
@@ -756,14 +757,17 @@ Performance Benchmarks
 ~~~~~~~~~~~~~~~~~~~~~~
 
 **Small Projects** (< 50 files):
+
 - Negligible performance impact
 - Import analysis adds ~50-100ms
 
 **Medium Projects** (50-200 files):
+
 - With caching: ~200-500ms additional overhead
 - Without caching: ~2-5 seconds (4-10x slower)
 
 **Large Projects** (200+ files):
+
 - With caching: ~500ms-1s additional overhead
 - Without caching: ~10+ seconds (20x+ slower)
 - 146x speedup observed in real-world codebases
