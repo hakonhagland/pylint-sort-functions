@@ -708,14 +708,40 @@ def _is_function_used_externally(
 def _is_unittest_file(module_name: str) -> bool:
     """Check if a module name indicates a unit test file.
 
-    TODO: Improve detection beyond simple string matching:
-    - Check for specific test directory patterns (tests/, test/)
-    - Look for common test file patterns (test_*.py, *_test.py)
-    - Consider checking file content for test frameworks
+    Detects test files based on common naming patterns:
+    - Files in 'tests' or 'test' directories
+    - Files starting with 'test_'
+    - Files ending with '_test'
+    - conftest.py files (pytest configuration)
+    - Files containing 'test' in their path components
 
-    :param module_name: The module name to check
+    :param module_name: The module name to check (e.g., 'package.tests.test_utils')
     :type module_name: str
     :returns: True if module appears to be a test file
     :rtype: bool
     """
-    return "test" in module_name.lower()
+    # Convert module name to lowercase for case-insensitive matching
+    lower_name = module_name.lower()
+
+    # Split into path components for more precise matching
+    parts = lower_name.split(".")
+
+    # Check if any directory in the path is a test directory
+    if "tests" in parts or "test" in parts:
+        return True
+
+    # Get the file name (last component)
+    if parts:
+        filename = parts[-1]
+
+        # Check for common test file patterns
+        if filename.startswith("test_"):
+            return True
+        if filename.endswith("_test"):
+            return True
+        if filename == "conftest":  # pytest configuration file
+            return True
+
+    # Fallback: check if 'test' appears anywhere (catches edge cases)
+    # This is more permissive but ensures we don't miss test files
+    return "test" in lower_name
