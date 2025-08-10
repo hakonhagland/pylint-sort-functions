@@ -427,6 +427,13 @@ Both systems respect the same configuration options:
 
 - ``public-api-patterns``: Functions to treat as public API
 - ``enable-privacy-detection``: Whether to perform privacy analysis
+- ``privacy-exclude-dirs``: Directories to exclude from privacy analysis
+- ``privacy-exclude-patterns``: File patterns to exclude from privacy analysis
+- ``privacy-additional-test-patterns``: Additional test file patterns
+- ``privacy-update-tests``: Enable automatic test file updates
+- ``privacy-override-test-detection``: Override built-in test detection
+
+For detailed configuration examples and real-world use cases, see :doc:`usage`.
 
 Test File Exclusion System
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~

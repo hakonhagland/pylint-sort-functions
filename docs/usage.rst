@@ -195,7 +195,296 @@ The privacy detection system automatically excludes test files from analysis to 
     src/tests/helpers.py          ✓ Excluded (in tests/ subdirectory)
 
 .. note::
-   Test file exclusion patterns are currently built-in and not configurable. Future versions may add configuration options for custom test patterns.
+   The built-in test file detection can be extended with custom patterns using the privacy configuration options described below.
+
+Privacy Configuration Options
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The privacy detection system provides five configuration options to customize test file detection and privacy analysis behavior. These options give you full control over which files are excluded from privacy analysis and how test files are handled.
+
+**Complete Configuration Example**
+
+Using ``.pylintrc``:
+
+.. code-block:: ini
+
+    [MASTER]
+    load-plugins = pylint_sort_functions
+
+    [function-sort]
+    enable-privacy-detection = yes
+    privacy-exclude-dirs = tests,integration_tests,e2e,qa
+    privacy-exclude-patterns = test_*.py,*_test.py,conftest.py,*_spec.py
+    privacy-additional-test-patterns = spec_*.py,scenario_*.py,*_scenario.py
+    privacy-update-tests = yes
+    privacy-override-test-detection = no
+
+Using ``pyproject.toml``:
+
+.. code-block:: toml
+
+    [tool.pylint.MASTER]
+    load-plugins = ["pylint_sort_functions"]
+
+    [tool.pylint."function-sort"]
+    enable-privacy-detection = true
+    privacy-exclude-dirs = ["tests", "integration_tests", "e2e", "qa"]
+    privacy-exclude-patterns = ["test_*.py", "*_test.py", "conftest.py", "*_spec.py"]
+    privacy-additional-test-patterns = ["spec_*.py", "scenario_*.py", "*_scenario.py"]
+    privacy-update-tests = true
+    privacy-override-test-detection = false
+
+**Configuration Options Reference**
+
+**privacy-exclude-dirs**
+    Comma-separated list of directory names to exclude from privacy analysis. Files in these directories are scanned but their references are ignored when determining if functions should be private. Useful for test directories and other non-production code.
+
+    *Default*: ``[]`` (empty list)
+
+    *Example*: ``tests,integration_tests,e2e,qa,benchmarks``
+
+**privacy-exclude-patterns**
+    Comma-separated list of file patterns to exclude from privacy analysis. Files matching these patterns are scanned but their references are ignored when determining if functions should be private. Supports glob patterns.
+
+    *Default*: ``[]`` (empty list)
+
+    *Example*: ``test_*.py,*_test.py,conftest.py,*_spec.py,benchmark_*.py``
+
+**privacy-additional-test-patterns**
+    Comma-separated list of additional file patterns to treat as test files, beyond the built-in detection. These patterns are added to the default test detection (``test_*.py``, ``*_test.py``, ``conftest.py``, ``tests/``). Supports glob patterns.
+
+    *Default*: ``[]`` (empty list)
+
+    *Example*: ``spec_*.py,*_spec.py,scenario_*.py,*_scenario.py``
+
+**privacy-update-tests**
+    Enable automatic updating of test files when functions are privatized. When enabled, test files will be automatically updated to use the new private function names when using the privacy fixer CLI tool.
+
+    *Default*: ``false``
+
+    *Example*: ``yes`` (in .pylintrc) or ``true`` (in pyproject.toml)
+
+**privacy-override-test-detection**
+    Override the built-in test file detection entirely and only use the patterns specified in privacy-exclude-patterns and privacy-exclude-dirs. When disabled, both built-in detection and custom patterns are used together.
+
+    *Default*: ``false``
+
+    *Example*: ``yes`` (in .pylintrc) or ``true`` (in pyproject.toml)
+
+**Real-World Use Cases**
+
+**Enterprise Projects with Multiple Test Directories**
+
+Large enterprise projects often have multiple test directories for different types of tests:
+
+.. code-block:: ini
+
+    [function-sort]
+    # Exclude all test-related directories from privacy analysis
+    privacy-exclude-dirs = tests,integration_tests,e2e_tests,qa,performance_tests,smoke_tests
+
+    # Additional patterns for enterprise test naming conventions
+    privacy-additional-test-patterns = *_integration.py,*_e2e.py,*_smoke.py,test_suite_*.py
+
+    # Enable test updates for automated refactoring
+    privacy-update-tests = yes
+
+.. code-block:: toml
+
+    [tool.pylint."function-sort"]
+    privacy-exclude-dirs = [
+        "tests",
+        "integration_tests",
+        "e2e_tests",
+        "qa",
+        "performance_tests",
+        "smoke_tests"
+    ]
+    privacy-additional-test-patterns = [
+        "*_integration.py",
+        "*_e2e.py",
+        "*_smoke.py",
+        "test_suite_*.py"
+    ]
+    privacy-update-tests = true
+
+**Django Projects with Custom Test Structure**
+
+Django projects often have tests alongside application code and use specific naming patterns:
+
+.. code-block:: ini
+
+    [function-sort]
+    # Django test directories
+    privacy-exclude-dirs = tests,test,testapp
+
+    # Django-specific test patterns
+    privacy-exclude-patterns = test*.py,tests.py,*_tests.py
+    privacy-additional-test-patterns = test_*.py,*_testcase.py,test_models_*.py,test_views_*.py
+
+    # Keep default detection for standard Django test files
+    privacy-override-test-detection = no
+
+.. code-block:: toml
+
+    [tool.pylint."function-sort"]
+    privacy-exclude-dirs = ["tests", "test", "testapp"]
+    privacy-exclude-patterns = ["test*.py", "tests.py", "*_tests.py"]
+    privacy-additional-test-patterns = [
+        "test_*.py",
+        "*_testcase.py",
+        "test_models_*.py",
+        "test_views_*.py"
+    ]
+    privacy-override-test-detection = false
+
+**Flask/FastAPI Microservices with Integration Tests**
+
+Microservice architectures often separate unit tests from integration/contract tests:
+
+.. code-block:: ini
+
+    [function-sort]
+    # Separate test types in microservices
+    privacy-exclude-dirs = tests,integration,contracts,mocks,fixtures
+
+    # API test patterns
+    privacy-additional-test-patterns = *_contract.py,*_integration.py,api_test_*.py
+
+    # Enable automatic test updates for CI/CD
+    privacy-update-tests = yes
+
+.. code-block:: toml
+
+    [tool.pylint."function-sort"]
+    privacy-exclude-dirs = [
+        "tests",
+        "integration",
+        "contracts",
+        "mocks",
+        "fixtures"
+    ]
+    privacy-additional-test-patterns = [
+        "*_contract.py",
+        "*_integration.py",
+        "api_test_*.py"
+    ]
+    privacy-update-tests = true
+
+**Legacy Projects with Non-Standard Test Naming**
+
+Legacy projects might have unconventional test naming that doesn't follow modern patterns:
+
+.. code-block:: ini
+
+    [function-sort]
+    # Override default detection for legacy naming
+    privacy-override-test-detection = yes
+
+    # Define all test patterns explicitly
+    privacy-exclude-patterns = Test*.py,*Test.py,*Tests.py,check_*.py,verify_*.py
+    privacy-exclude-dirs = QA,Testing,Validation,TestSuite
+
+    # No additional patterns needed since we're overriding
+    privacy-additional-test-patterns =
+
+.. code-block:: toml
+
+    [tool.pylint."function-sort"]
+    privacy-override-test-detection = true
+    privacy-exclude-patterns = [
+        "Test*.py",
+        "*Test.py",
+        "*Tests.py",
+        "check_*.py",
+        "verify_*.py"
+    ]
+    privacy-exclude-dirs = ["QA", "Testing", "Validation", "TestSuite"]
+    privacy-additional-test-patterns = []
+
+**Behavior-Driven Development (BDD) Projects**
+
+Projects using BDD frameworks like behave or pytest-bdd have specific test file patterns:
+
+.. code-block:: ini
+
+    [function-sort]
+    # BDD test directories
+    privacy-exclude-dirs = features,specs,scenarios,steps
+
+    # BDD-specific patterns
+    privacy-additional-test-patterns = *_steps.py,*_feature.py,scenario_*.py,given_*.py,when_*.py,then_*.py
+
+    # Keep built-in detection for standard test files
+    privacy-override-test-detection = no
+
+.. code-block:: toml
+
+    [tool.pylint."function-sort"]
+    privacy-exclude-dirs = ["features", "specs", "scenarios", "steps"]
+    privacy-additional-test-patterns = [
+        "*_steps.py",
+        "*_feature.py",
+        "scenario_*.py",
+        "given_*.py",
+        "when_*.py",
+        "then_*.py"
+    ]
+    privacy-override-test-detection = false
+
+**Troubleshooting Privacy Configuration**
+
+**Issue: Functions used only by tests are still being marked as private**
+
+*Solution*: Ensure your test files are properly excluded:
+
+1. Check that test directories are listed in ``privacy-exclude-dirs``
+2. Verify test file patterns match your naming convention in ``privacy-exclude-patterns``
+3. Add any custom test patterns to ``privacy-additional-test-patterns``
+4. Enable ``privacy-update-tests`` if you want tests to be automatically updated
+
+**Issue: Privacy detection is too aggressive**
+
+*Solution*: Expand your exclusion patterns:
+
+.. code-block:: ini
+
+    [function-sort]
+    # More comprehensive exclusions
+    privacy-exclude-dirs = tests,test,testing,qa,benchmarks,examples,demos
+    privacy-exclude-patterns = test_*.py,*_test.py,*_tests.py,conftest.py,*_spec.py,example_*.py
+
+**Issue: Privacy detection is missing test files**
+
+*Solution*: Add your specific patterns and verify detection:
+
+.. code-block:: bash
+
+    # Check which files are being detected as tests
+    pylint --load-plugins=pylint_sort_functions --verbose src/
+
+Look for messages about excluded test files in the verbose output.
+
+**Issue: Want to completely customize test detection**
+
+*Solution*: Override built-in detection and define your own patterns:
+
+.. code-block:: ini
+
+    [function-sort]
+    # Take full control of test detection
+    privacy-override-test-detection = yes
+    privacy-exclude-patterns = my_test_*.py,*_mytest.py
+    privacy-exclude-dirs = my_tests,custom_qa
+
+**Issue: Configuration not being applied**
+
+*Solution*: Verify configuration file location and syntax:
+
+1. Ensure ``.pylintrc`` or ``pyproject.toml`` is in the project root
+2. Check that the configuration section is named ``[function-sort]`` (not ``[pylint-sort-functions]``)
+3. For ``pyproject.toml``, use ``[tool.pylint."function-sort"]``
+4. Verify boolean values: ``yes``/``no`` in .pylintrc, ``true``/``false`` in pyproject.toml
 
 Automatic Directory Exclusion
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
