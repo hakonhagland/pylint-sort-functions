@@ -597,7 +597,7 @@ def _already_private():
             assert "helper_func" in violation_names
 
 
-class TestFunctionReference:  # pylint: disable=too-few-public-methods
+class FunctionTestReference:  # pylint: disable=too-few-public-methods
     """Test the FunctionReference namedtuple."""
 
     def test_function_reference_creation(self) -> None:
@@ -1523,9 +1523,9 @@ def incomplete_function(
         module_mock = Mock()
         content = "test content"
 
-        from pylint_sort_functions.privacy_types import TestReference
+        from pylint_sort_functions.privacy_types import FunctionTestReference
 
-        mock_test_ref = TestReference(
+        mock_test_ref = FunctionTestReference(
             file_path=test_file,
             line=1,
             col=0,
@@ -1548,7 +1548,7 @@ def incomplete_function(
             assert result == [mock_test_ref]
 
         # Test _find_string_references_in_test_file delegation
-        mock_string_test_ref = TestReference(
+        mock_string_test_ref = FunctionTestReference(
             file_path=test_file,
             line=2,
             col=0,

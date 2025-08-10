@@ -13,7 +13,7 @@ from pathlib import Path
 from typing import Any, Dict, List
 
 # Import types that will be referenced
-from pylint_sort_functions.privacy_types import TestReference
+from pylint_sort_functions.privacy_types import FunctionTestReference
 
 
 class TestFileUpdater:  # pylint: disable=too-few-public-methods
@@ -37,7 +37,7 @@ class TestFileUpdater:  # pylint: disable=too-few-public-methods
         test_file: Path,
         old_name: str,
         new_name: str,
-        test_references: List[TestReference],
+        test_references: List[FunctionTestReference],
     ) -> Dict[str, Any]:
         """Update a test file to use the new function name with backup and rollback.
 
@@ -136,7 +136,7 @@ class TestFileUpdater:  # pylint: disable=too-few-public-methods
         test_file: Path,
         old_name: str,
         new_name: str,
-        test_references: List[TestReference],
+        test_references: List[FunctionTestReference],
     ) -> bool:
         """Update import statements in a test file to use the new function name.
 
@@ -200,7 +200,7 @@ class TestFileUpdater:  # pylint: disable=too-few-public-methods
         test_file: Path,
         old_name: str,
         new_name: str,
-        test_references: List[TestReference],
+        test_references: List[FunctionTestReference],
     ) -> bool:
         """Update mock patch patterns in a test file to use the new function name.
 

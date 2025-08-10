@@ -61,6 +61,9 @@ fail_under = 100
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+markers = [
+    "integration: marks tests as integration tests"
+]
 
 # Mypy automatically discovers this configuration from pyproject.toml
 # No additional configuration needed for pre-commit hooks

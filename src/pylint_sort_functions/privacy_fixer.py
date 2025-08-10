@@ -24,13 +24,13 @@ from pylint_sort_functions.privacy_analyzer import PrivacyAnalyzer
 from pylint_sort_functions.privacy_types import (
     FunctionReference,
     RenameCandidate,
-    TestReference,
+    FunctionTestReference,
 )
 from pylint_sort_functions.test_file_manager import TestFileManager
 from pylint_sort_functions.test_file_updater import TestFileUpdater
 
 # Re-export types for backward compatibility
-__all__ = ["PrivacyFixer", "FunctionReference", "RenameCandidate", "TestReference"]
+__all__ = ["PrivacyFixer", "FunctionReference", "RenameCandidate", "FunctionTestReference"]
 
 
 class PrivacyFixer:
@@ -165,7 +165,7 @@ class PrivacyFixer:
                 for candidate in file_candidates:
                     if candidate.is_safe and candidate.test_references:
                         # Group test references by file
-                        test_refs_by_file: Dict[Path, List[TestReference]] = {}
+                        test_refs_by_file: Dict[Path, List[FunctionTestReference]] = {}
                         for ref in candidate.test_references:
                             if ref.file_path not in test_refs_by_file:
                                 test_refs_by_file[ref.file_path] = []
@@ -252,7 +252,7 @@ class PrivacyFixer:
 
     def find_test_references(
         self, function_name: str, test_files: List[Path]
-    ) -> List[TestReference]:
+    ) -> List[FunctionTestReference]:
         """Find all references to a function in test files.
 
         Delegates to the test file manager for the actual reference finding logic.
@@ -336,7 +336,7 @@ class PrivacyFixer:
         test_file: Path,
         old_name: str,
         new_name: str,
-        test_references: List[TestReference],
+        test_references: List[FunctionTestReference],
     ) -> Dict[str, Any]:
         """Update a test file to use the new function name with backup and rollback.
 
@@ -387,7 +387,7 @@ class PrivacyFixer:
 
     def _find_references_in_test_file(
         self, function_name: str, test_file: Path, module: Any, content: str
-    ) -> List[TestReference]:
+    ) -> List[FunctionTestReference]:
         """Find function references in a test file using AST analysis."""
         return self.test_manager._find_references_in_test_file(
             function_name, test_file, module, content
@@ -395,7 +395,7 @@ class PrivacyFixer:
 
     def _find_string_references_in_test_file(
         self, function_name: str, test_file: Path, content: str
-    ) -> List[TestReference]:
+    ) -> List[FunctionTestReference]:
         """Find function references in test file using string-based analysis."""
         return self.test_manager._find_string_references_in_test_file(
             function_name, test_file, content
@@ -484,7 +484,7 @@ class PrivacyFixer:
         test_file: Path,
         old_name: str,
         new_name: str,
-        test_references: List[TestReference],
+        test_references: List[FunctionTestReference],
     ) -> bool:
         """Update import statements in a test file to use the new function name."""
         return self.test_updater._update_import_statements(
@@ -496,7 +496,7 @@ class PrivacyFixer:
         test_file: Path,
         old_name: str,
         new_name: str,
-        test_references: List[TestReference],
+        test_references: List[FunctionTestReference],
     ) -> bool:
         """Update mock patch patterns in a test file to use the new function name."""
         return self.test_updater._update_mock_patterns(

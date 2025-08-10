@@ -17,7 +17,7 @@ from astroid import nodes
 from pylint_sort_functions import utils
 
 # Import types that will be referenced
-from pylint_sort_functions.privacy_types import TestReference
+from pylint_sort_functions.privacy_types import FunctionTestReference
 
 
 class TestFileManager:
@@ -58,7 +58,7 @@ class TestFileManager:
 
     def find_test_references(
         self, function_name: str, test_files: List[Path]
-    ) -> List[TestReference]:
+    ) -> List[FunctionTestReference]:
         """Find all references to a function in test files.
 
         Scans test files for various types of function references:
@@ -105,7 +105,7 @@ class TestFileManager:
         test_file: Path,
         module: nodes.Module,
         content: str,
-    ) -> List[TestReference]:
+    ) -> List[FunctionTestReference]:
         """Find function references in a test file using AST analysis.
 
         :param function_name: Name of the function to find
@@ -126,7 +126,7 @@ class TestFileManager:
                             # Use alias if present, otherwise use original name
                             import_name = alias if alias else name
                             references.append(
-                                TestReference(
+                                FunctionTestReference(
                                     file_path=test_file,
                                     line=node.lineno,
                                     col=node.col_offset,
@@ -148,7 +148,7 @@ class TestFileManager:
 
     def _find_string_references_in_test_file(
         self, function_name: str, test_file: Path, content: str
-    ) -> List[TestReference]:
+    ) -> List[FunctionTestReference]:
         """Find function references in test file using string-based analysis.
 
         This handles cases where AST parsing fails or for string literals
@@ -173,7 +173,7 @@ class TestFileManager:
             match = re.search(patch_pattern, line)
             if match:
                 references.append(
-                    TestReference(
+                    FunctionTestReference(
                         file_path=test_file,
                         line=line_num,
                         col=match.start(),
@@ -186,7 +186,7 @@ class TestFileManager:
             match = re.search(mocker_pattern, line)
             if match:
                 references.append(
-                    TestReference(
+                    FunctionTestReference(
                         file_path=test_file,
                         line=line_num,
                         col=match.start(),

@@ -21,7 +21,7 @@ class FunctionReference(NamedTuple):
     context: str  # "call", "decorator", "assignment", etc.
 
 
-class TestReference(NamedTuple):
+class FunctionTestReference(NamedTuple):
     """Represents a reference to a function within a test file."""
 
     file_path: Path
@@ -38,6 +38,6 @@ class RenameCandidate(NamedTuple):
     old_name: str
     new_name: str
     references: List[FunctionReference]
-    test_references: List[TestReference]
+    test_references: List[FunctionTestReference]
     is_safe: bool
     safety_issues: List[str]

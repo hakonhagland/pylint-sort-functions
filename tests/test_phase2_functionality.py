@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Any
 from unittest.mock import Mock, patch
 
-from pylint_sort_functions.privacy_fixer import PrivacyFixer, TestReference
+from pylint_sort_functions.privacy_fixer import PrivacyFixer, FunctionTestReference
 
 
 class TestPhase2TestFileUpdates:
@@ -29,7 +29,7 @@ class TestPhase2TestFileUpdates:
             )
 
             test_references = [
-                TestReference(
+                FunctionTestReference(
                     file_path=test_file,
                     line=1,
                     col=0,
@@ -62,7 +62,7 @@ class TestPhase2TestFileUpdates:
             )
 
             test_references = [
-                TestReference(
+                FunctionTestReference(
                     file_path=test_file,
                     line=2,  # Line with helper_function
                     col=0,
@@ -95,7 +95,7 @@ class TestPhase2TestFileUpdates:
             )
 
             test_references = [
-                TestReference(
+                FunctionTestReference(
                     file_path=test_file,
                     line=3,
                     col=0,
@@ -125,7 +125,7 @@ class TestPhase2TestFileUpdates:
             )
 
             test_references = [
-                TestReference(
+                FunctionTestReference(
                     file_path=test_file,
                     line=2,
                     col=0,
@@ -162,21 +162,21 @@ class TestPhase2TestFileUpdates:
             test_file.write_text(original_content)
 
             test_references = [
-                TestReference(
+                FunctionTestReference(
                     file_path=test_file,
                     line=2,
                     col=0,
                     context="import",
                     reference_text="from src.module import helper_function",
                 ),
-                TestReference(
+                FunctionTestReference(
                     file_path=test_file,
                     line=4,
                     col=0,
                     context="mock_patch",
                     reference_text="src.module.helper_function",
                 ),
-                TestReference(
+                FunctionTestReference(
                     file_path=test_file,
                     line=10,
                     col=0,
@@ -209,7 +209,7 @@ class TestPhase2TestFileUpdates:
             test_file.write_text(original_content)
 
             test_references = [
-                TestReference(
+                FunctionTestReference(
                     file_path=test_file,
                     line=1,
                     col=0,
@@ -246,7 +246,7 @@ class TestPhase2TestFileUpdates:
                 test_file: Path,
                 old_name: str,
                 new_name: str,
-                test_references: list[TestReference],
+                test_references: list[FunctionTestReference],
             ) -> bool:
                 # This will create invalid syntax by writing malformed content
                 with open(test_file, "w", encoding="utf-8") as f:
@@ -263,7 +263,7 @@ class TestPhase2TestFileUpdates:
             )
 
             test_references = [
-                TestReference(
+                FunctionTestReference(
                     file_path=test_file,
                     line=1,
                     col=0,
@@ -297,7 +297,7 @@ class TestPhase2TestFileUpdates:
             test_file.write_text(original_content)
 
             # Empty test references - no changes needed
-            test_references: list[TestReference] = []
+            test_references: list[FunctionTestReference] = []
 
             result = self.fixer.update_test_file(
                 test_file, "helper_function", "_helper_function", test_references
@@ -318,7 +318,7 @@ class TestPhase2TestFileUpdates:
             # Don't create the file - this will cause an exception
 
             test_references = [
-                TestReference(
+                FunctionTestReference(
                     file_path=test_file,
                     line=1,
                     col=0,
@@ -343,7 +343,7 @@ class TestPhase2TestFileUpdates:
 
             # References that don't match any import context
             test_references = [
-                TestReference(
+                FunctionTestReference(
                     file_path=test_file,
                     line=1,
                     col=0,
@@ -368,7 +368,7 @@ class TestPhase2TestFileUpdates:
 
             # References that don't match any mock context
             test_references = [
-                TestReference(
+                FunctionTestReference(
                     file_path=test_file,
                     line=1,
                     col=0,
@@ -390,7 +390,7 @@ class TestPhase2TestFileUpdates:
         invalid_file = Path("/nonexistent/path/file.py")
 
         test_references = [
-            TestReference(
+            FunctionTestReference(
                 file_path=invalid_file,
                 line=1,
                 col=0,
@@ -441,14 +441,14 @@ class TestPhase2Integration:
 
             # Create test references
             test_references = [
-                TestReference(
+                FunctionTestReference(
                     file_path=test_file,
                     line=1,
                     col=0,
                     context="import",
                     reference_text="from src.module import helper_function",
                 ),
-                TestReference(
+                FunctionTestReference(
                     file_path=test_file,
                     line=2,
                     col=0,
@@ -626,7 +626,7 @@ class TestPhase2Integration:
             mock_func_node.name = "helper_function"
 
             test_references = [
-                TestReference(
+                FunctionTestReference(
                     file_path=test_file,
                     line=1,
                     col=0,
@@ -703,7 +703,7 @@ class TestPhase2Integration:
             mock_func_node.name = "helper_function"
 
             test_references = [
-                TestReference(
+                FunctionTestReference(
                     file_path=test_file,
                     line=1,
                     col=0,
@@ -768,7 +768,7 @@ class TestPhase2Integration:
             test_file.write_text("from src.module import helper_function\n")
 
             test_references = [
-                TestReference(
+                FunctionTestReference(
                     file_path=test_file,
                     line=1,
                     col=0,

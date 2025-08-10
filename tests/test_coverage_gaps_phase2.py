@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Any
 from unittest.mock import Mock, patch
 
-from pylint_sort_functions.privacy_fixer import PrivacyFixer, TestReference
+from pylint_sort_functions.privacy_fixer import PrivacyFixer, FunctionTestReference
 
 
 class TestCoverageGapsPhase2:
@@ -141,7 +141,7 @@ class TestCoverageGapsPhase2:
             test_file.write_text("from src.module import helper_function\n")
 
             test_references = [
-                TestReference(
+                FunctionTestReference(
                     file_path=test_file,
                     line=1,
                     col=0,
