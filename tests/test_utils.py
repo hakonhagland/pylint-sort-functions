@@ -51,7 +51,7 @@ class TestUtils:
         """Test sorting validation with empty list."""
         functions: list[nodes.FunctionDef] = []
 
-        result = utils.are_functions_sorted(functions)
+        result = utils._are_functions_sorted(functions)
         assert result is True
 
     def test_are_functions_sorted_false(self) -> None:
@@ -63,7 +63,7 @@ class TestUtils:
         module = astroid.parse(content)
         functions = utils.get_functions_from_node(module)
 
-        result = utils.are_functions_sorted(functions)
+        result = utils._are_functions_sorted(functions)
         assert result is False
 
     def test_are_functions_sorted_false_private_only(self) -> None:
@@ -75,7 +75,7 @@ class TestUtils:
         module = astroid.parse(content)
         functions = utils.get_functions_from_node(module)
 
-        result = utils.are_functions_sorted(functions)
+        result = utils._are_functions_sorted(functions)
         assert result is False
 
     def test_are_functions_sorted_true(self) -> None:
@@ -87,7 +87,7 @@ class TestUtils:
         module = astroid.parse(content)
         functions = utils.get_functions_from_node(module)
 
-        result = utils.are_functions_sorted(functions)
+        result = utils._are_functions_sorted(functions)
         assert result is True
 
     def test_are_methods_sorted_false(self) -> None:
@@ -101,7 +101,7 @@ class TestUtils:
         assert isinstance(class_node, nodes.ClassDef)
         methods = utils.get_methods_from_class(class_node)
 
-        result = utils.are_methods_sorted(methods)
+        result = utils._are_methods_sorted(methods)
         assert result is False
 
     def test_are_methods_sorted_true(self) -> None:
@@ -115,7 +115,7 @@ class TestUtils:
         assert isinstance(class_node, nodes.ClassDef)
         methods = utils.get_methods_from_class(class_node)
 
-        result = utils.are_methods_sorted(methods)
+        result = utils._are_methods_sorted(methods)
         assert result is True
 
     def test_get_function_groups(self) -> None:
@@ -278,7 +278,7 @@ class TestUtils:
             skip_dir.mkdir()
             (skip_dir / "cached.py").write_text("# Should be skipped")
 
-            files = utils._find_python_files(temp_path)
+            files = utils.find_python_files(temp_path)
 
             # Should find 3 Python files
             assert len(files) == 3

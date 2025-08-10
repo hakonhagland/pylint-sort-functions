@@ -101,7 +101,7 @@ def main() -> int:  # pylint: disable=too-many-return-statements,too-many-branch
                 print(f"Error: Path does not exist: {path}")
                 return 1
 
-        python_files = _find_python_files(paths)
+        python_files = find_python_files_from_paths(paths)
         if not python_files:
             print("No Python files found in the specified paths.")
             return 0
@@ -273,12 +273,96 @@ def _add_parser_arguments(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "--privacy-dry-run",
         action="store_true",
-        help="Show which functions would be renamed to private without modifying files",
+        help="Show functions that would be renamed to private (standalone option)",
+    )
+
+    parser.add_argument(
+        "--auto-sort",
+        action="store_true",
+        help="Automatically apply function sorting after privacy fixes",
     )
 
 
-def _handle_privacy_fixing(
-    args: object, python_files: List[Path], paths: List[Path]
+def _apply_integrated_sorting(
+    args: argparse.Namespace, python_files: List[Path]
+) -> None:
+    """Apply function sorting after privacy fixes.
+
+    :param args: Parsed command-line arguments containing configuration
+    :param python_files: List of Python files to sort
+    """
+    # Create sorting configuration from CLI args
+    config = AutoFixConfig(
+        dry_run=args.privacy_dry_run,  # Use privacy dry-run mode for sorting too
+        backup=not args.no_backup,
+        ignore_decorators=args.ignore_decorators or [],
+        add_section_headers=args.add_section_headers,
+        public_header=args.public_header,
+        private_header=args.private_header,
+        public_method_header=args.public_method_header,
+        private_method_header=args.private_method_header,
+        additional_section_patterns=args.additional_section_patterns,
+        section_header_case_sensitive=args.section_headers_case_sensitive,
+    )
+
+    # Apply sorting
+    files_processed, files_modified = auto_fix.sort_python_files(python_files, config)
+
+    if config.dry_run:
+        print(f"Would sort {files_modified} of {files_processed} files")
+    else:
+        print(f"Sorted {files_modified} of {files_processed} files")
+        if config.backup and files_modified > 0:  # pragma: no cover
+            print("Additional backup files created for sorting changes")
+
+
+def _find_project_root(start_path: Path) -> Path:
+    """Find the project root by looking for common project markers.
+
+    :param start_path: Starting path to search from
+    :type start_path: Path
+    :returns: Project root path
+    :rtype: Path
+    """
+    current = start_path.resolve()
+    if current.is_file():
+        current = current.parent
+
+    # Look for common project root indicators
+    markers = ["pyproject.toml", "setup.py", "setup.cfg", ".git", "requirements.txt"]
+
+    while current != current.parent:
+        for marker in markers:
+            if (current / marker).exists():
+                return current
+        current = current.parent
+
+    # Fallback to the original path's parent
+    return start_path.parent if start_path.is_file() else start_path
+
+
+def find_python_files_from_paths(paths: List[Path]) -> List[Path]:
+    """Find all Python files in the given paths.
+
+    :param paths: List of file or directory paths
+    :type paths: List[Path]
+    :returns: List of Python file paths
+    :rtype: List[Path]
+    """
+    python_files = []
+
+    for path in paths:
+        if path.is_file() and path.suffix == ".py":
+            python_files.append(path)
+        elif path.is_dir():
+            # Recursively find Python files
+            python_files.extend(path.rglob("*.py"))
+
+    return python_files
+
+
+def _handle_privacy_fixing(  # pylint: disable=too-many-locals,too-many-branches
+    args: argparse.Namespace, python_files: List[Path], paths: List[Path]
 ) -> int:
     """Handle privacy fixing workflow.
 
@@ -334,6 +418,7 @@ def _handle_privacy_fixing(
                         old_name=func.name,
                         new_name=f"_{func.name}",
                         references=references,
+                        test_references=[],  # Will be populated if needed
                         is_safe=True,  # Will be validated next
                         safety_issues=[],
                     )
@@ -345,6 +430,7 @@ def _handle_privacy_fixing(
                         old_name=func.name,
                         new_name=f"_{func.name}",
                         references=references,
+                        test_references=[],  # Will be populated if needed
                         is_safe=is_safe,
                         safety_issues=issues,
                     )
@@ -372,55 +458,25 @@ def _handle_privacy_fixing(
             if result.get("errors"):  # pragma: no cover
                 for error in result["errors"]:
                     print(f"Error: {error}")
+
+            # Apply automatic sorting if requested
+            if args.auto_sort and result["renamed"] > 0:
+                print("\n=== Applying Automatic Sorting ===")
+                _apply_integrated_sorting(args, python_files)
+        # For dry-run mode with auto-sort, show what sorting would do
+        if args.privacy_dry_run and args.auto_sort and all_candidates:
+            print("\n=== Auto-Sort Preview ===")
+            _apply_integrated_sorting(args, python_files)
     else:  # pragma: no cover
         print("No functions found that need privacy fixes.")
 
+        # For dry-run mode with auto-sort on files with no privacy issues,
+        # still show sorting preview
+        if args.privacy_dry_run and args.auto_sort:
+            print("\n=== Auto-Sort Preview ===")
+            _apply_integrated_sorting(args, python_files)
+
     return 0
-
-
-def _find_project_root(start_path: Path) -> Path:
-    """Find the project root by looking for common project markers.
-
-    :param start_path: Starting path to search from
-    :type start_path: Path
-    :returns: Project root path
-    :rtype: Path
-    """
-    current = start_path.resolve()
-    if current.is_file():
-        current = current.parent
-
-    # Look for common project root indicators
-    markers = ["pyproject.toml", "setup.py", "setup.cfg", ".git", "requirements.txt"]
-
-    while current != current.parent:
-        for marker in markers:
-            if (current / marker).exists():
-                return current
-        current = current.parent
-
-    # Fallback to the original path's parent
-    return start_path.parent if start_path.is_file() else start_path
-
-
-def _find_python_files(paths: List[Path]) -> List[Path]:
-    """Find all Python files in the given paths.
-
-    :param paths: List of file or directory paths
-    :type paths: List[Path]
-    :returns: List of Python file paths
-    :rtype: List[Path]
-    """
-    python_files = []
-
-    for path in paths:
-        if path.is_file() and path.suffix == ".py":
-            python_files.append(path)
-        elif path.is_dir():
-            # Recursively find Python files
-            python_files.extend(path.rglob("*.py"))
-
-    return python_files
 
 
 if __name__ == "__main__":  # pragma: no cover

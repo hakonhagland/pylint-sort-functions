@@ -4,7 +4,11 @@ import tempfile
 from pathlib import Path
 from unittest.mock import patch
 
-from pylint_sort_functions.cli import _find_project_root, _find_python_files, main
+from pylint_sort_functions.cli import (
+    _find_project_root,
+    _find_python_files_from_paths,
+    main,
+)
 
 
 class TestCLI:
@@ -59,7 +63,7 @@ class TestCLI:
             py_file2.write_text("def test(): pass")
             non_py_file.write_text("not python")
 
-            result = _find_python_files([temp_path])
+            result = _find_python_files_from_paths([temp_path])
 
             # Should find both Python files
             assert len(result) == 2
@@ -73,7 +77,7 @@ class TestCLI:
             temp_file = Path(f.name)
 
         try:
-            result = _find_python_files([temp_file])
+            result = _find_python_files_from_paths([temp_file])
             assert result == [temp_file]
         finally:
             temp_file.unlink()

@@ -61,45 +61,12 @@ def are_functions_properly_separated(functions: list[nodes.FunctionDef]) -> bool
     return True
 
 
-def are_functions_sorted(functions: list[nodes.FunctionDef]) -> bool:  # pylint: disable=function-should-be-private
-    """Check if functions are sorted alphabetically within their visibility scope.
-
-    Functions are expected to be sorted with:
-    - Public functions (including dunder methods like __init__) sorted first
-    - Private functions (single underscore prefix) sorted alphabetically second
-
-    Dunder methods are treated as public and will naturally sort to the top due to
-    the __ prefix (e.g., __init__ comes before add_item).
-
-    :param functions: List of function definition nodes
-    :type functions: list[nodes.FunctionDef]
-    :returns: True if functions are properly sorted
-    :rtype: bool
-    """
-    if len(functions) <= 1:
-        return True
-
-    public_functions, private_functions = _get_function_groups(functions)
-
-    # Check if public functions are sorted
-    public_names = [f.name for f in public_functions]
-    if public_names != sorted(public_names):
-        return False
-
-    # Check if private functions are sorted
-    private_names = [f.name for f in private_functions]
-    if private_names != sorted(private_names):
-        return False
-
-    return True
-
-
 def are_functions_sorted_with_exclusions(
     functions: list[nodes.FunctionDef], ignore_decorators: list[str] | None = None
 ) -> bool:
     """Check if functions are sorted alphabetically, excluding decorator-dependent ones.
 
-    This is the enhanced version of are_functions_sorted that supports framework-aware
+    This is the enhanced version of _are_functions_sorted that supports framework-aware
     sorting by excluding functions with specific decorators that create dependencies.
 
     :param functions: List of function definition nodes
@@ -120,19 +87,7 @@ def are_functions_sorted_with_exclusions(
     ]
 
     # Use existing sorting logic on the filtered functions
-    return are_functions_sorted(sortable_functions)
-
-
-def are_methods_sorted(methods: list[nodes.FunctionDef]) -> bool:  # pylint: disable=function-should-be-private
-    """Check if methods are sorted alphabetically within their visibility scope.
-
-    :param methods: List of method definition nodes
-    :type methods: list[nodes.FunctionDef]
-    :returns: True if methods are properly sorted
-    :rtype: bool
-    """
-    # Methods follow the same sorting rules as functions
-    return are_functions_sorted(methods)
+    return _are_functions_sorted(sortable_functions)
 
 
 def are_methods_sorted_with_exclusions(
@@ -149,6 +104,49 @@ def are_methods_sorted_with_exclusions(
     """
     # Methods follow the same sorting rules as functions
     return are_functions_sorted_with_exclusions(methods, ignore_decorators)
+
+
+def find_python_files(root_path: Path) -> list[Path]:
+    """Find all Python files in a project directory.
+
+    Recursively searches for files with .py extension while skipping common
+    directories that should not be analyzed (build artifacts, virtual environments,
+    caches, etc.).
+
+    TODO: Make skip_dirs list configurable for project-specific needs.
+
+    :param root_path: Root directory to search for Python files
+    :type root_path: Path
+    :returns: List of paths to Python files
+    :rtype: list[Path]
+    """
+    python_files = []
+
+    # Directories to skip
+    skip_dirs = {
+        "__pycache__",
+        ".git",
+        ".tox",
+        ".pytest_cache",
+        ".mypy_cache",
+        "venv",
+        ".venv",
+        "env",
+        ".env",
+        "build",
+        "dist",
+        "*.egg-info",
+        "node_modules",
+    }
+
+    for item in root_path.rglob("*.py"):
+        # Skip if any parent directory should be skipped
+        if any(skip_dir in item.parts for skip_dir in skip_dirs):
+            continue
+
+        python_files.append(item)
+
+    return python_files
 
 
 def function_has_excluded_decorator(
@@ -225,6 +223,48 @@ def is_private_function(func: nodes.FunctionDef) -> bool:
     :rtype: bool
     """
     return func.name.startswith("_") and not _is_dunder_method(func)
+
+
+def is_unittest_file(module_name: str) -> bool:
+    """Check if a module name indicates a unit test file.
+
+    Detects test files based on common naming patterns:
+    - Files in 'tests' or 'test' directories
+    - Files starting with 'test_'
+    - Files ending with '_test'
+    - conftest.py files (pytest configuration)
+    - Files containing 'test' in their path components
+
+    :param module_name: The module name to check (e.g., 'package.tests.test_utils')
+    :type module_name: str
+    :returns: True if module appears to be a test file
+    :rtype: bool
+    """
+    # Convert module name to lowercase for case-insensitive matching
+    lower_name = module_name.lower()
+
+    # Split into path components for more precise matching
+    parts = lower_name.split(".")
+
+    # Check if any directory in the path is a test directory
+    if "tests" in parts or "test" in parts:
+        return True
+
+    # Get the file name (last component)
+    if parts:
+        filename = parts[-1]
+
+        # Check for common test file patterns
+        if filename.startswith("test_"):
+            return True
+        if filename.endswith("_test"):
+            return True
+        if filename == "conftest":  # pytest configuration file
+            return True
+
+    # Fallback: check if 'test' appears anywhere (catches edge cases)
+    # This is more permissive but ensures we don't miss test files
+    return "test" in lower_name
 
 
 def should_function_be_private(
@@ -339,6 +379,51 @@ def should_function_be_public(
 # Private functions
 
 
+def _are_functions_sorted(functions: list[nodes.FunctionDef]) -> bool:  # pylint: disable=function-should-be-private
+    """Check if functions are sorted alphabetically within their visibility scope.
+
+    Functions are expected to be sorted with:
+    - Public functions (including dunder methods like __init__) sorted first
+    - Private functions (single underscore prefix) sorted alphabetically second
+
+    Dunder methods are treated as public and will naturally sort to the top due to
+    the __ prefix (e.g., __init__ comes before add_item).
+
+    :param functions: List of function definition nodes
+    :type functions: list[nodes.FunctionDef]
+    :returns: True if functions are properly sorted
+    :rtype: bool
+    """
+    if len(functions) <= 1:
+        return True
+
+    public_functions, private_functions = _get_function_groups(functions)
+
+    # Check if public functions are sorted
+    public_names = [f.name for f in public_functions]
+    if public_names != sorted(public_names):
+        return False
+
+    # Check if private functions are sorted
+    private_names = [f.name for f in private_functions]
+    if private_names != sorted(private_names):
+        return False
+
+    return True
+
+
+def _are_methods_sorted(methods: list[nodes.FunctionDef]) -> bool:  # pylint: disable=function-should-be-private
+    """Check if methods are sorted alphabetically within their visibility scope.
+
+    :param methods: List of method definition nodes
+    :type methods: list[nodes.FunctionDef]
+    :returns: True if methods are properly sorted
+    :rtype: bool
+    """
+    # Methods follow the same sorting rules as functions
+    return _are_functions_sorted(methods)
+
+
 @lru_cache(maxsize=1)
 def _build_cross_module_usage_graph(project_root: Path) -> dict[str, set[str]]:
     """Build a graph of which functions are used by which modules.
@@ -354,7 +439,7 @@ def _build_cross_module_usage_graph(project_root: Path) -> dict[str, set[str]]:
     :rtype: dict[str, set[str]]
     """
     usage_graph: dict[str, set[str]] = {}
-    python_files = _find_python_files(project_root)
+    python_files = find_python_files(project_root)
 
     for file_path in python_files:
         # Get relative module name (e.g., "src/package/module.py" -> "package.module")
@@ -365,7 +450,7 @@ def _build_cross_module_usage_graph(project_root: Path) -> dict[str, set[str]]:
             # Skip __init__ files (they re-export for API organization)
             # not actual usage)
             # and test files (tests access internals, don't indicate public API)
-            if module_name.endswith("__init__") or _is_unittest_file(module_name):
+            if module_name.endswith("__init__") or is_unittest_file(module_name):
                 continue
 
             # Get file modification time for cache key
@@ -571,49 +656,6 @@ def _extract_imports_from_file(
         return set(), set(), set()
 
 
-def _find_python_files(root_path: Path) -> list[Path]:
-    """Find all Python files in a project directory.
-
-    Recursively searches for files with .py extension while skipping common
-    directories that should not be analyzed (build artifacts, virtual environments,
-    caches, etc.).
-
-    TODO: Make skip_dirs list configurable for project-specific needs.
-
-    :param root_path: Root directory to search for Python files
-    :type root_path: Path
-    :returns: List of paths to Python files
-    :rtype: list[Path]
-    """
-    python_files = []
-
-    # Directories to skip
-    skip_dirs = {
-        "__pycache__",
-        ".git",
-        ".tox",
-        ".pytest_cache",
-        ".mypy_cache",
-        "venv",
-        ".venv",
-        "env",
-        ".env",
-        "build",
-        "dist",
-        "*.egg-info",
-        "node_modules",
-    }
-
-    for item in root_path.rglob("*.py"):
-        # Skip if any parent directory should be skipped
-        if any(skip_dir in item.parts for skip_dir in skip_dirs):
-            continue
-
-        python_files.append(item)
-
-    return python_files
-
-
 def _get_decorator_strings(func: nodes.FunctionDef) -> list[str]:
     """Extract string representations of all decorators on a function.
 
@@ -703,45 +745,3 @@ def _is_function_used_externally(
     external_usage = [m for m in using_modules if m != current_module]
 
     return len(external_usage) > 0
-
-
-def _is_unittest_file(module_name: str) -> bool:
-    """Check if a module name indicates a unit test file.
-
-    Detects test files based on common naming patterns:
-    - Files in 'tests' or 'test' directories
-    - Files starting with 'test_'
-    - Files ending with '_test'
-    - conftest.py files (pytest configuration)
-    - Files containing 'test' in their path components
-
-    :param module_name: The module name to check (e.g., 'package.tests.test_utils')
-    :type module_name: str
-    :returns: True if module appears to be a test file
-    :rtype: bool
-    """
-    # Convert module name to lowercase for case-insensitive matching
-    lower_name = module_name.lower()
-
-    # Split into path components for more precise matching
-    parts = lower_name.split(".")
-
-    # Check if any directory in the path is a test directory
-    if "tests" in parts or "test" in parts:
-        return True
-
-    # Get the file name (last component)
-    if parts:
-        filename = parts[-1]
-
-        # Check for common test file patterns
-        if filename.startswith("test_"):
-            return True
-        if filename.endswith("_test"):
-            return True
-        if filename == "conftest":  # pytest configuration file
-            return True
-
-    # Fallback: check if 'test' appears anywhere (catches edge cases)
-    # This is more permissive but ensures we don't miss test files
-    return "test" in lower_name

@@ -149,6 +149,7 @@ class TestPrivacyFixer:  # pylint: disable=attribute-defined-outside-init,too-ma
             old_name="helper_function",
             new_name="_helper_function",
             references=references,
+            test_references=[],  # Phase 1: Added test references
             is_safe=True,  # We'll validate this
             safety_issues=[],
         )
@@ -177,6 +178,7 @@ class TestPrivacyFixer:  # pylint: disable=attribute-defined-outside-init,too-ma
             old_name="helper",
             new_name="_helper",
             references=[],
+            test_references=[],  # Phase 1: Added test references
             is_safe=True,
             safety_issues=[],
         )
@@ -186,6 +188,7 @@ class TestPrivacyFixer:  # pylint: disable=attribute-defined-outside-init,too-ma
             old_name="complex_helper",
             new_name="_complex_helper",
             references=[],
+            test_references=[],  # Phase 1: Added test references
             is_safe=False,
             safety_issues=["Dynamic references found"],
         )
@@ -231,6 +234,7 @@ class TestPrivacyFixer:  # pylint: disable=attribute-defined-outside-init,too-ma
             old_name="test_func",
             new_name="_test_func",
             references=[],
+            test_references=[],  # Phase 1: Added test references
             is_safe=True,
             safety_issues=[],
         )
@@ -277,6 +281,7 @@ class TestPrivacyFixer:  # pylint: disable=attribute-defined-outside-init,too-ma
             old_name="test_func",
             new_name="_test_func",
             references=[],
+            test_references=[],  # Phase 1: Added test references
             is_safe=True,
             safety_issues=[],
         )
@@ -321,6 +326,7 @@ class TestPrivacyFixer:  # pylint: disable=attribute-defined-outside-init,too-ma
             old_name="test_func",
             new_name="_test_func",
             references=[],
+            test_references=[],  # Phase 1: Added test references
             is_safe=True,
             safety_issues=[],
         )
@@ -357,6 +363,7 @@ class TestPrivacyFixer:  # pylint: disable=attribute-defined-outside-init,too-ma
             old_name="test_func",
             new_name="_test_func",
             references=[],
+            test_references=[],  # Phase 1: Added test references
             is_safe=True,
             safety_issues=[],
         )
@@ -388,6 +395,7 @@ class TestPrivacyFixer:  # pylint: disable=attribute-defined-outside-init,too-ma
             old_name="test_func",
             new_name="_test_func",
             references=[],
+            test_references=[],  # Phase 1: Added test references
             is_safe=True,
             safety_issues=[],
         )
@@ -414,6 +422,7 @@ class TestPrivacyFixer:  # pylint: disable=attribute-defined-outside-init,too-ma
             old_name="test_exception_coverage",  # Special name to trigger exception
             new_name="_test_exception_coverage",
             references=[],
+            test_references=[],  # Phase 1: Added test references
             is_safe=True,
             safety_issues=[],
         )
@@ -452,6 +461,7 @@ class TestPrivacyFixer:  # pylint: disable=attribute-defined-outside-init,too-ma
                     old_name=candidate.old_name,
                     new_name=candidate.new_name,
                     references=[unsafe_ref],
+                    test_references=[],  # Phase 1: Added test references
                     is_safe=candidate.is_safe,
                     safety_issues=candidate.safety_issues,
                 )
@@ -471,6 +481,7 @@ class TestPrivacyFixer:  # pylint: disable=attribute-defined-outside-init,too-ma
             old_name="test_func",
             new_name="_test_func",
             references=[],
+            test_references=[],  # Phase 1: Added test references
             is_safe=True,
             safety_issues=[],
         )
@@ -615,6 +626,7 @@ class TestRenameCandidate:  # pylint: disable=too-few-public-methods
             old_name="test_func",
             new_name="_test_func",
             references=[],
+            test_references=[],  # Phase 1: Added test references
             is_safe=True,
             safety_issues=[],
         )
@@ -907,6 +919,7 @@ class TestPrivacyFixerIntegration:  # pylint: disable=too-few-public-methods
             old_name="test_function",
             new_name="_test_function",
             references=[],
+            test_references=[],  # Phase 1: Added test references
             is_safe=True,
             safety_issues=[],
         )
@@ -916,6 +929,7 @@ class TestPrivacyFixerIntegration:  # pylint: disable=too-few-public-methods
             old_name="unsafe_function",
             new_name="_unsafe_function",
             references=[],
+            test_references=[],  # Phase 1: Added test references
             is_safe=False,
             safety_issues=["Test safety issue"],
         )
@@ -953,6 +967,7 @@ class TestPrivacyFixerIntegration:  # pylint: disable=too-few-public-methods
             old_name="helper_function",
             new_name="_helper_function",
             references=[],
+            test_references=[],  # Phase 1: Added test references
             is_safe=True,
             safety_issues=[],
         )
@@ -1002,6 +1017,7 @@ class TestPrivacyFixerIntegration:  # pylint: disable=too-few-public-methods
             old_name="test",
             new_name="_test",
             references=[],
+            test_references=[],  # Phase 1: Added test references
             is_safe=True,
             safety_issues=[],
         )
@@ -1046,6 +1062,7 @@ class TestPrivacyFixerIntegration:  # pylint: disable=too-few-public-methods
             old_name="safe_function",
             new_name="_safe_function",
             references=[],
+            test_references=[],  # Phase 1: Added test references
             is_safe=True,
             safety_issues=[],
         )
@@ -1055,6 +1072,7 @@ class TestPrivacyFixerIntegration:  # pylint: disable=too-few-public-methods
             old_name="unsafe_function",
             new_name="_unsafe_function",
             references=[],
+            test_references=[],  # Phase 1: Added test references
             is_safe=False,
             safety_issues=["Dynamic references found"],
         )
@@ -1095,6 +1113,7 @@ class TestPrivacyFixerIntegration:  # pylint: disable=too-few-public-methods
             old_name="function1",
             new_name="_function1",
             references=[],
+            test_references=[],  # Phase 1: Added test references
             is_safe=True,
             safety_issues=[],
         )
@@ -1104,6 +1123,7 @@ class TestPrivacyFixerIntegration:  # pylint: disable=too-few-public-methods
             old_name="function2",
             new_name="_function2",
             references=[],
+            test_references=[],  # Phase 1: Added test references
             is_safe=True,
             safety_issues=[],
         )
@@ -1169,6 +1189,7 @@ class TestPrivacyFixerIntegration:  # pylint: disable=too-few-public-methods
                     old_name=func_node.name,
                     new_name=f"_{func_node.name}",
                     references=[],
+                    test_references=[],  # Phase 1: Added test references
                     is_safe=True,
                     safety_issues=[],
                 )
@@ -1224,6 +1245,7 @@ class TestPrivacyFixerIntegration:  # pylint: disable=too-few-public-methods
             old_name="test_function",
             new_name="_test_function",
             references=[],
+            test_references=[],  # Phase 1: Added test references
             is_safe=True,
             safety_issues=[],
         )
@@ -1270,6 +1292,7 @@ class TestPrivacyFixerIntegration:  # pylint: disable=too-few-public-methods
                 old_name="test_function",
                 new_name="_test_function",
                 references=[],
+                test_references=[],  # Phase 1: Added test references
                 is_safe=True,
                 safety_issues=[],
             )
@@ -1299,6 +1322,7 @@ class TestPrivacyFixerIntegration:  # pylint: disable=too-few-public-methods
             old_name="test_function",
             new_name="_test_function",
             references=[],
+            test_references=[],  # Phase 1: Added test references
             is_safe=True,
             safety_issues=[],
         )
@@ -1330,6 +1354,7 @@ class TestPrivacyFixerIntegration:  # pylint: disable=too-few-public-methods
             old_name="test_function",
             new_name="_test_function",
             references=[],
+            test_references=[],  # Phase 1: Added test references
             is_safe=True,
             safety_issues=[],
         )
@@ -1385,6 +1410,7 @@ class TestPrivacyFixerIntegration:  # pylint: disable=too-few-public-methods
             old_name="test_function",
             new_name="_test_function",
             references=[],
+            test_references=[],  # Phase 1: Added test references
             is_safe=True,
             safety_issues=[],
         )
@@ -1395,3 +1421,94 @@ class TestPrivacyFixerIntegration:  # pylint: disable=too-few-public-methods
         assert len(grouped) == 1
         file_paths = list(grouped.keys())
         assert str(file_paths[0]) == "/real/path/to/file.py"
+
+
+class TestPhase1Functionality:
+    """Test Phase 1 functionality: test file detection and reference scanning."""
+
+    def setup_method(self) -> None:
+        """Set up test fixtures."""
+        self.fixer = PrivacyFixer()  # pylint: disable=attribute-defined-outside-init
+
+    def test_find_test_files(self) -> None:
+        """Test find_test_files method."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            project_root = Path(temp_dir)
+
+            # Create test files
+            tests_dir = project_root / "tests"
+            tests_dir.mkdir()
+
+            (tests_dir / "test_module.py").write_text("# test file")
+            (project_root / "conftest.py").write_text("# pytest config")
+            (project_root / "src.py").write_text("# production file")
+
+            test_files = self.fixer.find_test_files(project_root)
+
+            assert len(test_files) == 2  # test_module.py and conftest.py
+            test_file_names = [f.name for f in test_files]
+            assert "test_module.py" in test_file_names
+            assert "conftest.py" in test_file_names
+
+    def test_find_test_references_with_mocks(self) -> None:
+        """Test find_test_references with mock patterns."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            project_root = Path(temp_dir)
+
+            test_file = project_root / "test_example.py"
+            test_file.write_text("""
+@patch('src.module.helper_function')
+def test_with_patch(mock_helper):
+    result = helper_function()
+
+def test_with_mocker(mocker):
+    mocker.patch('src.module.helper_function', return_value='mocked')
+    result = helper_function()
+""")
+
+            test_refs = self.fixer.find_test_references("helper_function", [test_file])
+
+            assert len(test_refs) >= 2  # At least mock patches
+            contexts = [ref.context for ref in test_refs]
+            assert "mock_patch" in contexts
+
+    def test_find_test_references_ast_parsing_failure(self) -> None:
+        """Test find_test_references when AST parsing fails."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            project_root = Path(temp_dir)
+
+            # Create file with syntax error
+            test_file = project_root / "bad_syntax.py"
+            test_file.write_text("""
+@patch('src.module.helper_function')
+def test_something(): pass
+# Missing closing parenthesis creates syntax error
+def incomplete_function(
+""")
+
+            test_refs = self.fixer.find_test_references("helper_function", [test_file])
+
+            # Should still find references via string-based detection
+            assert len(test_refs) >= 1
+            assert any(ref.context == "mock_patch" for ref in test_refs)
+
+    def test_find_test_references_unreadable_file(self) -> None:
+        """Test find_test_references with unreadable files."""
+        # Pass non-existent file
+        fake_file = Path("/nonexistent/file.py")
+        test_refs = self.fixer.find_test_references("helper_function", [fake_file])
+
+        # Should gracefully handle and return empty list
+        assert test_refs == []
+
+    def test_find_test_references_empty_file(self) -> None:
+        """Test find_test_references with empty file."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            project_root = Path(temp_dir)
+
+            test_file = project_root / "empty_test.py"
+            test_file.write_text("")
+
+            test_refs = self.fixer.find_test_references("helper_function", [test_file])
+
+            assert test_refs == []

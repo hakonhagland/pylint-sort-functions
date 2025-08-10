@@ -306,7 +306,7 @@ class SimpleClass:
             patch(
                 "pylint_sort_functions.utils.get_methods_from_class"
             ) as mock_get_methods,
-            patch("pylint_sort_functions.utils.are_methods_sorted") as mock_are_sorted,
+            patch("pylint_sort_functions.utils._are_methods_sorted") as mock_are_sorted,
             patch(
                 "pylint_sort_functions.utils.are_functions_properly_separated"
             ) as mock_are_separated,
@@ -332,7 +332,7 @@ class SimpleClass:
                 "pylint_sort_functions.utils.get_functions_from_node"
             ) as mock_get_functions,
             patch(
-                "pylint_sort_functions.utils.are_functions_sorted"
+                "pylint_sort_functions.utils._are_functions_sorted"
             ) as mock_are_sorted,
         ):
             mock_get_functions.return_value = []
@@ -361,7 +361,7 @@ class SimpleClass:
                 "pylint_sort_functions.utils.get_functions_from_node"
             ) as mock_get_functions,
             patch(
-                "pylint_sort_functions.utils.are_functions_sorted"
+                "pylint_sort_functions.utils._are_functions_sorted"
             ) as mock_are_sorted,
         ):
             mock_get_functions.return_value = []

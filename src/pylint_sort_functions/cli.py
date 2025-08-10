@@ -101,7 +101,7 @@ def main() -> int:  # pylint: disable=too-many-return-statements,too-many-branch
                 print(f"Error: Path does not exist: {path}")
                 return 1
 
-        python_files = _find_python_files(paths)
+        python_files = _find_python_files_from_paths(paths)
         if not python_files:
             print("No Python files found in the specified paths.")
             return 0
@@ -341,7 +341,7 @@ def _find_project_root(start_path: Path) -> Path:
     return start_path.parent if start_path.is_file() else start_path
 
 
-def _find_python_files(paths: List[Path]) -> List[Path]:
+def _find_python_files_from_paths(paths: List[Path]) -> List[Path]:
     """Find all Python files in the given paths.
 
     :param paths: List of file or directory paths
@@ -418,6 +418,7 @@ def _handle_privacy_fixing(  # pylint: disable=too-many-locals,too-many-branches
                         old_name=func.name,
                         new_name=f"_{func.name}",
                         references=references,
+                        test_references=[],  # Will be populated if needed
                         is_safe=True,  # Will be validated next
                         safety_issues=[],
                     )
@@ -429,6 +430,7 @@ def _handle_privacy_fixing(  # pylint: disable=too-many-locals,too-many-branches
                         old_name=func.name,
                         new_name=f"_{func.name}",
                         references=references,
+                        test_references=[],  # Will be populated if needed
                         is_safe=is_safe,
                         safety_issues=issues,
                     )
