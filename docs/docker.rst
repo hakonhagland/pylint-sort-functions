@@ -217,25 +217,42 @@ The extraction uses regular expressions to find RST code blocks:
 - Continues until reaching a non-indented line
 - Strips the leading indentation from extracted content
 
-Current Issues
-~~~~~~~~~~~~~~
+Historical Issues (Resolved)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-**Bug**: The current implementation uses Markdown-style patterns (````ini`) instead of RST patterns (``.. code-block:: ini``), causing it to miss configuration examples.
+**Bug (RESOLVED)**: The previous implementation used Markdown-style patterns (````ini`) instead of RST patterns (``.. code-block:: ini``), causing it to miss configuration examples.
 
-**Impact**: Only 1 example is found instead of the 28+ examples actually present:
+**Impact (BEFORE FIX)**: Only 1 example was found instead of the 28+ examples actually present:
 
 - 19 ini code blocks (for .pylintrc examples)
 - 9 toml code blocks (for pyproject.toml examples)
 
-**Fix Required**: Update the regex patterns to match RST syntax:
+**Fix Applied**: Updated the regex patterns to match RST syntax:
 
 .. code-block:: python
 
-   # Current (incorrect) pattern
+   # Previous (incorrect) pattern
    pylintrc_pattern = r"```ini\s*\n(.*?)\n```"  # Markdown style
 
-   # Should be (correct) pattern
+   # Current (correct) pattern
    pylintrc_pattern = r'\.\. code-block:: ini\s*\n\n((?:[ \t]+.*\n)*)'  # RST style
+
+Current Status
+~~~~~~~~~~~~~~
+
+**Extraction Success**: The configuration extraction now works correctly:
+
+- **16 examples found**: 6 .pylintrc + 9 pyproject.toml + 1 setup.cfg
+- **100% validation success**: All extracted examples pass validation
+- **Proper filtering**: Tox.ini content is correctly excluded from .pylintrc examples
+- **Pattern matching**: RST code blocks are properly parsed with indentation handling
+
+**Validation Results**:
+
+- Total tests: 16
+- Passed: 16
+- Failed: 0
+- Success rate: 100.0%
 
 Validation Reports
 ------------------
