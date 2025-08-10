@@ -22,6 +22,7 @@ from pathlib import Path
 from typing import List, Optional
 
 import astroid  # type: ignore[import-untyped]
+from astroid import nodes
 
 from pylint_sort_functions import auto_fix, utils
 from pylint_sort_functions.auto_fix import AutoFixConfig  # Class - direct import OK
@@ -283,6 +284,48 @@ def _add_parser_arguments(parser: argparse.ArgumentParser) -> None:
     )
 
 
+def _analyze_files_for_privacy(
+    python_files: List[Path],
+    privacy_fixer: PrivacyFixer,
+    project_root: Path,
+    verbose: bool = False,
+) -> List[RenameCandidate]:
+    """Analyze files and return privacy rename candidates.
+
+    :param python_files: List of Python files to analyze
+    :param privacy_fixer: PrivacyFixer instance to use for analysis
+    :param project_root: Root directory of the project
+    :param verbose: Whether to print verbose output
+    :returns: List of rename candidates found across all files
+    """
+    all_candidates = []
+
+    for file_path in python_files:
+        try:
+            # Parse the file
+            with open(file_path, "r", encoding="utf-8") as f:
+                content = f.read()
+            module = astroid.parse(content, module_name=str(file_path))
+
+            # Find functions that should be private
+            functions = utils.get_functions_from_node(module)
+            for func in functions:
+                candidate = _create_rename_candidate(
+                    func, file_path, privacy_fixer, project_root
+                )
+                if candidate is not None:
+                    all_candidates.append(candidate)
+
+        except (
+            Exception
+        ) as e:  # pragma: no cover  # pylint: disable=broad-exception-caught
+            if verbose:
+                print(f"Warning: Could not analyze {file_path}: {e}")
+            continue
+
+    return all_candidates
+
+
 def _apply_integrated_sorting(
     args: argparse.Namespace, python_files: List[Path]
 ) -> None:
@@ -314,6 +357,69 @@ def _apply_integrated_sorting(
         print(f"Sorted {files_modified} of {files_processed} files")
         if config.backup and files_modified > 0:  # pragma: no cover
             print("Additional backup files created for sorting changes")
+
+
+def _create_rename_candidate(
+    func: nodes.FunctionDef,
+    file_path: Path,
+    privacy_fixer: PrivacyFixer,
+    project_root: Path,
+) -> Optional[RenameCandidate]:
+    """Create and validate a single rename candidate.
+
+    :param func: Function node to analyze
+    :param file_path: Path to file containing the function
+    :param privacy_fixer: PrivacyFixer instance for validation
+    :param project_root: Root directory of the project
+    :returns: Validated rename candidate or None if not suitable
+    """
+    # Use default public patterns plus common API patterns
+    public_patterns = {
+        "main",
+        "run",
+        "execute",
+        "start",
+        "stop",
+        "setup",
+        "teardown",
+        "public_api",
+    }
+
+    if not utils.should_function_be_private(
+        func, file_path, project_root, public_patterns
+    ):
+        return None
+
+    # Parse the module to get references
+    with open(file_path, "r", encoding="utf-8") as f:
+        content = f.read()
+    module = astroid.parse(content, module_name=str(file_path))
+
+    # Find all references to this function
+    references = privacy_fixer.find_function_references(func.name, module)
+
+    # Create initial candidate
+    candidate = RenameCandidate(
+        function_node=func,
+        old_name=func.name,
+        new_name=f"_{func.name}",
+        references=references,
+        test_references=[],  # Will be populated if needed
+        is_safe=True,  # Will be validated next
+        safety_issues=[],
+    )
+
+    # Validate safety
+    is_safe, issues = privacy_fixer.is_safe_to_rename(candidate)
+    return RenameCandidate(
+        function_node=func,
+        old_name=func.name,
+        new_name=f"_{func.name}",
+        references=references,
+        test_references=[],  # Will be populated if needed
+        is_safe=is_safe,
+        safety_issues=issues,
+    )
 
 
 def _find_project_root(start_path: Path) -> Path:
@@ -361,13 +467,10 @@ def _find_python_files_from_paths(paths: List[Path]) -> List[Path]:
     return python_files
 
 
-def _handle_privacy_fixing(  # pylint: disable=too-many-locals,too-many-branches,too-many-statements  # noqa: E501
+def _handle_privacy_fixing(
     args: argparse.Namespace, python_files: List[Path], paths: List[Path]
 ) -> int:
     """Handle privacy fixing workflow.
-
-    TODO: This function is too complex and should be refactored.
-    See GitHub Issue #31: https://github.com/hakonhagland/pylint-sort-functions/issues/31
 
     :param args: Parsed command-line arguments
     :param python_files: List of Python files to process
@@ -381,73 +484,35 @@ def _handle_privacy_fixing(  # pylint: disable=too-many-locals,too-many-branches
     privacy_fixer = PrivacyFixer(
         dry_run=args.privacy_dry_run, backup=not args.no_backup
     )
-
-    # Analyze all files and collect rename candidates
-    all_candidates = []
     project_root = _find_project_root(paths[0])
 
-    for file_path in python_files:
-        try:
-            # Parse the file
-            with open(file_path, "r", encoding="utf-8") as f:
-                content = f.read()
-            module = astroid.parse(content, module_name=str(file_path))
+    # Analyze all files and collect rename candidates
+    all_candidates = _analyze_files_for_privacy(
+        python_files, privacy_fixer, project_root, args.verbose
+    )
 
-            # Find functions that should be private
-            functions = utils.get_functions_from_node(module)
-            for func in functions:
-                # Use default public patterns plus common API patterns
-                public_patterns = {
-                    "main",
-                    "run",
-                    "execute",
-                    "start",
-                    "stop",
-                    "setup",
-                    "teardown",
-                    "public_api",
-                }
-                if utils.should_function_be_private(
-                    func, file_path, project_root, public_patterns
-                ):
-                    # Find all references to this function
-                    references = privacy_fixer.find_function_references(
-                        func.name, module
-                    )
+    # Process results and apply fixes if requested
+    return _process_privacy_results(
+        all_candidates, args, python_files, paths, privacy_fixer
+    )
 
-                    # Create and validate rename candidate
-                    candidate = RenameCandidate(
-                        function_node=func,
-                        old_name=func.name,
-                        new_name=f"_{func.name}",
-                        references=references,
-                        test_references=[],  # Will be populated if needed
-                        is_safe=True,  # Will be validated next
-                        safety_issues=[],
-                    )
 
-                    # Validate safety
-                    is_safe, issues = privacy_fixer.is_safe_to_rename(candidate)
-                    candidate = RenameCandidate(
-                        function_node=func,
-                        old_name=func.name,
-                        new_name=f"_{func.name}",
-                        references=references,
-                        test_references=[],  # Will be populated if needed
-                        is_safe=is_safe,
-                        safety_issues=issues,
-                    )
+def _process_privacy_results(  # pylint: disable=too-many-branches
+    all_candidates: List[RenameCandidate],
+    args: argparse.Namespace,
+    python_files: List[Path],
+    paths: List[Path],
+    privacy_fixer: PrivacyFixer,
+) -> int:
+    """Handle privacy analysis results and apply fixes if requested.
 
-                    all_candidates.append(candidate)
-
-        except (
-            Exception
-        ) as e:  # pragma: no cover  # pylint: disable=broad-exception-caught
-            if args.verbose:
-                print(f"Warning: Could not analyze {file_path}: {e}")
-            continue
-
-    # Generate and display report
+    :param all_candidates: List of rename candidates found
+    :param args: Parsed command-line arguments
+    :param python_files: List of Python files being processed
+    :param paths: List of original paths provided
+    :param privacy_fixer: PrivacyFixer instance for applying renames
+    :returns: Exit code
+    """
     if all_candidates:
         report = privacy_fixer.generate_report(all_candidates)
         print(report)
