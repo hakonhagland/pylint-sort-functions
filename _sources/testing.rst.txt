@@ -311,200 +311,23 @@ See :doc:`cli` for complete CLI documentation.
 Docker Validation System
 -------------------------
 
-The Docker validation system provides comprehensive integration testing for all documentation examples and framework configurations.
+The project includes a comprehensive Docker-based validation system for testing all configuration examples in the documentation. This system ensures that all documented PyLint configurations actually work correctly with the plugin implementation.
 
-Architecture
-~~~~~~~~~~~~
+See :doc:`docker` for complete documentation of the Docker validation system, including:
 
-The validation system uses a containerized approach:
+- **Architecture and Components**: Containerized testing environment details
+- **Running Validation Tests**: Using ``make test-documentation`` and manual control
+- **API Endpoints**: REST API for configuration testing
+- **Configuration Extraction Process**: How examples are extracted from documentation
+- **Validation Reports**: Understanding test results and metrics
+- **Troubleshooting**: Common issues and solutions
 
-.. code-block:: text
-
-   Docker Container (Ubuntu 24.04)
-   ├── Python + uv + pylint-sort-functions (from local source)
-   ├── Flask API Service (port 8080)
-   └── Framework Test Projects
-       ├── minimal-project/     # Basic sorting violations
-       ├── flask-project/       # Flask @app.route testing
-       ├── django-project/      # Django decorator testing
-       ├── fastapi-project/     # FastAPI endpoint testing
-       ├── click-project/       # Click CLI command testing
-       └── pytest-project/      # Pytest fixture testing
-
-Local Source Installation
-~~~~~~~~~~~~~~~~~~~~~~~~~
-
-**Important**: The Docker container installs the plugin **from your local source code**, not from PyPI.
-
-**How it works**:
-
-1. **Source Copy**: The build process copies your current ``src/``, ``pyproject.toml``, and ``README.md`` into the container
-2. **Development Installation**: Uses ``uv pip install -e .`` to install from the copied source
-3. **Current State Testing**: This ensures you're testing the **exact code you're working on**
-
-**Build Evidence**:
-
-.. code-block:: text
-
-   Step 14/19 : RUN cd /app && uv pip install -e .
-   [91mResolved 8 packages in 87ms
-   [91m   Building pylint-sort-functions @ file:///app
-   [91mInstalled 3 packages in 7ms
-    + pylint-sort-functions==1.0.1 (from file:///app)
-
-The key indicator is ``(from file:///app)`` - showing local source installation, not PyPI.
-
-**Why This Approach?**
-
-- ✅ **Current Development State**: Tests your exact working code
-- ✅ **No PyPI Dependency**: Works with unpublished or development versions
-- ✅ **Immediate Testing**: Source changes are immediately testable
-- ✅ **Version Accuracy**: Tests actual implementation, not outdated published versions
-
-Quick Usage
-~~~~~~~~~~~
+Quick usage:
 
 .. code-block:: bash
 
-   # Complete validation workflow
+   # Run complete validation workflow
    make test-documentation
-
-   # Manual container management
-   make build-docker-image        # Build validation container
-   make run-docker-container      # Start container
-   make stop-docker-container     # Clean up
-
-Advanced Usage
-~~~~~~~~~~~~~~
-
-.. code-block:: bash
-
-   # Build and start container
-   make build-docker-image
-   make run-docker-container
-
-   # Run validation tests
-   python test-validation/test-runner.py --verbose
-
-   # View validation reports
-   ls test-validation/reports/
-   cat test-validation/reports/validation_report_*.json
-
-   # Test specific API endpoints
-   curl http://localhost:8080/health
-   curl http://localhost:8080/projects
-   curl -X POST http://localhost:8080/test/flask-project
-
-   # Clean up
-   make stop-docker-container
-
-API Endpoints
-~~~~~~~~~~~~~
-
-The validation container exposes a REST API:
-
-.. list-table:: Validation API Endpoints
-   :widths: 10 20 70
-   :header-rows: 1
-
-   * - Method
-     - Endpoint
-     - Purpose
-   * - GET
-     - ``/health``
-     - Health check and readiness status
-   * - GET
-     - ``/projects``
-     - List available test projects
-   * - POST
-     - ``/config``
-     - Upload configuration (.pylintrc, pyproject.toml, setup.cfg)
-   * - POST
-     - ``/test/{project}``
-     - Run PyLint on specific test project
-   * - GET
-     - ``/results/{test_id}``
-     - Get detailed test results
-   * - POST
-     - ``/reset``
-     - Reset configuration to clean state
-   * - GET
-     - ``/plugin-info``
-     - Get plugin information and available options
-
-What Gets Validated
-~~~~~~~~~~~~~~~~~~~
-
-**Documentation Examples**
-   All configuration examples from ``docs/pylintrc.rst`` are extracted and tested
-
-**Plugin Options**
-   Documented options are validated against actual plugin implementation
-
-**Framework Compatibility**
-   Decorator exclusion behavior tested with real framework code:
-
-   - **Flask**: ``@app.route``, ``@app.before_request``
-   - **Django**: ``@login_required``, ``@csrf_exempt``
-   - **FastAPI**: ``@app.get``, ``@app.post``
-   - **Click**: ``@cli.command``, ``@click.group``
-   - **Pytest**: ``@pytest.fixture``, ``@pytest.mark.*``
-
-**Configuration Formats**
-   Multiple configuration formats are tested:
-
-   - ``.pylintrc`` format
-   - ``pyproject.toml`` format
-   - ``setup.cfg`` format
-
-Validation Reports
-~~~~~~~~~~~~~~~~~~
-
-The system generates detailed JSON reports in ``test-validation/reports/``:
-
-.. code-block:: json
-
-   {
-     "timestamp": "2025-08-07 15:47:44",
-     "summary": {
-       "total_tests": 1,
-       "passed_tests": 1,
-       "failed_tests": 0,
-       "success_rate": 1.0,
-       "config_errors": 0,
-       "plugin_issues": 4
-     },
-     "plugin_issues": [
-       "Documented option 'ignore-decorators' not found in plugin implementation",
-       "Documented option 'check-privacy' not found in plugin implementation"
-     ],
-     "framework_results": {
-       "flask-project": {
-         "total_messages": 12,
-         "config_errors": 1,
-         "plugin_messages": 7,
-         "success": false
-       }
-     }
-   }
-
-Critical Issues Discovered
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-The validation system has already identified **4 critical documentation issues**:
-
-.. warning::
-
-   These plugin options are **documented but not implemented**:
-
-   - ``ignore-decorators`` - ✅ **RESOLVED**: Now works in both CLI tool and PyLint plugin (GitHub issue #13)
-   - ``enable-privacy-detection`` - ✅ **IMPLEMENTED**: Works correctly
-   - ``public-api-patterns`` - ✅ **IMPLEMENTED**: Works correctly
-   - ``skip-dirs`` - ❌ **NOT IMPLEMENTED**: Future feature (GitHub issue #7)
-
-   Framework projects now **pass successfully** with decorator exclusions.
-
-GitHub issue #13 has been resolved - decorator exclusions now work in both tools.
 
 Framework Integration Testing
 -----------------------------
