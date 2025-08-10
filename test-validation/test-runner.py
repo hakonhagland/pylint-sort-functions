@@ -131,38 +131,45 @@ class ConfigExtractor:
         content = self.pylintrc_file.read_text()
         examples = []
 
-        # Pattern to find .pylintrc code blocks
-        pylintrc_pattern = r"```ini\s*\n(.*?)\n```"
-        matches = re.findall(pylintrc_pattern, content, re.DOTALL)
+        # Pattern to find RST ini code blocks
+        rst_ini_pattern = r"\.\. code-block:: ini\s*\n\n((?:[ \t]+.*\n)*)"
+        matches = re.findall(rst_ini_pattern, content, re.MULTILINE)
 
         for i, match in enumerate(matches):
+            # Remove leading indentation and clean up content
+            lines = match.split("\n")
+            cleaned_lines = []
+            for line in lines:
+                if line.strip():  # Skip empty lines
+                    # Remove consistent leading whitespace
+                    if line.startswith("   "):
+                        cleaned_lines.append(line[3:])
+                    else:
+                        cleaned_lines.append(line.lstrip())
+
+            cleaned_content = "\n".join(cleaned_lines).strip()
+
             # Skip if it doesn't look like pylintrc content
-            if "load-plugins" not in match and "pylint_sort_functions" not in match:
+            if not cleaned_content or (
+                "load-plugins" not in cleaned_content
+                and "pylint_sort_functions" not in cleaned_content
+            ):
+                continue
+
+            # Skip tox.ini content (contains testenv sections and deps/commands)
+            if "[testenv" in cleaned_content or (
+                "deps =" in cleaned_content and "commands =" in cleaned_content
+            ):
                 continue
 
             examples.append(
                 {
                     "type": "pylintrc",
-                    "content": match.strip(),
-                    "name": f"pylintrc_example_{i + 1}",
+                    "content": cleaned_content,
+                    "name": f"pylintrc_example_{len(examples) + 1}",
                     "source": "docs/pylintrc.rst",
                 }
             )
-
-        # Also look for direct .pylintrc sections
-        section_pattern = r"\[MASTER\].*?(?=\n\[|\Z)"
-        sections = re.findall(section_pattern, content, re.DOTALL)
-
-        for i, section in enumerate(sections):
-            if "pylint_sort_functions" in section:
-                examples.append(
-                    {
-                        "type": "pylintrc",
-                        "content": section.strip(),
-                        "name": f"pylintrc_section_{i + 1}",
-                        "source": "docs/pylintrc.rst",
-                    }
-                )
 
         return examples
 
@@ -171,20 +178,39 @@ class ConfigExtractor:
         content = self.pylintrc_file.read_text()
         examples = []
 
-        # Pattern for pyproject.toml code blocks
-        toml_pattern = r"```toml\s*\n(.*?)\n```"
-        matches = re.findall(toml_pattern, content, re.DOTALL)
+        # Pattern for RST toml code blocks
+        rst_toml_pattern = r"\.\. code-block:: toml\s*\n\n((?:[ \t]+.*\n)*)"
+        matches = re.findall(rst_toml_pattern, content, re.MULTILINE)
 
         for i, match in enumerate(matches):
-            if "pylint" in match and "pylint_sort_functions" in match:
-                examples.append(
-                    {
-                        "type": "pyproject",
-                        "content": match.strip(),
-                        "name": f"pyproject_example_{i + 1}",
-                        "source": "docs/pylintrc.rst",
-                    }
-                )
+            # Remove leading indentation and clean up content
+            lines = match.split("\n")
+            cleaned_lines = []
+            for line in lines:
+                if line.strip():  # Skip empty lines
+                    # Remove consistent leading whitespace
+                    if line.startswith("   "):
+                        cleaned_lines.append(line[3:])
+                    else:
+                        cleaned_lines.append(line.lstrip())
+
+            cleaned_content = "\n".join(cleaned_lines).strip()
+
+            # Skip if it doesn't look like pyproject.toml content
+            if not cleaned_content or (
+                "pylint" not in cleaned_content
+                and "pylint_sort_functions" not in cleaned_content
+            ):
+                continue
+
+            examples.append(
+                {
+                    "type": "pyproject",
+                    "content": cleaned_content,
+                    "name": f"pyproject_example_{len(examples) + 1}",
+                    "source": "docs/pylintrc.rst",
+                }
+            )
 
         return examples
 
@@ -193,20 +219,36 @@ class ConfigExtractor:
         content = self.pylintrc_file.read_text()
         examples = []
 
-        # Pattern for setup.cfg code blocks
-        cfg_pattern = r"```cfg\s*\n(.*?)\n```"
-        matches = re.findall(cfg_pattern, content, re.DOTALL)
+        # Pattern for RST cfg code blocks - ini format used for setup.cfg in RST
+        rst_cfg_pattern = r"\.\. code-block:: ini\s*\n\n((?:[ \t]+.*\n)*)"
+        matches = re.findall(rst_cfg_pattern, content, re.MULTILINE)
 
         for i, match in enumerate(matches):
-            if "pylint" in match and "pylint_sort_functions" in match:
-                examples.append(
-                    {
-                        "type": "setup_cfg",
-                        "content": match.strip(),
-                        "name": f"setup_cfg_example_{i + 1}",
-                        "source": "docs/pylintrc.rst",
-                    }
-                )
+            # Remove leading indentation and clean up content
+            lines = match.split("\n")
+            cleaned_lines = []
+            for line in lines:
+                if line.strip():  # Skip empty lines
+                    # Remove consistent leading whitespace
+                    if line.startswith("   "):
+                        cleaned_lines.append(line[3:])
+                    else:
+                        cleaned_lines.append(line.lstrip())
+
+            cleaned_content = "\n".join(cleaned_lines).strip()
+
+            # Only include setup.cfg examples (look for [pylint] section)
+            if not cleaned_content or "[pylint]" not in cleaned_content:
+                continue
+
+            examples.append(
+                {
+                    "type": "setup_cfg",
+                    "content": cleaned_content,
+                    "name": f"setup_cfg_example_{len(examples) + 1}",
+                    "source": "docs/pylintrc.rst",
+                }
+            )
 
         return examples
 
