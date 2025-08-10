@@ -116,9 +116,9 @@ publish-to-pypi-minor:
 publish-to-pypi-major:
 	python scripts/publish-to-pypi.py major
 
-# NOTE: to avoid rstcheck to fail on info-level messages, we set the report-level to WARNING
+# NOTE: Using unified rstcheck script for consistency with pre-commit hooks
 rstcheck:
-	rstcheck --report-level=WARNING -r docs/
+	bash scripts/rstcheck.sh --recursive
 
 ruff-check:
 	ruff check src tests

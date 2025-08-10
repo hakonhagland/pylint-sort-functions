@@ -34,7 +34,7 @@ repos:
       - id: rstcheck
         name: rstcheck
         language: system
-        entry: bash -c "source .venv/bin/activate && rstcheck --ignore-directives=automodule,click --report-level=WARNING docs/*.rst"
+        entry: bash scripts/rstcheck.sh
         pass_filenames: false
         always_run: true
 -   repo: local
