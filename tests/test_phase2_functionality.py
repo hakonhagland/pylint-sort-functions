@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Any
 from unittest.mock import Mock, patch
 
-from pylint_sort_functions.privacy_fixer import PrivacyFixer, FunctionTestReference
+from pylint_sort_functions.privacy_fixer import FunctionTestReference, PrivacyFixer
 
 
 class TestPhase2TestFileUpdates:

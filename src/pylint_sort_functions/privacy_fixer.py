@@ -23,14 +23,19 @@ from pylint_sort_functions.file_operations import FileOperations
 from pylint_sort_functions.privacy_analyzer import PrivacyAnalyzer
 from pylint_sort_functions.privacy_types import (
     FunctionReference,
-    RenameCandidate,
     FunctionTestReference,
+    RenameCandidate,
 )
 from pylint_sort_functions.test_file_manager import TestFileManager
 from pylint_sort_functions.test_file_updater import TestFileUpdater
 
 # Re-export types for backward compatibility
-__all__ = ["PrivacyFixer", "FunctionReference", "RenameCandidate", "FunctionTestReference"]
+__all__ = [
+    "PrivacyFixer",
+    "FunctionReference",
+    "RenameCandidate",
+    "FunctionTestReference",
+]
 
 
 class PrivacyFixer:
