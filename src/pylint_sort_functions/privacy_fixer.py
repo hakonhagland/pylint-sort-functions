@@ -10,6 +10,9 @@ The implementation follows a conservative approach:
 4. Report all changes clearly
 
 Safety-first design ensures user confidence in the automated renaming.
+
+TODO: This module has grown too large (1117 lines) and should be split.
+See GitHub Issue #32: https://github.com/hakonhagland/pylint-sort-functions/issues/32
 """
 
 import ast
@@ -56,8 +59,10 @@ class RenameCandidate(NamedTuple):
     safety_issues: List[str]
 
 
-class PrivacyFixer:
+class PrivacyFixer:  # pylint: disable=too-many-lines  # Issue #32
     """Handles automatic renaming of functions that should be private."""
+
+    # Public methods
 
     # Public methods
 
@@ -91,7 +96,7 @@ class PrivacyFixer:
         # TODO: Implement in next phase
         return []
 
-    def apply_renames(
+    def apply_renames(  # pylint: disable=too-many-locals,too-many-branches,too-many-nested-blocks  # Issue #32
         self, candidates: List[RenameCandidate], project_root: Optional[Path] = None
     ) -> Dict[str, Any]:
         """Apply the function renames to the module files and update test files.
@@ -458,6 +463,105 @@ class PrivacyFixer:
             issues.append(f"Unsafe reference contexts: {', '.join(unsafe_contexts)}")
 
         return len(issues) == 0, issues
+
+    # Private methods
+
+    def update_test_file(
+        self,
+        test_file: Path,
+        old_name: str,
+        new_name: str,
+        test_references: List[TestReference],
+    ) -> Dict[str, Any]:
+        """Update a test file to use the new function name with backup and rollback.
+
+        This is the main entry point for safely updating test files. It creates
+        a backup, applies updates, validates the result, and rolls back if needed.
+
+        :param test_file: Path to the test file to update
+        :param old_name: Original function name
+        :param new_name: New private function name (with underscore)
+        :param test_references: List of test references to update
+        :returns: Report of the update operation
+        """
+        backup_file = None
+
+        try:
+            # Create backup if backup is enabled
+            if self.backup:
+                backup_file = Path(f"{test_file}.bak")
+                shutil.copy2(test_file, backup_file)
+
+            # Track changes made
+            import_changes = False
+            mock_changes = False
+
+            # Apply import statement updates
+            if any(ref.context == "import" for ref in test_references):
+                import_changes = self._update_import_statements(
+                    test_file, old_name, new_name, test_references
+                )
+
+            # Apply mock pattern updates
+            if any(ref.context == "mock_patch" for ref in test_references):
+                mock_changes = self._update_mock_patterns(
+                    test_file, old_name, new_name, test_references
+                )
+
+            # Validate the updated file syntax
+            if import_changes or mock_changes:
+                try:
+                    with open(test_file, "r", encoding="utf-8") as f:
+                        content = f.read()
+                    ast.parse(content)  # This will raise SyntaxError if invalid
+
+                    return {
+                        "success": True,
+                        "file": str(test_file),
+                        "backup": str(backup_file) if backup_file else None,
+                        "import_changes": import_changes,
+                        "mock_changes": mock_changes,
+                        "total_references": len(test_references),
+                    }
+
+                except SyntaxError:
+                    # Syntax validation failed - rollback
+                    if backup_file and backup_file.exists():
+                        shutil.copy2(backup_file, test_file)
+                        backup_file.unlink()  # Remove the backup since we used it
+
+                    return {
+                        "success": False,
+                        "error": "Syntax validation failed - changes rolled back",
+                        "file": str(test_file),
+                    }
+            else:
+                # No changes needed
+                if backup_file and backup_file.exists():
+                    backup_file.unlink()  # Remove unnecessary backup
+
+                return {
+                    "success": True,
+                    "file": str(test_file),
+                    "import_changes": False,
+                    "mock_changes": False,
+                    "total_references": len(test_references),
+                }
+
+        except Exception as e:
+            # General error - rollback if possible
+            if backup_file and backup_file.exists():
+                try:
+                    shutil.copy2(backup_file, test_file)
+                    backup_file.unlink()
+                except Exception:
+                    pass  # Best effort rollback
+
+            return {
+                "success": False,
+                "error": f"Update failed: {str(e)}",
+                "file": str(test_file),
+            }
 
     # Private methods
 
@@ -842,7 +946,59 @@ class PrivacyFixer:
 
         return False
 
-    def _update_import_statements(
+    def _should_function_be_private(
+        self,
+        func: nodes.FunctionDef,
+        file_path: Path,
+        project_root: Path,
+    ) -> bool:
+        """Determine if a function should be private based on cross-module usage.
+
+        Uses comprehensive import graph analysis to determine if a function is used
+        by other modules or only internally within its defining module.
+
+        :param func: Function definition node
+        :param file_path: Path to the file containing the function
+        :param project_root: Root directory of the project
+        :returns: True if function should be private
+        """
+        # Skip common public API patterns that should never be made private
+        public_patterns = {
+            "main",
+            "run",
+            "execute",
+            "start",
+            "stop",
+            "setup",
+            "teardown",
+            "test",
+            "public_api",
+            "api",
+            "handle",
+            "process",
+        }
+
+        if func.name in public_patterns or func.name.startswith("test"):
+            return False
+
+        # Also skip functions that look like public APIs
+        if any(
+            func.name.startswith(pattern)
+            for pattern in ["calculate_", "compute_", "get_", "set_"]
+        ):
+            return False
+
+        # Build import graph to check cross-module usage
+        try:
+            import_graph = self._build_import_graph(project_root)
+            return not self._is_function_used_externally(
+                func.name, file_path, import_graph
+            )
+        except Exception:
+            # If cross-module analysis fails, fall back to heuristics
+            return self._fallback_privacy_heuristics(func)
+
+    def _update_import_statements(  # pylint: disable=too-many-nested-blocks  # Issue #32
         self,
         test_file: Path,
         old_name: str,
@@ -961,152 +1117,3 @@ class PrivacyFixer:
         except Exception:
             # If file operations fail, return False
             return False
-
-    def update_test_file(
-        self,
-        test_file: Path,
-        old_name: str,
-        new_name: str,
-        test_references: List[TestReference],
-    ) -> Dict[str, Any]:
-        """Update a test file to use the new function name with backup and rollback.
-
-        This is the main entry point for safely updating test files. It creates
-        a backup, applies updates, validates the result, and rolls back if needed.
-
-        :param test_file: Path to the test file to update
-        :param old_name: Original function name
-        :param new_name: New private function name (with underscore)
-        :param test_references: List of test references to update
-        :returns: Report of the update operation
-        """
-        backup_file = None
-
-        try:
-            # Create backup if backup is enabled
-            if self.backup:
-                backup_file = Path(f"{test_file}.bak")
-                shutil.copy2(test_file, backup_file)
-
-            # Track changes made
-            import_changes = False
-            mock_changes = False
-
-            # Apply import statement updates
-            if any(ref.context == "import" for ref in test_references):
-                import_changes = self._update_import_statements(
-                    test_file, old_name, new_name, test_references
-                )
-
-            # Apply mock pattern updates
-            if any(ref.context == "mock_patch" for ref in test_references):
-                mock_changes = self._update_mock_patterns(
-                    test_file, old_name, new_name, test_references
-                )
-
-            # Validate the updated file syntax
-            if import_changes or mock_changes:
-                try:
-                    with open(test_file, "r", encoding="utf-8") as f:
-                        content = f.read()
-                    ast.parse(content)  # This will raise SyntaxError if invalid
-
-                    return {
-                        "success": True,
-                        "file": str(test_file),
-                        "backup": str(backup_file) if backup_file else None,
-                        "import_changes": import_changes,
-                        "mock_changes": mock_changes,
-                        "total_references": len(test_references),
-                    }
-
-                except SyntaxError:
-                    # Syntax validation failed - rollback
-                    if backup_file and backup_file.exists():
-                        shutil.copy2(backup_file, test_file)
-                        backup_file.unlink()  # Remove the backup since we used it
-
-                    return {
-                        "success": False,
-                        "error": "Syntax validation failed - changes rolled back",
-                        "file": str(test_file),
-                    }
-            else:
-                # No changes needed
-                if backup_file and backup_file.exists():
-                    backup_file.unlink()  # Remove unnecessary backup
-
-                return {
-                    "success": True,
-                    "file": str(test_file),
-                    "import_changes": False,
-                    "mock_changes": False,
-                    "total_references": len(test_references),
-                }
-
-        except Exception as e:
-            # General error - rollback if possible
-            if backup_file and backup_file.exists():
-                try:
-                    shutil.copy2(backup_file, test_file)
-                    backup_file.unlink()
-                except Exception:
-                    pass  # Best effort rollback
-
-            return {
-                "success": False,
-                "error": f"Update failed: {str(e)}",
-                "file": str(test_file),
-            }
-
-    def _should_function_be_private(
-        self,
-        func: nodes.FunctionDef,
-        file_path: Path,
-        project_root: Path,
-    ) -> bool:
-        """Determine if a function should be private based on cross-module usage.
-
-        Uses comprehensive import graph analysis to determine if a function is used
-        by other modules or only internally within its defining module.
-
-        :param func: Function definition node
-        :param file_path: Path to the file containing the function
-        :param project_root: Root directory of the project
-        :returns: True if function should be private
-        """
-        # Skip common public API patterns that should never be made private
-        public_patterns = {
-            "main",
-            "run",
-            "execute",
-            "start",
-            "stop",
-            "setup",
-            "teardown",
-            "test",
-            "public_api",
-            "api",
-            "handle",
-            "process",
-        }
-
-        if func.name in public_patterns or func.name.startswith("test"):
-            return False
-
-        # Also skip functions that look like public APIs
-        if any(
-            func.name.startswith(pattern)
-            for pattern in ["calculate_", "compute_", "get_", "set_"]
-        ):
-            return False
-
-        # Build import graph to check cross-module usage
-        try:
-            import_graph = self._build_import_graph(project_root)
-            return not self._is_function_used_externally(
-                func.name, file_path, import_graph
-            )
-        except Exception:
-            # If cross-module analysis fails, fall back to heuristics
-            return self._fallback_privacy_heuristics(func)

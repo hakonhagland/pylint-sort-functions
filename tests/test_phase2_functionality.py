@@ -242,12 +242,12 @@ class TestPhase2TestFileUpdates:
             # Create a mock that will make the update create invalid syntax
             original_update_import = self.fixer._update_import_statements
 
-            def mock_update_import_statements(
+            def mock_update_import_statements(  # pylint: disable=unused-argument
                 test_file: Path,
                 old_name: str,
                 new_name: str,
                 test_references: list[TestReference],
-            ) -> bool:  # pylint: disable=unused-argument
+            ) -> bool:
                 # This will create invalid syntax by writing malformed content
                 with open(test_file, "w", encoding="utf-8") as f:
                     f.write(
@@ -470,9 +470,9 @@ class TestPhase2Integration:
             # Mock the file rename part since we're focusing on test file updates
             original_apply_renames_to_file = fixer._apply_renames_to_file
 
-            def mock_apply_renames_to_file(
+            def mock_apply_renames_to_file(  # pylint: disable=unused-argument
                 file_path: Path, file_candidates: list[RenameCandidate]
-            ) -> dict[str, Any]:  # pylint: disable=unused-argument
+            ) -> dict[str, Any]:
                 return {"renamed": 1, "skipped": 0, "errors": []}
 
             # Using setattr to avoid MyPy method assignment error
@@ -519,9 +519,9 @@ class TestPhase2Integration:
         # Mock the file rename part
         original_apply_renames_to_file = fixer._apply_renames_to_file
 
-        def mock_apply_renames_to_file(
+        def mock_apply_renames_to_file(  # pylint: disable=unused-argument
             file_path: Path, file_candidates: list[RenameCandidate]
-        ) -> dict[str, Any]:  # pylint: disable=unused-argument
+        ) -> dict[str, Any]:
             return {"renamed": 1, "skipped": 0, "errors": []}
 
         # Using setattr to avoid MyPy method assignment error
@@ -786,9 +786,8 @@ class TestPhase2Integration:
                 if call_count[0] == 1:
                     # First call (backup creation) succeeds
                     return original_copy2(*args)
-                else:
-                    # Second call (rollback) fails
-                    raise PermissionError("Cannot access backup file")
+                # Second call (rollback) fails
+                raise PermissionError("Cannot access backup file")
 
             # Mock the general exception path by making an exception occur
             original_update_import = fixer._update_import_statements

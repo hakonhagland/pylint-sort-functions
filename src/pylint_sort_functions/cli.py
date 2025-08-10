@@ -361,10 +361,13 @@ def _find_python_files_from_paths(paths: List[Path]) -> List[Path]:
     return python_files
 
 
-def _handle_privacy_fixing(  # pylint: disable=too-many-locals,too-many-branches
+def _handle_privacy_fixing(  # pylint: disable=too-many-locals,too-many-branches,too-many-statements  # noqa: E501
     args: argparse.Namespace, python_files: List[Path], paths: List[Path]
 ) -> int:
     """Handle privacy fixing workflow.
+
+    TODO: This function is too complex and should be refactored.
+    See GitHub Issue #31: https://github.com/hakonhagland/pylint-sort-functions/issues/31
 
     :param args: Parsed command-line arguments
     :param python_files: List of Python files to process

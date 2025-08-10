@@ -49,7 +49,7 @@ class TestCoverageGapsPhase2:
 
                         assert result == 0
 
-    def test_cli_test_file_update_reporting(self) -> None:
+    def test_cli_test_file_update_reporting(self) -> None:  # pylint: disable=too-many-locals
         """Test CLI test file update success reporting - covers lines 475, 477-479."""
         from pylint_sort_functions.cli import _handle_privacy_fixing
 
@@ -131,7 +131,7 @@ class TestCoverageGapsPhase2:
                                     f"Calls: {print_calls}"
                                 )
 
-    def test_privacy_fixer_backup_unlink_coverage(self) -> None:
+    def test_privacy_fixer_backup_unlink_coverage(self) -> None:  # pylint: disable=too-many-locals
         """Test backup file unlink during rollback - covers line 1052."""
         import shutil
         from unittest.mock import patch
