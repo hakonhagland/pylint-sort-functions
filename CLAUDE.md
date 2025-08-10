@@ -150,8 +150,9 @@ python scripts/bump-version.py --no-commit patch  # Version bump without commit
 tox
 make tox
 
-# Check RST documentation
-make rstcheck
+# Check RST documentation (syntax and formatting)
+make rstcheck  # Runs both rstcheck and list format checker
+make rst-list-check  # Only check RST list formatting issues
 
 # Run pre-commit hooks manually
 make pre-commit
@@ -475,8 +476,32 @@ The project includes these pre-commit hooks:
 - `ruff`: Python linting
 - `ruff-format`: Python code formatting
 - `mypy`: Type checking
-- `rstcheck`: reStructuredText validation
+- `rstcheck`: reStructuredText syntax validation
+- `rst-list-format`: RST list formatting checker (detects missing newlines before lists)
 - `coverage`: Test coverage verification (enforces 100% coverage)
+
+### RST List Format Checker
+
+The project includes a custom RST list format checker (`scripts/check_rst_list_format.py`) that detects a common documentation formatting issue where bullet lists immediately follow text ending with a colon without a blank line separator. This causes RST to render the list items inline rather than as proper bullet points.
+
+**Example of the issue detected:**
+```rst
+# Incorrect (missing blank line):
+**Some heading**:
+- Item 1
+- Item 2
+
+# Correct (with blank line):
+**Some heading**:
+
+- Item 1
+- Item 2
+```
+
+The checker is integrated into:
+- Makefile: `make rstcheck` and `make rst-list-check`
+- Pre-commit hooks: Runs automatically on RST file changes
+- CI/CD: Validates documentation in GitHub Actions
 
 ## Configuration
 

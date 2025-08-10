@@ -39,6 +39,15 @@ repos:
         always_run: true
 -   repo: local
     hooks:
+      - id: rst-list-format
+        name: RST list format check
+        language: system
+        entry: python scripts/check_rst_list_format.py --recursive docs/
+        files: '\.rst$'
+        pass_filenames: false
+        always_run: false
+-   repo: local
+    hooks:
       - id: pylint-sort-functions
         name: pylint-sort-functions full check
         language: system
