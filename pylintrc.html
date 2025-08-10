@@ -65,6 +65,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#plugin-specific-configuration">Plugin-Specific Configuration</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#decorator-exclusions">Decorator Exclusions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#privacy-detection-settings">Privacy Detection Settings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#privacy-configuration-options">Privacy Configuration Options</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#directory-exclusions-future-feature">Directory Exclusions (Future Feature)</a></li>
 </ul>
 </li>
@@ -268,6 +269,47 @@ when used with PyLint.</p>
 </pre></div>
 </div>
 </section>
+<section id="privacy-configuration-options">
+<h3>Privacy Configuration Options<a class="headerlink" href="#privacy-configuration-options" title="Link to this heading"></a></h3>
+<p>Control test file detection and privacy analysis behavior with these options:</p>
+<p><strong>.pylintrc:</strong></p>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[function-sort]</span>
+<span class="c1"># Directory exclusions for privacy analysis</span>
+<span class="na">privacy-exclude-dirs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">tests,integration_tests,e2e,qa</span>
+
+<span class="c1"># File pattern exclusions for privacy analysis</span>
+<span class="na">privacy-exclude-patterns</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">test_*.py,*_test.py,conftest.py,*_spec.py</span>
+
+<span class="c1"># Additional test patterns beyond built-in detection</span>
+<span class="na">privacy-additional-test-patterns</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">spec_*.py,scenario_*.py</span>
+
+<span class="c1"># Enable automatic test file updates when privatizing functions</span>
+<span class="na">privacy-update-tests</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">yes</span>
+
+<span class="c1"># Override built-in test detection (use custom patterns only)</span>
+<span class="na">privacy-override-test-detection</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">no</span>
+</pre></div>
+</div>
+<p><strong>pyproject.toml:</strong></p>
+<div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span class="k">[tool.pylint.</span><span class="s2">&quot;function-sort&quot;</span><span class="k">]</span>
+<span class="c1"># Directory exclusions for privacy analysis</span>
+<span class="n">privacy-exclude-dirs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;tests&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;integration_tests&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;e2e&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;qa&quot;</span><span class="p">]</span>
+
+<span class="c1"># File pattern exclusions for privacy analysis</span>
+<span class="n">privacy-exclude-patterns</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;test_*.py&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;*_test.py&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;conftest.py&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;*_spec.py&quot;</span><span class="p">]</span>
+
+<span class="c1"># Additional test patterns beyond built-in detection</span>
+<span class="n">privacy-additional-test-patterns</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;spec_*.py&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;scenario_*.py&quot;</span><span class="p">]</span>
+
+<span class="c1"># Enable automatic test file updates when privatizing functions</span>
+<span class="n">privacy-update-tests</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span>
+
+<span class="c1"># Override built-in test detection (use custom patterns only)</span>
+<span class="n">privacy-override-test-detection</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">false</span>
+</pre></div>
+</div>
+<p>See <a class="reference internal" href="usage.html"><span class="doc">User Guide</span></a> for detailed privacy configuration examples and real-world use cases.</p>
+</section>
 <section id="directory-exclusions-future-feature">
 <h3>Directory Exclusions (Future Feature)<a class="headerlink" href="#directory-exclusions-future-feature" title="Link to this heading"></a></h3>
 <div class="admonition note">
@@ -310,6 +352,9 @@ when used with PyLint.</p>
 
 <span class="k">[function-sort]</span>
 <span class="na">ignore-decorators</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">@app.route,@app.before_request,@app.after_request,@app.errorhandler,@app.teardown_appcontext</span>
+<span class="c1"># Privacy configuration for Flask projects</span>
+<span class="na">privacy-exclude-dirs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">tests,test,testing</span>
+<span class="na">privacy-additional-test-patterns</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">test_*.py,*_test.py,test_views_*.py,test_models_*.py</span>
 </pre></div>
 </div>
 <div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span class="k">[tool.pylint.MASTER]</span>
@@ -326,6 +371,9 @@ when used with PyLint.</p>
 <span class="w">    </span><span class="s2">&quot;@app.errorhandler&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="s2">&quot;@app.teardown_appcontext&quot;</span>
 <span class="p">]</span>
+<span class="c1"># Privacy configuration for Flask projects</span>
+<span class="n">privacy-exclude-dirs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;tests&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;test&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;testing&quot;</span><span class="p">]</span>
+<span class="n">privacy-additional-test-patterns</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;test_*.py&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;*_test.py&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;test_views_*.py&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;test_models_*.py&quot;</span><span class="p">]</span>
 </pre></div>
 </div>
 </section>
@@ -362,6 +410,10 @@ when used with PyLint.</p>
 <p><strong>PyLint plugin configuration with decorator exclusions:</strong></p>
 <div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[function-sort]</span>
 <span class="na">ignore-decorators</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">@login_required,@csrf_exempt,@require_http_methods,@cache_page,@vary_on_headers</span>
+<span class="c1"># Privacy configuration for Django projects</span>
+<span class="na">privacy-exclude-dirs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">tests,test,testapp</span>
+<span class="na">privacy-exclude-patterns</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">test*.py,tests.py,*_tests.py</span>
+<span class="na">privacy-additional-test-patterns</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">test_*.py,*_testcase.py,test_models_*.py,test_views_*.py,test_forms_*.py</span>
 </pre></div>
 </div>
 </section>
@@ -374,6 +426,9 @@ when used with PyLint.</p>
 <p><strong>PyLint plugin configuration:</strong></p>
 <div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[function-sort]</span>
 <span class="na">ignore-decorators</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">@app.get,@app.post,@app.put,@app.delete,@app.patch,@app.middleware</span>
+<span class="c1"># Privacy configuration for FastAPI microservices</span>
+<span class="na">privacy-exclude-dirs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">tests,integration,e2e,contracts</span>
+<span class="na">privacy-additional-test-patterns</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">*_contract.py,*_integration.py,api_test_*.py</span>
 </pre></div>
 </div>
 </section>
@@ -386,6 +441,10 @@ when used with PyLint.</p>
 <p><strong>PyLint plugin configuration:</strong></p>
 <div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[function-sort]</span>
 <span class="na">ignore-decorators</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">@pytest.fixture,@pytest.mark.*,@pytest.parametrize</span>
+<span class="c1"># Privacy configuration for pytest projects</span>
+<span class="na">privacy-exclude-dirs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">tests,test,testing</span>
+<span class="na">privacy-exclude-patterns</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">test_*.py,*_test.py,conftest.py</span>
+<span class="na">privacy-additional-test-patterns</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">*_fixture.py,*_fixtures.py</span>
 </pre></div>
 </div>
 </section>

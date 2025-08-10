@@ -61,6 +61,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#plugin-configuration-options">Plugin Configuration Options</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#configuration-options-reference">Configuration Options Reference</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#test-file-exclusion">Test File Exclusion</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#privacy-configuration-options">Privacy Configuration Options</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#automatic-directory-exclusion">Automatic Directory Exclusion</a></li>
 </ul>
 </li>
@@ -318,8 +319,243 @@ src/tests/helpers.py          ✓ Excluded (in tests/ subdirectory)
 </div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>Test file exclusion patterns are currently built-in and not configurable. Future versions may add configuration options for custom test patterns.</p>
+<p>The built-in test file detection can be extended with custom patterns using the privacy configuration options described below.</p>
 </div>
+</section>
+<section id="privacy-configuration-options">
+<h3>Privacy Configuration Options<a class="headerlink" href="#privacy-configuration-options" title="Link to this heading"></a></h3>
+<p>The privacy detection system provides five configuration options to customize test file detection and privacy analysis behavior. These options give you full control over which files are excluded from privacy analysis and how test files are handled.</p>
+<p><strong>Complete Configuration Example</strong></p>
+<p>Using <code class="docutils literal notranslate"><span class="pre">.pylintrc</span></code>:</p>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[MASTER]</span>
+<span class="na">load-plugins</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">pylint_sort_functions</span>
+
+<span class="k">[function-sort]</span>
+<span class="na">enable-privacy-detection</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">yes</span>
+<span class="na">privacy-exclude-dirs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">tests,integration_tests,e2e,qa</span>
+<span class="na">privacy-exclude-patterns</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">test_*.py,*_test.py,conftest.py,*_spec.py</span>
+<span class="na">privacy-additional-test-patterns</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">spec_*.py,scenario_*.py,*_scenario.py</span>
+<span class="na">privacy-update-tests</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">yes</span>
+<span class="na">privacy-override-test-detection</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">no</span>
+</pre></div>
+</div>
+<p>Using <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code>:</p>
+<div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span class="k">[tool.pylint.MASTER]</span>
+<span class="n">load-plugins</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;pylint_sort_functions&quot;</span><span class="p">]</span>
+
+<span class="k">[tool.pylint.</span><span class="s2">&quot;function-sort&quot;</span><span class="k">]</span>
+<span class="n">enable-privacy-detection</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span>
+<span class="n">privacy-exclude-dirs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;tests&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;integration_tests&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;e2e&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;qa&quot;</span><span class="p">]</span>
+<span class="n">privacy-exclude-patterns</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;test_*.py&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;*_test.py&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;conftest.py&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;*_spec.py&quot;</span><span class="p">]</span>
+<span class="n">privacy-additional-test-patterns</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;spec_*.py&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;scenario_*.py&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;*_scenario.py&quot;</span><span class="p">]</span>
+<span class="n">privacy-update-tests</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span>
+<span class="n">privacy-override-test-detection</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">false</span>
+</pre></div>
+</div>
+<p><strong>Configuration Options Reference</strong></p>
+<dl>
+<dt><strong>privacy-exclude-dirs</strong></dt><dd><p>Comma-separated list of directory names to exclude from privacy analysis. Files in these directories are scanned but their references are ignored when determining if functions should be private. Useful for test directories and other non-production code.</p>
+<p><em>Default</em>: <code class="docutils literal notranslate"><span class="pre">[]</span></code> (empty list)</p>
+<p><em>Example</em>: <code class="docutils literal notranslate"><span class="pre">tests,integration_tests,e2e,qa,benchmarks</span></code></p>
+</dd>
+<dt><strong>privacy-exclude-patterns</strong></dt><dd><p>Comma-separated list of file patterns to exclude from privacy analysis. Files matching these patterns are scanned but their references are ignored when determining if functions should be private. Supports glob patterns.</p>
+<p><em>Default</em>: <code class="docutils literal notranslate"><span class="pre">[]</span></code> (empty list)</p>
+<p><em>Example</em>: <code class="docutils literal notranslate"><span class="pre">test_*.py,*_test.py,conftest.py,*_spec.py,benchmark_*.py</span></code></p>
+</dd>
+<dt><strong>privacy-additional-test-patterns</strong></dt><dd><p>Comma-separated list of additional file patterns to treat as test files, beyond the built-in detection. These patterns are added to the default test detection (<code class="docutils literal notranslate"><span class="pre">test_*.py</span></code>, <code class="docutils literal notranslate"><span class="pre">*_test.py</span></code>, <code class="docutils literal notranslate"><span class="pre">conftest.py</span></code>, <code class="docutils literal notranslate"><span class="pre">tests/</span></code>). Supports glob patterns.</p>
+<p><em>Default</em>: <code class="docutils literal notranslate"><span class="pre">[]</span></code> (empty list)</p>
+<p><em>Example</em>: <code class="docutils literal notranslate"><span class="pre">spec_*.py,*_spec.py,scenario_*.py,*_scenario.py</span></code></p>
+</dd>
+<dt><strong>privacy-update-tests</strong></dt><dd><p>Enable automatic updating of test files when functions are privatized. When enabled, test files will be automatically updated to use the new private function names when using the privacy fixer CLI tool.</p>
+<p><em>Default</em>: <code class="docutils literal notranslate"><span class="pre">false</span></code></p>
+<p><em>Example</em>: <code class="docutils literal notranslate"><span class="pre">yes</span></code> (in .pylintrc) or <code class="docutils literal notranslate"><span class="pre">true</span></code> (in pyproject.toml)</p>
+</dd>
+<dt><strong>privacy-override-test-detection</strong></dt><dd><p>Override the built-in test file detection entirely and only use the patterns specified in privacy-exclude-patterns and privacy-exclude-dirs. When disabled, both built-in detection and custom patterns are used together.</p>
+<p><em>Default</em>: <code class="docutils literal notranslate"><span class="pre">false</span></code></p>
+<p><em>Example</em>: <code class="docutils literal notranslate"><span class="pre">yes</span></code> (in .pylintrc) or <code class="docutils literal notranslate"><span class="pre">true</span></code> (in pyproject.toml)</p>
+</dd>
+</dl>
+<p><strong>Real-World Use Cases</strong></p>
+<p><strong>Enterprise Projects with Multiple Test Directories</strong></p>
+<p>Large enterprise projects often have multiple test directories for different types of tests:</p>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[function-sort]</span>
+<span class="c1"># Exclude all test-related directories from privacy analysis</span>
+<span class="na">privacy-exclude-dirs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">tests,integration_tests,e2e_tests,qa,performance_tests,smoke_tests</span>
+
+<span class="c1"># Additional patterns for enterprise test naming conventions</span>
+<span class="na">privacy-additional-test-patterns</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">*_integration.py,*_e2e.py,*_smoke.py,test_suite_*.py</span>
+
+<span class="c1"># Enable test updates for automated refactoring</span>
+<span class="na">privacy-update-tests</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">yes</span>
+</pre></div>
+</div>
+<div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span class="k">[tool.pylint.</span><span class="s2">&quot;function-sort&quot;</span><span class="k">]</span>
+<span class="n">privacy-exclude-dirs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="s2">&quot;tests&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;integration_tests&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;e2e_tests&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;qa&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;performance_tests&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;smoke_tests&quot;</span>
+<span class="p">]</span>
+<span class="n">privacy-additional-test-patterns</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="s2">&quot;*_integration.py&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;*_e2e.py&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;*_smoke.py&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;test_suite_*.py&quot;</span>
+<span class="p">]</span>
+<span class="n">privacy-update-tests</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span>
+</pre></div>
+</div>
+<p><strong>Django Projects with Custom Test Structure</strong></p>
+<p>Django projects often have tests alongside application code and use specific naming patterns:</p>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[function-sort]</span>
+<span class="c1"># Django test directories</span>
+<span class="na">privacy-exclude-dirs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">tests,test,testapp</span>
+
+<span class="c1"># Django-specific test patterns</span>
+<span class="na">privacy-exclude-patterns</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">test*.py,tests.py,*_tests.py</span>
+<span class="na">privacy-additional-test-patterns</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">test_*.py,*_testcase.py,test_models_*.py,test_views_*.py</span>
+
+<span class="c1"># Keep default detection for standard Django test files</span>
+<span class="na">privacy-override-test-detection</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">no</span>
+</pre></div>
+</div>
+<div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span class="k">[tool.pylint.</span><span class="s2">&quot;function-sort&quot;</span><span class="k">]</span>
+<span class="n">privacy-exclude-dirs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;tests&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;test&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;testapp&quot;</span><span class="p">]</span>
+<span class="n">privacy-exclude-patterns</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;test*.py&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;tests.py&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;*_tests.py&quot;</span><span class="p">]</span>
+<span class="n">privacy-additional-test-patterns</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="s2">&quot;test_*.py&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;*_testcase.py&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;test_models_*.py&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;test_views_*.py&quot;</span>
+<span class="p">]</span>
+<span class="n">privacy-override-test-detection</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">false</span>
+</pre></div>
+</div>
+<p><strong>Flask/FastAPI Microservices with Integration Tests</strong></p>
+<p>Microservice architectures often separate unit tests from integration/contract tests:</p>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[function-sort]</span>
+<span class="c1"># Separate test types in microservices</span>
+<span class="na">privacy-exclude-dirs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">tests,integration,contracts,mocks,fixtures</span>
+
+<span class="c1"># API test patterns</span>
+<span class="na">privacy-additional-test-patterns</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">*_contract.py,*_integration.py,api_test_*.py</span>
+
+<span class="c1"># Enable automatic test updates for CI/CD</span>
+<span class="na">privacy-update-tests</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">yes</span>
+</pre></div>
+</div>
+<div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span class="k">[tool.pylint.</span><span class="s2">&quot;function-sort&quot;</span><span class="k">]</span>
+<span class="n">privacy-exclude-dirs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="s2">&quot;tests&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;integration&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;contracts&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;mocks&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;fixtures&quot;</span>
+<span class="p">]</span>
+<span class="n">privacy-additional-test-patterns</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="s2">&quot;*_contract.py&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;*_integration.py&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;api_test_*.py&quot;</span>
+<span class="p">]</span>
+<span class="n">privacy-update-tests</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span>
+</pre></div>
+</div>
+<p><strong>Legacy Projects with Non-Standard Test Naming</strong></p>
+<p>Legacy projects might have unconventional test naming that doesn’t follow modern patterns:</p>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[function-sort]</span>
+<span class="c1"># Override default detection for legacy naming</span>
+<span class="na">privacy-override-test-detection</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">yes</span>
+
+<span class="c1"># Define all test patterns explicitly</span>
+<span class="na">privacy-exclude-patterns</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">Test*.py,*Test.py,*Tests.py,check_*.py,verify_*.py</span>
+<span class="na">privacy-exclude-dirs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">QA,Testing,Validation,TestSuite</span>
+
+<span class="c1"># No additional patterns needed since we&#39;re overriding</span>
+<span class="na">privacy-additional-test-patterns</span><span class="w"> </span><span class="o">=</span>
+</pre></div>
+</div>
+<div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span class="k">[tool.pylint.</span><span class="s2">&quot;function-sort&quot;</span><span class="k">]</span>
+<span class="n">privacy-override-test-detection</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span>
+<span class="n">privacy-exclude-patterns</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="s2">&quot;Test*.py&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;*Test.py&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;*Tests.py&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;check_*.py&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;verify_*.py&quot;</span>
+<span class="p">]</span>
+<span class="n">privacy-exclude-dirs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;QA&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;Testing&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;Validation&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;TestSuite&quot;</span><span class="p">]</span>
+<span class="n">privacy-additional-test-patterns</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[]</span>
+</pre></div>
+</div>
+<p><strong>Behavior-Driven Development (BDD) Projects</strong></p>
+<p>Projects using BDD frameworks like behave or pytest-bdd have specific test file patterns:</p>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[function-sort]</span>
+<span class="c1"># BDD test directories</span>
+<span class="na">privacy-exclude-dirs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">features,specs,scenarios,steps</span>
+
+<span class="c1"># BDD-specific patterns</span>
+<span class="na">privacy-additional-test-patterns</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">*_steps.py,*_feature.py,scenario_*.py,given_*.py,when_*.py,then_*.py</span>
+
+<span class="c1"># Keep built-in detection for standard test files</span>
+<span class="na">privacy-override-test-detection</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">no</span>
+</pre></div>
+</div>
+<div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span class="k">[tool.pylint.</span><span class="s2">&quot;function-sort&quot;</span><span class="k">]</span>
+<span class="n">privacy-exclude-dirs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;features&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;specs&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;scenarios&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;steps&quot;</span><span class="p">]</span>
+<span class="n">privacy-additional-test-patterns</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="s2">&quot;*_steps.py&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;*_feature.py&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;scenario_*.py&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;given_*.py&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;when_*.py&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;then_*.py&quot;</span>
+<span class="p">]</span>
+<span class="n">privacy-override-test-detection</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">false</span>
+</pre></div>
+</div>
+<p><strong>Troubleshooting Privacy Configuration</strong></p>
+<p><strong>Issue: Functions used only by tests are still being marked as private</strong></p>
+<p><em>Solution</em>: Ensure your test files are properly excluded:</p>
+<ol class="arabic simple">
+<li><p>Check that test directories are listed in <code class="docutils literal notranslate"><span class="pre">privacy-exclude-dirs</span></code></p></li>
+<li><p>Verify test file patterns match your naming convention in <code class="docutils literal notranslate"><span class="pre">privacy-exclude-patterns</span></code></p></li>
+<li><p>Add any custom test patterns to <code class="docutils literal notranslate"><span class="pre">privacy-additional-test-patterns</span></code></p></li>
+<li><p>Enable <code class="docutils literal notranslate"><span class="pre">privacy-update-tests</span></code> if you want tests to be automatically updated</p></li>
+</ol>
+<p><strong>Issue: Privacy detection is too aggressive</strong></p>
+<p><em>Solution</em>: Expand your exclusion patterns:</p>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[function-sort]</span>
+<span class="c1"># More comprehensive exclusions</span>
+<span class="na">privacy-exclude-dirs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">tests,test,testing,qa,benchmarks,examples,demos</span>
+<span class="na">privacy-exclude-patterns</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">test_*.py,*_test.py,*_tests.py,conftest.py,*_spec.py,example_*.py</span>
+</pre></div>
+</div>
+<p><strong>Issue: Privacy detection is missing test files</strong></p>
+<p><em>Solution</em>: Add your specific patterns and verify detection:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Check which files are being detected as tests</span>
+pylint<span class="w"> </span>--load-plugins<span class="o">=</span>pylint_sort_functions<span class="w"> </span>--verbose<span class="w"> </span>src/
+</pre></div>
+</div>
+<p>Look for messages about excluded test files in the verbose output.</p>
+<p><strong>Issue: Want to completely customize test detection</strong></p>
+<p><em>Solution</em>: Override built-in detection and define your own patterns:</p>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[function-sort]</span>
+<span class="c1"># Take full control of test detection</span>
+<span class="na">privacy-override-test-detection</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">yes</span>
+<span class="na">privacy-exclude-patterns</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">my_test_*.py,*_mytest.py</span>
+<span class="na">privacy-exclude-dirs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">my_tests,custom_qa</span>
+</pre></div>
+</div>
+<p><strong>Issue: Configuration not being applied</strong></p>
+<p><em>Solution</em>: Verify configuration file location and syntax:</p>
+<ol class="arabic simple">
+<li><p>Ensure <code class="docutils literal notranslate"><span class="pre">.pylintrc</span></code> or <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code> is in the project root</p></li>
+<li><p>Check that the configuration section is named <code class="docutils literal notranslate"><span class="pre">[function-sort]</span></code> (not <code class="docutils literal notranslate"><span class="pre">[pylint-sort-functions]</span></code>)</p></li>
+<li><p>For <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code>, use <code class="docutils literal notranslate"><span class="pre">[tool.pylint.&quot;function-sort&quot;]</span></code></p></li>
+<li><p>Verify boolean values: <code class="docutils literal notranslate"><span class="pre">yes</span></code>/<code class="docutils literal notranslate"><span class="pre">no</span></code> in .pylintrc, <code class="docutils literal notranslate"><span class="pre">true</span></code>/<code class="docutils literal notranslate"><span class="pre">false</span></code> in pyproject.toml</p></li>
+</ol>
 </section>
 <section id="automatic-directory-exclusion">
 <h3>Automatic Directory Exclusion<a class="headerlink" href="#automatic-directory-exclusion" title="Link to this heading"></a></h3>

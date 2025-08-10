@@ -154,6 +154,53 @@ Configure the privacy detection feature that suggests functions should be made p
    enable-privacy-detection = true
    public-api-patterns = ["main", "run", "execute", "setup", "teardown"]
 
+Privacy Configuration Options
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Control test file detection and privacy analysis behavior with these options:
+
+**.pylintrc:**
+
+.. code-block:: ini
+
+   [function-sort]
+   # Directory exclusions for privacy analysis
+   privacy-exclude-dirs = tests,integration_tests,e2e,qa
+
+   # File pattern exclusions for privacy analysis
+   privacy-exclude-patterns = test_*.py,*_test.py,conftest.py,*_spec.py
+
+   # Additional test patterns beyond built-in detection
+   privacy-additional-test-patterns = spec_*.py,scenario_*.py
+
+   # Enable automatic test file updates when privatizing functions
+   privacy-update-tests = yes
+
+   # Override built-in test detection (use custom patterns only)
+   privacy-override-test-detection = no
+
+**pyproject.toml:**
+
+.. code-block:: toml
+
+   [tool.pylint."function-sort"]
+   # Directory exclusions for privacy analysis
+   privacy-exclude-dirs = ["tests", "integration_tests", "e2e", "qa"]
+
+   # File pattern exclusions for privacy analysis
+   privacy-exclude-patterns = ["test_*.py", "*_test.py", "conftest.py", "*_spec.py"]
+
+   # Additional test patterns beyond built-in detection
+   privacy-additional-test-patterns = ["spec_*.py", "scenario_*.py"]
+
+   # Enable automatic test file updates when privatizing functions
+   privacy-update-tests = true
+
+   # Override built-in test detection (use custom patterns only)
+   privacy-override-test-detection = false
+
+See :doc:`usage` for detailed privacy configuration examples and real-world use cases.
+
 Directory Exclusions (Future Feature)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -208,6 +255,9 @@ Flask Applications
 
    [function-sort]
    ignore-decorators = @app.route,@app.before_request,@app.after_request,@app.errorhandler,@app.teardown_appcontext
+   # Privacy configuration for Flask projects
+   privacy-exclude-dirs = tests,test,testing
+   privacy-additional-test-patterns = test_*.py,*_test.py,test_views_*.py,test_models_*.py
 
 .. code-block:: toml
 
@@ -225,6 +275,9 @@ Flask Applications
        "@app.errorhandler",
        "@app.teardown_appcontext"
    ]
+   # Privacy configuration for Flask projects
+   privacy-exclude-dirs = ["tests", "test", "testing"]
+   privacy-additional-test-patterns = ["test_*.py", "*_test.py", "test_views_*.py", "test_models_*.py"]
 
 Click CLI Applications
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -270,6 +323,10 @@ Django Applications
 
    [function-sort]
    ignore-decorators = @login_required,@csrf_exempt,@require_http_methods,@cache_page,@vary_on_headers
+   # Privacy configuration for Django projects
+   privacy-exclude-dirs = tests,test,testapp
+   privacy-exclude-patterns = test*.py,tests.py,*_tests.py
+   privacy-additional-test-patterns = test_*.py,*_testcase.py,test_models_*.py,test_views_*.py,test_forms_*.py
 
 FastAPI Applications
 ~~~~~~~~~~~~~~~~~~~~
@@ -286,6 +343,9 @@ FastAPI Applications
 
    [function-sort]
    ignore-decorators = @app.get,@app.post,@app.put,@app.delete,@app.patch,@app.middleware
+   # Privacy configuration for FastAPI microservices
+   privacy-exclude-dirs = tests,integration,e2e,contracts
+   privacy-additional-test-patterns = *_contract.py,*_integration.py,api_test_*.py
 
 Pytest Test Configuration
 ~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -302,6 +362,10 @@ Pytest Test Configuration
 
    [function-sort]
    ignore-decorators = @pytest.fixture,@pytest.mark.*,@pytest.parametrize
+   # Privacy configuration for pytest projects
+   privacy-exclude-dirs = tests,test,testing
+   privacy-exclude-patterns = test_*.py,*_test.py,conftest.py
+   privacy-additional-test-patterns = *_fixture.py,*_fixtures.py
 
 Integration Examples
 --------------------
