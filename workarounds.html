@@ -114,15 +114,19 @@ Active issues are tracked in our <a class="reference external" href="https://git
 </div>
 <section id="current-status-summary">
 <h2>Current Status Summary<a class="headerlink" href="#current-status-summary" title="Link to this heading"></a></h2>
-<p>✅ <strong>RESOLVED (Modern Solutions Available)</strong>:
-- Framework decorator conflicts (Click, Flask, FastAPI) - Use <code class="docutils literal notranslate"><span class="pre">ignore-decorators</span></code> configuration
-- pyproject.toml configuration support - Fully supported via <code class="docutils literal notranslate"><span class="pre">[tool.pylint.function-sort]</span></code>
-- Bulk fixing automation - Comprehensive CLI auto-fix tool available
-- Privacy detection and fixing - Built-in <code class="docutils literal notranslate"><span class="pre">--fix-privacy</span></code> feature</p>
-<p>🟡 <strong>ACTIVE LIMITATIONS (Workarounds Available)</strong>:
-- Enhanced error messages - CLI tool provides better analysis, plugin improvements planned
-- Test method conventional ordering - Use class-level disables or ignore decorators
-- Magic method conventional ordering - Use class-level disables</p>
+<p>✅ <strong>RESOLVED (Modern Solutions Available)</strong>:</p>
+<ul class="simple">
+<li><p>Framework decorator conflicts (Click, Flask, FastAPI) - Use <code class="docutils literal notranslate"><span class="pre">ignore-decorators</span></code> configuration</p></li>
+<li><p>pyproject.toml configuration support - Fully supported via <code class="docutils literal notranslate"><span class="pre">[tool.pylint.function-sort]</span></code></p></li>
+<li><p>Bulk fixing automation - Comprehensive CLI auto-fix tool available</p></li>
+<li><p>Privacy detection and fixing - Built-in <code class="docutils literal notranslate"><span class="pre">--fix-privacy</span></code> feature</p></li>
+</ul>
+<p>🟡 <strong>ACTIVE LIMITATIONS (Workarounds Available)</strong>:</p>
+<ul class="simple">
+<li><p>Enhanced error messages - CLI tool provides better analysis, plugin improvements planned</p></li>
+<li><p>Test method conventional ordering - Use class-level disables or ignore decorators</p></li>
+<li><p>Magic method conventional ordering - Use class-level disables</p></li>
+</ul>
 <p>🔧 <strong>RECOMMENDED APPROACH</strong>: Use modern pyproject.toml configuration with selective workarounds for remaining limitations.</p>
 </section>
 <section id="framework-decorator-support">
@@ -239,11 +243,13 @@ Active issues are tracked in our <a class="reference external" href="https://git
     <span class="o">--</span><span class="n">private</span><span class="o">-</span><span class="n">header</span> <span class="s2">&quot;=== Internal ===&quot;</span> <span class="n">src</span><span class="o">/</span>
 </pre></div>
 </div>
-<p><strong>Safety Features</strong>:
-- Automatic backup creation (disable with <code class="docutils literal notranslate"><span class="pre">--no-backup</span></code>)
-- Dry-run mode for safe previewing
-- AST-based parsing preserves comments and formatting
-- Integration with existing formatters (ruff, black)</p>
+<p><strong>Safety Features</strong>:</p>
+<ul class="simple">
+<li><p>Automatic backup creation (disable with <code class="docutils literal notranslate"><span class="pre">--no-backup</span></code>)</p></li>
+<li><p>Dry-run mode for safe previewing</p></li>
+<li><p>AST-based parsing preserves comments and formatting</p></li>
+<li><p>Integration with existing formatters (ruff, black)</p></li>
+</ul>
 </section>
 <section id="enhanced-error-messages">
 <h2>Enhanced Error Messages<a class="headerlink" href="#enhanced-error-messages" title="Link to this heading"></a></h2>
