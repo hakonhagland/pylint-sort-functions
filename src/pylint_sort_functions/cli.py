@@ -19,7 +19,7 @@ Usage examples:
 import argparse
 import sys
 from pathlib import Path
-from typing import List
+from typing import List, Optional
 
 import astroid  # type: ignore[import-untyped]
 
@@ -451,13 +451,32 @@ def _handle_privacy_fixing(  # pylint: disable=too-many-locals,too-many-branches
 
         # Apply renames if not in dry-run mode
         if args.fix_privacy:
-            result = privacy_fixer.apply_renames(all_candidates)
+            # Determine project root from the provided paths
+            test_project_root: Optional[Path] = None
+            if paths:
+                # Use the first path as project root, or its parent if it's a file
+                first_path = paths[0]
+                if first_path.is_dir():
+                    test_project_root = first_path
+                else:
+                    test_project_root = first_path.parent
+
+            result = privacy_fixer.apply_renames(all_candidates, test_project_root)
             print(f"\nRenamed {result['renamed']} functions.")
             if result["skipped"] > 0:  # pragma: no cover
                 print(f"Skipped {result['skipped']} unsafe renames.")
             if result.get("errors"):  # pragma: no cover
                 for error in result["errors"]:
                     print(f"Error: {error}")
+
+            # Report test file updates
+            if "test_files_updated" in result:
+                if result["test_files_updated"] > 0:
+                    print(f"Updated {result['test_files_updated']} test files.")
+                if result.get("test_file_errors"):
+                    print("\nTest file update errors:")
+                    for error in result["test_file_errors"]:
+                        print(f"  {error}")
 
             # Apply automatic sorting if requested
             if args.auto_sort and result["renamed"] > 0:

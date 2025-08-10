@@ -489,6 +489,226 @@ Test file exclusion is applied during the import analysis phase in ``_build_cros
 
 This addresses `GitHub issue #26 <https://github.com/hakonhagland/pylint-sort-functions/issues/26>`_ which identified incomplete test file detection causing test imports to break when functions were incorrectly privatized.
 
+Test File Update System (Phase 2)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+**Implemented in Version 2.0+** - *Status: ✅ COMPLETED*
+
+As of Phase 2 implementation (GitHub issue #28), the privacy fixer includes automatic test file update functionality that resolves the fundamental limitation where 100% test coverage prevented any functions from being privatized.
+
+**Problem Solved**: Previously, functions used by tests could not be privatized because test usage was excluded from analysis. This created a limitation where well-tested codebases couldn't benefit from privacy detection.
+
+**Solution**: The system now automatically updates test files when functions are privatized, enabling production code to drive API design while keeping all tests working.
+
+**Core Components**:
+
+.. code-block:: python
+
+    class TestReference(NamedTuple):
+        """Represents a reference to a function within a test file."""
+
+        file_path: Path
+        line: int
+        col: int
+        context: str              # "import", "mock_patch", "call", etc.
+        reference_text: str       # The actual text that needs to be replaced
+
+**Enhanced RenameCandidate**:
+
+.. code-block:: python
+
+    class RenameCandidate(NamedTuple):
+        """Represents a function that can be safely renamed."""
+
+        function_node: nodes.FunctionDef
+        old_name: str
+        new_name: str
+        references: List[FunctionReference]
+        test_references: List[TestReference]  # NEW: references from test files
+        is_safe: bool
+        safety_issues: List[str]
+
+**Test File Update Process**:
+
+1. **Test File Detection**: Uses existing test detection logic to find all test files
+2. **Reference Scanning**: Finds function references in test files via dual approach:
+   - **AST-based**: Import statements parsing with astroid
+   - **String-based**: Mock patch patterns via regex
+3. **Safe Updates**: Backup creation, atomic updates, syntax validation, rollback on failure
+
+**Reference Types Handled**:
+
+**Import Statements**:
+
+.. code-block:: python
+
+    # Before privatization:
+    from src.module import helper_function, other_func
+
+    # After automatic update:
+    from src.module import _helper_function, other_func
+
+**Mock Patch Decorators**:
+
+.. code-block:: python
+
+    # Before:
+    @patch('src.module.helper_function')
+    def test_with_mock(mock_helper):
+        result = helper_function()
+
+    # After automatic update:
+    @patch('src.module._helper_function')
+    def test_with_mock(mock_helper):
+        result = _helper_function()  # Import statement also updated
+
+**Mocker Patch Calls**:
+
+.. code-block:: python
+
+    # Before:
+    def test_with_mocker(mocker):
+        mocker.patch('src.module.helper_function', return_value='mocked')
+        result = helper_function()
+
+    # After automatic update:
+    def test_with_mocker(mocker):
+        mocker.patch('src.module._helper_function', return_value='mocked')
+        result = _helper_function()
+
+**Multi-line Import Support**:
+
+.. code-block:: python
+
+    # Before:
+    from src.module import (
+        helper_function,
+        other_func,
+        third_func
+    )
+
+    # After automatic update:
+    from src.module import (
+        _helper_function,
+        other_func,
+        third_func
+    )
+
+**Safety Mechanisms**:
+
+1. **Backup Creation**: Automatic `.bak` files for all modified test files
+2. **Syntax Validation**: AST parsing validation after updates
+3. **Atomic Operations**: Either all updates succeed or all are rolled back
+4. **Error Recovery**: Graceful handling of update failures with detailed reporting
+
+**Implementation Details**:
+
+**Test File Update Methods**:
+
+.. code-block:: python
+
+    class PrivacyFixer:
+        def update_test_file(self, test_file: Path, old_name: str,
+                           new_name: str, test_references: List[TestReference]) -> Dict[str, Any]:
+            """Main entry point for safely updating test files."""
+
+        def _update_import_statements(self, test_file: Path, old_name: str,
+                                    new_name: str, test_references: List[TestReference]) -> bool:
+            """Update import statements using AST-based modifications."""
+
+        def _update_mock_patterns(self, test_file: Path, old_name: str,
+                                new_name: str, test_references: List[TestReference]) -> bool:
+            """Update mock patch patterns using string-based modifications."""
+
+**Integration with apply_renames()**:
+
+.. code-block:: python
+
+    def apply_renames(self, candidates: List[RenameCandidate],
+                     project_root: Optional[Path] = None) -> Dict[str, Any]:
+        """Enhanced to include test file updates when project_root is provided."""
+
+        # 1. Apply renames to production files
+        # 2. If project_root provided and renames successful:
+        #    - Find all test files in project
+        #    - Update test files for each renamed function
+        #    - Report test file update results
+
+**CLI Integration**:
+
+.. code-block:: bash
+
+    # Automatic test file updates when project root is available
+    pylint-sort-functions --fix-privacy src/
+
+    # Output includes test file update reporting:
+    # Renamed 3 functions.
+    # Updated 5 test files.
+
+**Benefits Achieved**:
+
+1. **Production-Driven API Design**: Production code relationships determine privacy, not test usage
+2. **100% Test Coverage Compatible**: Well-tested codebases can now use privacy detection effectively
+3. **No Broken Tests**: All test imports and mocks automatically updated to use new private names
+4. **Safe Operations**: Comprehensive backup and rollback mechanisms prevent test breakage
+5. **Transparent Process**: Clear reporting of test file modifications
+
+**Example Workflow**:
+
+.. code-block:: python
+
+    # Production file: src/utils.py
+    def helper_function():  # Should be private (only used internally)
+        return "help"
+
+    def public_api():       # Correctly public (used by other modules)
+        return helper_function()
+
+.. code-block:: python
+
+    # Test file: tests/test_utils.py
+    from src.utils import helper_function, public_api
+
+    @patch('src.utils.helper_function')
+    def test_helper(mock_helper):
+        result = helper_function()
+        assert result
+
+.. code-block:: bash
+
+    # Privacy fixer detects helper_function should be private
+    pylint-sort-functions --fix-privacy src/
+
+**Results**:
+
+.. code-block:: python
+
+    # Production file: src/utils.py (updated)
+    def _helper_function():  # Now correctly private
+        return "help"
+
+    def public_api():        # Calls updated to use private name
+        return _helper_function()
+
+.. code-block:: python
+
+    # Test file: tests/test_utils.py (automatically updated)
+    from src.utils import _helper_function, public_api
+
+    @patch('src.utils._helper_function')
+    def test_helper(mock_helper):
+        result = _helper_function()
+        assert result
+
+**Error Handling**:
+
+- **Syntax Errors**: Automatic rollback if test file updates create invalid syntax
+- **File Access Issues**: Graceful handling of permission errors or locked files
+- **Partial Failures**: Detailed reporting of which test files succeeded/failed
+- **Best Effort Recovery**: Restore original content from backups when possible
+
+This advancement represents a significant improvement in the privacy fixer's practical utility, making it effective for real-world codebases with comprehensive test coverage.
+
 CLI Integration
 ---------------
 
@@ -617,18 +837,19 @@ Current Implementation Status
 
 **✅ Completed Components**:
 
-- **Core Architecture**: All three main classes fully implemented with comprehensive functionality
+- **Core Architecture**: All four main classes fully implemented with comprehensive functionality (Phase 1 + 2)
 - **Core API Methods**: detect_privacy_violations() method implemented with AST analysis
 - **AST Function Analysis**: Complete function extraction with cross-module import analysis
 - **Cross-Module Analysis**: Full import graph traversal to detect external function usage
 - **Bidirectional Privacy Detection**: Both W9004 (should be private) and W9005 (should be public) detection
-- **Reference Detection**: Complete AST traversal with comprehensive pattern matching
+- **Reference Detection**: Complete AST traversal with comprehensive pattern matching for production and test files
 - **Safety Validation System**: Multi-layer validation with name conflict detection and dynamic reference analysis
 - **Rename Application System**: Atomic file operations with backup creation and rollback support
+- **Test File Update System**: Automatic update of test files when functions are privatized (Phase 2)
 - **CLI Integration**: Complete implementation of ``--fix-privacy``, ``--privacy-dry-run``, and ``--auto-sort`` arguments
 - **Module Analysis**: Full integration with existing W9004/W9005 detection logic and configuration systems
 - **Report Generation**: Human-readable status reports with detailed explanations and safety issue descriptions
-- **Test Coverage**: Comprehensive test suite with 100% source code coverage including integration tests
+- **Test Coverage**: Comprehensive test suite with 100% source code coverage including integration tests and Phase 2 functionality
 - **Auto-Sort Integration**: Seamless workflow combining privacy fixes with automatic function sorting
 
 **✅ Advanced Features Implemented**:
@@ -657,19 +878,30 @@ Current Implementation Status
 Development Status
 ~~~~~~~~~~~~~~~~~~
 
-**✅ All Phases Complete**:
+**✅ All Phases Complete (Including Phase 2 Enhancement)**:
 
 **Phase 1: Core Safety System** *(COMPLETED)*
     Comprehensive safety validation system with multi-layer checks for all risk categories including name conflicts, dynamic references, and string literal detection.
 
-**Phase 2: Rename Implementation** *(COMPLETED)*
+**Phase 2: Test File Update System** *(COMPLETED - Issue #28)*
+    Automatic test file update functionality that updates imports and mock patches when functions are privatized, enabling production code to drive API design while maintaining test compatibility.
+
+**Phase 3: Rename Implementation** *(COMPLETED)*
     Full source code modification system with atomic operations, error recovery, and backup management.
 
-**Phase 3: CLI Integration** *(COMPLETED)*
+**Phase 4: CLI Integration** *(COMPLETED)*
     Complete command-line interface integration with argument parsing, progress reporting, and configuration management.
 
-**Phase 4: Testing and Optimization** *(COMPLETED)*
+**Phase 5: Testing and Optimization** *(COMPLETED)*
     Comprehensive integration testing, performance optimization, and complete documentation.
+
+**Phase 2 Enhancements Completed**:
+
+- **Test File Update Engine**: Automatic modification of test imports and mock patches
+- **Dual Detection Strategy**: AST-based import updates + string-based mock pattern updates
+- **Safe File Modification**: Backup creation, syntax validation, automatic rollback on failure
+- **Multi-line Import Support**: Handles complex import statement formats
+- **Comprehensive Test Coverage**: 15+ additional test cases for Phase 2 functionality
 
 **Additional Enhancements Completed**:
 
