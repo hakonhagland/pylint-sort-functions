@@ -89,6 +89,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#integration-with-privacy-detection-system">Integration with Privacy Detection System</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#detection-integration">Detection Integration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#test-file-exclusion-system">Test File Exclusion System</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#test-file-update-system-phase-2">Test File Update System (Phase 2)</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#cli-integration">CLI Integration</a><ul>
@@ -587,6 +588,194 @@ my_test_file.py              ✓ Excluded (contains &#39;test&#39;)
 </div>
 <p>This addresses <a class="reference external" href="https://github.com/hakonhagland/pylint-sort-functions/issues/26">GitHub issue #26</a> which identified incomplete test file detection causing test imports to break when functions were incorrectly privatized.</p>
 </section>
+<section id="test-file-update-system-phase-2">
+<h3>Test File Update System (Phase 2)<a class="headerlink" href="#test-file-update-system-phase-2" title="Link to this heading"></a></h3>
+<p><strong>Implemented in Version 2.0+</strong> - <em>Status: ✅ COMPLETED</em></p>
+<p>As of Phase 2 implementation (GitHub issue #28), the privacy fixer includes automatic test file update functionality that resolves the fundamental limitation where 100% test coverage prevented any functions from being privatized.</p>
+<p><strong>Problem Solved</strong>: Previously, functions used by tests could not be privatized because test usage was excluded from analysis. This created a limitation where well-tested codebases couldn’t benefit from privacy detection.</p>
+<p><strong>Solution</strong>: The system now automatically updates test files when functions are privatized, enabling production code to drive API design while keeping all tests working.</p>
+<p><strong>Core Components</strong>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">TestReference</span><span class="p">(</span><span class="n">NamedTuple</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Represents a reference to a function within a test file.&quot;&quot;&quot;</span>
+
+    <span class="n">file_path</span><span class="p">:</span> <span class="n">Path</span>
+    <span class="n">line</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">col</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">context</span><span class="p">:</span> <span class="nb">str</span>              <span class="c1"># &quot;import&quot;, &quot;mock_patch&quot;, &quot;call&quot;, etc.</span>
+    <span class="n">reference_text</span><span class="p">:</span> <span class="nb">str</span>       <span class="c1"># The actual text that needs to be replaced</span>
+</pre></div>
+</div>
+<p><strong>Enhanced RenameCandidate</strong>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">RenameCandidate</span><span class="p">(</span><span class="n">NamedTuple</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Represents a function that can be safely renamed.&quot;&quot;&quot;</span>
+
+    <span class="n">function_node</span><span class="p">:</span> <span class="n">nodes</span><span class="o">.</span><span class="n">FunctionDef</span>
+    <span class="n">old_name</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">new_name</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">references</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">FunctionReference</span><span class="p">]</span>
+    <span class="n">test_references</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">TestReference</span><span class="p">]</span>  <span class="c1"># NEW: references from test files</span>
+    <span class="n">is_safe</span><span class="p">:</span> <span class="nb">bool</span>
+    <span class="n">safety_issues</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+</pre></div>
+</div>
+<p><strong>Test File Update Process</strong>:</p>
+<ol class="arabic simple">
+<li><p><strong>Test File Detection</strong>: Uses existing test detection logic to find all test files</p></li>
+<li><p><strong>Reference Scanning</strong>: Finds function references in test files via dual approach:
+- <strong>AST-based</strong>: Import statements parsing with astroid
+- <strong>String-based</strong>: Mock patch patterns via regex</p></li>
+<li><p><strong>Safe Updates</strong>: Backup creation, atomic updates, syntax validation, rollback on failure</p></li>
+</ol>
+<p><strong>Reference Types Handled</strong>:</p>
+<p><strong>Import Statements</strong>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Before privatization:</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">src.module</span><span class="w"> </span><span class="kn">import</span> <span class="n">helper_function</span><span class="p">,</span> <span class="n">other_func</span>
+
+<span class="c1"># After automatic update:</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">src.module</span><span class="w"> </span><span class="kn">import</span> <span class="n">_helper_function</span><span class="p">,</span> <span class="n">other_func</span>
+</pre></div>
+</div>
+<p><strong>Mock Patch Decorators</strong>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Before:</span>
+<span class="nd">@patch</span><span class="p">(</span><span class="s1">&#39;src.module.helper_function&#39;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_with_mock</span><span class="p">(</span><span class="n">mock_helper</span><span class="p">):</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">helper_function</span><span class="p">()</span>
+
+<span class="c1"># After automatic update:</span>
+<span class="nd">@patch</span><span class="p">(</span><span class="s1">&#39;src.module._helper_function&#39;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_with_mock</span><span class="p">(</span><span class="n">mock_helper</span><span class="p">):</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">_helper_function</span><span class="p">()</span>  <span class="c1"># Import statement also updated</span>
+</pre></div>
+</div>
+<p><strong>Mocker Patch Calls</strong>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Before:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_with_mocker</span><span class="p">(</span><span class="n">mocker</span><span class="p">):</span>
+    <span class="n">mocker</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="s1">&#39;src.module.helper_function&#39;</span><span class="p">,</span> <span class="n">return_value</span><span class="o">=</span><span class="s1">&#39;mocked&#39;</span><span class="p">)</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">helper_function</span><span class="p">()</span>
+
+<span class="c1"># After automatic update:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_with_mocker</span><span class="p">(</span><span class="n">mocker</span><span class="p">):</span>
+    <span class="n">mocker</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="s1">&#39;src.module._helper_function&#39;</span><span class="p">,</span> <span class="n">return_value</span><span class="o">=</span><span class="s1">&#39;mocked&#39;</span><span class="p">)</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">_helper_function</span><span class="p">()</span>
+</pre></div>
+</div>
+<p><strong>Multi-line Import Support</strong>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Before:</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">src.module</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">helper_function</span><span class="p">,</span>
+    <span class="n">other_func</span><span class="p">,</span>
+    <span class="n">third_func</span>
+<span class="p">)</span>
+
+<span class="c1"># After automatic update:</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">src.module</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">_helper_function</span><span class="p">,</span>
+    <span class="n">other_func</span><span class="p">,</span>
+    <span class="n">third_func</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>Safety Mechanisms</strong>:</p>
+<ol class="arabic simple">
+<li><p><strong>Backup Creation</strong>: Automatic <cite>.bak</cite> files for all modified test files</p></li>
+<li><p><strong>Syntax Validation</strong>: AST parsing validation after updates</p></li>
+<li><p><strong>Atomic Operations</strong>: Either all updates succeed or all are rolled back</p></li>
+<li><p><strong>Error Recovery</strong>: Graceful handling of update failures with detailed reporting</p></li>
+</ol>
+<p><strong>Implementation Details</strong>:</p>
+<p><strong>Test File Update Methods</strong>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">PrivacyFixer</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update_test_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">test_file</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">old_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                       <span class="n">new_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">test_references</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">TestReference</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Main entry point for safely updating test files.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_update_import_statements</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">test_file</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">old_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                                <span class="n">new_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">test_references</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">TestReference</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Update import statements using AST-based modifications.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_update_mock_patterns</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">test_file</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">old_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                            <span class="n">new_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">test_references</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">TestReference</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Update mock patch patterns using string-based modifications.&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<p><strong>Integration with apply_renames()</strong>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">apply_renames</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">candidates</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">RenameCandidate</span><span class="p">],</span>
+                 <span class="n">project_root</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Path</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Enhanced to include test file updates when project_root is provided.&quot;&quot;&quot;</span>
+
+    <span class="c1"># 1. Apply renames to production files</span>
+    <span class="c1"># 2. If project_root provided and renames successful:</span>
+    <span class="c1">#    - Find all test files in project</span>
+    <span class="c1">#    - Update test files for each renamed function</span>
+    <span class="c1">#    - Report test file update results</span>
+</pre></div>
+</div>
+<p><strong>CLI Integration</strong>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Automatic test file updates when project root is available</span>
+pylint-sort-functions<span class="w"> </span>--fix-privacy<span class="w"> </span>src/
+
+<span class="c1"># Output includes test file update reporting:</span>
+<span class="c1"># Renamed 3 functions.</span>
+<span class="c1"># Updated 5 test files.</span>
+</pre></div>
+</div>
+<p><strong>Benefits Achieved</strong>:</p>
+<ol class="arabic simple">
+<li><p><strong>Production-Driven API Design</strong>: Production code relationships determine privacy, not test usage</p></li>
+<li><p><strong>100% Test Coverage Compatible</strong>: Well-tested codebases can now use privacy detection effectively</p></li>
+<li><p><strong>No Broken Tests</strong>: All test imports and mocks automatically updated to use new private names</p></li>
+<li><p><strong>Safe Operations</strong>: Comprehensive backup and rollback mechanisms prevent test breakage</p></li>
+<li><p><strong>Transparent Process</strong>: Clear reporting of test file modifications</p></li>
+</ol>
+<p><strong>Example Workflow</strong>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Production file: src/utils.py</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">helper_function</span><span class="p">():</span>  <span class="c1"># Should be private (only used internally)</span>
+    <span class="k">return</span> <span class="s2">&quot;help&quot;</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">public_api</span><span class="p">():</span>       <span class="c1"># Correctly public (used by other modules)</span>
+    <span class="k">return</span> <span class="n">helper_function</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Test file: tests/test_utils.py</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">src.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">helper_function</span><span class="p">,</span> <span class="n">public_api</span>
+
+<span class="nd">@patch</span><span class="p">(</span><span class="s1">&#39;src.utils.helper_function&#39;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_helper</span><span class="p">(</span><span class="n">mock_helper</span><span class="p">):</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">helper_function</span><span class="p">()</span>
+    <span class="k">assert</span> <span class="n">result</span>
+</pre></div>
+</div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Privacy fixer detects helper_function should be private</span>
+pylint-sort-functions<span class="w"> </span>--fix-privacy<span class="w"> </span>src/
+</pre></div>
+</div>
+<p><strong>Results</strong>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Production file: src/utils.py (updated)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_helper_function</span><span class="p">():</span>  <span class="c1"># Now correctly private</span>
+    <span class="k">return</span> <span class="s2">&quot;help&quot;</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">public_api</span><span class="p">():</span>        <span class="c1"># Calls updated to use private name</span>
+    <span class="k">return</span> <span class="n">_helper_function</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Test file: tests/test_utils.py (automatically updated)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">src.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">_helper_function</span><span class="p">,</span> <span class="n">public_api</span>
+
+<span class="nd">@patch</span><span class="p">(</span><span class="s1">&#39;src.utils._helper_function&#39;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_helper</span><span class="p">(</span><span class="n">mock_helper</span><span class="p">):</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">_helper_function</span><span class="p">()</span>
+    <span class="k">assert</span> <span class="n">result</span>
+</pre></div>
+</div>
+<p><strong>Error Handling</strong>:</p>
+<ul class="simple">
+<li><p><strong>Syntax Errors</strong>: Automatic rollback if test file updates create invalid syntax</p></li>
+<li><p><strong>File Access Issues</strong>: Graceful handling of permission errors or locked files</p></li>
+<li><p><strong>Partial Failures</strong>: Detailed reporting of which test files succeeded/failed</p></li>
+<li><p><strong>Best Effort Recovery</strong>: Restore original content from backups when possible</p></li>
+</ul>
+<p>This advancement represents a significant improvement in the privacy fixer’s practical utility, making it effective for real-world codebases with comprehensive test coverage.</p>
+</section>
 </section>
 <section id="cli-integration">
 <h2>CLI Integration<a class="headerlink" href="#cli-integration" title="Link to this heading"></a></h2>
@@ -695,18 +884,19 @@ pylint-sort-functions<span class="w"> </span>--fix-privacy<span class="w"> </spa
 <h3>Current Implementation Status<a class="headerlink" href="#current-implementation-status" title="Link to this heading"></a></h3>
 <p><strong>✅ Completed Components</strong>:</p>
 <ul class="simple">
-<li><p><strong>Core Architecture</strong>: All three main classes fully implemented with comprehensive functionality</p></li>
+<li><p><strong>Core Architecture</strong>: All four main classes fully implemented with comprehensive functionality (Phase 1 + 2)</p></li>
 <li><p><strong>Core API Methods</strong>: detect_privacy_violations() method implemented with AST analysis</p></li>
 <li><p><strong>AST Function Analysis</strong>: Complete function extraction with cross-module import analysis</p></li>
 <li><p><strong>Cross-Module Analysis</strong>: Full import graph traversal to detect external function usage</p></li>
 <li><p><strong>Bidirectional Privacy Detection</strong>: Both W9004 (should be private) and W9005 (should be public) detection</p></li>
-<li><p><strong>Reference Detection</strong>: Complete AST traversal with comprehensive pattern matching</p></li>
+<li><p><strong>Reference Detection</strong>: Complete AST traversal with comprehensive pattern matching for production and test files</p></li>
 <li><p><strong>Safety Validation System</strong>: Multi-layer validation with name conflict detection and dynamic reference analysis</p></li>
 <li><p><strong>Rename Application System</strong>: Atomic file operations with backup creation and rollback support</p></li>
+<li><p><strong>Test File Update System</strong>: Automatic update of test files when functions are privatized (Phase 2)</p></li>
 <li><p><strong>CLI Integration</strong>: Complete implementation of <code class="docutils literal notranslate"><span class="pre">--fix-privacy</span></code>, <code class="docutils literal notranslate"><span class="pre">--privacy-dry-run</span></code>, and <code class="docutils literal notranslate"><span class="pre">--auto-sort</span></code> arguments</p></li>
 <li><p><strong>Module Analysis</strong>: Full integration with existing W9004/W9005 detection logic and configuration systems</p></li>
 <li><p><strong>Report Generation</strong>: Human-readable status reports with detailed explanations and safety issue descriptions</p></li>
-<li><p><strong>Test Coverage</strong>: Comprehensive test suite with 100% source code coverage including integration tests</p></li>
+<li><p><strong>Test Coverage</strong>: Comprehensive test suite with 100% source code coverage including integration tests and Phase 2 functionality</p></li>
 <li><p><strong>Auto-Sort Integration</strong>: Seamless workflow combining privacy fixes with automatic function sorting</p></li>
 </ul>
 <p><strong>✅ Advanced Features Implemented</strong>:</p>
@@ -739,17 +929,27 @@ pylint-sort-functions<span class="w"> </span>--fix-privacy<span class="w"> </spa
 </section>
 <section id="development-status">
 <h3>Development Status<a class="headerlink" href="#development-status" title="Link to this heading"></a></h3>
-<p><strong>✅ All Phases Complete</strong>:</p>
+<p><strong>✅ All Phases Complete (Including Phase 2 Enhancement)</strong>:</p>
 <dl class="simple">
 <dt><strong>Phase 1: Core Safety System</strong> <em>(COMPLETED)</em></dt><dd><p>Comprehensive safety validation system with multi-layer checks for all risk categories including name conflicts, dynamic references, and string literal detection.</p>
 </dd>
-<dt><strong>Phase 2: Rename Implementation</strong> <em>(COMPLETED)</em></dt><dd><p>Full source code modification system with atomic operations, error recovery, and backup management.</p>
+<dt><strong>Phase 2: Test File Update System</strong> <em>(COMPLETED - Issue #28)</em></dt><dd><p>Automatic test file update functionality that updates imports and mock patches when functions are privatized, enabling production code to drive API design while maintaining test compatibility.</p>
 </dd>
-<dt><strong>Phase 3: CLI Integration</strong> <em>(COMPLETED)</em></dt><dd><p>Complete command-line interface integration with argument parsing, progress reporting, and configuration management.</p>
+<dt><strong>Phase 3: Rename Implementation</strong> <em>(COMPLETED)</em></dt><dd><p>Full source code modification system with atomic operations, error recovery, and backup management.</p>
 </dd>
-<dt><strong>Phase 4: Testing and Optimization</strong> <em>(COMPLETED)</em></dt><dd><p>Comprehensive integration testing, performance optimization, and complete documentation.</p>
+<dt><strong>Phase 4: CLI Integration</strong> <em>(COMPLETED)</em></dt><dd><p>Complete command-line interface integration with argument parsing, progress reporting, and configuration management.</p>
+</dd>
+<dt><strong>Phase 5: Testing and Optimization</strong> <em>(COMPLETED)</em></dt><dd><p>Comprehensive integration testing, performance optimization, and complete documentation.</p>
 </dd>
 </dl>
+<p><strong>Phase 2 Enhancements Completed</strong>:</p>
+<ul class="simple">
+<li><p><strong>Test File Update Engine</strong>: Automatic modification of test imports and mock patches</p></li>
+<li><p><strong>Dual Detection Strategy</strong>: AST-based import updates + string-based mock pattern updates</p></li>
+<li><p><strong>Safe File Modification</strong>: Backup creation, syntax validation, automatic rollback on failure</p></li>
+<li><p><strong>Multi-line Import Support</strong>: Handles complex import statement formats</p></li>
+<li><p><strong>Comprehensive Test Coverage</strong>: 15+ additional test cases for Phase 2 functionality</p></li>
+</ul>
 <p><strong>Additional Enhancements Completed</strong>:</p>
 <ul class="simple">
 <li><p><strong>W9005 Bidirectional Detection</strong>: Private functions that should be public</p></li>
