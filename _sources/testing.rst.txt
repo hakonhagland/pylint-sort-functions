@@ -154,6 +154,59 @@ Test coverage is configured to measure only source code quality, not test file e
 
 **Coverage Scope**: Only files in ``src/pylint_sort_functions/`` are measured, ensuring 100% coverage reflects comprehensive testing of the actual plugin code.
 
+Coverage Strategy
+~~~~~~~~~~~~~~~~~
+
+The project maintains **100% test coverage** through a pragmatic approach combining targeted testing with strategic exclusions:
+
+**Targeted Testing**: Focus on business logic, API contracts, and user-facing functionality
+
+**Strategic Exclusions**: Use ``# pragma: no cover`` for code that's genuinely hard to test or low business value
+
+**Pragma Usage Guidelines**
+
+``# pragma: no cover`` is used appropriately for:
+
+.. code-block:: python
+
+   def example_function():
+       # Defensive error handling
+       try:
+           content = parse_file(file_path)
+       except (SyntaxError, UnicodeDecodeError):  # pragma: no cover
+           return False  # pragma: no cover
+
+       # Broad exception fallbacks for robustness
+       try:
+           return perform_analysis(func)
+       except Exception:  # pylint: disable=broad-exception-caught  # pragma: no cover
+           return self._fallback_heuristics(func)  # pragma: no cover
+
+       # Edge case fallbacks for malformed input
+       if not module_parts:
+           return fallback_pattern_match(pattern)  # pragma: no cover
+
+   # Unimplemented placeholder methods
+   def _has_dynamic_references(self, candidate):
+       # TODO: Implement dynamic reference detection
+       return False  # pragma: no cover
+
+**When NOT to use pragma:**
+
+- Core business logic and user-facing APIs
+- Configuration and plugin registration code
+- Data processing and validation logic
+- Public method implementations
+
+**Coverage Achievement Strategy:**
+
+1. **Write comprehensive tests** for all business logic
+2. **Add pragmas judiciously** for defensive/error handling code
+3. **Validate test quality** - ensure tests cover realistic scenarios
+4. **Document exclusions** - pragma comments should be self-explanatory
+
+This approach achieves 100% coverage efficiently while maintaining focus on valuable test coverage that prevents regressions and validates functionality.
+
 Integration Testing
 -------------------
 

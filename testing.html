@@ -69,6 +69,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#test-structure">Test Structure</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#running-unit-tests">Running Unit Tests</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#coverage-configuration">Coverage Configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#coverage-strategy">Coverage Strategy</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#integration-testing">Integration Testing</a><ul>
@@ -165,65 +166,66 @@
 <li><p><a class="reference internal" href="#test-structure" id="id6">Test Structure</a></p></li>
 <li><p><a class="reference internal" href="#running-unit-tests" id="id7">Running Unit Tests</a></p></li>
 <li><p><a class="reference internal" href="#coverage-configuration" id="id8">Coverage Configuration</a></p></li>
+<li><p><a class="reference internal" href="#coverage-strategy" id="id9">Coverage Strategy</a></p></li>
 </ul>
 </li>
-<li><p><a class="reference internal" href="#integration-testing" id="id9">Integration Testing</a></p>
+<li><p><a class="reference internal" href="#integration-testing" id="id10">Integration Testing</a></p>
 <ul>
-<li><p><a class="reference internal" href="#test-types" id="id10">Test Types</a></p></li>
-<li><p><a class="reference internal" href="#running-integration-tests" id="id11">Running Integration Tests</a></p></li>
+<li><p><a class="reference internal" href="#test-types" id="id11">Test Types</a></p></li>
+<li><p><a class="reference internal" href="#running-integration-tests" id="id12">Running Integration Tests</a></p></li>
 </ul>
 </li>
-<li><p><a class="reference internal" href="#plugin-integration-testing" id="id12">Plugin Integration Testing</a></p>
+<li><p><a class="reference internal" href="#plugin-integration-testing" id="id13">Plugin Integration Testing</a></p>
 <ul>
-<li><p><a class="reference internal" href="#testing-with-pylint" id="id13">Testing with PyLint</a></p></li>
-<li><p><a class="reference internal" href="#configuration-testing" id="id14">Configuration Testing</a></p></li>
+<li><p><a class="reference internal" href="#testing-with-pylint" id="id14">Testing with PyLint</a></p></li>
+<li><p><a class="reference internal" href="#configuration-testing" id="id15">Configuration Testing</a></p></li>
 </ul>
 </li>
-<li><p><a class="reference internal" href="#cli-tool-testing" id="id15">CLI Tool Testing</a></p></li>
-<li><p><a class="reference internal" href="#docker-validation-system" id="id16">Docker Validation System</a></p>
+<li><p><a class="reference internal" href="#cli-tool-testing" id="id16">CLI Tool Testing</a></p></li>
+<li><p><a class="reference internal" href="#docker-validation-system" id="id17">Docker Validation System</a></p>
 <ul>
-<li><p><a class="reference internal" href="#architecture" id="id17">Architecture</a></p></li>
-<li><p><a class="reference internal" href="#local-source-installation" id="id18">Local Source Installation</a></p></li>
-<li><p><a class="reference internal" href="#quick-usage" id="id19">Quick Usage</a></p></li>
-<li><p><a class="reference internal" href="#advanced-usage" id="id20">Advanced Usage</a></p></li>
-<li><p><a class="reference internal" href="#api-endpoints" id="id21">API Endpoints</a></p></li>
-<li><p><a class="reference internal" href="#what-gets-validated" id="id22">What Gets Validated</a></p></li>
-<li><p><a class="reference internal" href="#validation-reports" id="id23">Validation Reports</a></p></li>
-<li><p><a class="reference internal" href="#critical-issues-discovered" id="id24">Critical Issues Discovered</a></p></li>
+<li><p><a class="reference internal" href="#architecture" id="id18">Architecture</a></p></li>
+<li><p><a class="reference internal" href="#local-source-installation" id="id19">Local Source Installation</a></p></li>
+<li><p><a class="reference internal" href="#quick-usage" id="id20">Quick Usage</a></p></li>
+<li><p><a class="reference internal" href="#advanced-usage" id="id21">Advanced Usage</a></p></li>
+<li><p><a class="reference internal" href="#api-endpoints" id="id22">API Endpoints</a></p></li>
+<li><p><a class="reference internal" href="#what-gets-validated" id="id23">What Gets Validated</a></p></li>
+<li><p><a class="reference internal" href="#validation-reports" id="id24">Validation Reports</a></p></li>
+<li><p><a class="reference internal" href="#critical-issues-discovered" id="id25">Critical Issues Discovered</a></p></li>
 </ul>
 </li>
-<li><p><a class="reference internal" href="#framework-integration-testing" id="id25">Framework Integration Testing</a></p>
+<li><p><a class="reference internal" href="#framework-integration-testing" id="id26">Framework Integration Testing</a></p>
 <ul>
-<li><p><a class="reference internal" href="#testing-decorator-exclusions" id="id26">Testing Decorator Exclusions</a></p></li>
-<li><p><a class="reference internal" href="#testing-custom-frameworks" id="id27">Testing Custom Frameworks</a></p></li>
+<li><p><a class="reference internal" href="#testing-decorator-exclusions" id="id27">Testing Decorator Exclusions</a></p></li>
+<li><p><a class="reference internal" href="#testing-custom-frameworks" id="id28">Testing Custom Frameworks</a></p></li>
 </ul>
 </li>
-<li><p><a class="reference internal" href="#continuous-integration-testing" id="id28">Continuous Integration Testing</a></p>
+<li><p><a class="reference internal" href="#continuous-integration-testing" id="id29">Continuous Integration Testing</a></p>
 <ul>
-<li><p><a class="reference internal" href="#github-actions-integration" id="id29">GitHub Actions Integration</a></p></li>
-<li><p><a class="reference internal" href="#pre-commit-integration" id="id30">Pre-commit Integration</a></p></li>
+<li><p><a class="reference internal" href="#github-actions-integration" id="id30">GitHub Actions Integration</a></p></li>
+<li><p><a class="reference internal" href="#pre-commit-integration" id="id31">Pre-commit Integration</a></p></li>
 </ul>
 </li>
-<li><p><a class="reference internal" href="#performance-testing" id="id31">Performance Testing</a></p>
+<li><p><a class="reference internal" href="#performance-testing" id="id32">Performance Testing</a></p>
 <ul>
-<li><p><a class="reference internal" href="#load-testing-the-api" id="id32">Load Testing the API</a></p></li>
-<li><p><a class="reference internal" href="#container-resource-usage" id="id33">Container Resource Usage</a></p></li>
-<li><p><a class="reference internal" href="#benchmark-plugin-performance" id="id34">Benchmark Plugin Performance</a></p></li>
+<li><p><a class="reference internal" href="#load-testing-the-api" id="id33">Load Testing the API</a></p></li>
+<li><p><a class="reference internal" href="#container-resource-usage" id="id34">Container Resource Usage</a></p></li>
+<li><p><a class="reference internal" href="#benchmark-plugin-performance" id="id35">Benchmark Plugin Performance</a></p></li>
 </ul>
 </li>
-<li><p><a class="reference internal" href="#troubleshooting" id="id35">Troubleshooting</a></p>
+<li><p><a class="reference internal" href="#troubleshooting" id="id36">Troubleshooting</a></p>
 <ul>
-<li><p><a class="reference internal" href="#common-issues" id="id36">Common Issues</a></p></li>
-<li><p><a class="reference internal" href="#debug-mode" id="id37">Debug Mode</a></p></li>
+<li><p><a class="reference internal" href="#common-issues" id="id37">Common Issues</a></p></li>
+<li><p><a class="reference internal" href="#debug-mode" id="id38">Debug Mode</a></p></li>
 </ul>
 </li>
-<li><p><a class="reference internal" href="#contributing-to-tests" id="id38">Contributing to Tests</a></p>
+<li><p><a class="reference internal" href="#contributing-to-tests" id="id39">Contributing to Tests</a></p>
 <ul>
-<li><p><a class="reference internal" href="#adding-new-test-cases" id="id39">Adding New Test Cases</a></p></li>
-<li><p><a class="reference internal" href="#test-guidelines" id="id40">Test Guidelines</a></p></li>
+<li><p><a class="reference internal" href="#adding-new-test-cases" id="id40">Adding New Test Cases</a></p></li>
+<li><p><a class="reference internal" href="#test-guidelines" id="id41">Test Guidelines</a></p></li>
 </ul>
 </li>
-<li><p><a class="reference internal" href="#see-also" id="id41">See Also</a></p></li>
+<li><p><a class="reference internal" href="#see-also" id="id42">See Also</a></p></li>
 </ul>
 </nav>
 <section id="overview">
@@ -358,12 +360,58 @@ make<span class="w"> </span>coverage
 </ul>
 <p><strong>Coverage Scope</strong>: Only files in <code class="docutils literal notranslate"><span class="pre">src/pylint_sort_functions/</span></code> are measured, ensuring 100% coverage reflects comprehensive testing of the actual plugin code.</p>
 </section>
+<section id="coverage-strategy">
+<h3><a class="toc-backref" href="#id9" role="doc-backlink">Coverage Strategy</a><a class="headerlink" href="#coverage-strategy" title="Link to this heading"></a></h3>
+<p>The project maintains <strong>100% test coverage</strong> through a pragmatic approach combining targeted testing with strategic exclusions:</p>
+<p><strong>Targeted Testing</strong>: Focus on business logic, API contracts, and user-facing functionality</p>
+<p><strong>Strategic Exclusions</strong>: Use <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">pragma:</span> <span class="pre">no</span> <span class="pre">cover</span></code> for code that’s genuinely hard to test or low business value</p>
+<p><strong>Pragma Usage Guidelines</strong></p>
+<p><code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">pragma:</span> <span class="pre">no</span> <span class="pre">cover</span></code> is used appropriately for:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">example_function</span><span class="p">():</span>
+    <span class="c1"># Defensive error handling</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">content</span> <span class="o">=</span> <span class="n">parse_file</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
+    <span class="k">except</span> <span class="p">(</span><span class="ne">SyntaxError</span><span class="p">,</span> <span class="ne">UnicodeDecodeError</span><span class="p">):</span>  <span class="c1"># pragma: no cover</span>
+        <span class="k">return</span> <span class="kc">False</span>  <span class="c1"># pragma: no cover</span>
+
+    <span class="c1"># Broad exception fallbacks for robustness</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">perform_analysis</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>  <span class="c1"># pylint: disable=broad-exception-caught  # pragma: no cover</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fallback_heuristics</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>  <span class="c1"># pragma: no cover</span>
+
+    <span class="c1"># Edge case fallbacks for malformed input</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">module_parts</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">fallback_pattern_match</span><span class="p">(</span><span class="n">pattern</span><span class="p">)</span>  <span class="c1"># pragma: no cover</span>
+
+<span class="c1"># Unimplemented placeholder methods</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_has_dynamic_references</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">candidate</span><span class="p">):</span>
+    <span class="c1"># TODO: Implement dynamic reference detection</span>
+    <span class="k">return</span> <span class="kc">False</span>  <span class="c1"># pragma: no cover</span>
+</pre></div>
+</div>
+<p><strong>When NOT to use pragma:</strong></p>
+<ul class="simple">
+<li><p>Core business logic and user-facing APIs</p></li>
+<li><p>Configuration and plugin registration code</p></li>
+<li><p>Data processing and validation logic</p></li>
+<li><p>Public method implementations</p></li>
+</ul>
+<p><strong>Coverage Achievement Strategy:</strong></p>
+<ol class="arabic simple">
+<li><p><strong>Write comprehensive tests</strong> for all business logic</p></li>
+<li><p><strong>Add pragmas judiciously</strong> for defensive/error handling code</p></li>
+<li><p><strong>Validate test quality</strong> - ensure tests cover realistic scenarios</p></li>
+<li><p><strong>Document exclusions</strong> - pragma comments should be self-explanatory</p></li>
+</ol>
+<p>This approach achieves 100% coverage efficiently while maintaining focus on valuable test coverage that prevents regressions and validates functionality.</p>
+</section>
 </section>
 <section id="integration-testing">
-<h2><a class="toc-backref" href="#id9" role="doc-backlink">Integration Testing</a><a class="headerlink" href="#integration-testing" title="Link to this heading"></a></h2>
+<h2><a class="toc-backref" href="#id10" role="doc-backlink">Integration Testing</a><a class="headerlink" href="#integration-testing" title="Link to this heading"></a></h2>
 <p>Integration tests validate end-to-end functionality and CLI behavior. These tests are located in <code class="docutils literal notranslate"><span class="pre">tests/integration/</span></code> and use pytest exclusively.</p>
 <section id="test-types">
-<h3><a class="toc-backref" href="#id10" role="doc-backlink">Test Types</a><a class="headerlink" href="#test-types" title="Link to this heading"></a></h3>
+<h3><a class="toc-backref" href="#id11" role="doc-backlink">Test Types</a><a class="headerlink" href="#test-types" title="Link to this heading"></a></h3>
 <dl class="simple">
 <dt><strong>CLI Integration Tests</strong></dt><dd><p>Test command-line interface functionality with real file systems</p>
 </dd>
@@ -374,7 +422,7 @@ make<span class="w"> </span>coverage
 </dl>
 </section>
 <section id="running-integration-tests">
-<h3><a class="toc-backref" href="#id11" role="doc-backlink">Running Integration Tests</a><a class="headerlink" href="#running-integration-tests" title="Link to this heading"></a></h3>
+<h3><a class="toc-backref" href="#id12" role="doc-backlink">Running Integration Tests</a><a class="headerlink" href="#running-integration-tests" title="Link to this heading"></a></h3>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Run all integration tests</span>
 make<span class="w"> </span>test-integration
 
@@ -400,9 +448,9 @@ make<span class="w"> </span>test-all
 </section>
 </section>
 <section id="plugin-integration-testing">
-<h2><a class="toc-backref" href="#id12" role="doc-backlink">Plugin Integration Testing</a><a class="headerlink" href="#plugin-integration-testing" title="Link to this heading"></a></h2>
+<h2><a class="toc-backref" href="#id13" role="doc-backlink">Plugin Integration Testing</a><a class="headerlink" href="#plugin-integration-testing" title="Link to this heading"></a></h2>
 <section id="testing-with-pylint">
-<h3><a class="toc-backref" href="#id13" role="doc-backlink">Testing with PyLint</a><a class="headerlink" href="#testing-with-pylint" title="Link to this heading"></a></h3>
+<h3><a class="toc-backref" href="#id14" role="doc-backlink">Testing with PyLint</a><a class="headerlink" href="#testing-with-pylint" title="Link to this heading"></a></h3>
 <p>Test the plugin with real PyLint execution:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Basic plugin testing</span>
 pylint<span class="w"> </span>--load-plugins<span class="o">=</span>pylint_sort_functions<span class="w"> </span>src/
@@ -421,7 +469,7 @@ make<span class="w"> </span>self-check<span class="w">          </span><span cla
 </div>
 </section>
 <section id="configuration-testing">
-<h3><a class="toc-backref" href="#id14" role="doc-backlink">Configuration Testing</a><a class="headerlink" href="#configuration-testing" title="Link to this heading"></a></h3>
+<h3><a class="toc-backref" href="#id15" role="doc-backlink">Configuration Testing</a><a class="headerlink" href="#configuration-testing" title="Link to this heading"></a></h3>
 <p>Test different configuration approaches:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Test with .pylintrc</span>
 <span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;[MASTER]\nload-plugins = pylint_sort_functions&quot;</span><span class="w"> </span>&gt;<span class="w"> </span>.test-pylintrc
@@ -434,7 +482,7 @@ pylint<span class="w"> </span>src/<span class="w">  </span><span class="c1"># Us
 </section>
 </section>
 <section id="cli-tool-testing">
-<h2><a class="toc-backref" href="#id15" role="doc-backlink">CLI Tool Testing</a><a class="headerlink" href="#cli-tool-testing" title="Link to this heading"></a></h2>
+<h2><a class="toc-backref" href="#id16" role="doc-backlink">CLI Tool Testing</a><a class="headerlink" href="#cli-tool-testing" title="Link to this heading"></a></h2>
 <p>The standalone CLI tool provides auto-fix functionality:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Dry-run (show what would be changed)</span>
 python<span class="w"> </span>-m<span class="w"> </span>pylint_sort_functions.cli<span class="w"> </span>--dry-run<span class="w"> </span>src/
@@ -450,10 +498,10 @@ python<span class="w"> </span>-m<span class="w"> </span>pylint_sort_functions.cl
 <p>See <a class="reference internal" href="cli.html"><span class="doc">Auto-Fix Tool Reference</span></a> for complete CLI documentation.</p>
 </section>
 <section id="docker-validation-system">
-<h2><a class="toc-backref" href="#id16" role="doc-backlink">Docker Validation System</a><a class="headerlink" href="#docker-validation-system" title="Link to this heading"></a></h2>
+<h2><a class="toc-backref" href="#id17" role="doc-backlink">Docker Validation System</a><a class="headerlink" href="#docker-validation-system" title="Link to this heading"></a></h2>
 <p>The Docker validation system provides comprehensive integration testing for all documentation examples and framework configurations.</p>
 <section id="architecture">
-<h3><a class="toc-backref" href="#id17" role="doc-backlink">Architecture</a><a class="headerlink" href="#architecture" title="Link to this heading"></a></h3>
+<h3><a class="toc-backref" href="#id18" role="doc-backlink">Architecture</a><a class="headerlink" href="#architecture" title="Link to this heading"></a></h3>
 <p>The validation system uses a containerized approach:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Docker Container (Ubuntu 24.04)
 ├── Python + uv + pylint-sort-functions (from local source)
@@ -469,7 +517,7 @@ python<span class="w"> </span>-m<span class="w"> </span>pylint_sort_functions.cl
 </div>
 </section>
 <section id="local-source-installation">
-<h3><a class="toc-backref" href="#id18" role="doc-backlink">Local Source Installation</a><a class="headerlink" href="#local-source-installation" title="Link to this heading"></a></h3>
+<h3><a class="toc-backref" href="#id19" role="doc-backlink">Local Source Installation</a><a class="headerlink" href="#local-source-installation" title="Link to this heading"></a></h3>
 <p><strong>Important</strong>: The Docker container installs the plugin <strong>from your local source code</strong>, not from PyPI.</p>
 <p><strong>How it works</strong>:</p>
 <ol class="arabic simple">
@@ -495,7 +543,7 @@ python<span class="w"> </span>-m<span class="w"> </span>pylint_sort_functions.cl
 </ul>
 </section>
 <section id="quick-usage">
-<h3><a class="toc-backref" href="#id19" role="doc-backlink">Quick Usage</a><a class="headerlink" href="#quick-usage" title="Link to this heading"></a></h3>
+<h3><a class="toc-backref" href="#id20" role="doc-backlink">Quick Usage</a><a class="headerlink" href="#quick-usage" title="Link to this heading"></a></h3>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Complete validation workflow</span>
 make<span class="w"> </span>test-documentation
 
@@ -507,7 +555,7 @@ make<span class="w"> </span>stop-docker-container<span class="w">     </span><sp
 </div>
 </section>
 <section id="advanced-usage">
-<h3><a class="toc-backref" href="#id20" role="doc-backlink">Advanced Usage</a><a class="headerlink" href="#advanced-usage" title="Link to this heading"></a></h3>
+<h3><a class="toc-backref" href="#id21" role="doc-backlink">Advanced Usage</a><a class="headerlink" href="#advanced-usage" title="Link to this heading"></a></h3>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Build and start container</span>
 make<span class="w"> </span>build-docker-image
 make<span class="w"> </span>run-docker-container
@@ -530,7 +578,7 @@ make<span class="w"> </span>stop-docker-container
 </div>
 </section>
 <section id="api-endpoints">
-<h3><a class="toc-backref" href="#id21" role="doc-backlink">API Endpoints</a><a class="headerlink" href="#api-endpoints" title="Link to this heading"></a></h3>
+<h3><a class="toc-backref" href="#id22" role="doc-backlink">API Endpoints</a><a class="headerlink" href="#api-endpoints" title="Link to this heading"></a></h3>
 <p>The validation container exposes a REST API:</p>
 <table class="docutils align-default" id="id1">
 <caption><span class="caption-text">Validation API Endpoints</span><a class="headerlink" href="#id1" title="Link to this table"></a></caption>
@@ -578,7 +626,7 @@ make<span class="w"> </span>stop-docker-container
 </table>
 </section>
 <section id="what-gets-validated">
-<h3><a class="toc-backref" href="#id22" role="doc-backlink">What Gets Validated</a><a class="headerlink" href="#what-gets-validated" title="Link to this heading"></a></h3>
+<h3><a class="toc-backref" href="#id23" role="doc-backlink">What Gets Validated</a><a class="headerlink" href="#what-gets-validated" title="Link to this heading"></a></h3>
 <dl class="simple">
 <dt><strong>Documentation Examples</strong></dt><dd><p>All configuration examples from <code class="docutils literal notranslate"><span class="pre">docs/pylintrc.rst</span></code> are extracted and tested</p>
 </dd>
@@ -603,7 +651,7 @@ make<span class="w"> </span>stop-docker-container
 </dl>
 </section>
 <section id="validation-reports">
-<h3><a class="toc-backref" href="#id23" role="doc-backlink">Validation Reports</a><a class="headerlink" href="#validation-reports" title="Link to this heading"></a></h3>
+<h3><a class="toc-backref" href="#id24" role="doc-backlink">Validation Reports</a><a class="headerlink" href="#validation-reports" title="Link to this heading"></a></h3>
 <p>The system generates detailed JSON reports in <code class="docutils literal notranslate"><span class="pre">test-validation/reports/</span></code>:</p>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
 <span class="w">  </span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2025-08-07 15:47:44&quot;</span><span class="p">,</span>
@@ -632,7 +680,7 @@ make<span class="w"> </span>stop-docker-container
 </div>
 </section>
 <section id="critical-issues-discovered">
-<h3><a class="toc-backref" href="#id24" role="doc-backlink">Critical Issues Discovered</a><a class="headerlink" href="#critical-issues-discovered" title="Link to this heading"></a></h3>
+<h3><a class="toc-backref" href="#id25" role="doc-backlink">Critical Issues Discovered</a><a class="headerlink" href="#critical-issues-discovered" title="Link to this heading"></a></h3>
 <p>The validation system has already identified <strong>4 critical documentation issues</strong>:</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
@@ -649,9 +697,9 @@ make<span class="w"> </span>stop-docker-container
 </section>
 </section>
 <section id="framework-integration-testing">
-<h2><a class="toc-backref" href="#id25" role="doc-backlink">Framework Integration Testing</a><a class="headerlink" href="#framework-integration-testing" title="Link to this heading"></a></h2>
+<h2><a class="toc-backref" href="#id26" role="doc-backlink">Framework Integration Testing</a><a class="headerlink" href="#framework-integration-testing" title="Link to this heading"></a></h2>
 <section id="testing-decorator-exclusions">
-<h3><a class="toc-backref" href="#id26" role="doc-backlink">Testing Decorator Exclusions</a><a class="headerlink" href="#testing-decorator-exclusions" title="Link to this heading"></a></h3>
+<h3><a class="toc-backref" href="#id27" role="doc-backlink">Testing Decorator Exclusions</a><a class="headerlink" href="#testing-decorator-exclusions" title="Link to this heading"></a></h3>
 <p>The Docker validation system includes comprehensive framework testing:</p>
 <p><strong>Flask Example</strong> (<code class="docutils literal notranslate"><span class="pre">test-validation/test-projects/flask-project/</span></code>):</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># These should be excluded from sorting due to @app.route</span>
@@ -685,7 +733,7 @@ make<span class="w"> </span>stop-docker-container
 </dl>
 </section>
 <section id="testing-custom-frameworks">
-<h3><a class="toc-backref" href="#id27" role="doc-backlink">Testing Custom Frameworks</a><a class="headerlink" href="#testing-custom-frameworks" title="Link to this heading"></a></h3>
+<h3><a class="toc-backref" href="#id28" role="doc-backlink">Testing Custom Frameworks</a><a class="headerlink" href="#testing-custom-frameworks" title="Link to this heading"></a></h3>
 <p>To test decorator exclusions with your own framework:</p>
 <ol class="arabic">
 <li><p><strong>Create Test Project</strong>:</p>
@@ -719,9 +767,9 @@ curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </spa
 </section>
 </section>
 <section id="continuous-integration-testing">
-<h2><a class="toc-backref" href="#id28" role="doc-backlink">Continuous Integration Testing</a><a class="headerlink" href="#continuous-integration-testing" title="Link to this heading"></a></h2>
+<h2><a class="toc-backref" href="#id29" role="doc-backlink">Continuous Integration Testing</a><a class="headerlink" href="#continuous-integration-testing" title="Link to this heading"></a></h2>
 <section id="github-actions-integration">
-<h3><a class="toc-backref" href="#id29" role="doc-backlink">GitHub Actions Integration</a><a class="headerlink" href="#github-actions-integration" title="Link to this heading"></a></h3>
+<h3><a class="toc-backref" href="#id30" role="doc-backlink">GitHub Actions Integration</a><a class="headerlink" href="#github-actions-integration" title="Link to this heading"></a></h3>
 <p>The validation system integrates with CI/CD:</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># .github/workflows/validate-docs.yml</span>
 <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Documentation Validation</span>
@@ -746,7 +794,7 @@ curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </spa
 </div>
 </section>
 <section id="pre-commit-integration">
-<h3><a class="toc-backref" href="#id30" role="doc-backlink">Pre-commit Integration</a><a class="headerlink" href="#pre-commit-integration" title="Link to this heading"></a></h3>
+<h3><a class="toc-backref" href="#id31" role="doc-backlink">Pre-commit Integration</a><a class="headerlink" href="#pre-commit-integration" title="Link to this heading"></a></h3>
 <p>Validation tests can run in pre-commit hooks:</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># .pre-commit-config.yaml</span>
 <span class="nt">repos</span><span class="p">:</span>
@@ -762,9 +810,9 @@ curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </spa
 </section>
 </section>
 <section id="performance-testing">
-<h2><a class="toc-backref" href="#id31" role="doc-backlink">Performance Testing</a><a class="headerlink" href="#performance-testing" title="Link to this heading"></a></h2>
+<h2><a class="toc-backref" href="#id32" role="doc-backlink">Performance Testing</a><a class="headerlink" href="#performance-testing" title="Link to this heading"></a></h2>
 <section id="load-testing-the-api">
-<h3><a class="toc-backref" href="#id32" role="doc-backlink">Load Testing the API</a><a class="headerlink" href="#load-testing-the-api" title="Link to this heading"></a></h3>
+<h3><a class="toc-backref" href="#id33" role="doc-backlink">Load Testing the API</a><a class="headerlink" href="#load-testing-the-api" title="Link to this heading"></a></h3>
 <p>Test the validation API under load:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Install hey (HTTP load testing tool)</span>
 go<span class="w"> </span>install<span class="w"> </span>github.com/rakyll/hey@latest
@@ -778,7 +826,7 @@ hey<span class="w"> </span>-n<span class="w"> </span><span class="m">100</span><
 </div>
 </section>
 <section id="container-resource-usage">
-<h3><a class="toc-backref" href="#id33" role="doc-backlink">Container Resource Usage</a><a class="headerlink" href="#container-resource-usage" title="Link to this heading"></a></h3>
+<h3><a class="toc-backref" href="#id34" role="doc-backlink">Container Resource Usage</a><a class="headerlink" href="#container-resource-usage" title="Link to this heading"></a></h3>
 <p>Monitor container performance:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># View container resource usage</span>
 docker<span class="w"> </span>stats<span class="w"> </span>pylint-validation-container
@@ -792,7 +840,7 @@ docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </spa
 </div>
 </section>
 <section id="benchmark-plugin-performance">
-<h3><a class="toc-backref" href="#id34" role="doc-backlink">Benchmark Plugin Performance</a><a class="headerlink" href="#benchmark-plugin-performance" title="Link to this heading"></a></h3>
+<h3><a class="toc-backref" href="#id35" role="doc-backlink">Benchmark Plugin Performance</a><a class="headerlink" href="#benchmark-plugin-performance" title="Link to this heading"></a></h3>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Time plugin execution</span>
 <span class="nb">time</span><span class="w"> </span>pylint<span class="w"> </span>--load-plugins<span class="o">=</span>pylint_sort_functions<span class="w"> </span>large_project/
 
@@ -806,9 +854,9 @@ python<span class="w"> </span>-m<span class="w"> </span>cProfile<span class="w">
 </section>
 </section>
 <section id="troubleshooting">
-<h2><a class="toc-backref" href="#id35" role="doc-backlink">Troubleshooting</a><a class="headerlink" href="#troubleshooting" title="Link to this heading"></a></h2>
+<h2><a class="toc-backref" href="#id36" role="doc-backlink">Troubleshooting</a><a class="headerlink" href="#troubleshooting" title="Link to this heading"></a></h2>
 <section id="common-issues">
-<h3><a class="toc-backref" href="#id36" role="doc-backlink">Common Issues</a><a class="headerlink" href="#common-issues" title="Link to this heading"></a></h3>
+<h3><a class="toc-backref" href="#id37" role="doc-backlink">Common Issues</a><a class="headerlink" href="#common-issues" title="Link to this heading"></a></h3>
 <p><strong>Docker Build Failures</strong></p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Clear Docker cache</span>
 docker<span class="w"> </span>system<span class="w"> </span>prune<span class="w"> </span>-f
@@ -851,7 +899,7 @@ pytest<span class="w"> </span>tests/<span class="w"> </span>--pdb
 </div>
 </section>
 <section id="debug-mode">
-<h3><a class="toc-backref" href="#id37" role="doc-backlink">Debug Mode</a><a class="headerlink" href="#debug-mode" title="Link to this heading"></a></h3>
+<h3><a class="toc-backref" href="#id38" role="doc-backlink">Debug Mode</a><a class="headerlink" href="#debug-mode" title="Link to this heading"></a></h3>
 <p>Enable debug output in various components:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># PyLint debug output</span>
 pylint<span class="w"> </span>--load-plugins<span class="o">=</span>pylint_sort_functions<span class="w"> </span>--verbose<span class="w"> </span>src/
@@ -866,9 +914,9 @@ python<span class="w"> </span>test-validation/test-runner.py<span class="w"> </s
 </section>
 </section>
 <section id="contributing-to-tests">
-<h2><a class="toc-backref" href="#id38" role="doc-backlink">Contributing to Tests</a><a class="headerlink" href="#contributing-to-tests" title="Link to this heading"></a></h2>
+<h2><a class="toc-backref" href="#id39" role="doc-backlink">Contributing to Tests</a><a class="headerlink" href="#contributing-to-tests" title="Link to this heading"></a></h2>
 <section id="adding-new-test-cases">
-<h3><a class="toc-backref" href="#id39" role="doc-backlink">Adding New Test Cases</a><a class="headerlink" href="#adding-new-test-cases" title="Link to this heading"></a></h3>
+<h3><a class="toc-backref" href="#id40" role="doc-backlink">Adding New Test Cases</a><a class="headerlink" href="#adding-new-test-cases" title="Link to this heading"></a></h3>
 <ol class="arabic simple">
 <li><p><strong>Unit Tests</strong>: Add to appropriate file in <code class="docutils literal notranslate"><span class="pre">tests/</span></code></p></li>
 <li><p><strong>Integration Tests</strong>: Add new test projects to <code class="docutils literal notranslate"><span class="pre">test-validation/test-projects/</span></code></p></li>
@@ -876,7 +924,7 @@ python<span class="w"> </span>test-validation/test-runner.py<span class="w"> </s
 </ol>
 </section>
 <section id="test-guidelines">
-<h3><a class="toc-backref" href="#id40" role="doc-backlink">Test Guidelines</a><a class="headerlink" href="#test-guidelines" title="Link to this heading"></a></h3>
+<h3><a class="toc-backref" href="#id41" role="doc-backlink">Test Guidelines</a><a class="headerlink" href="#test-guidelines" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p><strong>100% Coverage Required</strong>: All new code must include tests</p></li>
 <li><p><strong>PyLint Framework</strong>: Use <code class="docutils literal notranslate"><span class="pre">CheckerTestCase</span></code> for plugin tests</p></li>
@@ -887,7 +935,7 @@ python<span class="w"> </span>test-validation/test-runner.py<span class="w"> </s
 </section>
 </section>
 <section id="see-also">
-<h2><a class="toc-backref" href="#id41" role="doc-backlink">See Also</a><a class="headerlink" href="#see-also" title="Link to this heading"></a></h2>
+<h2><a class="toc-backref" href="#id42" role="doc-backlink">See Also</a><a class="headerlink" href="#see-also" title="Link to this heading"></a></h2>
 <ul class="simple">
 <li><p><a class="reference internal" href="developer.html"><span class="doc">Developer Guide</span></a> - Plugin development and architecture</p></li>
 <li><p><a class="reference internal" href="cli.html"><span class="doc">Auto-Fix Tool Reference</span></a> - Command-line tool usage</p></li>
