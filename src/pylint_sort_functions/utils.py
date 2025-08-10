@@ -22,10 +22,12 @@ scanning actual usage patterns across the project:
 """
 
 import ast
+import fnmatch
 import os
 import re
 from functools import lru_cache
 from pathlib import Path
+from typing import Any
 
 from astroid import nodes  # type: ignore[import-untyped]
 
@@ -225,10 +227,15 @@ def is_private_function(func: nodes.FunctionDef) -> bool:
     return func.name.startswith("_") and not _is_dunder_method(func)
 
 
-def is_unittest_file(module_name: str) -> bool:  # pylint: disable=function-should-be-private
+def is_unittest_file(  # pylint: disable=function-should-be-private
+    module_name: str, privacy_config: dict[str, Any] | None = None
+) -> bool:
     """Check if a module name indicates a unit test file.
 
-    Detects test files based on common naming patterns:
+    Detects test files based on configurable patterns and built-in heuristics.
+    Can be configured to override built-in detection or add additional patterns.
+
+    Built-in detection patterns:
     - Files in 'tests' or 'test' directories
     - Files starting with 'test_'
     - Files ending with '_test'
@@ -237,15 +244,44 @@ def is_unittest_file(module_name: str) -> bool:  # pylint: disable=function-shou
 
     :param module_name: The module name to check (e.g., 'package.tests.test_utils')
     :type module_name: str
+    :param privacy_config: Privacy configuration with exclusion patterns
+    :type privacy_config: dict[str, Any] | None
     :returns: True if module appears to be a test file
     :rtype: bool
     """
-    # Convert module name to lowercase for case-insensitive matching
-    lower_name = module_name.lower()
+    if privacy_config is None:
+        privacy_config = {}
 
-    # Split into path components for more precise matching
+    # Get configuration options
+    exclude_dirs = privacy_config.get("exclude_dirs", [])
+    exclude_patterns = privacy_config.get("exclude_patterns", [])
+    additional_test_patterns = privacy_config.get("additional_test_patterns", [])
+    override_test_detection = privacy_config.get("override_test_detection", False)
+
+    # Check directory exclusions first
+    lower_name = module_name.lower()
     parts = lower_name.split(".")
 
+    # Check if file is in an excluded directory
+    for exclude_dir in exclude_dirs:
+        if exclude_dir.lower() in parts:
+            return True
+
+    # Check file pattern exclusions
+    for pattern in exclude_patterns:
+        if _matches_file_pattern(module_name, pattern):
+            return True
+
+    # Check additional test patterns
+    for pattern in additional_test_patterns:
+        if _matches_file_pattern(module_name, pattern):
+            return True
+
+    # If override is enabled, only use configured patterns
+    if override_test_detection:
+        return False
+
+    # Built-in test detection (original logic)
     # Check if any directory in the path is a test directory
     if "tests" in parts or "test" in parts:
         return True
@@ -272,6 +308,7 @@ def should_function_be_private(
     module_path: Path,
     project_root: Path,
     public_patterns: set[str] | None = None,
+    privacy_config: dict[str, Any] | None = None,
 ) -> bool:
     """Detect if a function should be private based on import analysis.
 
@@ -324,7 +361,7 @@ def should_function_be_private(
 
     # Check if function is actually used by other modules
     is_used_externally = _is_function_used_externally(
-        func.name, module_path, project_root
+        func.name, module_path, project_root, privacy_config
     )
 
     # If not used externally, it should probably be private
@@ -335,6 +372,7 @@ def should_function_be_public(
     func: nodes.FunctionDef,
     module_path: Path,
     project_root: Path,
+    privacy_config: dict[str, Any] | None = None,
 ) -> bool:
     """Detect if a private function should be public based on external usage analysis.
 
@@ -369,7 +407,7 @@ def should_function_be_public(
 
     # Check if this private function is actually used by other modules
     is_used_externally = _is_function_used_externally(
-        func.name, module_path, project_root
+        func.name, module_path, project_root, privacy_config
     )
 
     # If used externally, it should be public
@@ -424,8 +462,9 @@ def _are_methods_sorted(methods: list[nodes.FunctionDef]) -> bool:  # pylint: di
     return _are_functions_sorted(methods)
 
 
-@lru_cache(maxsize=1)
-def _build_cross_module_usage_graph(project_root: Path) -> dict[str, set[str]]:
+def _build_cross_module_usage_graph(
+    project_root: Path, privacy_config: dict[str, Any] | None = None
+) -> dict[str, set[str]]:
     """Build a graph of which functions are used by which modules.
 
     This creates a mapping from function names to the set of modules that import them.
@@ -450,7 +489,9 @@ def _build_cross_module_usage_graph(project_root: Path) -> dict[str, set[str]]:
             # Skip __init__ files (they re-export for API organization)
             # not actual usage)
             # and test files (tests access internals, don't indicate public API)
-            if module_name.endswith("__init__") or is_unittest_file(module_name):
+            if module_name.endswith("__init__") or is_unittest_file(
+                module_name, privacy_config
+            ):
                 continue
 
             # Get file modification time for cache key
@@ -707,7 +748,10 @@ def _is_dunder_method(func: nodes.FunctionDef) -> bool:
 
 
 def _is_function_used_externally(
-    func_name: str, module_path: Path, project_root: Path
+    func_name: str,
+    module_path: Path,
+    project_root: Path,
+    privacy_config: dict[str, Any] | None = None,
 ) -> bool:
     """Check if a function is imported/used by other modules.
 
@@ -727,7 +771,7 @@ def _is_function_used_externally(
     :returns: True if function is used by other modules, False if only used internally
     :rtype: bool
     """
-    usage_graph = _build_cross_module_usage_graph(project_root)
+    usage_graph = _build_cross_module_usage_graph(project_root, privacy_config)
 
     if func_name not in usage_graph:
         return False
@@ -745,3 +789,30 @@ def _is_function_used_externally(
     external_usage = [m for m in using_modules if m != current_module]
 
     return len(external_usage) > 0
+
+
+def _matches_file_pattern(module_name: str, pattern: str) -> bool:
+    """Check if a module name matches a file pattern.
+
+    Supports glob patterns for matching file names and paths.
+
+    :param module_name: Module name to check (e.g., 'package.tests.test_utils')
+    :type module_name: str
+    :param pattern: Glob pattern to match against (e.g., 'test_*.py', '*_test.py')
+    :type pattern: str
+    :returns: True if module name matches pattern
+    :rtype: bool
+    """
+    # Convert module name to filename-like format for pattern matching
+    # e.g., "package.tests.test_utils" -> "package/tests/test_utils.py"
+    file_path = module_name.replace(".", "/") + ".py"
+
+    # Also check just the module name for direct matching
+    parts = module_name.split(".")
+    if parts:
+        filename = parts[-1] + ".py"  # Add .py for pattern matching
+
+        # Check both full path and just filename
+        return fnmatch.fnmatch(file_path, pattern) or fnmatch.fnmatch(filename, pattern)
+
+    return fnmatch.fnmatch(file_path, pattern)  # pragma: no cover

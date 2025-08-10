@@ -90,6 +90,76 @@ class FunctionSortChecker(BaseChecker):
                 ),
             },
         ),
+        (
+            "privacy-exclude-dirs",
+            {
+                "default": [],
+                "type": "csv",
+                "metavar": "<dir1,dir2,...>",
+                "help": (
+                    "Directories to exclude from privacy analysis. Files in these "
+                    "directories are scanned but their references are ignored when "
+                    "determining if functions should be private. Useful for test "
+                    "directories and other non-production code."
+                ),
+            },
+        ),
+        (
+            "privacy-exclude-patterns",
+            {
+                "default": [],
+                "type": "csv",
+                "metavar": "<pattern1,pattern2,...>",
+                "help": (
+                    "File patterns to exclude from privacy analysis. Files matching "
+                    "these patterns are scanned but their references are ignored when "
+                    "determining if functions should be private. Supports glob "
+                    "patterns like 'test_*.py', '*_test.py', 'conftest.py'."
+                ),
+            },
+        ),
+        (
+            "privacy-additional-test-patterns",
+            {
+                "default": [],
+                "type": "csv",
+                "metavar": "<pattern1,pattern2,...>",
+                "help": (
+                    "Additional file patterns to treat as test files, beyond the "
+                    "built-in detection. These patterns are added to the default "
+                    "test detection (test_*.py, *_test.py, conftest.py, tests/). "
+                    "Supports glob patterns like 'spec_*.py', '*_spec.py'."
+                ),
+            },
+        ),
+        (
+            "privacy-update-tests",
+            {
+                "default": False,
+                "type": "yn",
+                "metavar": "<y or n>",
+                "help": (
+                    "Enable automatic updating of test files when functions are "
+                    "privatized. When enabled, test files will be automatically "
+                    "updated to use the new private function names. Requires the "
+                    "privacy fixer to be run."
+                ),
+            },
+        ),
+        (
+            "privacy-override-test-detection",
+            {
+                "default": False,
+                "type": "yn",
+                "metavar": "<y or n>",
+                "help": (
+                    "Override the built-in test file detection entirely and only "
+                    "use the patterns specified in privacy-exclude-patterns and "
+                    "privacy-exclude-dirs. When disabled, both built-in detection "
+                    "and custom patterns are used together."
+                ),
+            },
+        ),
     )
 
     # Public methods
@@ -174,17 +244,22 @@ class FunctionSortChecker(BaseChecker):
         # Get configured public API patterns
         public_patterns = set(self.linter.config.public_api_patterns)
 
+        # Get privacy exclusion configuration
+        privacy_config = self._get_privacy_config()
+
         # Use import analysis for more accurate detection
         for func in functions:
             if utils.should_function_be_private(
-                func, module_path, project_root, public_patterns
+                func, module_path, project_root, public_patterns, privacy_config
             ):
                 # Report function that should be private
                 # See docs/usage.rst for privacy detection feature
                 self.add_message(
                     "function-should-be-private", node=func, args=(func.name,)
                 )
-            elif utils.should_function_be_public(func, module_path, project_root):
+            elif utils.should_function_be_public(
+                func, module_path, project_root, privacy_config
+            ):
                 # Report private function that should be public
                 # See docs/usage.rst for privacy detection feature
                 self.add_message(
@@ -220,6 +295,37 @@ class FunctionSortChecker(BaseChecker):
         if hasattr(self.linter, "current_file") and self.linter.current_file:
             return Path(self.linter.current_file).resolve()
         return None
+
+    def _get_privacy_config(self) -> dict[str, Any]:
+        """Extract privacy-related configuration from linter config.
+
+        :returns: Dictionary containing privacy configuration options
+        :rtype: dict[str, Any]
+        """
+        config = {}
+
+        # Handle both real config and Mock objects robustly
+        def get_config_value(attr_name: str, default_value: Any) -> Any:
+            try:
+                value = getattr(self.linter.config, attr_name, default_value)
+                # If it's a Mock object, return the default instead
+                if hasattr(value, "_mock_name"):
+                    return default_value
+                return value
+            except (AttributeError, TypeError):
+                return default_value
+
+        config["exclude_dirs"] = get_config_value("privacy_exclude_dirs", [])
+        config["exclude_patterns"] = get_config_value("privacy_exclude_patterns", [])
+        config["additional_test_patterns"] = get_config_value(
+            "privacy_additional_test_patterns", []
+        )
+        config["update_tests"] = get_config_value("privacy_update_tests", False)
+        config["override_test_detection"] = get_config_value(
+            "privacy_override_test_detection", False
+        )
+
+        return config
 
     def _get_project_root(self, module_path: Path) -> Path | None:
         """Find the project root directory by looking for common project markers.

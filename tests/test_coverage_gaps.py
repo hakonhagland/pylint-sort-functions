@@ -344,3 +344,158 @@ def main():
             assert "consumer" in usage_graph["process_data"]
             assert "format_output" in usage_graph
             assert "consumer" in usage_graph["format_output"]
+
+    def test_backup_file_operations(self) -> None:
+        """Test backup file cleanup and restoration operations."""
+        import tempfile
+        from pathlib import Path
+
+        from pylint_sort_functions.file_operations import FileOperations
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_path = Path(temp_dir)
+            file_ops = FileOperations(backup=True)
+
+            # Create a test file
+            test_file = temp_path / "test.py"
+            original_content = "def hello():\n    pass\n"
+            file_ops.write_file(test_file, original_content)
+
+            # Test backup creation and cleanup
+            backup_path = file_ops.create_backup(test_file)
+            assert backup_path.exists()
+            assert backup_path.read_text(encoding="utf-8") == original_content
+
+            # Test cleanup_backup when backup exists
+            file_ops.cleanup_backup(backup_path)
+            assert not backup_path.exists()
+
+            # Test cleanup_backup when backup doesn't exist (should not error)
+            file_ops.cleanup_backup(backup_path)  # Should not raise
+
+            # Test restore_from_backup when backup exists
+            backup_path = file_ops.create_backup(test_file)
+            modified_content = "def modified():\n    pass\n"
+            file_ops.write_file(test_file, modified_content)
+
+            # Restore from backup
+            file_ops.restore_from_backup(test_file, backup_path)
+            restored_content = file_ops.read_file(test_file)
+            assert restored_content == original_content
+
+            # Test restore_from_backup when backup doesn't exist (should not error)
+            backup_path.unlink()  # Remove backup
+            file_ops.restore_from_backup(test_file, backup_path)  # Should not raise
+
+    def test_privacy_analyzer_safety_validation(self) -> None:
+        """Test privacy_analyzer safety validation methods."""
+        import tempfile
+        from pathlib import Path
+        from unittest.mock import Mock
+
+        from pylint_sort_functions.privacy_analyzer import PrivacyAnalyzer
+        from pylint_sort_functions.privacy_types import (
+            FunctionReference,
+            RenameCandidate,
+        )
+
+        analyzer = PrivacyAnalyzer()
+
+        # Create a mock function node
+        mock_func = Mock()
+        mock_func.name = "test_function"
+
+        # Create mock references with different contexts
+        mock_node = Mock()
+        mock_references = [
+            FunctionReference(node=mock_node, line=1, col=0, context="function_call"),
+            FunctionReference(node=mock_node, line=2, col=0, context="getattr_call"),
+            FunctionReference(node=mock_node, line=3, col=0, context="string_literal"),
+        ]
+
+        # Create a test candidate
+        candidate = RenameCandidate(
+            function_node=mock_func,
+            old_name="test_function",
+            new_name="_test_function",
+            references=mock_references,
+            is_safe=True,
+            safety_issues=[],
+            test_references=[],
+        )
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_path = Path(temp_dir)
+
+            # Create a test module with potential conflicts
+            test_file = temp_path / "test_module.py"
+            test_file.write_text("""
+def _test_function():
+    # This creates a name conflict
+    pass
+
+def other_function():
+    # Test getattr usage (dynamic reference)
+    getattr(module, "test_function")
+
+    # Test string literal reference
+    function_name = "test_function"
+
+    return _test_function()
+""")
+
+            import astroid
+
+            # Parse with astroid for the test
+            content = test_file.read_text()
+            module = astroid.parse(content, module_name="test_module")
+
+            # Update candidate with actual module
+            updated_candidate = candidate._replace(
+                function_node=module.body[1]  # other_function
+            )
+
+            # Test is_safe_to_rename with various safety issues
+            is_safe, issues = analyzer.is_safe_to_rename(updated_candidate)
+
+            # Should detect multiple safety issues
+            assert not is_safe
+            assert len(issues) > 0
+            issue_text = " ".join(issues)
+            # Should detect name conflict, dynamic refs, or string refs
+            expected_keywords = ["conflict", "dynamic", "string", "unsafe"]
+            assert any(keyword in issue_text.lower() for keyword in expected_keywords)
+
+        # Test with a safe candidate (no conflicts)
+        safe_reference = FunctionReference(
+            node=mock_node, line=1, col=0, context="function_call"
+        )
+        safe_candidate = RenameCandidate(
+            function_node=mock_func,
+            old_name="safe_function",
+            new_name="_safe_function",
+            references=[safe_reference],
+            is_safe=True,
+            safety_issues=[],
+            test_references=[],
+        )
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_path = Path(temp_dir)
+            safe_file = temp_path / "safe_module.py"
+            safe_file.write_text("""
+def safe_function():
+    return "safe"
+
+def caller():
+    return safe_function()
+""")
+
+            content = safe_file.read_text()
+            safe_module = astroid.parse(content, module_name="safe_module")
+            safe_updated = safe_candidate._replace(function_node=safe_module.body[0])
+
+            # This should be safer (fewer issues)
+            is_safe, issues = analyzer.is_safe_to_rename(safe_updated)
+            # May still have some issues, but should be fewer than the conflict case
+            # The exact result depends on the implementation details

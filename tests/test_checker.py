@@ -531,7 +531,7 @@ def public_function_2():
         # Verify options are defined
         assert hasattr(self.checker, "options")
         assert isinstance(self.checker.options, tuple)
-        assert len(self.checker.options) == 3
+        assert len(self.checker.options) == 8
 
         # Test public-api-patterns option
         public_api_option = self.checker.options[0]
@@ -858,3 +858,201 @@ def ambiguous_function():
 
             # Verify should_function_be_public was not called due to elif
             mock_should_be_public.assert_not_called()
+
+    def test_privacy_configuration_options(self) -> None:
+        """Test that privacy-specific configuration options are properly defined."""
+        # Test privacy-exclude-dirs option
+        exclude_dirs_option = self.checker.options[3]
+        assert exclude_dirs_option[0] == "privacy-exclude-dirs"
+        assert exclude_dirs_option[1]["type"] == "csv"
+        assert exclude_dirs_option[1]["default"] == []
+
+        # Test privacy-exclude-patterns option
+        exclude_patterns_option = self.checker.options[4]
+        assert exclude_patterns_option[0] == "privacy-exclude-patterns"
+        assert exclude_patterns_option[1]["type"] == "csv"
+        assert exclude_patterns_option[1]["default"] == []
+
+        # Test privacy-additional-test-patterns option
+        additional_patterns_option = self.checker.options[5]
+        assert additional_patterns_option[0] == "privacy-additional-test-patterns"
+        assert additional_patterns_option[1]["type"] == "csv"
+        assert additional_patterns_option[1]["default"] == []
+
+        # Test privacy-update-tests option
+        update_tests_option = self.checker.options[6]
+        assert update_tests_option[0] == "privacy-update-tests"
+        assert update_tests_option[1]["type"] == "yn"
+        assert update_tests_option[1]["default"] is False
+
+        # Test privacy-override-test-detection option
+        override_option = self.checker.options[7]
+        assert override_option[0] == "privacy-override-test-detection"
+        assert override_option[1]["type"] == "yn"
+        assert override_option[1]["default"] is False
+
+    def test_get_privacy_config_method(self) -> None:
+        """Test that _get_privacy_config extracts configuration correctly."""
+        from unittest.mock import Mock
+
+        # Mock linter config with privacy settings
+        mock_linter = Mock()
+        mock_linter.config.privacy_exclude_dirs = ["tests", "qa"]
+        mock_linter.config.privacy_exclude_patterns = ["test_*.py", "*_spec.py"]
+        mock_linter.config.privacy_additional_test_patterns = ["scenario_*.py"]
+        mock_linter.config.privacy_update_tests = True
+        mock_linter.config.privacy_override_test_detection = False
+
+        with patch.object(self.checker, "linter", mock_linter):
+            config = self.checker._get_privacy_config()
+
+            assert config["exclude_dirs"] == ["tests", "qa"]
+            assert config["exclude_patterns"] == ["test_*.py", "*_spec.py"]
+            assert config["additional_test_patterns"] == ["scenario_*.py"]
+            assert config["update_tests"] is True
+            assert config["override_test_detection"] is False
+
+    def test_get_privacy_config_with_defaults(self) -> None:
+        """Test that _get_privacy_config handles missing configuration with defaults."""
+        from unittest.mock import Mock
+
+        # Mock linter config without privacy settings
+        mock_linter = Mock()
+        # Remove privacy attributes to simulate default behavior
+        del mock_linter.config.privacy_exclude_dirs
+        del mock_linter.config.privacy_exclude_patterns
+        del mock_linter.config.privacy_additional_test_patterns
+        del mock_linter.config.privacy_update_tests
+        del mock_linter.config.privacy_override_test_detection
+
+        with patch.object(self.checker, "linter", mock_linter):
+            config = self.checker._get_privacy_config()
+
+            assert config["exclude_dirs"] == []
+            assert config["exclude_patterns"] == []
+            assert config["additional_test_patterns"] == []
+            assert config["update_tests"] is False
+            assert config["override_test_detection"] is False
+
+    def test_privacy_analysis_with_exclude_dirs(self) -> None:
+        """Test privacy analysis with exclude_dirs configuration."""
+        from unittest.mock import Mock
+
+        content = """
+def helper_function():
+    return "helper"
+"""
+        # Module content for testing (unused variable is intentional for test setup)
+        _ = astroid.parse(content, module_name="mymodule")
+
+        # Mock linter config with excluded directories
+        mock_linter = Mock()
+        mock_linter.config.enable_privacy_detection = True
+        mock_linter.config.public_api_patterns = []
+        mock_linter.config.privacy_exclude_dirs = ["tests", "qa"]
+        mock_linter.config.privacy_exclude_patterns = []
+        mock_linter.config.privacy_additional_test_patterns = []
+        mock_linter.config.privacy_update_tests = False
+        mock_linter.config.privacy_override_test_detection = False
+
+        with patch.object(self.checker, "linter", mock_linter):
+            # Test that _get_privacy_config returns the correct configuration
+            privacy_config = self.checker._get_privacy_config()
+            assert privacy_config["exclude_dirs"] == ["tests", "qa"]
+            assert privacy_config["exclude_patterns"] == []
+            assert privacy_config["additional_test_patterns"] == []
+            assert privacy_config["update_tests"] is False
+            assert privacy_config["override_test_detection"] is False
+
+    def test_privacy_analysis_with_exclude_patterns(self) -> None:
+        """Test privacy analysis with exclude_patterns configuration."""
+        from unittest.mock import Mock
+
+        # Mock linter config with excluded patterns
+        mock_linter = Mock()
+        mock_linter.config.enable_privacy_detection = True
+        mock_linter.config.public_api_patterns = []
+        mock_linter.config.privacy_exclude_dirs = []
+        mock_linter.config.privacy_exclude_patterns = ["*_spec.py", "test_*.py"]
+        mock_linter.config.privacy_additional_test_patterns = []
+        mock_linter.config.privacy_update_tests = False
+        mock_linter.config.privacy_override_test_detection = False
+
+        with patch.object(self.checker, "linter", mock_linter):
+            # Test that _get_privacy_config returns the correct configuration
+            privacy_config = self.checker._get_privacy_config()
+            assert privacy_config["exclude_dirs"] == []
+            assert privacy_config["exclude_patterns"] == ["*_spec.py", "test_*.py"]
+            assert privacy_config["additional_test_patterns"] == []
+            assert privacy_config["update_tests"] is False
+            assert privacy_config["override_test_detection"] is False
+
+    def test_privacy_analysis_with_additional_test_patterns(self) -> None:
+        """Test privacy analysis with additional_test_patterns configuration."""
+        from unittest.mock import Mock
+
+        # Mock linter config with additional test patterns
+        mock_linter = Mock()
+        mock_linter.config.enable_privacy_detection = True
+        mock_linter.config.public_api_patterns = []
+        mock_linter.config.privacy_exclude_dirs = []
+        mock_linter.config.privacy_exclude_patterns = []
+        mock_linter.config.privacy_additional_test_patterns = [
+            "scenario_*.py",
+            "*_demo.py",
+        ]
+        mock_linter.config.privacy_update_tests = False
+        mock_linter.config.privacy_override_test_detection = False
+
+        with patch.object(self.checker, "linter", mock_linter):
+            # Test that _get_privacy_config returns the correct configuration
+            privacy_config = self.checker._get_privacy_config()
+            assert privacy_config["exclude_dirs"] == []
+            assert privacy_config["exclude_patterns"] == []
+            assert privacy_config["additional_test_patterns"] == [
+                "scenario_*.py",
+                "*_demo.py",
+            ]
+            assert privacy_config["update_tests"] is False
+            assert privacy_config["override_test_detection"] is False
+
+    def test_get_privacy_config_exception_handling(self) -> None:
+        """Test that _get_privacy_config handles exceptions gracefully."""
+        from unittest.mock import Mock
+
+        # Create a mock that raises AttributeError when accessed
+        class ExceptionMock:
+            """Mock class that raises AttributeError on attribute access."""
+
+            def __getattr__(self, name: str) -> None:
+                raise AttributeError(f"Mock attribute error for {name}")
+
+        mock_linter = Mock()
+        mock_linter.config = ExceptionMock()
+
+        with patch.object(self.checker, "linter", mock_linter):
+            # Should use defaults when exceptions occur
+            config = self.checker._get_privacy_config()
+            assert config["exclude_dirs"] == []
+            assert config["exclude_patterns"] == []
+            assert config["additional_test_patterns"] == []
+            assert config["update_tests"] is False
+            assert config["override_test_detection"] is False
+
+        # Test TypeError handling as well
+        class TypeErrorMock:
+            """Mock class that raises TypeError on getattr."""
+
+            def __getattr__(self, name: str) -> None:
+                raise TypeError(f"Mock type error for {name}")
+
+        mock_linter_2 = Mock()
+        mock_linter_2.config = TypeErrorMock()
+
+        with patch.object(self.checker, "linter", mock_linter_2):
+            # Should also use defaults when TypeError occurs
+            config = self.checker._get_privacy_config()
+            assert config["exclude_dirs"] == []
+            assert config["additional_test_patterns"] == []
+            assert config["update_tests"] is False
+            assert config["override_test_detection"] is False

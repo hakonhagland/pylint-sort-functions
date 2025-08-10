@@ -1512,3 +1512,165 @@ def incomplete_function(
             test_refs = self.fixer.find_test_references("helper_function", [test_file])
 
             assert test_refs == []
+
+    def test_delegation_methods(self) -> None:
+        """Test delegation methods that forward calls to component classes."""
+        from pathlib import Path
+        from unittest.mock import Mock, patch
+
+        # Test _find_references_in_test_file delegation
+        test_file = Path("test.py")
+        module_mock = Mock()
+        content = "test content"
+
+        from pylint_sort_functions.privacy_types import TestReference
+
+        mock_test_ref = TestReference(
+            file_path=test_file,
+            line=1,
+            col=0,
+            context="test",
+            reference_text="test line",
+        )
+
+        with patch.object(
+            self.fixer.test_manager, "_find_references_in_test_file"
+        ) as mock_method:
+            mock_method.return_value = [mock_test_ref]
+
+            result = self.fixer._find_references_in_test_file(
+                "func_name", test_file, module_mock, content
+            )
+
+            mock_method.assert_called_once_with(
+                "func_name", test_file, module_mock, content
+            )
+            assert result == [mock_test_ref]
+
+        # Test _find_string_references_in_test_file delegation
+        mock_string_test_ref = TestReference(
+            file_path=test_file,
+            line=2,
+            col=0,
+            context="string",
+            reference_text="string test line",
+        )
+
+        with patch.object(
+            self.fixer.test_manager, "_find_string_references_in_test_file"
+        ) as mock_method:
+            mock_method.return_value = [mock_string_test_ref]
+
+            result = self.fixer._find_string_references_in_test_file(
+                "func_name", test_file, content
+            )
+
+            mock_method.assert_called_once_with("func_name", test_file, content)
+            assert result == [mock_string_test_ref]
+
+        # Test _get_functions_from_module delegation
+        with patch.object(
+            self.fixer.analyzer, "_get_functions_from_module"
+        ) as mock_method:
+            mock_function = Mock()
+            mock_method.return_value = [mock_function]
+
+            result = self.fixer._get_functions_from_module(module_mock)
+
+            mock_method.assert_called_once_with(module_mock)
+            assert result == [mock_function]
+
+    def test_analyze_module_backward_compatibility(self) -> None:
+        """Test analyze_module backward compatibility with old Path signature."""
+        from pathlib import Path
+        from unittest.mock import Mock, patch
+
+        # Test old signature: analyze_module(module_path, project_root, public_patterns)
+        module_path = Path("old_module.py")  # Single Path (old signature)
+        project_root = Path("project")
+        public_patterns = {"main", "run"}  # Set of public patterns (old signature)
+
+        # Old signature should return empty list (backward compatibility behavior)
+        result = self.fixer.analyze_module(module_path, project_root, public_patterns)
+        assert result == []
+
+        # Test new signature with include_test_analysis=True (default)
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_path = Path(temp_dir)
+
+            # Create a test file
+            test_file = temp_path / "test_module.py"
+            test_file.write_text("""
+def helper_function():
+    return "helper"
+
+def main():
+    return helper_function()
+""")
+
+            files = [test_file]  # List of files (new signature)
+
+            # Mock the analyzer to return a test candidate
+            mock_candidate = Mock()
+            mock_candidate.old_name = "helper_function"
+            mock_candidate._replace = Mock(return_value=mock_candidate)
+
+            with patch.object(
+                self.fixer.analyzer, "analyze_module_privacy"
+            ) as mock_analyze:
+                mock_analyze.return_value = [mock_candidate]
+
+                with patch.object(
+                    self.fixer.test_manager, "find_test_files"
+                ) as mock_find_files:
+                    mock_find_files.return_value = []
+
+                    with patch.object(
+                        self.fixer.test_manager, "find_test_references"
+                    ) as mock_find_refs:
+                        mock_find_refs.return_value = []
+
+                        with patch.object(
+                            self.fixer, "is_safe_to_rename"
+                        ) as mock_is_safe:
+                            mock_is_safe.return_value = (True, [])
+
+                            # Test new signature with default include_test_analysis=True
+                            result = self.fixer.analyze_module(files, temp_path)
+
+                            # Should call analysis pipeline
+                            mock_analyze.assert_called_once_with(files, temp_path)
+                            mock_find_files.assert_called_once_with(temp_path)
+                            mock_find_refs.assert_called_once_with(
+                                "helper_function", []
+                            )
+                            mock_is_safe.assert_called_once()
+
+                            assert len(result) == 1
+
+        # Test new signature with include_test_analysis=False
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_path = Path(temp_dir)
+            test_file = temp_path / "test_module2.py"
+            test_file.write_text("def test_func(): pass")
+            files = [test_file]
+
+            mock_candidate2 = Mock()
+            mock_candidate2._replace = Mock(return_value=mock_candidate2)
+
+            with patch.object(
+                self.fixer.analyzer, "analyze_module_privacy"
+            ) as mock_analyze:
+                mock_analyze.return_value = [mock_candidate2]
+
+                with patch.object(self.fixer, "is_safe_to_rename") as mock_is_safe:
+                    mock_is_safe.return_value = (False, ["test issue"])
+
+                    # Test new signature with include_test_analysis=False
+                    result = self.fixer.analyze_module(files, temp_path, False)
+
+                    mock_analyze.assert_called_once_with(files, temp_path)
+                    # Should NOT call find_test_files when include_test_analysis=False
+                    # (verified by not mocking find_test_files)
+
+                    assert len(result) == 1

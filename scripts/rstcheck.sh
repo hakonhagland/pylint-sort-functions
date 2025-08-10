@@ -65,7 +65,7 @@ run_rstcheck() {
     temp_output=$(mktemp)
     temp_stderr=$(mktemp)
     local exit_code=0
-    
+
     if [[ "$MODE" == "recursive" ]]; then
         echo "Running rstcheck recursively on docs/ directory..."
         rstcheck --ignore-directives="$IGNORED_DIRECTIVES" --report-level="$REPORT_LEVEL" -r docs/ >"$temp_output" 2>"$temp_stderr" || exit_code=$?
@@ -73,21 +73,21 @@ run_rstcheck() {
         echo "Running rstcheck on docs/*.rst files..."
         rstcheck --ignore-directives="$IGNORED_DIRECTIVES" --report-level="$REPORT_LEVEL" docs/*.rst >"$temp_output" 2>"$temp_stderr" || exit_code=$?
     fi
-    
+
     # Show stdout (actual validation results)
     if [[ -s "$temp_output" ]]; then
         cat "$temp_output"
     fi
-    
+
     # Filter stderr to suppress known rstcheck-core warnings but preserve actual errors
     if [[ -s "$temp_stderr" ]]; then
         # Suppress the specific known AttributeError warning, but show other stderr content
         grep -v "WARNING:rstcheck_core.checker:An \`AttributeError\` error occured" "$temp_stderr" || true
     fi
-    
+
     # Clean up temp files
     rm -f "$temp_output" "$temp_stderr"
-    
+
     # Preserve rstcheck exit code for actual validation failures
     if [[ $exit_code -ne 0 ]]; then
         echo "❌ RST documentation validation failed"
