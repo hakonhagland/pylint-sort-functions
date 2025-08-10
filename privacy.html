@@ -88,6 +88,7 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#integration-with-privacy-detection-system">Integration with Privacy Detection System</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#detection-integration">Detection Integration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#test-file-exclusion-system">Test File Exclusion System</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#cli-integration">CLI Integration</a><ul>
@@ -533,6 +534,58 @@
 <p>Both systems respect the same configuration options:
 - <code class="docutils literal notranslate"><span class="pre">public-api-patterns</span></code>: Functions to treat as public API
 - <code class="docutils literal notranslate"><span class="pre">enable-privacy-detection</span></code>: Whether to perform privacy analysis</p>
+</section>
+<section id="test-file-exclusion-system">
+<h3>Test File Exclusion System<a class="headerlink" href="#test-file-exclusion-system" title="Link to this heading"></a></h3>
+<p>As of version 1.3.2, the privacy detection system includes enhanced test file exclusion to prevent functions used only by tests from being incorrectly marked as private.</p>
+<p><strong>Technical Implementation</strong>:</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">_is_unittest_file()</span></code> function in <code class="docutils literal notranslate"><span class="pre">utils.py</span></code> implements comprehensive test file detection:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_is_unittest_file</span><span class="p">(</span><span class="n">module_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check if a module name indicates a unit test file.&quot;&quot;&quot;</span>
+    <span class="c1"># Split into path components for precise matching</span>
+    <span class="n">parts</span> <span class="o">=</span> <span class="n">module_name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)</span>
+
+    <span class="c1"># Check for test directories</span>
+    <span class="k">if</span> <span class="s1">&#39;tests&#39;</span> <span class="ow">in</span> <span class="n">parts</span> <span class="ow">or</span> <span class="s1">&#39;test&#39;</span> <span class="ow">in</span> <span class="n">parts</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="c1"># Check file name patterns</span>
+    <span class="k">if</span> <span class="n">parts</span><span class="p">:</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="n">parts</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">filename</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;test_&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">filename</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;_test&#39;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="n">filename</span> <span class="o">==</span> <span class="s1">&#39;conftest&#39;</span><span class="p">:</span>  <span class="c1"># pytest configuration</span>
+            <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="k">return</span> <span class="s1">&#39;test&#39;</span> <span class="ow">in</span> <span class="n">module_name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>  <span class="c1"># Fallback</span>
+</pre></div>
+</div>
+<p><strong>Integration with Cross-Module Analysis</strong>:</p>
+<p>Test file exclusion is applied during the import analysis phase in <code class="docutils literal notranslate"><span class="pre">_build_cross_module_usage_graph()</span></code>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">file_path</span> <span class="ow">in</span> <span class="n">python_files</span><span class="p">:</span>
+    <span class="n">module_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">relative_path</span><span class="o">.</span><span class="n">with_suffix</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="p">,</span> <span class="s2">&quot;.&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Skip test files from privacy analysis</span>
+    <span class="k">if</span> <span class="n">module_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;__init__&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">_is_unittest_file</span><span class="p">(</span><span class="n">module_name</span><span class="p">):</span>
+        <span class="k">continue</span>  <span class="c1"># Exclude from usage tracking</span>
+</pre></div>
+</div>
+<p><strong>Impact on Privacy Detection</strong>:</p>
+<ul class="simple">
+<li><p><strong>W9004 (should be private)</strong>: Functions used only by tests will be marked as candidates for privatization since test usage is excluded from external usage calculations</p></li>
+<li><p><strong>W9005 (should be public)</strong>: Private functions used by tests won’t be flagged as needing to be public, preventing false positives from test code</p></li>
+<li><p><strong>Safety</strong>: Prevents breaking test imports while maintaining accurate privacy detection for production code relationships</p></li>
+</ul>
+<p><strong>Detected Test Patterns</strong>:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>tests/test_module.py          ✓ Excluded (tests/ directory)
+src/tests/helpers.py          ✓ Excluded (tests/ in path)
+test_integration.py           ✓ Excluded (test_ prefix)
+utils_test.py                 ✓ Excluded (_test suffix)
+conftest.py                   ✓ Excluded (pytest config)
+my_test_file.py              ✓ Excluded (contains &#39;test&#39;)
+</pre></div>
+</div>
+<p>This addresses <a class="reference external" href="https://github.com/hakonhagland/pylint-sort-functions/issues/26">GitHub issue #26</a> which identified incomplete test file detection causing test imports to break when functions were incorrectly privatized.</p>
 </section>
 </section>
 <section id="cli-integration">

@@ -60,6 +60,8 @@
 <li class="toctree-l3"><a class="reference internal" href="#using-setup-cfg">Using setup.cfg</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#plugin-configuration-options">Plugin Configuration Options</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#configuration-options-reference">Configuration Options Reference</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#test-file-exclusion">Test File Exclusion</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#automatic-directory-exclusion">Automatic Directory Exclusion</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#message-types">Message Types</a><ul>
@@ -296,6 +298,49 @@ pip<span class="w"> </span>install<span class="w"> </span>pylint-sort-functions<
 </dd>
 </dl>
 </section>
+<section id="test-file-exclusion">
+<h3>Test File Exclusion<a class="headerlink" href="#test-file-exclusion" title="Link to this heading"></a></h3>
+<p>The privacy detection system automatically excludes test files from analysis to prevent functions used only by tests from being incorrectly marked as private. This ensures that functions validating the public API (via tests) remain accessible.</p>
+<p><strong>Automatically detected test files:</strong></p>
+<ul class="simple">
+<li><p>Files in <code class="docutils literal notranslate"><span class="pre">tests/</span></code> or <code class="docutils literal notranslate"><span class="pre">test/</span></code> directories</p></li>
+<li><p>Files starting with <code class="docutils literal notranslate"><span class="pre">test_</span></code> (e.g., <code class="docutils literal notranslate"><span class="pre">test_utils.py</span></code>)</p></li>
+<li><p>Files ending with <code class="docutils literal notranslate"><span class="pre">_test</span></code> (e.g., <code class="docutils literal notranslate"><span class="pre">module_test.py</span></code>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">conftest.py</span></code> files (pytest configuration)</p></li>
+</ul>
+<p><strong>Example excluded files:</strong></p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>tests/test_module.py          ✓ Excluded (in tests/ directory)
+test_integration.py           ✓ Excluded (starts with test_)
+utils_test.py                 ✓ Excluded (ends with _test)
+conftest.py                   ✓ Excluded (pytest configuration)
+src/tests/helpers.py          ✓ Excluded (in tests/ subdirectory)
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Test file exclusion patterns are currently built-in and not configurable. Future versions may add configuration options for custom test patterns.</p>
+</div>
+</section>
+<section id="automatic-directory-exclusion">
+<h3>Automatic Directory Exclusion<a class="headerlink" href="#automatic-directory-exclusion" title="Link to this heading"></a></h3>
+<p>The plugin automatically skips common directories that should not be analyzed for performance and accuracy:</p>
+<dl class="simple">
+<dt><strong>Build and Distribution:</strong></dt><dd><p><code class="docutils literal notranslate"><span class="pre">build/</span></code>, <code class="docutils literal notranslate"><span class="pre">dist/</span></code>, <code class="docutils literal notranslate"><span class="pre">*.egg-info/</span></code></p>
+</dd>
+<dt><strong>Version Control:</strong></dt><dd><p><code class="docutils literal notranslate"><span class="pre">.git/</span></code></p>
+</dd>
+<dt><strong>Python Caches:</strong></dt><dd><p><code class="docutils literal notranslate"><span class="pre">__pycache__/</span></code>, <code class="docutils literal notranslate"><span class="pre">.pytest_cache/</span></code>, <code class="docutils literal notranslate"><span class="pre">.mypy_cache/</span></code>, <code class="docutils literal notranslate"><span class="pre">.tox/</span></code></p>
+</dd>
+<dt><strong>Virtual Environments:</strong></dt><dd><p><code class="docutils literal notranslate"><span class="pre">venv/</span></code>, <code class="docutils literal notranslate"><span class="pre">.venv/</span></code>, <code class="docutils literal notranslate"><span class="pre">env/</span></code>, <code class="docutils literal notranslate"><span class="pre">.env/</span></code></p>
+</dd>
+<dt><strong>Node.js Dependencies:</strong></dt><dd><p><code class="docutils literal notranslate"><span class="pre">node_modules/</span></code></p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Directory exclusion patterns are currently built-in and not configurable. For custom directory exclusions, see <a class="reference external" href="https://github.com/hakonhagland/pylint-sort-functions/issues/7">GitHub issue #7</a>.</p>
+</div>
+</section>
 </section>
 <section id="message-types">
 <h2>Message Types<a class="headerlink" href="#message-types" title="Link to this heading"></a></h2>
@@ -400,8 +445,9 @@ pip<span class="w"> </span>install<span class="w"> </span>pylint-sort-functions<
 <ul class="simple">
 <li><p><strong>Cross-module analysis</strong>: Analyzes all Python files to detect function imports and calls</p></li>
 <li><p><strong>Usage tracking</strong>: Maps which functions are accessed by other modules via <code class="docutils literal notranslate"><span class="pre">from</span> <span class="pre">module</span> <span class="pre">import</span> <span class="pre">function</span></code> or <code class="docutils literal notranslate"><span class="pre">module.function()</span></code></p></li>
-<li><p><strong>Smart exclusions</strong>: Skips common public API patterns (<code class="docutils literal notranslate"><span class="pre">main</span></code>, <code class="docutils literal notranslate"><span class="pre">run</span></code>, <code class="docutils literal notranslate"><span class="pre">setup</span></code>) and test files</p></li>
-<li><p><strong>False positive prevention</strong>: Only flags functions with zero external usage, ensuring accuracy</p></li>
+<li><p><strong>Smart exclusions</strong>: Skips common public API patterns (<code class="docutils literal notranslate"><span class="pre">main</span></code>, <code class="docutils literal notranslate"><span class="pre">run</span></code>, <code class="docutils literal notranslate"><span class="pre">setup</span></code>) and automatically excludes test files from analysis</p></li>
+<li><p><strong>Test file exclusion</strong>: Automatically excludes <code class="docutils literal notranslate"><span class="pre">tests/</span></code>, <code class="docutils literal notranslate"><span class="pre">test_*.py</span></code>, <code class="docutils literal notranslate"><span class="pre">*_test.py</span></code>, and <code class="docutils literal notranslate"><span class="pre">conftest.py</span></code> files to prevent functions used only by tests from being marked private</p></li>
+<li><p><strong>False positive prevention</strong>: Only flags functions with zero external usage (excluding tests), ensuring accuracy</p></li>
 </ul>
 <p><strong>Auto-fix availability</strong>:
 - <strong>Manual renaming</strong>: Functions can be manually renamed following PyLint suggestions
@@ -435,7 +481,7 @@ pip<span class="w"> </span>install<span class="w"> </span>pylint-sort-functions<
 <li><p><strong>Cross-module import detection</strong>: Scans all Python files to identify imports of private functions</p></li>
 <li><p><strong>Usage pattern analysis</strong>: Detects <code class="docutils literal notranslate"><span class="pre">from</span> <span class="pre">module</span> <span class="pre">import</span> <span class="pre">_function</span></code> and <code class="docutils literal notranslate"><span class="pre">module._function()</span></code> patterns</p></li>
 <li><p><strong>Conservative approach</strong>: Only flags private functions with clear external usage evidence</p></li>
-<li><p><strong>Test file exclusion</strong>: Ignores usage within test files to avoid false positives</p></li>
+<li><p><strong>Test file exclusion</strong>: Automatically ignores usage within <code class="docutils literal notranslate"><span class="pre">tests/</span></code>, <code class="docutils literal notranslate"><span class="pre">test_*.py</span></code>, <code class="docutils literal notranslate"><span class="pre">*_test.py</span></code>, and <code class="docutils literal notranslate"><span class="pre">conftest.py</span></code> files to avoid false positives from test code</p></li>
 </ul>
 <p><strong>Auto-fix availability</strong>:
 - <strong>Manual renaming</strong>: Functions can be manually renamed following PyLint suggestions

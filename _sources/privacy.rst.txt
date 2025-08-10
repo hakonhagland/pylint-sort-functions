@@ -427,6 +427,68 @@ Both systems respect the same configuration options:
 - ``public-api-patterns``: Functions to treat as public API
 - ``enable-privacy-detection``: Whether to perform privacy analysis
 
+Test File Exclusion System
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+As of version 1.3.2, the privacy detection system includes enhanced test file exclusion to prevent functions used only by tests from being incorrectly marked as private.
+
+**Technical Implementation**:
+
+The ``_is_unittest_file()`` function in ``utils.py`` implements comprehensive test file detection:
+
+.. code-block:: python
+
+    def _is_unittest_file(module_name: str) -> bool:
+        """Check if a module name indicates a unit test file."""
+        # Split into path components for precise matching
+        parts = module_name.lower().split('.')
+
+        # Check for test directories
+        if 'tests' in parts or 'test' in parts:
+            return True
+
+        # Check file name patterns
+        if parts:
+            filename = parts[-1]
+            if filename.startswith('test_') or filename.endswith('_test'):
+                return True
+            if filename == 'conftest':  # pytest configuration
+                return True
+
+        return 'test' in module_name.lower()  # Fallback
+
+**Integration with Cross-Module Analysis**:
+
+Test file exclusion is applied during the import analysis phase in ``_build_cross_module_usage_graph()``:
+
+.. code-block:: python
+
+    for file_path in python_files:
+        module_name = str(relative_path.with_suffix("")).replace(os.sep, ".")
+
+        # Skip test files from privacy analysis
+        if module_name.endswith("__init__") or _is_unittest_file(module_name):
+            continue  # Exclude from usage tracking
+
+**Impact on Privacy Detection**:
+
+- **W9004 (should be private)**: Functions used only by tests will be marked as candidates for privatization since test usage is excluded from external usage calculations
+- **W9005 (should be public)**: Private functions used by tests won't be flagged as needing to be public, preventing false positives from test code
+- **Safety**: Prevents breaking test imports while maintaining accurate privacy detection for production code relationships
+
+**Detected Test Patterns**:
+
+.. code-block:: text
+
+    tests/test_module.py          ✓ Excluded (tests/ directory)
+    src/tests/helpers.py          ✓ Excluded (tests/ in path)
+    test_integration.py           ✓ Excluded (test_ prefix)
+    utils_test.py                 ✓ Excluded (_test suffix)
+    conftest.py                   ✓ Excluded (pytest config)
+    my_test_file.py              ✓ Excluded (contains 'test')
+
+This addresses `GitHub issue #26 <https://github.com/hakonhagland/pylint-sort-functions/issues/26>`_ which identified incomplete test file detection causing test imports to break when functions were incorrectly privatized.
+
 CLI Integration
 ---------------
 
