@@ -154,12 +154,12 @@ class TestCoverageGapsPhase2:
             fixer = PrivacyFixer(backup=True)
 
             # Mock the update to fail, triggering rollback
-            original_update_import = fixer._update_import_statements
+            original_update_import = fixer.test_updater._update_import_statements
 
             def mock_update_import(*args: Any) -> bool:
                 raise RuntimeError("Update failure to trigger rollback")
 
-            setattr(fixer, "_update_import_statements", mock_update_import)
+            setattr(fixer.test_updater, "_update_import_statements", mock_update_import)
 
             # Mock shutil operations to control the rollback flow
             original_copy2 = shutil.copy2

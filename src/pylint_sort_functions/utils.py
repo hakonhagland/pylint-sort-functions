@@ -106,7 +106,7 @@ def are_methods_sorted_with_exclusions(
     return are_functions_sorted_with_exclusions(methods, ignore_decorators)
 
 
-def find_python_files(root_path: Path) -> list[Path]:
+def find_python_files(root_path: Path) -> list[Path]:  # pylint: disable=function-should-be-private
     """Find all Python files in a project directory.
 
     Recursively searches for files with .py extension while skipping common
@@ -225,7 +225,7 @@ def is_private_function(func: nodes.FunctionDef) -> bool:
     return func.name.startswith("_") and not _is_dunder_method(func)
 
 
-def is_unittest_file(module_name: str) -> bool:
+def is_unittest_file(module_name: str) -> bool:  # pylint: disable=function-should-be-private
     """Check if a module name indicates a unit test file.
 
     Detects test files based on common naming patterns:

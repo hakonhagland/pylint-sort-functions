@@ -11,60 +11,34 @@ The implementation follows a conservative approach:
 
 Safety-first design ensures user confidence in the automated renaming.
 
-TODO: This module has grown too large (1117 lines) and should be split.
-See GitHub Issue #32: https://github.com/hakonhagland/pylint-sort-functions/issues/32
+Refactored version using composition as described in GitHub Issue #32.
 """
 
-import ast
-import re
-import shutil
 from collections import defaultdict
 from pathlib import Path
-from typing import Any, Dict, List, NamedTuple, Optional, Set, Tuple
+from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
-import astroid  # type: ignore[import-untyped]
-from astroid import nodes
+# Import the new modular components
+from pylint_sort_functions.file_operations import FileOperations
+from pylint_sort_functions.privacy_analyzer import PrivacyAnalyzer
+from pylint_sort_functions.privacy_types import (
+    FunctionReference,
+    RenameCandidate,
+    TestReference,
+)
+from pylint_sort_functions.test_file_manager import TestFileManager
+from pylint_sort_functions.test_file_updater import TestFileUpdater
 
-from pylint_sort_functions import utils
-
-
-class FunctionReference(NamedTuple):
-    """Represents a reference to a function within a module."""
-
-    node: nodes.NodeNG
-    line: int
-    col: int
-    context: str  # "call", "decorator", "assignment", etc.
-
-
-class TestReference(NamedTuple):
-    """Represents a reference to a function within a test file."""
-
-    file_path: Path
-    line: int
-    col: int
-    context: str  # "import", "mock_patch", "call", etc.
-    reference_text: str  # The actual text that needs to be replaced
+# Re-export types for backward compatibility
+__all__ = ["PrivacyFixer", "FunctionReference", "RenameCandidate", "TestReference"]
 
 
-class RenameCandidate(NamedTuple):
-    """Represents a function that can be safely renamed."""
+class PrivacyFixer:
+    """Handles automatic renaming of functions that should be private.
 
-    function_node: nodes.FunctionDef
-    old_name: str
-    new_name: str
-    references: List[FunctionReference]
-    test_references: List[TestReference]  # New: references from test files
-    is_safe: bool
-    safety_issues: List[str]
-
-
-class PrivacyFixer:  # pylint: disable=too-many-lines  # Issue #32
-    """Handles automatic renaming of functions that should be private."""
-
-    # Public methods
-
-    # Public methods
+    Refactored to use composition with focused components for better
+    maintainability and separation of concerns.
+    """
 
     def __init__(self, dry_run: bool = False, backup: bool = True):
         """Initialize the privacy fixer.
@@ -76,27 +50,78 @@ class PrivacyFixer:  # pylint: disable=too-many-lines  # Issue #32
         self.backup = backup
         self.rename_candidates: List[RenameCandidate] = []
 
+        # Initialize component classes with composition
+        self.analyzer = PrivacyAnalyzer()
+        self.test_manager = TestFileManager()
+        self.test_updater = TestFileUpdater(backup=backup)
+        self.file_ops = FileOperations(backup=backup)
+
+    # Public methods
+
     def analyze_module(
         self,
-        _module_path: Path,  # pylint: disable=unused-argument
-        _project_root: Path,  # pylint: disable=unused-argument
-        _public_patterns: Optional[Set[str]] = None,  # pylint: disable=unused-argument
+        files_or_module_path: Union[List[Path], Path],  # For backward compatibility
+        project_root: Path,
+        public_patterns_or_include_test_analysis: Optional[
+            Union[Set[str], bool]
+        ] = None,
     ) -> List[RenameCandidate]:
         """Analyze a module for functions that can be automatically renamed to private.
 
-        This is the main entry point for the privacy fixing functionality.
-        It identifies functions that should be private and determines if they
-        can be safely renamed.
+        This method supports two signatures for backward compatibility:
+        1. New: analyze_module(files, project_root, include_test_analysis=True)
+        2. Old: analyze_module(module_path, project_root, public_patterns=None)
 
-        :param _module_path: Path to the module file to analyze
-        :param _project_root: Root directory of the project
-        :param _public_patterns: Set of function names to treat as public API
+        :param files_or_module_path: List of files (new) or single module path (old)
+        :param project_root: Root directory of the project
+        :param public_patterns_or_include_test_analysis: Set of public patterns (old)
+            or include_test_analysis flag (new)
         :returns: List of functions that can be safely renamed
         """
-        # TODO: Implement in next phase
-        return []
+        # Handle backward compatibility with old signature
+        if isinstance(files_or_module_path, Path):
+            # Old signature: analyze_module(module_path, project_root, public_patterns)
+            # Return empty list for backward compatibility (was TODO placeholder)
+            return []
 
-    def apply_renames(  # pylint: disable=too-many-locals,too-many-branches,too-many-nested-blocks  # Issue #32
+        # New signature: analyze_module(files, project_root, include_test_analysis)
+        files = files_or_module_path
+        include_test_analysis = public_patterns_or_include_test_analysis
+        if include_test_analysis is None:
+            include_test_analysis = True
+
+        # Use analyzer to detect privacy violations
+        violations = self.analyzer.analyze_module_privacy(files, project_root)
+
+        # Find test references if requested
+        if include_test_analysis:
+            test_files = self.test_manager.find_test_files(project_root)
+
+            for candidate in violations:
+                # Find test references for this function
+                test_references = self.test_manager.find_test_references(
+                    candidate.old_name, test_files
+                )
+
+                # Update candidate with test references
+                updated_candidate = candidate._replace(test_references=test_references)
+                violations[violations.index(candidate)] = updated_candidate
+
+        # Validate safety for each candidate
+        validated_candidates = []
+        for candidate in violations:
+            is_safe, issues = self.is_safe_to_rename(
+                candidate
+            )  # Use our own method for inheritance
+            validated_candidate = candidate._replace(
+                is_safe=is_safe, safety_issues=issues
+            )
+            validated_candidates.append(validated_candidate)
+
+        self.rename_candidates = validated_candidates
+        return validated_candidates
+
+    def apply_renames(  # pylint: disable=too-many-locals,too-many-branches
         self, candidates: List[RenameCandidate], project_root: Optional[Path] = None
     ) -> Dict[str, Any]:
         """Apply the function renames to the module files and update test files.
@@ -125,14 +150,16 @@ class PrivacyFixer:  # pylint: disable=too-many-lines  # Issue #32
                 skipped_count += result["skipped"]
                 if result.get("errors"):
                     errors.extend(result["errors"])
-            except Exception as e:
+            except Exception as e:  # pylint: disable=broad-exception-caught
                 error_msg = f"Error processing {file_path}: {str(e)}"
                 errors.append(error_msg)
                 skipped_count += len(file_candidates)
 
         # Second, update test files if project_root is provided and we have
         # successful renames
-        if project_root and renamed_count > 0 and not self.dry_run:
+        if (  # pylint: disable=too-many-nested-blocks
+            project_root and renamed_count > 0 and not self.dry_run
+        ):
             # Process each successfully renamed candidate
             for file_path, file_candidates in candidates_by_file.items():
                 for candidate in file_candidates:
@@ -147,7 +174,7 @@ class PrivacyFixer:  # pylint: disable=too-many-lines  # Issue #32
                         # Update each test file that references this function
                         for test_file_path, refs in test_refs_by_file.items():
                             try:
-                                test_result = self.update_test_file(
+                                test_result = self.test_updater.update_test_file(
                                     test_file_path,
                                     candidate.old_name,
                                     candidate.new_name,
@@ -162,7 +189,7 @@ class PrivacyFixer:  # pylint: disable=too-many-lines  # Issue #32
                                         f"{test_result.get('error', 'Update failed')}"
                                     )
                                     test_file_errors.append(error_msg)
-                            except Exception as e:
+                            except Exception as e:  # pylint: disable=broad-exception-caught
                                 error_msg = (
                                     f"Error updating test file {test_file_path}: "
                                     f"{str(e)}"
@@ -190,211 +217,51 @@ class PrivacyFixer:  # pylint: disable=too-many-lines  # Issue #32
     ) -> List[RenameCandidate]:
         """Detect functions that should be private across multiple files.
 
-        Analyzes the provided files to identify functions that should be private
-        based on their usage patterns within the project. Uses cross-module
-        analysis to avoid false positives for functions used by other modules.
+        Delegates to the privacy analyzer for the actual detection logic.
 
         :param files: List of Python files to analyze
         :param project_root: Root directory of the project for cross-module analysis
         :returns: List of functions that violate privacy guidelines
         """
-        violations = []
-
-        for file_path in files:
-            try:
-                # Parse the file
-                with open(file_path, "r", encoding="utf-8") as f:
-                    content = f.read()
-                module = astroid.parse(content, module_name=str(file_path))
-
-                # Get all functions in this module
-                functions = self._get_functions_from_module(module)
-
-                for func in functions:
-                    # Skip functions that are already private
-                    if func.name.startswith("_"):
-                        continue
-
-                    # Check if function should be private based on usage
-                    if self._should_function_be_private(func, file_path, project_root):
-                        # Find references for potential renaming
-                        references = self.find_function_references(func.name, module)
-
-                        # Create rename candidate
-                        candidate = RenameCandidate(
-                            function_node=func,
-                            old_name=func.name,
-                            new_name=f"_{func.name}",
-                            references=references,
-                            test_references=[],  # Will be populated later
-                            is_safe=True,  # Will be validated later
-                            safety_issues=[],
-                        )
-                        violations.append(candidate)
-
-            except Exception:  # pylint: disable=broad-exception-caught
-                # Skip files that can't be parsed
-                continue
-
-        return violations
+        return self.analyzer.analyze_module_privacy(files, project_root)
 
     def find_function_references(
-        self, function_name: str, module_ast: nodes.Module
+        self,
+        function_name: str,
+        module_ast: Any,  # astroid nodes.Module
     ) -> List[FunctionReference]:
         """Find all references to a function within a module.
 
-        This includes:
-        - Function calls: function_name()
-        - Assignments: var = function_name
-        - Decorators: @function_name
-        - Method calls: obj.function_name() (if it's a method)
+        Delegates to the privacy analyzer for the actual reference finding logic.
 
         :param function_name: Name of the function to find references for
         :param module_ast: AST of the module to search in
         :returns: List of all references found
         """
-        references = []
-
-        # Keep track of nodes we've already processed as decorators
-        # to avoid double-counting them when we encounter them as Name nodes
-        decorator_nodes = set()
-
-        # Walk through all nodes in the AST to find references
-        def _check_node(node: nodes.NodeNG) -> None:
-            """Recursively check a node and its children for references."""
-            # Check for function calls: function_name()
-            if isinstance(node, nodes.Call):
-                if (
-                    isinstance(node.func, nodes.Name)
-                    and node.func.name == function_name
-                ):
-                    references.append(
-                        FunctionReference(
-                            node=node,
-                            line=node.lineno,
-                            col=node.col_offset,
-                            context="call",
-                        )
-                    )
-
-            # Check decorators first (before processing Name nodes)
-            elif hasattr(node, "decorators") and node.decorators:
-                for decorator in node.decorators.nodes:
-                    if (
-                        isinstance(decorator, nodes.Name)
-                        and decorator.name == function_name
-                    ):
-                        references.append(
-                            FunctionReference(
-                                node=decorator,
-                                line=decorator.lineno,
-                                col=decorator.col_offset,
-                                context="decorator",
-                            )
-                        )
-                        # Mark this node so we don't count it again as a Name reference
-                        decorator_nodes.add(id(decorator))
-
-            # Check for name references: var = function_name
-            elif isinstance(node, nodes.Name) and node.name == function_name:
-                # Skip if this node was already processed as a decorator
-                if id(node) in decorator_nodes:
-                    pass
-                # Note: The function definition check below is likely unreachable
-                # in astroid because function names are stored as attributes,
-                # not separate Name nodes
-                elif isinstance(node.parent, nodes.Call) and node.parent.func == node:
-                    # This is already handled in the Call case above
-                    pass
-                else:
-                    # Determine context based on parent node
-                    context = "reference"
-                    if isinstance(node.parent, nodes.Assign):
-                        context = "assignment"
-
-                    references.append(
-                        FunctionReference(
-                            node=node,
-                            line=node.lineno,
-                            col=node.col_offset,
-                            context=context,
-                        )
-                    )
-
-            # Recursively check children
-            for child in node.get_children():
-                _check_node(child)
-
-        _check_node(module_ast)
-        return references
+        return self.analyzer.find_function_references(function_name, module_ast)
 
     def find_test_files(self, project_root: Path) -> List[Path]:
         """Find all test files in the project.
 
-        Uses the existing test detection logic to identify files that should
-        be updated when functions are privatized.
+        Delegates to the test file manager for the actual file discovery logic.
 
         :param project_root: Root directory of the project
         :returns: List of paths to test files
         """
-        # Get all Python files in the project
-        all_python_files = utils.find_python_files(project_root)
-        test_files = []
-
-        for file_path in all_python_files:
-            try:
-                # Convert to module name for test detection
-                relative_path = file_path.relative_to(project_root)
-                module_name = str(relative_path.with_suffix("")).replace("/", ".")
-
-                if utils.is_unittest_file(module_name):
-                    test_files.append(file_path)
-            except ValueError:
-                # Skip files that can't be made relative to project root
-                continue
-
-        return test_files
+        return self.test_manager.find_test_files(project_root)
 
     def find_test_references(
         self, function_name: str, test_files: List[Path]
     ) -> List[TestReference]:
         """Find all references to a function in test files.
 
-        Scans test files for various types of function references:
-        - Import statements: from module import func
-        - Mock patches: @patch('module.func'), mocker.patch('module.func')
-        - Direct calls: module.func(), func()
+        Delegates to the test file manager for the actual reference finding logic.
 
         :param function_name: Name of the function to find references for
         :param test_files: List of test files to scan
         :returns: List of test file references
         """
-        test_references = []
-
-        for test_file in test_files:
-            try:
-                with open(test_file, "r", encoding="utf-8") as f:
-                    content = f.read()
-
-                # Try to parse as AST for import detection
-                try:
-                    module = astroid.parse(content, module_name=str(test_file))
-                    file_refs = self._find_references_in_test_file(
-                        function_name, test_file, module, content
-                    )
-                    test_references.extend(file_refs)
-                except Exception:
-                    # If AST parsing fails, try string-based detection
-                    file_refs = self._find_string_references_in_test_file(
-                        function_name, test_file, content
-                    )
-                    test_references.extend(file_refs)
-
-            except Exception:
-                # Skip files that can't be read
-                continue
-
-        return test_references
+        return self.test_manager.find_test_references(function_name, test_files)
 
     def generate_report(self, candidates: List[RenameCandidate]) -> str:
         """Generate a human-readable report of rename operations.
@@ -445,7 +312,7 @@ class PrivacyFixer:  # pylint: disable=too-many-lines  # Issue #32
         """
         issues = []
 
-        # Check for name conflicts
+        # Check for name conflicts - call our own methods that can be overridden
         if self._has_name_conflict(candidate):
             issues.append(f"Private function '{candidate.new_name}' already exists")
 
@@ -464,8 +331,6 @@ class PrivacyFixer:  # pylint: disable=too-many-lines  # Issue #32
 
         return len(issues) == 0, issues
 
-    # Private methods
-
     def update_test_file(
         self,
         test_file: Path,
@@ -475,8 +340,7 @@ class PrivacyFixer:  # pylint: disable=too-many-lines  # Issue #32
     ) -> Dict[str, Any]:
         """Update a test file to use the new function name with backup and rollback.
 
-        This is the main entry point for safely updating test files. It creates
-        a backup, applies updates, validates the result, and rolls back if needed.
+        Delegates to the test file updater for the actual update logic.
 
         :param test_file: Path to the test file to update
         :param old_name: Original function name
@@ -484,368 +348,64 @@ class PrivacyFixer:  # pylint: disable=too-many-lines  # Issue #32
         :param test_references: List of test references to update
         :returns: Report of the update operation
         """
-        backup_file = None
-
-        try:
-            # Create backup if backup is enabled
-            if self.backup:
-                backup_file = Path(f"{test_file}.bak")
-                shutil.copy2(test_file, backup_file)
-
-            # Track changes made
-            import_changes = False
-            mock_changes = False
-
-            # Apply import statement updates
-            if any(ref.context == "import" for ref in test_references):
-                import_changes = self._update_import_statements(
-                    test_file, old_name, new_name, test_references
-                )
-
-            # Apply mock pattern updates
-            if any(ref.context == "mock_patch" for ref in test_references):
-                mock_changes = self._update_mock_patterns(
-                    test_file, old_name, new_name, test_references
-                )
-
-            # Validate the updated file syntax
-            if import_changes or mock_changes:
-                try:
-                    with open(test_file, "r", encoding="utf-8") as f:
-                        content = f.read()
-                    ast.parse(content)  # This will raise SyntaxError if invalid
-
-                    return {
-                        "success": True,
-                        "file": str(test_file),
-                        "backup": str(backup_file) if backup_file else None,
-                        "import_changes": import_changes,
-                        "mock_changes": mock_changes,
-                        "total_references": len(test_references),
-                    }
-
-                except SyntaxError:
-                    # Syntax validation failed - rollback
-                    if backup_file and backup_file.exists():
-                        shutil.copy2(backup_file, test_file)
-                        backup_file.unlink()  # Remove the backup since we used it
-
-                    return {
-                        "success": False,
-                        "error": "Syntax validation failed - changes rolled back",
-                        "file": str(test_file),
-                    }
-            else:
-                # No changes needed
-                if backup_file and backup_file.exists():
-                    backup_file.unlink()  # Remove unnecessary backup
-
-                return {
-                    "success": True,
-                    "file": str(test_file),
-                    "import_changes": False,
-                    "mock_changes": False,
-                    "total_references": len(test_references),
-                }
-
-        except Exception as e:
-            # General error - rollback if possible
-            if backup_file and backup_file.exists():
-                try:
-                    shutil.copy2(backup_file, test_file)
-                    backup_file.unlink()
-                except Exception:
-                    pass  # Best effort rollback
-
-            return {
-                "success": False,
-                "error": f"Update failed: {str(e)}",
-                "file": str(test_file),
-            }
+        return self.test_updater.update_test_file(
+            test_file, old_name, new_name, test_references
+        )
 
     # Private methods
+
+    # Additional delegation methods for backward compatibility with tests
+    # pylint: disable=protected-access
 
     def _apply_renames_to_content(
         self, content: str, candidates: List[RenameCandidate]
     ) -> str:
-        """Apply function name renames to file content.
-
-        This uses a conservative string replacement approach that:
-        1. Only processes safe candidates
-        2. Uses word boundaries to avoid partial matches
-        3. Preserves original formatting and structure
-
-        :param content: Original file content
-        :param candidates: List of rename candidates
-        :returns: Modified file content
-        """
-        modified_content = content
-
-        # Only process safe candidates
-        safe_candidates = [c for c in candidates if c.is_safe]
-
-        for candidate in safe_candidates:
-            old_name = candidate.old_name
-            new_name = candidate.new_name
-
-            # Use word boundaries to ensure we only match complete function names
-            # This pattern matches:
-            # - Function definitions: def old_name(
-            # - Function calls: old_name(
-            # - Assignments: var = old_name
-            # - Decorators: @old_name
-            pattern = rf"\b{re.escape(old_name)}\b"
-
-            modified_content = re.sub(pattern, new_name, modified_content)
-
-        return modified_content
+        """Apply function name renames to file content (backward compatibility)."""
+        return self.file_ops._apply_renames_to_content(content, candidates)
 
     def _apply_renames_to_file(
         self, file_path: Path, candidates: List[RenameCandidate]
     ) -> Dict[str, Any]:
-        """Apply renames to a specific file.
-
-        :param file_path: Path to the file to modify
-        :param candidates: List of rename candidates for this file
-        :returns: Report of changes made to this file
-        """
-        if self.dry_run:
-            # In dry-run mode, just report what would be changed
-            return {
-                "renamed": len([c for c in candidates if c.is_safe]),
-                "skipped": len([c for c in candidates if not c.is_safe]),
-                "errors": [],
-                "dry_run": True,
-            }
-
-        try:
-            # Read the original file content
-            with open(file_path, "r", encoding="utf-8") as f:
-                original_content = f.read()
-
-            # Create backup if requested
-            if self.backup:
-                backup_path = file_path.with_suffix(file_path.suffix + ".bak")
-                with open(backup_path, "w", encoding="utf-8") as f:
-                    f.write(original_content)
-
-            # Apply renames to the content
-            modified_content = self._apply_renames_to_content(
-                original_content, candidates
-            )
-
-            # Write the modified content back to the file
-            if modified_content != original_content:
-                with open(file_path, "w", encoding="utf-8") as f:
-                    f.write(modified_content)
-
-            return {
-                "renamed": len([c for c in candidates if c.is_safe]),
-                "skipped": len([c for c in candidates if not c.is_safe]),
-                "errors": [],
-            }
-
-        except Exception as e:
-            return {
-                "renamed": 0,
-                "skipped": len(candidates),
-                "errors": [f"Failed to process {file_path}: {str(e)}"],
-            }
+        """Apply renames to a specific file (backward compatibility)."""
+        return self.file_ops.apply_renames_to_file(file_path, candidates, self.dry_run)
 
     def _build_import_graph(self, project_root: Path) -> Dict[Path, Set[str]]:
-        """Build a graph of imports across the project.
-
-        Scans all Python files in the project to build a mapping from
-        file paths to the set of function names they import.
-
-        :param project_root: Root directory to scan for Python files
-        :returns: Dictionary mapping file paths to imported function names
-        """
-        import_graph: Dict[Path, Set[str]] = {}
-
-        # Find all Python files in the project
-        python_files = list(project_root.rglob("*.py"))
-
-        for file_path in python_files:
-            try:
-                with open(file_path, "r", encoding="utf-8") as f:
-                    content = f.read()
-
-                # Parse the file to extract imports
-                module = astroid.parse(content, module_name=str(file_path))
-                imported_functions = self._extract_function_imports(module)
-                import_graph[file_path] = imported_functions
-
-            except Exception:
-                # Skip files that can't be parsed
-                import_graph[file_path] = set()
-
-        return import_graph
+        """Build a graph of imports across the project (backward compatibility)."""
+        return self.analyzer._build_import_graph(project_root)
 
     def _check_reference_contexts(self, candidate: RenameCandidate) -> List[str]:
         """Check if all references are in contexts we can safely handle."""
-        safe_contexts = {"call", "assignment", "decorator", "reference"}
-        unsafe_contexts = []
+        return self.analyzer._check_reference_contexts(candidate)
 
-        for ref in candidate.references:
-            if ref.context not in safe_contexts:
-                unsafe_contexts.append(ref.context)
+    def _extract_function_imports(self, module: Any) -> Set[str]:
+        """Extract function names that are imported by a module."""
+        return self.analyzer._extract_function_imports(module)
 
-        return list(set(unsafe_contexts))  # Remove duplicates
-
-    def _extract_function_imports(self, module: nodes.Module) -> Set[str]:
-        """Extract function names that are imported by a module.
-
-        :param module: AST module node to analyze
-        :returns: Set of imported function names
-        """
-        imported_functions: Set[str] = set()
-
-        for node in module.nodes_of_class((nodes.ImportFrom, nodes.Import)):
-            if isinstance(node, nodes.ImportFrom):
-                # Handle: from module import func1, func2
-                if node.names:
-                    for name, alias in node.names:
-                        # Use alias if present, otherwise use original name
-                        import_name = alias if alias else name
-                        if import_name and import_name != "*":
-                            imported_functions.add(import_name)
-            elif isinstance(node, nodes.Import):
-                # Handle: import module (functions accessed as module.func)
-                # For now, we don't track module.function patterns
-                pass
-
-        return imported_functions
-
-    def _fallback_privacy_heuristics(self, func: nodes.FunctionDef) -> bool:
-        """Fallback heuristics when cross-module analysis isn't available.
-
-        :param func: Function definition node
-        :returns: True if function should be private based on heuristics
-        """
-        # Use simple pattern matching as fallback
-        internal_patterns = ["helper", "internal", "validate", "format"]
-
-        for pattern in internal_patterns:
-            if pattern in func.name.lower():
-                return True
-
-        return False
+    def _fallback_privacy_heuristics(self, func: Any) -> bool:
+        """Fallback heuristics when cross-module analysis isn't available."""
+        return self.analyzer._fallback_privacy_heuristics(func)
 
     def _find_references_in_test_file(
-        self,
-        function_name: str,
-        test_file: Path,
-        module: nodes.Module,
-        content: str,
+        self, function_name: str, test_file: Path, module: Any, content: str
     ) -> List[TestReference]:
-        """Find function references in a test file using AST analysis.
-
-        :param function_name: Name of the function to find
-        :param test_file: Path to the test file being analyzed
-        :param module: Parsed AST module
-        :param content: File content for line-based analysis
-        :returns: List of test references found
-        """
-        references = []
-
-        # Find import statements
-        for node in module.nodes_of_class((nodes.ImportFrom, nodes.Import)):
-            if isinstance(node, nodes.ImportFrom):
-                # Handle: from module import func1, func2
-                if node.names:
-                    for name, alias in node.names:
-                        if name == function_name:
-                            # Use alias if present, otherwise use original name
-                            import_name = alias if alias else name
-                            references.append(
-                                TestReference(
-                                    file_path=test_file,
-                                    line=node.lineno,
-                                    col=node.col_offset,
-                                    context="import",
-                                    reference_text=(
-                                        f"from {node.module} import {name}"
-                                        f"{' as ' + import_name if alias else ''}"
-                                    ),
-                                )
-                            )
-
-        # Find string-based mock patches in the content
-        string_refs = self._find_string_references_in_test_file(
-            function_name, test_file, content
+        """Find function references in a test file using AST analysis."""
+        return self.test_manager._find_references_in_test_file(
+            function_name, test_file, module, content
         )
-        references.extend(string_refs)
-
-        return references
 
     def _find_string_references_in_test_file(
         self, function_name: str, test_file: Path, content: str
     ) -> List[TestReference]:
-        """Find function references in test file using string-based analysis.
+        """Find function references in test file using string-based analysis."""
+        return self.test_manager._find_string_references_in_test_file(
+            function_name, test_file, content
+        )
 
-        This handles cases where AST parsing fails or for string literals
-        like mock patches that contain function names.
+    def _get_functions_from_module(self, module: Any) -> List[Any]:
+        """Extract all function definitions from a module (backward compatibility)."""
+        return self.analyzer._get_functions_from_module(module)
 
-        :param function_name: Name of the function to find
-        :param test_file: Path to the test file being analyzed
-        :param content: File content to search
-        :returns: List of test references found
-        """
-        references = []
-        lines = content.split("\n")
-
-        # Pattern for mock patches: @patch('module.function_name')
-        patch_pattern = rf"@patch\(['\"]([^'\"]*\.{re.escape(function_name)})['\"]"
-
-        # Pattern for mocker.patch calls: mocker.patch('module.function_name')
-        mocker_pattern = rf"\.patch\(['\"]([^'\"]*\.{re.escape(function_name)})['\"]"
-
-        for line_num, line in enumerate(lines, 1):
-            # Check for patch decorators
-            match = re.search(patch_pattern, line)
-            if match:
-                references.append(
-                    TestReference(
-                        file_path=test_file,
-                        line=line_num,
-                        col=match.start(),
-                        context="mock_patch",
-                        reference_text=match.group(1),
-                    )
-                )
-
-            # Check for mocker.patch calls
-            match = re.search(mocker_pattern, line)
-            if match:
-                references.append(
-                    TestReference(
-                        file_path=test_file,
-                        line=line_num,
-                        col=match.start(),
-                        context="mock_patch",
-                        reference_text=match.group(1),
-                    )
-                )
-
-        return references
-
-    def _get_functions_from_module(
-        self, module: nodes.Module
-    ) -> List[nodes.FunctionDef]:
-        """Extract all function definitions from a module.
-
-        :param module: Astroid module node to analyze
-        :returns: List of function definition nodes
-        """
-        functions = []
-        for node in module.nodes_of_class(nodes.FunctionDef):
-            # Skip nested functions and class methods for now
-            if isinstance(node.parent, nodes.Module):
-                functions.append(node)
-        return functions
-
-    def _group_candidates_by_file(
+    def _group_candidates_by_file(  # pylint: disable=too-many-nested-blocks
         self, candidates: List[RenameCandidate]
     ) -> Dict[Path, List[RenameCandidate]]:
         """Group rename candidates by the file they belong to.
@@ -870,7 +430,7 @@ class PrivacyFixer:  # pylint: disable=too-many-lines  # Issue #32
                     elif hasattr(root, "name") and root.name and root.name != "<?>":
                         # For astroid modules parsed with explicit names
                         file_path = Path(root.name)
-            except Exception:
+            except Exception:  # pylint: disable=broad-exception-caught
                 # If we can't get file path from node, continue to fallback
                 pass
 
@@ -884,7 +444,7 @@ class PrivacyFixer:  # pylint: disable=too-many-lines  # Issue #32
                         if hasattr(candidate.function_node, "root")
                         else id(candidate.function_node)
                     )
-                except Exception:
+                except Exception:  # pylint: disable=broad-exception-caught
                     # If even getting the root fails, use the function node itself
                     node_id = id(candidate.function_node)
                 file_path = Path(f"file_{node_id}.py")
@@ -893,174 +453,43 @@ class PrivacyFixer:  # pylint: disable=too-many-lines  # Issue #32
 
         return dict(candidates_by_file)
 
-    def _has_dynamic_references(self, _candidate: RenameCandidate) -> bool:  # pylint: disable=unused-argument
+    def _has_dynamic_references(self, candidate: RenameCandidate) -> bool:
         """Check for dynamic references that we can't safely rename."""
-        # This is a placeholder - we'd need to scan the module AST for:
-        # - getattr(obj, "function_name")
-        # - hasattr(obj, "function_name")
-        # - __getattribute__, setattr, delattr with the function name
-        # - eval(), exec() with potential function references
+        return self.analyzer._has_dynamic_references(candidate)
 
-        # For MVP, we'll be conservative and just check if any references
-        # are in contexts we don't recognize
-        return False
-
-    def _has_name_conflict(self, candidate: RenameCandidate) -> bool:  # pylint: disable=unused-argument
+    def _has_name_conflict(self, candidate: RenameCandidate) -> bool:
         """Check if renaming would create a name conflict."""
-        # Get the module AST to check for existing private function
-        try:
-            # We need the module AST - for now, assume we'll pass it in
-            # TODO: Refactor to include module AST in candidate or pass separately
+        return self.analyzer._has_name_conflict(candidate)
 
-            # For testing coverage: allow triggering exception path
-            if candidate.old_name == "test_exception_coverage":
-                raise RuntimeError("Test exception for coverage")
-            return False
-        except Exception:
-            return True  # Conservative: assume conflict if we can't check
-
-    def _has_string_references(self, _candidate: RenameCandidate) -> bool:  # pylint: disable=unused-argument
+    def _has_string_references(self, candidate: RenameCandidate) -> bool:
         """Check for string literals containing the function name."""
-        # This would scan the module for string literals containing the function name
-        # For MVP, assume no string references for simplicity
-        return False
+        return self.analyzer._has_string_references(candidate)
 
     def _is_function_used_externally(
         self, func_name: str, file_path: Path, import_graph: Dict[Path, Set[str]]
     ) -> bool:
-        """Check if a function is imported by other modules.
-
-        :param func_name: Name of the function to check
-        :param file_path: Path of the file containing the function
-        :param import_graph: Import graph from _build_import_graph
-        :returns: True if function is used by other modules
-        """
-        for other_file, imported_funcs in import_graph.items():
-            # Skip the file containing the function itself
-            if other_file == file_path:
-                continue
-
-            # Check if this function is imported
-            if func_name in imported_funcs:
-                return True
-
-        return False
+        """Check if a function is imported by other modules (backward compatibility)."""
+        return self.analyzer._is_function_used_externally(
+            func_name, file_path, import_graph
+        )
 
     def _should_function_be_private(
-        self,
-        func: nodes.FunctionDef,
-        file_path: Path,
-        project_root: Path,
+        self, func: Any, file_path: Path, project_root: Path
     ) -> bool:
-        """Determine if a function should be private based on cross-module usage.
+        """Determine if a function should be private based on cross-module usage."""
+        return self.analyzer.should_function_be_private(func, file_path, project_root)
 
-        Uses comprehensive import graph analysis to determine if a function is used
-        by other modules or only internally within its defining module.
-
-        :param func: Function definition node
-        :param file_path: Path to the file containing the function
-        :param project_root: Root directory of the project
-        :returns: True if function should be private
-        """
-        # Skip common public API patterns that should never be made private
-        public_patterns = {
-            "main",
-            "run",
-            "execute",
-            "start",
-            "stop",
-            "setup",
-            "teardown",
-            "test",
-            "public_api",
-            "api",
-            "handle",
-            "process",
-        }
-
-        if func.name in public_patterns or func.name.startswith("test"):
-            return False
-
-        # Also skip functions that look like public APIs
-        if any(
-            func.name.startswith(pattern)
-            for pattern in ["calculate_", "compute_", "get_", "set_"]
-        ):
-            return False
-
-        # Build import graph to check cross-module usage
-        try:
-            import_graph = self._build_import_graph(project_root)
-            return not self._is_function_used_externally(
-                func.name, file_path, import_graph
-            )
-        except Exception:
-            # If cross-module analysis fails, fall back to heuristics
-            return self._fallback_privacy_heuristics(func)
-
-    def _update_import_statements(  # pylint: disable=too-many-nested-blocks  # Issue #32
+    def _update_import_statements(
         self,
         test_file: Path,
         old_name: str,
         new_name: str,
         test_references: List[TestReference],
     ) -> bool:
-        """Update import statements in a test file to use the new function name.
-
-        This method handles AST-based modifications of import statements to replace
-        old function names with new private function names.
-
-        :param test_file: Path to the test file to update
-        :param old_name: Original function name
-        :param new_name: New private function name (with underscore)
-        :param test_references: List of test references to update
-        :returns: True if file was successfully updated
-        """
-        try:
-            # Read the current file content
-            with open(test_file, "r", encoding="utf-8") as f:
-                content = f.read()
-
-            # Track if any changes were made
-            changes_made = False
-            lines = content.split("\n")
-
-            # Process each import-related test reference
-            for ref in test_references:
-                if ref.context == "import":
-                    # For multi-line imports, the reference line might not be the
-                    # ImportFrom node line. So we need to check if the specific
-                    # line contains the function name
-                    line_idx = ref.line - 1  # Convert to 0-based index
-                    if line_idx < len(lines):
-                        old_line = lines[line_idx]
-                        # Check if this line contains the function name to replace
-                        if old_name in old_line:
-                            # Replace the function name in various patterns
-                            new_line = (
-                                old_line.replace(f" {old_name}", f" {new_name}")
-                                .replace(f" {old_name},", f" {new_name},")
-                                .replace(f"({old_name}", f"({new_name}")
-                                .replace(f"({old_name},", f"({new_name},")
-                                .replace(f"    {old_name},", f"    {new_name},")
-                                .replace(f"    {old_name}", f"    {new_name}")
-                            )
-
-                            if new_line != old_line:
-                                lines[line_idx] = new_line
-                                changes_made = True
-
-            # Write the updated content back to the file if changes were made
-            if changes_made:
-                updated_content = "\n".join(lines)
-                with open(test_file, "w", encoding="utf-8") as f:
-                    f.write(updated_content)
-
-            return changes_made
-
-        except Exception:
-            # If AST parsing or file operations fail, return False
-            return False
+        """Update import statements in a test file to use the new function name."""
+        return self.test_updater._update_import_statements(
+            test_file, old_name, new_name, test_references
+        )
 
     def _update_mock_patterns(
         self,
@@ -1069,51 +498,7 @@ class PrivacyFixer:  # pylint: disable=too-many-lines  # Issue #32
         new_name: str,
         test_references: List[TestReference],
     ) -> bool:
-        """Update mock patch patterns in a test file to use the new function name.
-
-        This method handles string-based modifications of mock patches to replace
-        old function names with new private function names.
-
-        :param test_file: Path to the test file to update
-        :param old_name: Original function name
-        :param new_name: New private function name (with underscore)
-        :param test_references: List of test references to update
-        :returns: True if file was successfully updated
-        """
-        try:
-            # Read the current file content
-            with open(test_file, "r", encoding="utf-8") as f:
-                content = f.read()
-
-            # Track if any changes were made
-            changes_made = False
-            lines = content.split("\n")
-
-            # Process each mock-related test reference
-            for ref in test_references:
-                if ref.context == "mock_patch":
-                    # Update the specific line containing the mock patch
-                    line_idx = ref.line - 1  # Convert to 0-based index
-                    if line_idx < len(lines):
-                        old_line = lines[line_idx]
-                        # Replace the function name in the mock patch string
-                        # Handle both single and double quotes
-                        new_line = old_line.replace(
-                            f".{old_name}'", f".{new_name}'"
-                        ).replace(f'.{old_name}"', f'.{new_name}"')
-
-                        if new_line != old_line:
-                            lines[line_idx] = new_line
-                            changes_made = True
-
-            # Write the updated content back to the file if changes were made
-            if changes_made:
-                updated_content = "\n".join(lines)
-                with open(test_file, "w", encoding="utf-8") as f:
-                    f.write(updated_content)
-
-            return changes_made
-
-        except Exception:
-            # If file operations fail, return False
-            return False
+        """Update mock patch patterns in a test file to use the new function name."""
+        return self.test_updater._update_mock_patterns(
+            test_file, old_name, new_name, test_references
+        )

@@ -240,7 +240,7 @@ class TestPhase2TestFileUpdates:
             test_file.write_text(original_content)
 
             # Create a mock that will make the update create invalid syntax
-            original_update_import = self.fixer._update_import_statements
+            original_update_import = self.fixer.test_updater._update_import_statements
 
             def mock_update_import_statements(  # pylint: disable=unused-argument
                 test_file: Path,
@@ -257,7 +257,9 @@ class TestPhase2TestFileUpdates:
 
             # Using setattr to avoid MyPy method assignment error
             setattr(
-                self.fixer, "_update_import_statements", mock_update_import_statements
+                self.fixer.test_updater,
+                "_update_import_statements",
+                mock_update_import_statements,
             )
 
             test_references = [
@@ -658,14 +660,14 @@ class TestPhase2Integration:
                 },
             )
 
-            # Mock update_test_file to return failure
-            original_update_test_file = fixer.update_test_file
+            # Mock update_test_file to return failure (on component method)
+            original_update_test_file = fixer.test_updater.update_test_file
+
+            def mock_update_test_file(*_args: Any) -> dict[str, Any]:
+                return {"success": False, "error": "Test update failed"}
+
             # Using setattr to avoid MyPy method assignment error
-            setattr(
-                fixer,
-                "update_test_file",
-                lambda *args: {"success": False, "error": "Test update failed"},
-            )
+            setattr(fixer.test_updater, "update_test_file", mock_update_test_file)
 
             try:
                 result = fixer.apply_renames(candidates, project_root)
@@ -678,7 +680,9 @@ class TestPhase2Integration:
 
             finally:
                 setattr(fixer, "_apply_renames_to_file", original_apply_renames_to_file)
-                setattr(fixer, "update_test_file", original_update_test_file)
+                setattr(
+                    fixer.test_updater, "update_test_file", original_update_test_file
+                )
 
     def test_test_file_update_exception_reporting(self) -> None:
         """Test exception reporting for test file update failures."""
@@ -733,14 +737,14 @@ class TestPhase2Integration:
                 },
             )
 
-            # Mock update_test_file to raise exception
-            original_update_test_file = fixer.update_test_file
+            # Mock update_test_file to raise exception (on component method)
+            original_update_test_file = fixer.test_updater.update_test_file
 
             def mock_update_test_file(*args: Any) -> dict[str, Any]:
                 raise RuntimeError("Simulated exception")
 
             # Using setattr to avoid MyPy method assignment error
-            setattr(fixer, "update_test_file", mock_update_test_file)
+            setattr(fixer.test_updater, "update_test_file", mock_update_test_file)
 
             try:
                 result = fixer.apply_renames(candidates, project_root)
@@ -753,7 +757,9 @@ class TestPhase2Integration:
 
             finally:
                 setattr(fixer, "_apply_renames_to_file", original_apply_renames_to_file)
-                setattr(fixer, "update_test_file", original_update_test_file)
+                setattr(
+                    fixer.test_updater, "update_test_file", original_update_test_file
+                )
 
     def test_update_test_file_rollback_exception_handling(self) -> None:
         """Test exception handling during rollback operations."""
@@ -790,13 +796,13 @@ class TestPhase2Integration:
                 raise PermissionError("Cannot access backup file")
 
             # Mock the general exception path by making an exception occur
-            original_update_import = fixer._update_import_statements
+            original_update_import = fixer.test_updater._update_import_statements
 
             def mock_update_import(*args: Any) -> bool:
                 raise RuntimeError("General update failure")
 
             # Using setattr to avoid MyPy method assignment error
-            setattr(fixer, "_update_import_statements", mock_update_import)
+            setattr(fixer.test_updater, "_update_import_statements", mock_update_import)
 
             with patch("shutil.copy2", mock_copy2):
                 result = fixer.update_test_file(
