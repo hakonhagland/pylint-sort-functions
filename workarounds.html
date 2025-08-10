@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Known Issues &amp; Workarounds &mdash; pylint-sort-functions 0.1 documentation</title>
+  <title>Configuration &amp; Limitations Guide &mdash; pylint-sort-functions 0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
 
@@ -47,24 +47,16 @@
 <li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="usage.html">User Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="cli.html">Auto-Fix Tool Reference</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Known Issues &amp; Workarounds</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#framework-decorator-issues">Framework Decorator Issues</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#workaround-options">Workaround Options</a></li>
-</ul>
-</li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Configuration &amp; Limitations Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#current-status-summary">Current Status Summary</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#framework-decorator-support">Framework Decorator Support</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#test-method-ordering">Test Method Ordering</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#magic-methods-init-str-etc">Magic Methods (__init__, __str__, etc.)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#bulk-violations">Bulk Violations</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#temporary-strategy">Temporary Strategy</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#getting-better-error-messages">Getting Better Error Messages</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#manual-debugging">Manual Debugging</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#project-wide-configuration">Project-Wide Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#automated-bulk-fixing">Automated Bulk Fixing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#enhanced-error-messages">Enhanced Error Messages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#modern-configuration">Modern Configuration</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#selective-enforcement-strategy">Selective Enforcement Strategy</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#configuration-templates">Configuration Templates</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#modern-configuration-examples">Modern Configuration Examples</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#getting-help">Getting Help</a></li>
 </ul>
 </li>
@@ -102,7 +94,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">Known Issues &amp; Workarounds</li>
+      <li class="breadcrumb-item active">Configuration &amp; Limitations Guide</li>
       <li class="wy-breadcrumbs-aside">
               <a href="https://github.com/hakonhagland/pylint-sort-functions/blob/main/docs/workarounds.rst" class="fa fa-github"> Edit on GitHub</a>
       </li>
@@ -112,60 +104,66 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="known-issues-workarounds">
-<h1>Known Issues &amp; Workarounds<a class="headerlink" href="#known-issues-workarounds" title="Link to this heading"></a></h1>
-<p>This page provides temporary solutions for known limitations while we work on permanent fixes.</p>
+  <section id="configuration-limitations-guide">
+<h1>Configuration &amp; Limitations Guide<a class="headerlink" href="#configuration-limitations-guide" title="Link to this heading"></a></h1>
+<p>This page covers modern configuration options and current limitations with their workarounds.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>These are temporary solutions. Permanent fixes are tracked in our <a class="reference external" href="https://github.com/hakonhagland/pylint-sort-functions/issues">GitHub issues</a>.
-Check the <a class="reference internal" href="roadmap.html"><span class="doc">Development Roadmap</span></a> for implementation timeline.</p>
+<p>Many previously documented issues have been resolved! This guide now focuses on current configuration best practices and remaining limitations.
+Active issues are tracked in our <a class="reference external" href="https://github.com/hakonhagland/pylint-sort-functions/issues">GitHub issues</a>.</p>
 </div>
-<section id="framework-decorator-issues">
-<h2>Framework Decorator Issues<a class="headerlink" href="#framework-decorator-issues" title="Link to this heading"></a></h2>
-<p><strong>Issue</strong>: <a class="reference external" href="https://github.com/hakonhagland/pylint-sort-functions/issues/1">#1</a> - Functions with decorators that depend on other functions trigger false positives.</p>
-<p><strong>Affected Frameworks</strong>: Click, Flask, FastAPI, Celery</p>
-<p><strong>Problem Example</strong>:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># This code works but violates sorting</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
-    <span class="k">pass</span>
-
-<span class="nd">@main</span><span class="o">.</span><span class="n">command</span><span class="p">()</span>  <span class="c1"># Depends on main() being defined first</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">create</span><span class="p">():</span>
-    <span class="k">pass</span>
-</pre></div>
-</div>
-<section id="workaround-options">
-<h3>Workaround Options<a class="headerlink" href="#workaround-options" title="Link to this heading"></a></h3>
-<p><strong>1. File-level disable (recommended for now)</strong>:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># pylint: disable=unsorted-functions</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
-    <span class="k">pass</span>
-
-<span class="nd">@main</span><span class="o">.</span><span class="n">command</span><span class="p">()</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">create</span><span class="p">():</span>
-    <span class="k">pass</span>
-</pre></div>
-</div>
-<p><strong>2. Per-function disable</strong>:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
-    <span class="k">pass</span>
-
-<span class="k">def</span><span class="w"> </span><span class="nf">create</span><span class="p">():</span>  <span class="c1"># pylint: disable=unsorted-functions</span>
-    <span class="k">pass</span>
-</pre></div>
-</div>
-<p><strong>3. Global configuration</strong> (in <code class="docutils literal notranslate"><span class="pre">.pylintrc</span></code>):</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">MESSAGES</span> <span class="n">CONTROL</span><span class="p">]</span>
-<span class="n">disable</span><span class="o">=</span><span class="n">unsorted</span><span class="o">-</span><span class="n">functions</span><span class="p">,</span><span class="n">unsorted</span><span class="o">-</span><span class="n">methods</span>
-</pre></div>
-</div>
+<section id="current-status-summary">
+<h2>Current Status Summary<a class="headerlink" href="#current-status-summary" title="Link to this heading"></a></h2>
+<p>✅ <strong>RESOLVED (Modern Solutions Available)</strong>:
+- Framework decorator conflicts (Click, Flask, FastAPI) - Use <code class="docutils literal notranslate"><span class="pre">ignore-decorators</span></code> configuration
+- pyproject.toml configuration support - Fully supported via <code class="docutils literal notranslate"><span class="pre">[tool.pylint.function-sort]</span></code>
+- Bulk fixing automation - Comprehensive CLI auto-fix tool available
+- Privacy detection and fixing - Built-in <code class="docutils literal notranslate"><span class="pre">--fix-privacy</span></code> feature</p>
+<p>🟡 <strong>ACTIVE LIMITATIONS (Workarounds Available)</strong>:
+- Enhanced error messages - CLI tool provides better analysis, plugin improvements planned
+- Test method conventional ordering - Use class-level disables or ignore decorators
+- Magic method conventional ordering - Use class-level disables</p>
+<p>🔧 <strong>RECOMMENDED APPROACH</strong>: Use modern pyproject.toml configuration with selective workarounds for remaining limitations.</p>
 </section>
+<section id="framework-decorator-support">
+<h2>Framework Decorator Support<a class="headerlink" href="#framework-decorator-support" title="Link to this heading"></a></h2>
+<p><strong>Status</strong>: ✅ <strong>RESOLVED</strong> - The plugin now supports decorator exclusions.</p>
+<p><strong>Supported Frameworks</strong>: Click, Flask, FastAPI, Celery, pytest, and more.</p>
+<p><strong>Modern Solution</strong>: Use <code class="docutils literal notranslate"><span class="pre">ignore-decorators</span></code> configuration instead of disabling the plugin.</p>
+<p><strong>pyproject.toml Configuration</strong>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">tool</span><span class="o">.</span><span class="n">pylint</span><span class="o">.</span><span class="n">function</span><span class="o">-</span><span class="n">sort</span><span class="p">]</span>
+<span class="n">ignore</span><span class="o">-</span><span class="n">decorators</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">&quot;@app.route&quot;</span><span class="p">,</span>      <span class="c1"># Flask routes</span>
+    <span class="s2">&quot;@*.command&quot;</span><span class="p">,</span>      <span class="c1"># Click commands (wildcard support)</span>
+    <span class="s2">&quot;@celery.task&quot;</span><span class="p">,</span>    <span class="c1"># Celery tasks</span>
+    <span class="s2">&quot;@pytest.fixture&quot;</span><span class="p">,</span> <span class="c1"># pytest fixtures</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+<p><strong>CLI Tool Integration</strong>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Auto-fix with decorator exclusions</span>
+<span class="n">pylint</span><span class="o">-</span><span class="n">sort</span><span class="o">-</span><span class="n">functions</span> <span class="o">--</span><span class="n">fix</span> <span class="o">--</span><span class="n">ignore</span><span class="o">-</span><span class="n">decorators</span> <span class="s2">&quot;@app.route&quot;</span> <span class="o">--</span><span class="n">ignore</span><span class="o">-</span><span class="n">decorators</span> <span class="s2">&quot;@*.command&quot;</span> <span class="n">src</span><span class="o">/</span>
+</pre></div>
+</div>
+<p><strong>Example - Click Application</strong>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># pyproject.toml: ignore-decorators = [&quot;@*.command&quot;]</span>
+
+<span class="c1"># This now works without violations:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
+    <span class="k">pass</span>
+
+<span class="nd">@main</span><span class="o">.</span><span class="n">command</span><span class="p">()</span>  <span class="c1"># Excluded from sorting requirements</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">create</span><span class="p">():</span>
+    <span class="k">pass</span>
+</pre></div>
+</div>
 </section>
 <section id="test-method-ordering">
 <h2>Test Method Ordering<a class="headerlink" href="#test-method-ordering" title="Link to this heading"></a></h2>
-<p><strong>Issue</strong>: <a class="reference external" href="https://github.com/hakonhagland/pylint-sort-functions/issues/5">#5</a> - Test classes with setUp/tearDown methods trigger violations.</p>
+<p><strong>Status</strong>: 🟡 <strong>PLANNED</strong> - <a class="reference external" href="https://github.com/hakonhagland/pylint-sort-functions/issues/5">Issue #5</a> is still open.</p>
 <p><strong>Problem</strong>: Test frameworks expect conventional ordering (setUp, tearDown, then test methods), not alphabetical.</p>
-<p><strong>Workaround</strong>:</p>
+<p><strong>Current Workarounds</strong>:</p>
+<p><strong>1. Class-level disable (recommended)</strong>:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">TestExample</span><span class="p">:</span>  <span class="c1"># pylint: disable=unsorted-methods</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">pass</span>
@@ -177,53 +175,87 @@ Check the <a class="reference internal" href="roadmap.html"><span class="doc">De
         <span class="k">pass</span>
 </pre></div>
 </div>
+<p><strong>2. Configure exclusions for test files</strong>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># pyproject.toml</span>
+<span class="p">[</span><span class="n">tool</span><span class="o">.</span><span class="n">pylint</span><span class="o">.</span><span class="n">function</span><span class="o">-</span><span class="n">sort</span><span class="p">]</span>
+<span class="n">ignore</span><span class="o">-</span><span class="n">decorators</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;@pytest.fixture&quot;</span><span class="p">]</span>
+
+<span class="c1"># Or disable in test files only:</span>
+<span class="c1"># At top of test_*.py files:</span>
+<span class="c1"># pylint: disable=unsorted-methods</span>
+</pre></div>
+</div>
+<p><strong>Planned Enhancement</strong>: Future configuration option for conventional test ordering:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">tool</span><span class="o">.</span><span class="n">pylint</span><span class="o">.</span><span class="n">function</span><span class="o">-</span><span class="n">sort</span><span class="p">]</span>
+<span class="n">test</span><span class="o">-</span><span class="n">method</span><span class="o">-</span><span class="n">ordering</span> <span class="o">=</span> <span class="s2">&quot;conventional&quot;</span>  <span class="c1"># setUp, tearDown, then alphabetical</span>
+</pre></div>
+</div>
 </section>
 <section id="magic-methods-init-str-etc">
 <h2>Magic Methods (__init__, __str__, etc.)<a class="headerlink" href="#magic-methods-init-str-etc" title="Link to this heading"></a></h2>
-<p><strong>Issue</strong>: Magic methods should follow conventional ordering, not alphabetical.</p>
-<p><strong>Problem</strong>: Classes with magic methods get flagged incorrectly.</p>
-<p><strong>Workaround</strong>:</p>
+<p><strong>Status</strong>: 🟡 <strong>ACTIVE LIMITATION</strong> - Magic methods currently trigger sorting violations.</p>
+<p><strong>Problem</strong>: Magic methods should follow conventional Python ordering, not alphabetical (e.g., <code class="docutils literal notranslate"><span class="pre">__init__</span></code> first), but the plugin currently enforces alphabetical sorting.</p>
+<p><strong>Current Workaround</strong>:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">MyClass</span><span class="p">:</span>  <span class="c1"># pylint: disable=unsorted-methods</span>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>  <span class="c1"># Convention: __init__ comes first</span>
         <span class="k">pass</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>   <span class="c1"># Then other magic methods</span>
         <span class="k">pass</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">my_method</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">my_method</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>  <span class="c1"># Then regular methods</span>
         <span class="k">pass</span>
 </pre></div>
 </div>
-</section>
-<section id="bulk-violations">
-<h2>Bulk Violations<a class="headerlink" href="#bulk-violations" title="Link to this heading"></a></h2>
-<p><strong>Issue</strong>: <a class="reference external" href="https://github.com/hakonhagland/pylint-sort-functions/issues/4">#4</a> - Many files need manual reordering.</p>
-<p><strong>Problem</strong>: Manually fixing 30+ files is time-consuming and error-prone.</p>
-<section id="temporary-strategy">
-<h3>Temporary Strategy<a class="headerlink" href="#temporary-strategy" title="Link to this heading"></a></h3>
-<ol class="arabic simple">
-<li><p><strong>Prioritize by impact</strong>: Fix public API modules first</p></li>
-<li><p><strong>Use selective disabling</strong>: Disable on complex files, enable on simple ones</p></li>
-<li><p><strong>Gradual adoption</strong>: Enable on new files only</p></li>
-</ol>
-<p><strong>Configuration Example</strong>:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># In .pylintrc - disable by default, enable selectively</span>
-<span class="p">[</span><span class="n">MESSAGES</span> <span class="n">CONTROL</span><span class="p">]</span>
-<span class="n">disable</span><span class="o">=</span><span class="n">unsorted</span><span class="o">-</span><span class="n">functions</span><span class="p">,</span><span class="n">unsorted</span><span class="o">-</span><span class="n">methods</span>
-
-<span class="c1"># Then in specific files where you want enforcement:</span>
-<span class="c1"># pylint: enable=unsorted-functions,unsorted-methods</span>
+<p><strong>Alternative</strong>: Selective class-level configuration (future enhancement):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Planned feature</span>
+<span class="p">[</span><span class="n">tool</span><span class="o">.</span><span class="n">pylint</span><span class="o">.</span><span class="n">function</span><span class="o">-</span><span class="n">sort</span><span class="p">]</span>
+<span class="n">respect</span><span class="o">-</span><span class="n">magic</span><span class="o">-</span><span class="n">method</span><span class="o">-</span><span class="n">conventions</span> <span class="o">=</span> <span class="n">true</span>
 </pre></div>
 </div>
 </section>
+<section id="automated-bulk-fixing">
+<h2>Automated Bulk Fixing<a class="headerlink" href="#automated-bulk-fixing" title="Link to this heading"></a></h2>
+<p><strong>Status</strong>: ✅ <strong>RESOLVED</strong> - Comprehensive CLI auto-fix tool available.</p>
+<p><strong>Modern Solution</strong>: Use the <code class="docutils literal notranslate"><span class="pre">pylint-sort-functions</span></code> CLI tool for automated bulk fixing.</p>
+<p><strong>Basic Usage</strong>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Preview changes without modifying files</span>
+<span class="n">pylint</span><span class="o">-</span><span class="n">sort</span><span class="o">-</span><span class="n">functions</span> <span class="o">--</span><span class="n">dry</span><span class="o">-</span><span class="n">run</span> <span class="n">src</span><span class="o">/</span>
+
+<span class="c1"># Apply fixes with automatic backups</span>
+<span class="n">pylint</span><span class="o">-</span><span class="n">sort</span><span class="o">-</span><span class="n">functions</span> <span class="o">--</span><span class="n">fix</span> <span class="n">src</span><span class="o">/</span>
+
+<span class="c1"># Fix with decorator exclusions and section headers</span>
+<span class="n">pylint</span><span class="o">-</span><span class="n">sort</span><span class="o">-</span><span class="n">functions</span> <span class="o">--</span><span class="n">fix</span> <span class="o">--</span><span class="n">ignore</span><span class="o">-</span><span class="n">decorators</span> <span class="s2">&quot;@app.route&quot;</span> <span class="o">--</span><span class="n">add</span><span class="o">-</span><span class="n">section</span><span class="o">-</span><span class="n">headers</span> <span class="n">src</span><span class="o">/</span>
+</pre></div>
+</div>
+<p><strong>Advanced Features</strong>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Privacy analysis and fixing</span>
+<span class="n">pylint</span><span class="o">-</span><span class="n">sort</span><span class="o">-</span><span class="n">functions</span> <span class="o">--</span><span class="n">fix</span><span class="o">-</span><span class="n">privacy</span> <span class="o">--</span><span class="n">auto</span><span class="o">-</span><span class="n">sort</span> <span class="n">src</span><span class="o">/</span>
+
+<span class="c1"># Custom section headers</span>
+<span class="n">pylint</span><span class="o">-</span><span class="n">sort</span><span class="o">-</span><span class="n">functions</span> <span class="o">--</span><span class="n">fix</span> <span class="o">--</span><span class="n">add</span><span class="o">-</span><span class="n">section</span><span class="o">-</span><span class="n">headers</span> \
+    <span class="o">--</span><span class="n">public</span><span class="o">-</span><span class="n">header</span> <span class="s2">&quot;=== Public API ===&quot;</span> \
+    <span class="o">--</span><span class="n">private</span><span class="o">-</span><span class="n">header</span> <span class="s2">&quot;=== Internal ===&quot;</span> <span class="n">src</span><span class="o">/</span>
+</pre></div>
+</div>
+<p><strong>Safety Features</strong>:
+- Automatic backup creation (disable with <code class="docutils literal notranslate"><span class="pre">--no-backup</span></code>)
+- Dry-run mode for safe previewing
+- AST-based parsing preserves comments and formatting
+- Integration with existing formatters (ruff, black)</p>
 </section>
-<section id="getting-better-error-messages">
-<h2>Getting Better Error Messages<a class="headerlink" href="#getting-better-error-messages" title="Link to this heading"></a></h2>
-<p><strong>Issue</strong>: <a class="reference external" href="https://github.com/hakonhagland/pylint-sort-functions/issues/2">#2</a> - Current messages don’t show expected order.</p>
-<p><strong>Problem</strong>: Messages like “Functions are not sorted alphabetically” aren’t actionable.</p>
-<section id="manual-debugging">
-<h3>Manual Debugging<a class="headerlink" href="#manual-debugging" title="Link to this heading"></a></h3>
-<p>Until enhanced error messages are implemented:</p>
+<section id="enhanced-error-messages">
+<h2>Enhanced Error Messages<a class="headerlink" href="#enhanced-error-messages" title="Link to this heading"></a></h2>
+<p><strong>Status</strong>: 🟡 <strong>PLANNED</strong> - <a class="reference external" href="https://github.com/hakonhagland/pylint-sort-functions/issues/2">Issue #2</a> is still open.</p>
+<p><strong>Current Limitation</strong>: Messages like “Functions are not sorted alphabetically” don’t show the expected order.</p>
+<p><strong>Temporary Solutions</strong>:</p>
+<p><strong>1. Use CLI tool for detailed analysis</strong>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Get detailed analysis with CLI tool</span>
+<span class="n">pylint</span><span class="o">-</span><span class="n">sort</span><span class="o">-</span><span class="n">functions</span> <span class="o">--</span><span class="n">dry</span><span class="o">-</span><span class="n">run</span> <span class="o">--</span><span class="n">verbose</span> <span class="n">src</span><span class="o">/</span><span class="n">myfile</span><span class="o">.</span><span class="n">py</span>
+</pre></div>
+</div>
+<p><strong>2. Manual debugging</strong>:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Get function names in current order</span>
 <span class="n">grep</span> <span class="o">-</span><span class="n">n</span> <span class="s2">&quot;^def &quot;</span> <span class="n">myfile</span><span class="o">.</span><span class="n">py</span>
 
@@ -231,18 +263,25 @@ Check the <a class="reference internal" href="roadmap.html"><span class="doc">De
 <span class="n">grep</span> <span class="s2">&quot;^def &quot;</span> <span class="n">myfile</span><span class="o">.</span><span class="n">py</span> <span class="o">|</span> <span class="n">sort</span>
 </pre></div>
 </div>
+<p><strong>Planned Enhancement</strong>: Future versions will show both expected and actual order:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">W9001</span><span class="p">:</span> <span class="n">Functions</span> <span class="n">are</span> <span class="ow">not</span> <span class="nb">sorted</span> <span class="n">alphabetically</span> <span class="ow">in</span> <span class="n">module</span> <span class="n">scope</span>
+<span class="n">Expected</span> <span class="n">order</span><span class="p">:</span> <span class="n">create</span><span class="p">,</span> <span class="n">edit_config</span><span class="p">,</span> <span class="n">main</span>
+<span class="n">Current</span> <span class="n">order</span><span class="p">:</span> <span class="n">main</span><span class="p">,</span> <span class="n">create</span><span class="p">,</span> <span class="n">edit_config</span>
+</pre></div>
+</div>
 </section>
-</section>
-<section id="project-wide-configuration">
-<h2>Project-Wide Configuration<a class="headerlink" href="#project-wide-configuration" title="Link to this heading"></a></h2>
-<p><strong>Issue</strong>: <a class="reference external" href="https://github.com/hakonhagland/pylint-sort-functions/issues/3">#3</a> - No pyproject.toml support yet.</p>
-<p><strong>Current Solution</strong>: Use <code class="docutils literal notranslate"><span class="pre">.pylintrc</span></code> for now:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">MESSAGES</span> <span class="n">CONTROL</span><span class="p">]</span>
-<span class="c1"># Disable where not suitable</span>
-<span class="n">disable</span><span class="o">=</span><span class="n">unsorted</span><span class="o">-</span><span class="n">functions</span><span class="p">,</span><span class="n">unsorted</span><span class="o">-</span><span class="n">methods</span>
-
-<span class="p">[</span><span class="n">TOOL</span><span class="p">:</span><span class="n">pylint</span><span class="o">-</span><span class="n">sort</span><span class="o">-</span><span class="n">functions</span><span class="p">]</span>
-<span class="c1"># Future configuration will go here</span>
+<section id="modern-configuration">
+<h2>Modern Configuration<a class="headerlink" href="#modern-configuration" title="Link to this heading"></a></h2>
+<p><strong>pyproject.toml Support</strong>: The plugin now supports modern configuration via <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">tool</span><span class="o">.</span><span class="n">pylint</span><span class="o">.</span><span class="n">function</span><span class="o">-</span><span class="n">sort</span><span class="p">]</span>
+<span class="n">ignore</span><span class="o">-</span><span class="n">decorators</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;@app.route&quot;</span><span class="p">,</span> <span class="s2">&quot;@*.command&quot;</span><span class="p">,</span> <span class="s2">&quot;@pytest.fixture&quot;</span><span class="p">]</span>
+<span class="n">public</span><span class="o">-</span><span class="n">api</span><span class="o">-</span><span class="n">patterns</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;^[a-zA-Z][a-zA-Z0-9_]*$&quot;</span><span class="p">]</span>
+</pre></div>
+</div>
+<p><strong>Legacy .pylintrc Support</strong>: Still supported for existing projects:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>[function-sort]
+ignore-decorators = @app.route,@*.command,@pytest.fixture
+public-api-patterns = ^[a-zA-Z][a-zA-Z0-9_]*$
 </pre></div>
 </div>
 </section>
@@ -262,47 +301,84 @@ Check the <a class="reference internal" href="roadmap.html"><span class="doc">De
 </div>
 <p><strong>Phase 3</strong>: Gradually expand as violations are fixed</p>
 </section>
-<section id="configuration-templates">
-<h2>Configuration Templates<a class="headerlink" href="#configuration-templates" title="Link to this heading"></a></h2>
-<p><strong>For Click Applications</strong>:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># At top of main CLI file</span>
-<span class="c1"># pylint: disable=unsorted-functions</span>
+<section id="modern-configuration-examples">
+<h2>Modern Configuration Examples<a class="headerlink" href="#modern-configuration-examples" title="Link to this heading"></a></h2>
+<p><strong>pyproject.toml - Comprehensive Setup</strong>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">tool</span><span class="o">.</span><span class="n">pylint</span><span class="o">.</span><span class="n">function</span><span class="o">-</span><span class="n">sort</span><span class="p">]</span>
+<span class="c1"># Framework support</span>
+<span class="n">ignore</span><span class="o">-</span><span class="n">decorators</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">&quot;@app.route&quot;</span><span class="p">,</span>         <span class="c1"># Flask routes</span>
+    <span class="s2">&quot;@*.command&quot;</span><span class="p">,</span>         <span class="c1"># Click commands</span>
+    <span class="s2">&quot;@pytest.fixture&quot;</span><span class="p">,</span>    <span class="c1"># pytest fixtures</span>
+    <span class="s2">&quot;@celery.task&quot;</span><span class="p">,</span>       <span class="c1"># Celery tasks</span>
+    <span class="s2">&quot;@api.route&quot;</span><span class="p">,</span>         <span class="c1"># FastAPI routes</span>
+<span class="p">]</span>
 
+<span class="c1"># Privacy detection patterns</span>
+<span class="n">public</span><span class="o">-</span><span class="n">api</span><span class="o">-</span><span class="n">patterns</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">&quot;^[a-zA-Z][a-zA-Z0-9_]*$&quot;</span>  <span class="c1"># Public functions (no leading underscore)</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+<p><strong>For Click Applications</strong>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># pyproject.toml</span>
+<span class="p">[</span><span class="n">tool</span><span class="o">.</span><span class="n">pylint</span><span class="o">.</span><span class="n">function</span><span class="o">-</span><span class="n">sort</span><span class="p">]</span>
+<span class="n">ignore</span><span class="o">-</span><span class="n">decorators</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;@*.command&quot;</span><span class="p">,</span> <span class="s2">&quot;@*.group&quot;</span><span class="p">]</span>
+
+<span class="c1"># Now this works without violations:</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">click</span>
 
 <span class="nd">@click</span><span class="o">.</span><span class="n">group</span><span class="p">()</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
     <span class="k">pass</span>
 
-<span class="nd">@main</span><span class="o">.</span><span class="n">command</span><span class="p">()</span>
+<span class="nd">@main</span><span class="o">.</span><span class="n">command</span><span class="p">()</span>  <span class="c1"># Excluded from sorting</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">create</span><span class="p">():</span>
     <span class="k">pass</span>
 </pre></div>
 </div>
 <p><strong>For Flask Applications</strong>:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># At top of app.py</span>
-<span class="c1"># pylint: disable=unsorted-functions</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># pyproject.toml</span>
+<span class="p">[</span><span class="n">tool</span><span class="o">.</span><span class="n">pylint</span><span class="o">.</span><span class="n">function</span><span class="o">-</span><span class="n">sort</span><span class="p">]</span>
+<span class="n">ignore</span><span class="o">-</span><span class="n">decorators</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;@app.route&quot;</span><span class="p">,</span> <span class="s2">&quot;@app.before_request&quot;</span><span class="p">,</span> <span class="s2">&quot;@app.errorhandler&quot;</span><span class="p">]</span>
 
+<span class="c1"># Now this works without violations:</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">flask</span><span class="w"> </span><span class="kn">import</span> <span class="n">Flask</span>
 <span class="n">app</span> <span class="o">=</span> <span class="n">Flask</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
-<span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span>
+<span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span>  <span class="c1"># Excluded from sorting</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">index</span><span class="p">():</span>
     <span class="k">return</span> <span class="s1">&#39;Hello World&#39;</span>
 </pre></div>
 </div>
-<p><strong>For Test Files</strong>:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># At top of test files</span>
+<p><strong>For pytest Test Files</strong>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># pyproject.toml</span>
+<span class="p">[</span><span class="n">tool</span><span class="o">.</span><span class="n">pylint</span><span class="o">.</span><span class="n">function</span><span class="o">-</span><span class="n">sort</span><span class="p">]</span>
+<span class="n">ignore</span><span class="o">-</span><span class="n">decorators</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;@pytest.fixture&quot;</span><span class="p">,</span> <span class="s2">&quot;@pytest.mark.*&quot;</span><span class="p">]</span>
+
+<span class="c1"># Then disable methods sorting in test files:</span>
+<span class="c1"># At top of test_*.py:</span>
 <span class="c1"># pylint: disable=unsorted-methods</span>
 
-<span class="kn">import</span><span class="w"> </span><span class="nn">unittest</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pytest</span>
 
-<span class="k">class</span><span class="w"> </span><span class="nc">TestMyClass</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
+<span class="nd">@pytest</span><span class="o">.</span><span class="n">fixture</span>  <span class="c1"># Excluded from sorting</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">sample_data</span><span class="p">():</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;key&quot;</span><span class="p">:</span> <span class="s2">&quot;value&quot;</span><span class="p">}</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">TestExample</span><span class="p">:</span>  <span class="c1"># pylint: disable=unsorted-methods</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">pass</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">test_something</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">pass</span>
+</pre></div>
+</div>
+<p><strong>Legacy .pylintrc Support</strong>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span># Still supported for existing projects
+[function-sort]
+ignore-decorators = @app.route,@*.command,@pytest.fixture
+public-api-patterns = ^[a-zA-Z][a-zA-Z0-9_]*$
 </pre></div>
 </div>
 </section>
