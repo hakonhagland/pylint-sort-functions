@@ -72,14 +72,14 @@
 <li class="toctree-l2"><a class="reference internal" href="#module-pylint_sort_functions.messages">Messages Module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-pylint_sort_functions.utils">Utilities Module</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#pylint_sort_functions.utils.are_functions_properly_separated"><code class="docutils literal notranslate"><span class="pre">are_functions_properly_separated()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#pylint_sort_functions.utils.are_functions_sorted"><code class="docutils literal notranslate"><span class="pre">are_functions_sorted()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pylint_sort_functions.utils.are_functions_sorted_with_exclusions"><code class="docutils literal notranslate"><span class="pre">are_functions_sorted_with_exclusions()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#pylint_sort_functions.utils.are_methods_sorted"><code class="docutils literal notranslate"><span class="pre">are_methods_sorted()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pylint_sort_functions.utils.are_methods_sorted_with_exclusions"><code class="docutils literal notranslate"><span class="pre">are_methods_sorted_with_exclusions()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pylint_sort_functions.utils.find_python_files"><code class="docutils literal notranslate"><span class="pre">find_python_files()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pylint_sort_functions.utils.function_has_excluded_decorator"><code class="docutils literal notranslate"><span class="pre">function_has_excluded_decorator()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pylint_sort_functions.utils.get_functions_from_node"><code class="docutils literal notranslate"><span class="pre">get_functions_from_node()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pylint_sort_functions.utils.get_methods_from_class"><code class="docutils literal notranslate"><span class="pre">get_methods_from_class()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pylint_sort_functions.utils.is_private_function"><code class="docutils literal notranslate"><span class="pre">is_private_function()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pylint_sort_functions.utils.is_unittest_file"><code class="docutils literal notranslate"><span class="pre">is_unittest_file()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pylint_sort_functions.utils.should_function_be_private"><code class="docutils literal notranslate"><span class="pre">should_function_be_private()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pylint_sort_functions.utils.should_function_be_public"><code class="docutils literal notranslate"><span class="pre">should_function_be_public()</span></code></a></li>
 </ul>
@@ -278,32 +278,10 @@ validation if implemented.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="pylint_sort_functions.utils.are_functions_sorted">
-<span class="sig-prename descclassname"><span class="pre">pylint_sort_functions.utils.</span></span><span class="sig-name descname"><span class="pre">are_functions_sorted</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">functions</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pylint_sort_functions.utils.are_functions_sorted" title="Link to this definition"></a></dt>
-<dd><p>Check if functions are sorted alphabetically within their visibility scope.</p>
-<p>Functions are expected to be sorted with:
-- Public functions (including dunder methods like __init__) sorted first
-- Private functions (single underscore prefix) sorted alphabetically second</p>
-<p>Dunder methods are treated as public and will naturally sort to the top due to
-the __ prefix (e.g., __init__ comes before add_item).</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>functions</strong> (<em>list</em><em>[</em><em>nodes.FunctionDef</em><em>]</em>) – List of function definition nodes</p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>True if functions are properly sorted</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>bool</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
 <dt class="sig sig-object py" id="pylint_sort_functions.utils.are_functions_sorted_with_exclusions">
 <span class="sig-prename descclassname"><span class="pre">pylint_sort_functions.utils.</span></span><span class="sig-name descname"><span class="pre">are_functions_sorted_with_exclusions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">functions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_decorators</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pylint_sort_functions.utils.are_functions_sorted_with_exclusions" title="Link to this definition"></a></dt>
 <dd><p>Check if functions are sorted alphabetically, excluding decorator-dependent ones.</p>
-<p>This is the enhanced version of are_functions_sorted that supports framework-aware
+<p>This is the enhanced version of _are_functions_sorted that supports framework-aware
 sorting by excluding functions with specific decorators that create dependencies.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -314,23 +292,6 @@ sorting by excluding functions with specific decorators that create dependencies
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>True if functions are properly sorted (excluding ignored ones)</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>bool</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="pylint_sort_functions.utils.are_methods_sorted">
-<span class="sig-prename descclassname"><span class="pre">pylint_sort_functions.utils.</span></span><span class="sig-name descname"><span class="pre">are_methods_sorted</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">methods</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pylint_sort_functions.utils.are_methods_sorted" title="Link to this definition"></a></dt>
-<dd><p>Check if methods are sorted alphabetically within their visibility scope.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>methods</strong> (<em>list</em><em>[</em><em>nodes.FunctionDef</em><em>]</em>) – List of method definition nodes</p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>True if methods are properly sorted</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>bool</p>
@@ -354,6 +315,27 @@ sorting by excluding functions with specific decorators that create dependencies
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pylint_sort_functions.utils.find_python_files">
+<span class="sig-prename descclassname"><span class="pre">pylint_sort_functions.utils.</span></span><span class="sig-name descname"><span class="pre">find_python_files</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">root_path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pylint_sort_functions.utils.find_python_files" title="Link to this definition"></a></dt>
+<dd><p>Find all Python files in a project directory.</p>
+<p>Recursively searches for files with .py extension while skipping common
+directories that should not be analyzed (build artifacts, virtual environments,
+caches, etc.).</p>
+<p>TODO: Make skip_dirs list configurable for project-specific needs.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>root_path</strong> (<em>Path</em>) – Root directory to search for Python files</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>List of paths to Python files</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list[Path]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -428,6 +410,29 @@ as they are special methods with specific meanings in Python.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>True if function name starts with underscore but not double underscore</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pylint_sort_functions.utils.is_unittest_file">
+<span class="sig-prename descclassname"><span class="pre">pylint_sort_functions.utils.</span></span><span class="sig-name descname"><span class="pre">is_unittest_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">module_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pylint_sort_functions.utils.is_unittest_file" title="Link to this definition"></a></dt>
+<dd><p>Check if a module name indicates a unit test file.</p>
+<p>Detects test files based on common naming patterns:
+- Files in ‘tests’ or ‘test’ directories
+- Files starting with ‘<a href="#id1"><span class="problematic" id="id2">test_</span></a>’
+- Files ending with ‘_test’
+- conftest.py files (pytest configuration)
+- Files containing ‘test’ in their path components</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>module_name</strong> (<em>str</em>) – The module name to check (e.g., ‘package.tests.test_utils’)</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if module appears to be a test file</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>bool</p>
