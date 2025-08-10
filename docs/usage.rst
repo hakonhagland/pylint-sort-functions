@@ -172,6 +172,54 @@ Configuration Options Reference
 
     *Default*: ``true``
 
+Test File Exclusion
+~~~~~~~~~~~~~~~~~~~
+
+The privacy detection system automatically excludes test files from analysis to prevent functions used only by tests from being incorrectly marked as private. This ensures that functions validating the public API (via tests) remain accessible.
+
+**Automatically detected test files:**
+
+- Files in ``tests/`` or ``test/`` directories
+- Files starting with ``test_`` (e.g., ``test_utils.py``)
+- Files ending with ``_test`` (e.g., ``module_test.py``)
+- ``conftest.py`` files (pytest configuration)
+
+**Example excluded files:**
+
+.. code-block:: text
+
+    tests/test_module.py          ✓ Excluded (in tests/ directory)
+    test_integration.py           ✓ Excluded (starts with test_)
+    utils_test.py                 ✓ Excluded (ends with _test)
+    conftest.py                   ✓ Excluded (pytest configuration)
+    src/tests/helpers.py          ✓ Excluded (in tests/ subdirectory)
+
+.. note::
+   Test file exclusion patterns are currently built-in and not configurable. Future versions may add configuration options for custom test patterns.
+
+Automatic Directory Exclusion
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The plugin automatically skips common directories that should not be analyzed for performance and accuracy:
+
+**Build and Distribution:**
+    ``build/``, ``dist/``, ``*.egg-info/``
+
+**Version Control:**
+    ``.git/``
+
+**Python Caches:**
+    ``__pycache__/``, ``.pytest_cache/``, ``.mypy_cache/``, ``.tox/``
+
+**Virtual Environments:**
+    ``venv/``, ``.venv/``, ``env/``, ``.env/``
+
+**Node.js Dependencies:**
+    ``node_modules/``
+
+.. note::
+   Directory exclusion patterns are currently built-in and not configurable. For custom directory exclusions, see `GitHub issue #7 <https://github.com/hakonhagland/pylint-sort-functions/issues/7>`_.
+
 Message Types
 -------------
 
@@ -305,8 +353,9 @@ W9004: function-should-be-private
 
 - **Cross-module analysis**: Analyzes all Python files to detect function imports and calls
 - **Usage tracking**: Maps which functions are accessed by other modules via ``from module import function`` or ``module.function()``
-- **Smart exclusions**: Skips common public API patterns (``main``, ``run``, ``setup``) and test files
-- **False positive prevention**: Only flags functions with zero external usage, ensuring accuracy
+- **Smart exclusions**: Skips common public API patterns (``main``, ``run``, ``setup``) and automatically excludes test files from analysis
+- **Test file exclusion**: Automatically excludes ``tests/``, ``test_*.py``, ``*_test.py``, and ``conftest.py`` files to prevent functions used only by tests from being marked private
+- **False positive prevention**: Only flags functions with zero external usage (excluding tests), ensuring accuracy
 
 **Auto-fix availability**:
 - **Manual renaming**: Functions can be manually renamed following PyLint suggestions
@@ -346,7 +395,7 @@ W9005: function-should-be-public
 - **Cross-module import detection**: Scans all Python files to identify imports of private functions
 - **Usage pattern analysis**: Detects ``from module import _function`` and ``module._function()`` patterns
 - **Conservative approach**: Only flags private functions with clear external usage evidence
-- **Test file exclusion**: Ignores usage within test files to avoid false positives
+- **Test file exclusion**: Automatically ignores usage within ``tests/``, ``test_*.py``, ``*_test.py``, and ``conftest.py`` files to avoid false positives from test code
 
 **Auto-fix availability**:
 - **Manual renaming**: Functions can be manually renamed following PyLint suggestions
