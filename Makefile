@@ -1,7 +1,7 @@
 ROOT := $(shell pwd)
 
 .PHONY: coverage docs eof-fix help mypy ruff-check ruff-fix ruff-format test test-integration test-all test-plugin test-plugin-strict tox
-.PHONY: publish-to-pypi publish-to-pypi-minor publish-to-pypi-major rstcheck rst-list-check self-check
+.PHONY: publish-to-pypi publish-to-pypi-minor publish-to-pypi-major rstcheck rst-list-check rst-toml-check self-check
 .PHONY: build-docker-image run-docker-container stop-docker-container test-documentation
 .PHONY: changelog-add changelog-prepare changelog-validate
 
@@ -57,8 +57,9 @@ help:
 	@echo "  coverage-html         - Generate HTML coverage report"
 	@echo "  mypy                  - Run type checking"
 	@echo "  pre-commit            - Run all pre-commit hooks"
-	@echo "  rstcheck              - Check reStructuredText documentation (syntax + formatting)"
+	@echo "  rstcheck              - Check reStructuredText documentation (syntax + formatting + TOML blocks)"
 	@echo "  rst-list-check        - Check RST files for list formatting issues"
+	@echo "  rst-toml-check        - Check TOML syntax in RST code blocks"
 	@echo "  ruff-check            - Run ruff linting"
 	@echo "  ruff-fix              - Run ruff with auto-fix"
 	@echo "  ruff-format           - Format code with ruff"
@@ -118,14 +119,19 @@ publish-to-pypi-major:
 	python scripts/publish-to-pypi.py major
 
 # NOTE: Using unified rstcheck script for consistency with pre-commit hooks
-# Also runs RST list format checker for comprehensive documentation validation
+# Also runs RST list format checker and TOML validation for comprehensive documentation validation
 rstcheck:
 	bash scripts/rstcheck.sh --recursive
 	python scripts/check_rst_list_format.py --recursive docs/
+	python scripts/check_rst_toml_blocks.py docs/*.rst
 
 # Check RST files for missing newlines before lists (formatting issues)
 rst-list-check:
 	python scripts/check_rst_list_format.py --recursive docs/
+
+# Check TOML syntax in RST code blocks
+rst-toml-check:
+	python scripts/check_rst_toml_blocks.py docs/*.rst
 
 ruff-check:
 	ruff check src tests

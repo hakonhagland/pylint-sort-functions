@@ -48,6 +48,15 @@ repos:
         always_run: false
 -   repo: local
     hooks:
+      - id: rst-toml-blocks
+        name: RST TOML code blocks validation
+        language: system
+        entry: python scripts/check_rst_toml_blocks.py
+        files: '\.rst$'
+        pass_filenames: true
+        always_run: false
+-   repo: local
+    hooks:
       - id: pylint-sort-functions
         name: pylint-sort-functions full check
         language: system

@@ -150,9 +150,10 @@ python scripts/bump-version.py --no-commit patch  # Version bump without commit
 tox
 make tox
 
-# Check RST documentation (syntax and formatting)
-make rstcheck  # Runs both rstcheck and list format checker
-make rst-list-check  # Only check RST list formatting issues
+# Check RST documentation (syntax, formatting, and code block validation)
+make rstcheck  # Runs rstcheck, list format checker, and TOML validation
+make rst-list-check   # Only check RST list formatting issues
+make rst-toml-check   # Only check TOML syntax in RST code blocks
 
 # Run pre-commit hooks manually
 make pre-commit
@@ -536,6 +537,50 @@ make test-integration  # Integration tests only
 make test-all         # All tests (unit + integration)
 make coverage         # Coverage report (must be 100%)
 ```
+
+## Documentation Validation Tools
+
+The project includes comprehensive validation tools for documentation quality:
+
+### RST Documentation Validation
+
+**rstcheck**: Validates reStructuredText syntax and formatting
+- Integrated into pre-commit hooks and `make rstcheck`
+- Catches RST syntax errors, broken links, and formatting issues
+
+**RST List Format Checker** (`scripts/check_rst_list_format.py`):
+- Detects missing blank lines before bullet lists in RST files
+- Prevents common formatting issues where lists render inline instead of as proper bullets
+- Example of caught issue:
+  ```rst
+  # Incorrect (missing blank line):
+  **Some heading**:
+  - Item 1
+
+  # Correct (with blank line):
+  **Some heading**:
+
+  - Item 1
+  ```
+
+**TOML Code Block Validator** (`scripts/check_rst_toml_blocks.py`):
+- Validates TOML syntax within `.. code-block:: toml` directives
+- Prevents documentation rendering issues caused by invalid TOML syntax
+- Catches common issues like incorrect multi-line string syntax
+- Integrated into pre-commit hooks and `make rstcheck`
+
+### Usage
+
+```bash
+# Run all documentation validation (recommended)
+make rstcheck
+
+# Individual validation tools
+make rst-list-check   # Check list formatting only
+make rst-toml-check   # Check TOML blocks only
+```
+
+All validation tools are automatically run by pre-commit hooks, ensuring documentation quality before commits.
 
 ## Code Style
 
