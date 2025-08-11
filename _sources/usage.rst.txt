@@ -199,8 +199,8 @@ Configuration Options Reference
 
     *Default*: ``true``
 
-Method Categorization Options (Phase 1 - NEW!)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Method Categorization Options
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 **enable-method-categories**
     Enable the multi-category method organization system. When disabled (default), uses traditional binary public/private sorting. When enabled, supports framework presets and custom categorization for more sophisticated method organization.
@@ -238,8 +238,8 @@ Method Categorization Options (Phase 1 - NEW!)
             {"name": "private_methods", "patterns": ["_*"], "priority": 1}
         ]
 
-Section Header Configuration Options (Phase 2 - Enhanced!)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Section Header Configuration Options
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 **enforce-section-headers**
     Enable section header validation. When enabled, methods must appear under the correct section headers according to their categorization. Section headers transform from decorative comments into functional organizational elements.
