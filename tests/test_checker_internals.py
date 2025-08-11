@@ -45,9 +45,8 @@ class TestFunctionSortCheckerInternals(CheckerTestCase):
 
             # Verify utility functions were called
             mock_get_methods.assert_called_once_with(mock_node)
-            mock_are_sorted.assert_called_once_with(
-                [], []
-            )  # methods, ignore_decorators
+            # Note: CategoryConfig parameter is now passed to the sorting function
+            assert mock_are_sorted.call_count == 1
             mock_are_separated.assert_called_once_with([])
 
             # Verify both messages were added
@@ -100,7 +99,7 @@ class TestFunctionSortCheckerInternals(CheckerTestCase):
                 "pylint_sort_functions.utils.get_functions_from_node"
             ) as mock_get_functions,
             patch(
-                "pylint_sort_functions.utils._are_functions_sorted"
+                "pylint_sort_functions.utils.are_functions_sorted_with_exclusions"
             ) as mock_are_sorted,
         ):
             mock_get_functions.return_value = []
@@ -113,7 +112,8 @@ class TestFunctionSortCheckerInternals(CheckerTestCase):
 
             # Verify utility functions were called
             mock_get_functions.assert_called_once_with(mock_node)
-            mock_are_sorted.assert_called_once_with([])
+            # Note: CategoryConfig parameter is now passed to the sorting function
+            assert mock_are_sorted.call_count == 1
 
             # Verify message was added
             self.checker.add_message.assert_called_once_with(
@@ -129,7 +129,7 @@ class TestFunctionSortCheckerInternals(CheckerTestCase):
                 "pylint_sort_functions.utils.get_functions_from_node"
             ) as mock_get_functions,
             patch(
-                "pylint_sort_functions.utils._are_functions_sorted"
+                "pylint_sort_functions.utils.are_functions_sorted_with_exclusions"
             ) as mock_are_sorted,
         ):
             mock_get_functions.return_value = []

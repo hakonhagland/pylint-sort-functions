@@ -1,6 +1,10 @@
 """Utility functions for AST analysis and sorting logic.
 
 This module provides the core analysis functions for the pylint-sort-functions plugin.
+
+NOTE: Module size (1114 lines) exceeds 1000-line guideline.
+Refactoring tracked in GitHub issue #37:
+https://github.com/hakonhagland/pylint-sort-functions/issues/37
 It includes functions for:
 
 1. Function/method sorting validation
@@ -21,15 +25,95 @@ scanning actual usage patterns across the project:
 - Provides accurate detection based on real usage patterns
 """
 
+# pylint: disable=too-many-lines
+
 import ast
 import fnmatch
 import os
 import re
+from dataclasses import dataclass, field
 from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
 from astroid import nodes  # type: ignore[import-untyped]
+
+
+@dataclass
+class MethodCategory:
+    """Configuration for a method category in the sorting system.
+
+    Defines how methods are categorized based on patterns, decorators, and other
+    criteria. Categories determine the sorting order and section organization.
+
+    :param name: Unique identifier for this category (e.g., 'properties')
+    :type name: str
+    :param patterns: List of glob patterns to match names (e.g., ['test_*'])
+    :type patterns: list[str]
+    :param decorators: List of decorator patterns (e.g., ['@property'])
+    :type decorators: list[str]
+    :param priority: Priority for conflict resolution, higher values win
+    :type priority: int
+    :param section_header: Comment header text for this category
+    :type section_header: str
+    """
+
+    name: str
+    patterns: list[str] = field(default_factory=list)
+    decorators: list[str] = field(default_factory=list)
+    priority: int = 0
+    section_header: str = ""
+
+
+@dataclass
+class CategoryConfig:
+    """Configuration for the method categorization system.
+
+    Defines the complete categorization scheme including all categories,
+    default behavior, and compatibility settings.
+
+    :param categories: List of method categories in sorting order
+    :type categories: list[MethodCategory]
+    :param default_category: Category name for methods that do not match patterns
+    :type default_category: str
+    :param enable_categories: Enable multi-category system (false = backward
+        compatibility)
+    :type enable_categories: bool
+    :param category_sorting: How to sort within categories ('alphabetical' or
+        'declaration')
+    :type category_sorting: str
+    """
+
+    categories: list[MethodCategory] = field(default_factory=list)
+    default_category: str = "public_methods"
+    enable_categories: bool = False  # Backward compatibility - disabled by default
+    category_sorting: str = "alphabetical"  # or "declaration" to preserve order
+
+    def __post_init__(self) -> None:
+        """Initialize with default binary categories if none provided."""
+        if not self.categories:
+            self.categories = self._get_default_categories()
+
+    def _get_default_categories(self) -> list[MethodCategory]:
+        """Get default binary public/private categories for backward compatibility.
+
+        :returns: List of default method categories (public, private)
+        :rtype: list[MethodCategory]
+        """
+        return [
+            MethodCategory(
+                name="public_methods",
+                patterns=["*"],  # Catch-all for non-private methods
+                section_header="# Public methods",
+            ),
+            MethodCategory(
+                name="private_methods",
+                patterns=["_*"],  # Methods starting with underscore
+                priority=1,  # Higher priority than public catch-all
+                section_header="# Private methods",
+            ),
+        ]
+
 
 # Public functions
 
@@ -64,7 +148,9 @@ def are_functions_properly_separated(functions: list[nodes.FunctionDef]) -> bool
 
 
 def are_functions_sorted_with_exclusions(
-    functions: list[nodes.FunctionDef], ignore_decorators: list[str] | None = None
+    functions: list[nodes.FunctionDef],
+    ignore_decorators: list[str] | None = None,
+    config: CategoryConfig | None = None,
 ) -> bool:
     """Check if functions are sorted alphabetically, excluding decorator-dependent ones.
 
@@ -75,6 +161,8 @@ def are_functions_sorted_with_exclusions(
     :type functions: list[nodes.FunctionDef]
     :param ignore_decorators: List of decorator patterns to ignore
     :type ignore_decorators: list[str] | None
+    :param config: Category configuration, uses default if None
+    :type config: CategoryConfig | None
     :returns: True if functions are properly sorted (excluding ignored ones)
     :rtype: bool
     """
@@ -89,11 +177,13 @@ def are_functions_sorted_with_exclusions(
     ]
 
     # Use existing sorting logic on the filtered functions
-    return _are_functions_sorted(sortable_functions)
+    return _are_functions_sorted(sortable_functions, config)
 
 
 def are_methods_sorted_with_exclusions(
-    methods: list[nodes.FunctionDef], ignore_decorators: list[str] | None = None
+    methods: list[nodes.FunctionDef],
+    ignore_decorators: list[str] | None = None,
+    config: CategoryConfig | None = None,
 ) -> bool:
     """Check if methods are sorted alphabetically, excluding decorator-dependent ones.
 
@@ -101,11 +191,56 @@ def are_methods_sorted_with_exclusions(
     :type methods: list[nodes.FunctionDef]
     :param ignore_decorators: List of decorator patterns to ignore
     :type ignore_decorators: list[str] | None
+    :param config: Category configuration, uses default if None
+    :type config: CategoryConfig | None
     :returns: True if methods are properly sorted (excluding ignored ones)
     :rtype: bool
     """
     # Methods follow the same sorting rules as functions
-    return are_functions_sorted_with_exclusions(methods, ignore_decorators)
+    return are_functions_sorted_with_exclusions(methods, ignore_decorators, config)
+
+
+def categorize_method(  # pylint: disable=function-should-be-private
+    func: nodes.FunctionDef, config: CategoryConfig | None = None
+) -> str:
+    """Determine the category for a method based on configuration patterns.
+
+    This replaces the binary is_private_function() with a flexible categorization
+    system that supports multiple method types (properties, test methods, etc.).
+
+    When enable_categories=False (default), provides backward compatible behavior
+    by returning 'public_methods' or 'private_methods' based on naming convention.
+
+    :param func: Function definition node to categorize
+    :type func: nodes.FunctionDef
+    :param config: Category configuration, uses default if None
+    :type config: CategoryConfig | None
+    :returns: Category name for the method (e.g., 'properties', 'test_methods')
+    :rtype: str
+    """
+    if config is None:
+        config = CategoryConfig()
+
+    # For backward compatibility, when categories disabled, use original logic
+    if not config.enable_categories:
+        return "private_methods" if is_private_function(func) else "public_methods"
+
+    # Find matching categories, prioritizing higher priority values
+    matching_categories: list[tuple[MethodCategory, int]] = []
+
+    for category in config.categories:
+        match_priority = _get_category_match_priority(func, category)
+        if match_priority > 0:
+            matching_categories.append((category, match_priority))
+
+    if not matching_categories:
+        # No matches found, use default category
+        return config.default_category
+
+    # Sort by priority (higher first), then by category priority field
+    matching_categories.sort(key=lambda x: (x[1], x[0].priority), reverse=True)
+
+    return matching_categories[0][0].name
 
 
 def find_python_files(root_path: Path) -> list[Path]:  # pylint: disable=function-should-be-private
@@ -215,6 +350,9 @@ def get_methods_from_class(node: nodes.ClassDef) -> list[nodes.FunctionDef]:
 def is_private_function(func: nodes.FunctionDef) -> bool:
     """Check if a function is private (starts with underscore).
 
+    DEPRECATED: This function is maintained for backward compatibility.
+    New code should use categorize_method() with appropriate configuration.
+
     Functions starting with a single underscore are considered private by convention.
     Dunder methods (double underscore) like __init__ are not considered private
     as they are special methods with specific meanings in Python.
@@ -299,7 +437,7 @@ def is_unittest_file(  # pylint: disable=function-should-be-private,too-many-ret
             return True
 
     # Fallback: check if 'test' appears anywhere (catches edge cases)
-    # This is more permissive but ensures we don't miss test files
+    # This is more permissive but ensures we do not miss test files
     return "test" in lower_name
 
 
@@ -344,7 +482,7 @@ def should_function_be_private(
 
     # Skip common public API patterns that are called by external systems
     # These are entry points, framework callbacks, or conventional APIs that
-    # won't show up in import analysis (e.g., main() called by Python runtime,
+    # will not show up in import analysis (e.g., main() called by Python runtime,
     # setup/teardown called by test frameworks)
     if public_patterns is None:
         public_patterns = {
@@ -381,7 +519,7 @@ def should_function_be_public(
     should therefore be made public.
 
     Detection Logic:
-    1. Skip if already public (doesn't start with underscore)
+    1. Skip if already public (does not start with underscore)
     2. Skip special methods (dunder methods like __init__, __str__, etc.)
     3. Check if the private function is imported/used by other modules
     4. If used externally, suggest making it public
@@ -395,7 +533,7 @@ def should_function_be_public(
     :returns: True if the function should be made public
     :rtype: bool
     """
-    # Skip if already public (doesn't start with underscore)
+    # Skip if already public (does not start with underscore)
     if not is_private_function(func):
         return False
 
@@ -417,49 +555,120 @@ def should_function_be_public(
 # Private functions
 
 
-def _are_functions_sorted(functions: list[nodes.FunctionDef]) -> bool:  # pylint: disable=function-should-be-private
-    """Check if functions are sorted alphabetically within their visibility scope.
+def _are_categories_properly_ordered(
+    functions: list[nodes.FunctionDef], config: CategoryConfig
+) -> bool:
+    """Check if functions appear in the correct category order.
 
-    Functions are expected to be sorted with:
-    - Public functions (including dunder methods like __init__) sorted first
-    - Private functions (single underscore prefix) sorted alphabetically second
-
-    Dunder methods are treated as public and will naturally sort to the top due to
-    the __ prefix (e.g., __init__ comes before add_item).
+    Verifies that functions appear in the order defined by config.categories.
+    For example, if categories are [properties, public_methods, private_methods],
+    then all properties must appear before all public_methods, etc.
 
     :param functions: List of function definition nodes
     :type functions: list[nodes.FunctionDef]
+    :param config: Category configuration defining order
+    :type config: CategoryConfig
+    :returns: True if functions are in correct category order
+    :rtype: bool
+    """
+    if not functions:
+        return True
+
+    category_order = {cat.name: i for i, cat in enumerate(config.categories)}
+    seen_categories = set()
+    last_category_index = -1
+
+    for func in functions:
+        category = categorize_method(func, config)
+        category_index = category_order.get(category, len(config.categories))
+
+        if category in seen_categories:
+            # We've seen this category before - check if we're still in it or
+            # moving backward
+            if category_index < last_category_index:
+                return False  # Categories are mixed/out of order
+        else:
+            # First time seeing this category
+            if category_index < last_category_index:
+                return False  # This category should have appeared earlier
+            seen_categories.add(category)
+            last_category_index = category_index
+
+    return True
+
+
+def _are_functions_sorted(
+    functions: list[nodes.FunctionDef], config: CategoryConfig | None = None
+) -> bool:  # pylint: disable=function-should-be-private
+    """Check if functions are sorted alphabetically within their category scope.
+
+    Functions are expected to be sorted with categories in the order defined by
+    the configuration, and alphabetically within each category.
+
+    For backward compatibility, when config.enable_categories=False:
+    - Public functions (including dunder methods like __init__) sorted first
+    - Private functions (single underscore prefix) sorted alphabetically second
+
+    :param functions: List of function definition nodes
+    :type functions: list[nodes.FunctionDef]
+    :param config: Category configuration, uses default if None
+    :type config: CategoryConfig | None
     :returns: True if functions are properly sorted
     :rtype: bool
     """
     if len(functions) <= 1:
         return True
 
-    public_functions, private_functions = _get_function_groups(functions)
+    if config is None:
+        config = CategoryConfig()
 
-    # Check if public functions are sorted
-    public_names = [f.name for f in public_functions]
-    if public_names != sorted(public_names):
-        return False
+    # For backward compatibility, use the original binary logic
+    if not config.enable_categories:
+        public_functions, private_functions = _get_function_groups(functions)
 
-    # Check if private functions are sorted
-    private_names = [f.name for f in private_functions]
-    if private_names != sorted(private_names):
-        return False
+        # Check if public functions are sorted
+        public_names = [f.name for f in public_functions]
+        if public_names != sorted(public_names):
+            return False
 
-    return True
+        # Check if private functions are sorted
+        private_names = [f.name for f in private_functions]
+        if private_names != sorted(private_names):
+            return False
+
+        return True
+
+    # New multi-category logic
+    categorized_functions = _get_function_categories(functions, config)
+
+    # Check sorting within each category
+    for category_name in [cat.name for cat in config.categories]:
+        if category_name in categorized_functions:
+            category_functions = categorized_functions[category_name]
+            if config.category_sorting == "alphabetical":
+                names = [f.name for f in category_functions]
+                if names != sorted(names):
+                    return False
+            # If category_sorting == "declaration", preserve order (always sorted)
+
+    # Check that categories appear in the correct order
+    return _are_categories_properly_ordered(functions, config)
 
 
-def _are_methods_sorted(methods: list[nodes.FunctionDef]) -> bool:  # pylint: disable=function-should-be-private
-    """Check if methods are sorted alphabetically within their visibility scope.
+def _are_methods_sorted(
+    methods: list[nodes.FunctionDef], config: CategoryConfig | None = None
+) -> bool:  # pylint: disable=function-should-be-private
+    """Check if methods are sorted alphabetically within their category scope.
 
     :param methods: List of method definition nodes
     :type methods: list[nodes.FunctionDef]
+    :param config: Category configuration, uses default if None
+    :type config: CategoryConfig | None
     :returns: True if methods are properly sorted
     :rtype: bool
     """
     # Methods follow the same sorting rules as functions
-    return _are_functions_sorted(methods)
+    return _are_functions_sorted(methods, config)
 
 
 def _build_cross_module_usage_graph(
@@ -488,7 +697,7 @@ def _build_cross_module_usage_graph(
 
             # Skip __init__ files (they re-export for API organization)
             # not actual usage)
-            # and test files (tests access internals, don't indicate public API)
+            # and test files (tests access internals, do not indicate public API)
             if module_name.endswith("__init__") or is_unittest_file(
                 module_name, privacy_config
             ):
@@ -498,7 +707,7 @@ def _build_cross_module_usage_graph(
             try:
                 file_mtime = file_path.stat().st_mtime
             except OSError:  # pragma: no cover
-                # If we can't get mtime, skip this file
+                # If we cannot get mtime, skip this file
                 continue
 
             _, function_imports, attribute_accesses = _extract_imports_from_file(
@@ -520,7 +729,7 @@ def _build_cross_module_usage_graph(
                 usage_graph[function_name].add(module_name)
 
         except (ValueError, OSError):
-            # Skip files that can't be processed
+            # Skip files that cannot be processed
             continue
 
     return usage_graph
@@ -693,8 +902,52 @@ def _extract_imports_from_file(
         return module_imports, function_imports, attribute_accesses
 
     except (SyntaxError, UnicodeDecodeError, FileNotFoundError):
-        # If file can't be parsed, return empty sets
+        # If file cannot be parsed, return empty sets
         return set(), set(), set()
+
+
+def _get_category_match_priority(
+    func: nodes.FunctionDef, category: MethodCategory
+) -> int:
+    """Calculate match priority for a function against a category.
+
+    Returns 0 if no match, positive integer if match (higher = better match).
+    Priority calculation:
+    - Decorator match: 100 (highest priority - most specific)
+    - Name pattern match: 50 (medium priority)
+    - Catch-all pattern (*): 1 (lowest priority - fallback)
+
+    :param func: Function definition node to check
+    :type func: nodes.FunctionDef
+    :param category: Category to test against
+    :type category: MethodCategory
+    :returns: Match priority (0 = no match, >0 = match strength)
+    :rtype: int
+    """
+    priority = 0
+
+    # Check decorator patterns (highest priority)
+    if category.decorators:
+        function_decorators = _get_decorator_strings(func)
+        for decorator_pattern in category.decorators:
+            for func_decorator in function_decorators:
+                if _decorator_matches_pattern(func_decorator, decorator_pattern):
+                    priority = max(priority, 100)
+                    break
+
+    # Check name patterns (medium priority)
+    if category.patterns:
+        for pattern in category.patterns:
+            if _method_name_matches_pattern(func.name, pattern):
+                if pattern == "*":
+                    # Catch-all pattern gets lowest priority
+                    priority = max(priority, 1)
+                else:
+                    # Specific patterns get medium priority
+                    priority = max(priority, 50)
+                break
+
+    return priority
 
 
 def _get_decorator_strings(func: nodes.FunctionDef) -> list[str]:
@@ -717,10 +970,36 @@ def _get_decorator_strings(func: nodes.FunctionDef) -> list[str]:
     return decorator_strings
 
 
+def _get_function_categories(
+    functions: list[nodes.FunctionDef], config: CategoryConfig
+) -> dict[str, list[nodes.FunctionDef]]:
+    """Group functions by their categories.
+
+    :param functions: List of function definition nodes
+    :type functions: list[nodes.FunctionDef]
+    :param config: Category configuration
+    :type config: CategoryConfig
+    :returns: Dictionary mapping category names to function lists
+    :rtype: dict[str, list[nodes.FunctionDef]]
+    """
+    categories: dict[str, list[nodes.FunctionDef]] = {}
+
+    for func in functions:
+        category = categorize_method(func, config)
+        if category not in categories:
+            categories[category] = []
+        categories[category].append(func)
+
+    return categories
+
+
 def _get_function_groups(
     functions: list[nodes.FunctionDef],
 ) -> tuple[list[nodes.FunctionDef], list[nodes.FunctionDef]]:
     """Split functions into public and private groups.
+
+    DEPRECATED: This function is maintained for backward compatibility.
+    New code should use _get_function_categories() with CategoryConfig.
 
     :param functions: List of function definitions
     :type functions: list[nodes.FunctionDef]
@@ -756,7 +1035,7 @@ def _is_function_used_externally(
     """Check if a function is imported/used by other modules.
 
     This is the core logic for privacy detection. If a function is only used
-    within its own module, it's a candidate for being marked as private.
+    within its own module, it is a candidate for being marked as private.
 
     WARNING: This builds the entire cross-module usage graph which can be
     expensive for large projects. The graph is cached via @lru_cache to
@@ -781,7 +1060,7 @@ def _is_function_used_externally(
         relative_path = module_path.relative_to(project_root)
         current_module = str(relative_path.with_suffix("")).replace(os.sep, ".")
     except ValueError:
-        # If we can't determine the module name, assume it's used externally
+        # If we cannot determine the module name, assume it is used externally
         return True
 
     # Check if function is used by any module other than its own
@@ -816,3 +1095,22 @@ def _matches_file_pattern(module_name: str, pattern: str) -> bool:
         return fnmatch.fnmatch(file_path, pattern) or fnmatch.fnmatch(filename, pattern)
 
     return fnmatch.fnmatch(file_path, pattern)  # pragma: no cover
+
+
+def _method_name_matches_pattern(method_name: str, pattern: str) -> bool:
+    """Check if a method name matches a glob pattern.
+
+    Supports standard glob patterns:
+    - * matches any sequence of characters
+    - ? matches any single character
+    - [seq] matches any character in seq
+    - [!seq] matches any character not in seq
+
+    :param method_name: Method name to check
+    :type method_name: str
+    :param pattern: Glob pattern to match against
+    :type pattern: str
+    :returns: True if method name matches pattern
+    :rtype: bool
+    """
+    return fnmatch.fnmatch(method_name, pattern)

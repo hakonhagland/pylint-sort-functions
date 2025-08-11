@@ -22,6 +22,7 @@ The visitor pattern: PyLint calls visit_module() for modules and visit_classdef(
 for class definitions. Each method analyzes the code structure and reports issues.
 """
 
+import json
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
@@ -29,6 +30,7 @@ from astroid import nodes  # type: ignore[import-untyped]
 from pylint.checkers import BaseChecker
 
 from pylint_sort_functions import messages, utils
+from pylint_sort_functions.utils import CategoryConfig, MethodCategory
 
 if TYPE_CHECKING:
     pass
@@ -160,6 +162,59 @@ class FunctionSortChecker(BaseChecker):
                 ),
             },
         ),
+        (
+            "enable-method-categories",
+            {
+                "default": False,
+                "type": "yn",
+                "metavar": "<y or n>",
+                "help": (
+                    "Enable flexible method categorization system. When disabled, "
+                    "uses the original binary public/private sorting. When enabled, "
+                    "allows custom method categories and framework presets."
+                ),
+            },
+        ),
+        (
+            "framework-preset",
+            {
+                "default": None,
+                "type": "string",
+                "metavar": "<preset_name>",
+                "help": (
+                    "Use a built-in framework preset for method categorization. "
+                    "Available presets: pytest, unittest, pyqt, django. "
+                    "Requires enable-method-categories=true."
+                ),
+            },
+        ),
+        (
+            "method-categories",
+            {
+                "default": None,
+                "type": "string",
+                "metavar": "<json_config>",
+                "help": (
+                    "JSON configuration for custom method categories. Defines "
+                    "category names, patterns, decorators, and priorities. "
+                    'Example: \'[{"name":"properties","decorators":["@property"]}]\''
+                ),
+            },
+        ),
+        (
+            "category-sorting",
+            {
+                "default": "alphabetical",
+                "type": "choice",
+                "choices": ["alphabetical", "declaration"],
+                "metavar": "<alphabetical|declaration>",
+                "help": (
+                    "How to sort methods within each category. "
+                    "'alphabetical' sorts methods alphabetically within categories. "
+                    "'declaration' preserves the original declaration order."
+                ),
+            },
+        ),
     )
 
     # Public methods
@@ -174,10 +229,13 @@ class FunctionSortChecker(BaseChecker):
         """
         methods = utils.get_methods_from_class(node)
 
-        # Get configured decorator exclusions
+        # Get configured decorator exclusions and category configuration
         ignore_decorators = self.linter.config.ignore_decorators or []
+        category_config = self._get_category_config()
 
-        if not utils.are_methods_sorted_with_exclusions(methods, ignore_decorators):
+        if not utils.are_methods_sorted_with_exclusions(
+            methods, ignore_decorators, category_config
+        ):
             # Report unsorted methods - see docs/usage.rst for message details
             self.add_message("unsorted-methods", node=node, args=(node.name,))
 
@@ -199,10 +257,13 @@ class FunctionSortChecker(BaseChecker):
         """
         functions = utils.get_functions_from_node(node)
 
-        # Get configured decorator exclusions
+        # Get configured decorator exclusions and category configuration
         ignore_decorators = self.linter.config.ignore_decorators or []
+        category_config = self._get_category_config()
 
-        if not utils.are_functions_sorted_with_exclusions(functions, ignore_decorators):
+        if not utils.are_functions_sorted_with_exclusions(
+            functions, ignore_decorators, category_config
+        ):
             # Report unsorted functions - see docs/usage.rst for configuration
             self.add_message("unsorted-functions", node=node, args=("module",))
 
@@ -284,6 +345,157 @@ class FunctionSortChecker(BaseChecker):
         # This fallback mode is rarely used (only when linter has no file info)
         pass  # pragma: no cover
 
+    def _get_category_config(self) -> CategoryConfig:
+        """Create CategoryConfig from linter configuration.
+
+        :returns: Category configuration for method sorting
+        :rtype: CategoryConfig
+        """
+        config = CategoryConfig()
+
+        # Get basic configuration options
+        enable_categories = getattr(
+            self.linter.config, "enable_method_categories", False
+        )
+        category_sorting = getattr(
+            self.linter.config, "category_sorting", "alphabetical"
+        )
+        framework_preset = getattr(self.linter.config, "framework_preset", None)
+        method_categories_json = getattr(self.linter.config, "method_categories", None)
+
+        config.enable_categories = enable_categories
+        config.category_sorting = category_sorting
+
+        # If categories are disabled, return with defaults
+        if not enable_categories:
+            return config
+
+        try:
+            # Handle framework preset
+            if framework_preset:
+                config.categories = self._get_framework_preset_categories(
+                    framework_preset
+                )
+            # Handle custom JSON configuration
+            elif method_categories_json:
+                config.categories = self._parse_method_categories_json(
+                    method_categories_json
+                )
+            # Use defaults if nothing specified
+
+        except (ValueError, json.JSONDecodeError) as e:
+            # Configuration error - report it and use defaults
+            # Note: We can't use self.add_message here as we're not in a visit method
+            # The error will surface when pylint runs and encounters invalid config
+            print(f"Warning: Invalid method category configuration: {e}")
+            # Keep default categories
+
+        return config
+
+    def _get_framework_preset_categories(self, preset: str) -> list[MethodCategory]:
+        """Get method categories for a framework preset.
+
+        :param preset: Framework preset name
+        :type preset: str
+        :returns: List of method categories for the preset
+        :rtype: list[MethodCategory]
+        :raises ValueError: If preset is not recognized
+        """
+        presets = {
+            "pytest": [
+                MethodCategory(
+                    name="test_fixtures",
+                    patterns=["setUp", "tearDown", "setup_*", "teardown_*"],
+                    priority=10,
+                    section_header="# Test fixtures",
+                ),
+                MethodCategory(
+                    name="test_methods",
+                    patterns=["test_*"],
+                    priority=5,
+                    section_header="# Test methods",
+                ),
+                MethodCategory(
+                    name="public_methods",
+                    patterns=["*"],
+                    priority=1,
+                    section_header="# Public methods",
+                ),
+                MethodCategory(
+                    name="private_methods",
+                    patterns=["_*"],
+                    priority=2,
+                    section_header="# Private methods",
+                ),
+            ],
+            "unittest": [
+                MethodCategory(
+                    name="test_fixtures",
+                    patterns=["setUp", "tearDown", "setUpClass", "tearDownClass"],
+                    priority=10,
+                    section_header="# Test fixtures",
+                ),
+                MethodCategory(
+                    name="test_methods",
+                    patterns=["test_*"],
+                    priority=5,
+                    section_header="# Test methods",
+                ),
+                MethodCategory(
+                    name="public_methods",
+                    patterns=["*"],
+                    priority=1,
+                    section_header="# Public methods",
+                ),
+                MethodCategory(
+                    name="private_methods",
+                    patterns=["_*"],
+                    priority=2,
+                    section_header="# Private methods",
+                ),
+            ],
+            "pyqt": [
+                MethodCategory(
+                    name="initialization",
+                    patterns=["__init__", "setup*", "*_ui"],
+                    priority=10,
+                    section_header="# Initialization",
+                ),
+                MethodCategory(
+                    name="properties",
+                    decorators=["@property", "@*.setter", "@*.deleter"],
+                    priority=8,
+                    section_header="# Properties",
+                ),
+                MethodCategory(
+                    name="event_handlers",
+                    patterns=["*Event", "on_*", "handle_*", "eventFilter"],
+                    priority=6,
+                    section_header="# Event handlers",
+                ),
+                MethodCategory(
+                    name="public_methods",
+                    patterns=["*"],
+                    priority=1,
+                    section_header="# Public methods",
+                ),
+                MethodCategory(
+                    name="private_methods",
+                    patterns=["_*"],
+                    priority=2,
+                    section_header="# Private methods",
+                ),
+            ],
+        }
+
+        if preset not in presets:
+            available = ", ".join(presets.keys())
+            raise ValueError(
+                f"Unknown framework preset '{preset}'. Available: {available}"
+            )
+
+        return presets[preset]
+
     def _get_module_path(self) -> Path | None:
         """Get the current module's file path from the linter.
 
@@ -356,3 +568,56 @@ class FunctionSortChecker(BaseChecker):
         # Fallback: use the module's parent directory
         # This handles cases where we're testing in isolated directories
         return module_path.parent
+
+    def _parse_method_categories_json(self, json_str: str) -> list[MethodCategory]:
+        """Parse JSON method categories configuration.
+
+        :param json_str: JSON string containing category definitions
+        :type json_str: str
+        :returns: List of parsed method categories
+        :rtype: list[MethodCategory]
+        :raises ValueError: If JSON is malformed or contains invalid category
+            definitions
+        :raises json.JSONDecodeError: If JSON syntax is invalid
+        """
+        try:
+            categories_data = json.loads(json_str)
+        except json.JSONDecodeError as e:
+            raise json.JSONDecodeError(
+                f"Invalid JSON in method-categories: {e}", json_str, 0
+            ) from e
+
+        if not isinstance(categories_data, list):
+            raise ValueError(
+                "method-categories must be a JSON array of category objects"
+            )
+
+        categories = []
+        for i, category_data in enumerate(categories_data):
+            if not isinstance(category_data, dict):
+                raise ValueError(f"Category {i} must be a JSON object")
+
+            # Validate required fields
+            if "name" not in category_data:
+                raise ValueError(f"Category {i} is missing required 'name' field")
+
+            # Create category with validation
+            try:
+                category = MethodCategory(
+                    name=category_data["name"],
+                    patterns=category_data.get("patterns", []),
+                    decorators=category_data.get("decorators", []),
+                    priority=category_data.get("priority", 0),
+                    section_header=category_data.get(
+                        "section_header",
+                        f"# {category_data['name'].replace('_', ' ').title()}",
+                    ),
+                )
+                categories.append(category)
+            except (TypeError, ValueError) as e:
+                raise ValueError(
+                    f"Invalid category {i} "
+                    f"({category_data.get('name', 'unnamed')}): {e}"
+                ) from e
+
+        return categories
