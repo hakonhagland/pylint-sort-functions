@@ -36,10 +36,12 @@ Add the plugin to your PyLint configuration:
 Message Control
 ---------------
 
-The plugin defines four message types that can be individually controlled:
+The plugin defines eight message types that can be individually controlled:
 
 Message Types
 ~~~~~~~~~~~~~
+
+**Sorting Violations:**
 
 W9001: unsorted-functions
   Functions in a module are not sorted alphabetically within their visibility scope.
@@ -50,8 +52,24 @@ W9002: unsorted-methods
 W9003: mixed-function-visibility
   Public and private functions/methods are not properly separated.
 
+**Privacy Violations:**
+
 W9004: function-should-be-private
   Function appears to be internal-only based on usage analysis and should be renamed with underscore prefix.
+
+W9005: function-should-be-public
+  Private function is used externally and should be made public by removing underscore prefix.
+
+**Section Header Violations (Phase 2):**
+
+W9006: method-wrong-section
+  Method appears in incorrect section according to its categorization when section header validation is enabled.
+
+W9007: missing-section-header
+  Required section header is missing for a populated category when require-section-headers is enabled.
+
+W9008: empty-section-header
+  Section header exists but contains no methods when allow-empty-sections is disabled.
 
 Enabling Messages
 ~~~~~~~~~~~~~~~~~
@@ -153,6 +171,83 @@ Configure the privacy detection feature that suggests functions should be made p
    [tool.pylint."function-sort"]
    enable-privacy-detection = true
    public-api-patterns = ["main", "run", "execute", "setup", "teardown"]
+
+Method Categorization Configuration (Phase 1)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Control multi-category method organization with these options:
+
+**.pylintrc:**
+
+.. code-block:: ini
+
+   [function-sort]
+   # Enable multi-category system (default: no)
+   enable-method-categories = yes
+
+   # Use built-in framework preset
+   framework-preset = pytest  # or unittest, pyqt
+
+   # Custom JSON category configuration
+   method-categories = [{"name": "test_methods", "patterns": ["test_*"], "priority": 10}]
+
+   # Category sorting behavior (default: alphabetical)
+   category-sorting = alphabetical  # or declaration
+
+**pyproject.toml:**
+
+.. code-block:: toml
+
+   [tool.pylint."function-sort"]
+   # Enable multi-category system
+   enable-method-categories = true
+
+   # Framework preset for common patterns
+   framework-preset = "pytest"
+
+   # Custom categories with pattern matching
+   method-categories = '[
+       {"name": "properties", "decorators": ["@property"], "priority": 15},
+       {"name": "test_methods", "patterns": ["test_*"], "priority": 10},
+       {"name": "public_methods", "patterns": ["*"], "priority": 5},
+       {"name": "private_methods", "patterns": ["_*"], "priority": 1}
+   ]'
+
+   # Sort within categories
+   category-sorting = "alphabetical"
+
+Section Header Configuration (Phase 2)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Control functional section header validation with these options:
+
+**.pylintrc:**
+
+.. code-block:: ini
+
+   [function-sort]
+   # Enable section header validation (default: no)
+   enforce-section-headers = yes
+
+   # Require headers for all populated sections (default: no)
+   require-section-headers = yes
+
+   # Allow empty section headers (default: yes)
+   allow-empty-sections = no
+
+**pyproject.toml:**
+
+.. code-block:: toml
+
+   [tool.pylint."function-sort"]
+   # Make section headers functional, not decorative
+   enforce-section-headers = true
+
+   # Require headers for all categories with methods
+   require-section-headers = true
+
+   # Disallow empty section headers
+   allow-empty-sections = false
 
 Privacy Configuration Options
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

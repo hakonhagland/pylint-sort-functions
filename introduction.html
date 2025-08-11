@@ -101,18 +101,20 @@
              
   <section id="introduction">
 <h1>Introduction<a class="headerlink" href="#introduction" title="Link to this heading"></a></h1>
-<p><code class="docutils literal notranslate"><span class="pre">pylint-sort-functions</span></code> is a PyLint plugin that enforces alphabetical sorting of functions and methods within Python classes and modules.</p>
+<p><code class="docutils literal notranslate"><span class="pre">pylint-sort-functions</span></code> is a PyLint plugin that enforces organized sorting of functions and methods within Python classes and modules. It supports both traditional binary public/private sorting and advanced multi-category organization with framework-specific presets for pytest, unittest, and PyQt applications.</p>
 <section id="features">
 <h2>Features<a class="headerlink" href="#features" title="Link to this heading"></a></h2>
 <ul class="simple">
-<li><p><strong>Function Organization</strong>: Enforces alphabetical sorting of functions within modules</p></li>
-<li><p><strong>Method Organization</strong>: Enforces alphabetical sorting of methods within classes</p></li>
-<li><p><strong>Public/Private Separation</strong>: Ensures public functions/methods come before private ones (underscore prefix)</p></li>
+<li><p><strong>Multi-Category Method Organization</strong>: Framework-aware method categorization beyond binary public/private (Phase 1)</p></li>
+<li><p><strong>Framework Presets</strong>: Built-in configurations for pytest, unittest, and PyQt frameworks</p></li>
+<li><p><strong>Custom Categorization</strong>: JSON-configurable method categories with pattern matching and priority resolution</p></li>
+<li><p><strong>Functional Section Headers</strong>: Validated section headers that enforce organizational structure (Phase 2)</p></li>
+<li><p><strong>Traditional Binary Sorting</strong>: Classic public/private alphabetical organization (backward compatible)</p></li>
 <li><p><strong>Privacy Detection</strong>: Identifies functions that should be private/public based on cross-module usage analysis</p></li>
 <li><p><strong>Automatic Fixing</strong>: CLI tool for automatically fixing function order and privacy violations</p></li>
-<li><p><strong>Configurable Rules</strong>: Customizable message codes (W9001-W9005) for different violations</p></li>
+<li><p><strong>Comprehensive Message Codes</strong>: Eight message types (W9001-W9008) covering all organizational violations</p></li>
 <li><p><strong>Advanced Configuration</strong>: Public API patterns, privacy detection settings, and decorator exclusions</p></li>
-<li><p><strong>Clear Error Messages</strong>: Helpful messages indicating exactly what needs to be reordered</p></li>
+<li><p><strong>Clear Error Messages</strong>: Detailed messages with line numbers indicating exactly what needs to be reorganized</p></li>
 </ul>
 </section>
 <section id="installation">

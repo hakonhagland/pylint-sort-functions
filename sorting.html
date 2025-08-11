@@ -55,8 +55,9 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Function and Method Sorting Algorithm</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#overview">Overview</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#sorting-rules">Sorting Rules</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#module-level-functions">Module-Level Functions</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#class-methods">Class Methods</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sorting-system-overview">Sorting System Overview</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#binary-mode-sorting-default">Binary Mode Sorting (Default)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#multi-category-mode-sorting-phase-1">Multi-Category Mode Sorting (Phase 1)</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#special-method-handling">Special Method Handling</a><ul>
@@ -81,17 +82,31 @@
 <li class="toctree-l3"><a class="reference internal" href="#examples">Examples</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#section-header-validation-phase-2">Section Header Validation (Phase 2)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id1">Overview</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id2">Configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#usage-examples">Usage Examples</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#section-header-detection">Section Header Detection</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#validation-logic">Validation Logic</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id3">Framework Integration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#error-messages">Error Messages</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#benefits">Benefits</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#message-types">Message Types</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#w9001-unsorted-functions">W9001: unsorted-functions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#w9002-unsorted-methods">W9002: unsorted-methods</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#w9003-mixed-function-visibility">W9003: mixed-function-visibility</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#w9004-function-should-be-private">W9004: function-should-be-private</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#w9005-function-should-be-public">W9005: function-should-be-public</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#w9006-method-wrong-section">W9006: method-wrong-section</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#w9007-missing-section-header">W9007: missing-section-header</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#w9008-empty-section-header">W9008: empty-section-header</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#pylint-integration">PyLint Integration</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#cli-tool">CLI Tool</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#benefits">Benefits</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#id4">Benefits</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#consistency">Consistency</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#readability">Readability</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#maintainability">Maintainability</a></li>
@@ -156,14 +171,45 @@
 to organize Python code for improved readability and maintainability.</p>
 <section id="overview">
 <h2>Overview<a class="headerlink" href="#overview" title="Link to this heading"></a></h2>
-<p>The plugin enforces a consistent organizational pattern for both module-level functions
-and class methods. This creates predictable code structure that improves navigation
-and reduces cognitive overhead when reading code.</p>
+<p>The plugin enforces consistent organizational patterns for both module-level functions
+and class methods using a flexible multi-category system. Beyond traditional binary
+public/private sorting, the plugin supports framework-specific presets and custom
+categorization that creates predictable code structure improving navigation and
+reducing cognitive overhead when reading code.</p>
+<p><strong>Key Features:</strong>
+- <strong>Traditional binary sorting</strong>: Public functions before private functions (default)
+- <strong>Multi-category system</strong>: Framework-aware method organization (Phase 1)
+- <strong>Framework presets</strong>: Built-in configurations for pytest, unittest, PyQt
+- <strong>Custom categorization</strong>: JSON-configurable method categories with pattern matching
+- <strong>Functional section headers</strong>: Validated headers that enforce organizational structure (Phase 2)</p>
 </section>
 <section id="sorting-rules">
 <h2>Sorting Rules<a class="headerlink" href="#sorting-rules" title="Link to this heading"></a></h2>
-<section id="module-level-functions">
-<h3>Module-Level Functions<a class="headerlink" href="#module-level-functions" title="Link to this heading"></a></h3>
+<section id="sorting-system-overview">
+<h3>Sorting System Overview<a class="headerlink" href="#sorting-system-overview" title="Link to this heading"></a></h3>
+<p>The plugin supports two sorting modes:</p>
+<ol class="arabic simple">
+<li><p><strong>Binary Mode (Default)</strong>: Traditional public/private categorization</p></li>
+<li><p><strong>Multi-Category Mode</strong>: Framework-aware categorization with custom categories</p></li>
+</ol>
+<p><strong>Binary Mode</strong> provides backward compatibility and follows simple rules:</p>
+<ul class="simple">
+<li><p>Public functions (no underscore) sorted alphabetically</p></li>
+<li><p>Private functions (underscore prefix) sorted alphabetically</p></li>
+<li><p>Public functions always come before private functions</p></li>
+</ul>
+<p><strong>Multi-Category Mode</strong> enables sophisticated method organization:</p>
+<ul class="simple">
+<li><p>Multiple categories defined by patterns and decorators</p></li>
+<li><p>Framework-specific presets (pytest, unittest, pyqt)</p></li>
+<li><p>Custom JSON category configuration</p></li>
+<li><p>Priority-based conflict resolution</p></li>
+<li><p>Optional section header validation</p></li>
+</ul>
+</section>
+<section id="binary-mode-sorting-default">
+<h3>Binary Mode Sorting (Default)<a class="headerlink" href="#binary-mode-sorting-default" title="Link to this heading"></a></h3>
+<p><strong>Module-Level Functions:</strong></p>
 <p>Functions within a module are organized using the following hierarchy:</p>
 <ol class="arabic simple">
 <li><p><strong>Public functions</strong> (no underscore prefix) - sorted alphabetically</p></li>
@@ -188,9 +234,7 @@ and reduces cognitive overhead when reading code.</p>
     <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Performing: </span><span class="si">{</span><span class="n">operation</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-</section>
-<section id="class-methods">
-<h3>Class Methods<a class="headerlink" href="#class-methods" title="Link to this heading"></a></h3>
+<p><strong>Class Methods:</strong></p>
 <p>Methods within classes follow the same organizational pattern:</p>
 <ol class="arabic simple">
 <li><p><strong>Public methods</strong> (including dunder methods) - sorted alphabetically</p></li>
@@ -222,6 +266,108 @@ and reduces cognitive overhead when reading code.</p>
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Transaction: </span><span class="si">{</span><span class="n">transaction</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
+</section>
+<section id="multi-category-mode-sorting-phase-1">
+<h3>Multi-Category Mode Sorting (Phase 1)<a class="headerlink" href="#multi-category-mode-sorting-phase-1" title="Link to this heading"></a></h3>
+<p>When <code class="docutils literal notranslate"><span class="pre">enable-method-categories</span> <span class="pre">=</span> <span class="pre">true</span></code> is configured, the plugin uses a sophisticated
+multi-category system that goes beyond binary public/private classification.</p>
+<p><strong>Framework Presets:</strong></p>
+<p>Built-in configurations for common Python frameworks:</p>
+<p><strong>pytest preset</strong> (<code class="docutils literal notranslate"><span class="pre">framework-preset</span> <span class="pre">=</span> <span class="pre">&quot;pytest&quot;</span></code>):</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">TestUserService</span><span class="p">:</span>
+    <span class="c1"># Test fixtures (priority: highest)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">setup_method</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="c1"># Test methods (priority: high)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_create_user</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_delete_user</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="c1"># Public methods (priority: medium)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">verify_result</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="c1"># Private methods (priority: lowest)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_create_test_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+</pre></div>
+</div>
+<p><strong>unittest preset</strong> (<code class="docutils literal notranslate"><span class="pre">framework-preset</span> <span class="pre">=</span> <span class="pre">&quot;unittest&quot;</span></code>):</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">TestUserService</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
+    <span class="c1"># Lifecycle methods (priority: highest)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">tearDown</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="c1"># Test methods (priority: high)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_create_user</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="c1"># Public methods (priority: medium)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">assert_user_valid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">user</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="c1"># Private methods (priority: lowest)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_create_test_user</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+</pre></div>
+</div>
+<p><strong>pyqt preset</strong> (<code class="docutils literal notranslate"><span class="pre">framework-preset</span> <span class="pre">=</span> <span class="pre">&quot;pyqt&quot;</span></code>):</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">UserDialog</span><span class="p">(</span><span class="n">QDialog</span><span class="p">):</span>
+    <span class="c1"># Initialization methods (priority: highest)</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">setup_ui</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="c1"># Properties (priority: high)</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">user_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_user_data</span>
+
+    <span class="c1"># Event handlers (priority: medium-high)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">closeEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="c1"># Public methods (priority: medium)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="c1"># Private methods (priority: lowest)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_validate_input</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+</pre></div>
+</div>
+<p><strong>Custom Category Configuration:</strong></p>
+<p>Define your own categories using JSON configuration:</p>
+<div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span class="k">[tool.pylint.function-sort]</span>
+<span class="n">enable-method-categories</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span>
+<span class="n">method-categories</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;</span><span class="err">[</span>
+<span class="w">    </span><span class="err">{</span><span class="s2">&quot;name&quot;</span><span class="err">:</span><span class="w"> </span><span class="s2">&quot;initialization&quot;</span><span class="err">,</span><span class="w"> </span><span class="s2">&quot;patterns&quot;</span><span class="err">:</span><span class="w"> </span><span class="k">[</span><span class="s2">&quot;__init__&quot;</span><span class="err">,</span><span class="w"> </span><span class="s2">&quot;setup*&quot;</span><span class="k">]</span><span class="err">,</span><span class="w"> </span><span class="s2">&quot;priority&quot;</span><span class="err">:</span><span class="w"> </span><span class="n">20</span><span class="err">},</span>
+<span class="w">    </span><span class="err">{</span><span class="s2">&quot;name&quot;</span><span class="err">:</span><span class="w"> </span><span class="s2">&quot;properties&quot;</span><span class="err">,</span><span class="w"> </span><span class="s2">&quot;decorators&quot;</span><span class="err">:</span><span class="w"> </span><span class="k">[</span><span class="s2">&quot;@property&quot;</span><span class="err">,</span><span class="w"> </span><span class="s2">&quot;@*.setter&quot;</span><span class="k">]</span><span class="err">,</span><span class="w"> </span><span class="s2">&quot;priority&quot;</span><span class="err">:</span><span class="w"> </span><span class="n">15</span><span class="err">},</span>
+<span class="w">    </span><span class="err">{</span><span class="s2">&quot;name&quot;</span><span class="err">:</span><span class="w"> </span><span class="s2">&quot;api_endpoints&quot;</span><span class="err">,</span><span class="w"> </span><span class="s2">&quot;decorators&quot;</span><span class="err">:</span><span class="w"> </span><span class="k">[</span><span class="s2">&quot;@app.route&quot;</span><span class="k">]</span><span class="err">,</span><span class="w"> </span><span class="s2">&quot;priority&quot;</span><span class="err">:</span><span class="w"> </span><span class="n">10</span><span class="err">},</span>
+<span class="w">    </span><span class="err">{</span><span class="s2">&quot;name&quot;</span><span class="err">:</span><span class="w"> </span><span class="s2">&quot;public_methods&quot;</span><span class="err">,</span><span class="w"> </span><span class="s2">&quot;patterns&quot;</span><span class="err">:</span><span class="w"> </span><span class="k">[</span><span class="s2">&quot;*&quot;</span><span class="k">]</span><span class="err">,</span><span class="w"> </span><span class="s2">&quot;priority&quot;</span><span class="err">:</span><span class="w"> </span><span class="n">5</span><span class="err">},</span>
+<span class="w">    </span><span class="err">{</span><span class="s2">&quot;name&quot;</span><span class="err">:</span><span class="w"> </span><span class="s2">&quot;private_methods&quot;</span><span class="err">,</span><span class="w"> </span><span class="s2">&quot;patterns&quot;</span><span class="err">:</span><span class="w"> </span><span class="k">[</span><span class="s2">&quot;_*&quot;</span><span class="k">]</span><span class="err">,</span><span class="w"> </span><span class="s2">&quot;priority&quot;</span><span class="err">:</span><span class="w"> </span><span class="n">1</span><span class="err">}</span>
+<span class="err">]</span><span class="s1">&#39;</span>
+</pre></div>
+</div>
+<p><strong>Pattern Matching System:</strong></p>
+<p>Categories use flexible pattern matching:</p>
+<ul class="simple">
+<li><p><strong>Name patterns</strong>: Glob patterns like <code class="docutils literal notranslate"><span class="pre">test_*</span></code>, <code class="docutils literal notranslate"><span class="pre">setup*</span></code>, <code class="docutils literal notranslate"><span class="pre">*Event</span></code></p></li>
+<li><p><strong>Decorator patterns</strong>: Match decorators like <code class="docutils literal notranslate"><span class="pre">&#64;property</span></code>, <code class="docutils literal notranslate"><span class="pre">&#64;app.route</span></code>, <code class="docutils literal notranslate"><span class="pre">&#64;*.fixture</span></code></p></li>
+<li><p><strong>Priority resolution</strong>: Higher priority numbers win when patterns conflict</p></li>
+<li><p><strong>Alphabetical sorting</strong>: Methods sorted alphabetically within each category</p></li>
+</ul>
+<p><strong>Category Ordering:</strong></p>
+<p>Categories are ordered by priority (highest to lowest), then methods within each
+category are sorted alphabetically (or by declaration order if <code class="docutils literal notranslate"><span class="pre">category-sorting</span> <span class="pre">=</span> <span class="pre">&quot;declaration&quot;</span></code>).</p>
 </section>
 </section>
 <section id="special-method-handling">
@@ -588,9 +734,186 @@ different visibility levels, while avoiding unnecessary headers for single-visib
 </div>
 </section>
 </section>
+<section id="section-header-validation-phase-2">
+<h2>Section Header Validation (Phase 2)<a class="headerlink" href="#section-header-validation-phase-2" title="Link to this heading"></a></h2>
+<p>The plugin supports functional section headers that validate method placement within their designated sections. This transforms section headers from decorative comments into enforceable organizational elements that work seamlessly with both binary and multi-category sorting modes.</p>
+<section id="id1">
+<h3>Overview<a class="headerlink" href="#id1" title="Link to this heading"></a></h3>
+<p>Traditional section headers are purely visual:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">MyClass</span><span class="p">:</span>
+    <span class="c1"># Test methods</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">public_method</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>    <span class="c1"># No validation - header ignored</span>
+        <span class="k">pass</span>
+
+    <span class="c1"># Public methods</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_something</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>   <span class="c1"># Wrong section - not detected</span>
+        <span class="k">pass</span>
+</pre></div>
+</div>
+<p>With section header validation enabled, these headers become functional:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">MyClass</span><span class="p">:</span>
+    <span class="c1"># Test methods</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_something</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>   <span class="c1"># ✅ Correct section</span>
+        <span class="k">pass</span>
+
+    <span class="c1"># Public methods</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">public_method</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>    <span class="c1"># ✅ Correct section</span>
+        <span class="k">pass</span>
+</pre></div>
+</div>
+</section>
+<section id="id2">
+<h3>Configuration<a class="headerlink" href="#id2" title="Link to this heading"></a></h3>
+<p>Section header validation is controlled by three configuration options:</p>
+<dl>
+<dt><strong>enforce-section-headers</strong></dt><dd><p>Enable section header validation. When enabled, methods must appear under the correct section headers according to their categorization.</p>
+<p><em>Default</em>: <code class="docutils literal notranslate"><span class="pre">false</span></code></p>
+</dd>
+<dt><strong>require-section-headers</strong></dt><dd><p>Require section headers for all populated categories. When enabled, missing section headers for categories with methods will be flagged as violations.</p>
+<p><em>Default</em>: <code class="docutils literal notranslate"><span class="pre">false</span></code></p>
+</dd>
+<dt><strong>allow-empty-sections</strong></dt><dd><p>Allow section headers that have no methods underneath them. When disabled, empty section headers will be flagged as violations.</p>
+<p><em>Default</em>: <code class="docutils literal notranslate"><span class="pre">true</span></code></p>
+</dd>
+</dl>
+</section>
+<section id="usage-examples">
+<h3>Usage Examples<a class="headerlink" href="#usage-examples" title="Link to this heading"></a></h3>
+<p><strong>Basic section header validation:</strong></p>
+<div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span class="k">[tool.pylint.</span><span class="s1">&#39;pylint-sort-functions&#39;</span><span class="k">]</span>
+<span class="n">enforce-section-headers</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span>
+</pre></div>
+</div>
+<p><strong>Strict section header requirements:</strong></p>
+<div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span class="k">[tool.pylint.</span><span class="s1">&#39;pylint-sort-functions&#39;</span><span class="k">]</span>
+<span class="n">enforce-section-headers</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span>
+<span class="n">require-section-headers</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span>
+<span class="n">allow-empty-sections</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">false</span>
+</pre></div>
+</div>
+<p><strong>Framework-specific section validation:</strong></p>
+<div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span class="k">[tool.pylint.</span><span class="s1">&#39;pylint-sort-functions&#39;</span><span class="k">]</span>
+<span class="n">enforce-section-headers</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span>
+<span class="n">framework-preset</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;pytest&quot;</span><span class="w">        </span><span class="c1"># Enables test method categories</span>
+</pre></div>
+</div>
+</section>
+<section id="section-header-detection">
+<h3>Section Header Detection<a class="headerlink" href="#section-header-detection" title="Link to this heading"></a></h3>
+<p>The plugin automatically detects section headers based on the configured category definitions. Headers are matched using case-insensitive comparison:</p>
+<p><strong>Default Categories (pytest preset):</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">Test</span> <span class="pre">methods</span></code> - for methods matching <code class="docutils literal notranslate"><span class="pre">test_*</span></code> patterns</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">Public</span> <span class="pre">methods</span></code> - for public methods not matching other patterns</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">Private</span> <span class="pre">methods</span></code> - for methods with underscore prefix</p></li>
+</ul>
+<p><strong>Custom Categories:</strong></p>
+<p>You can define custom section headers through the categorization system:</p>
+<div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span class="k">[tool.pylint.</span><span class="s1">&#39;pylint-sort-functions&#39;</span><span class="k">]</span>
+<span class="n">enforce-section-headers</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span>
+<span class="n">method-categories</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span><span class="n">name</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s2">&quot;properties&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">patterns</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;*&quot;</span><span class="p">],</span><span class="w"> </span><span class="n">decorators</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;@property&quot;</span><span class="p">],</span><span class="w"> </span><span class="n">section_header</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s2">&quot;# Properties&quot;</span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span><span class="n">name</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s2">&quot;lifecycle&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">patterns</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;__init__&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;setup*&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;teardown*&quot;</span><span class="p">],</span><span class="w"> </span><span class="n">section_header</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s2">&quot;# Lifecycle&quot;</span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span><span class="n">name</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s2">&quot;public_methods&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">patterns</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;*&quot;</span><span class="p">],</span><span class="w"> </span><span class="n">section_header</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s2">&quot;# Public API&quot;</span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span><span class="n">name</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s2">&quot;private_methods&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">patterns</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;_*&quot;</span><span class="p">],</span><span class="w"> </span><span class="n">section_header</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s2">&quot;# Private Implementation&quot;</span><span class="p">}</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+</section>
+<section id="validation-logic">
+<h3>Validation Logic<a class="headerlink" href="#validation-logic" title="Link to this heading"></a></h3>
+<p><strong>Method-to-Section Mapping:</strong></p>
+<p>The plugin creates a mapping of line numbers to section categories based on detected headers:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">ExampleClass</span><span class="p">:</span>
+    <span class="c1"># Properties                    # Section header (line 1)</span>
+    <span class="nd">@property</span>                      <span class="c1"># Lines 2-4 belong to &quot;properties&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>               <span class="c1"># section</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_value</span>         <span class="c1">#</span>
+
+    <span class="c1"># Public API                    # Section header (line 5)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">process_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>        <span class="c1"># Lines 6-7 belong to &quot;public_methods&quot;</span>
+        <span class="k">pass</span>                       <span class="c1"># section</span>
+</pre></div>
+</div>
+<p><strong>Violation Detection:</strong></p>
+<p>Methods are validated against their expected sections:</p>
+<ol class="arabic simple">
+<li><p><strong>Categorize method</strong> using configured patterns and decorators</p></li>
+<li><p><strong>Find section</strong> where method is located based on line number</p></li>
+<li><p><strong>Compare</strong> expected vs actual section</p></li>
+<li><p><strong>Report violation</strong> if sections don’t match</p></li>
+</ol>
+</section>
+<section id="id3">
+<h3>Framework Integration<a class="headerlink" href="#id3" title="Link to this heading"></a></h3>
+<p>Section header validation works seamlessly with framework presets:</p>
+<p><strong>pytest Integration:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">TestUserService</span><span class="p">:</span>
+    <span class="c1"># Test methods</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_create_user</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>     <span class="c1"># ✅ Correct - test method in test section</span>
+        <span class="k">pass</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_delete_user</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>     <span class="c1"># ✅ Correct - test method in test section</span>
+        <span class="k">pass</span>
+
+    <span class="c1"># Public methods</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">setup_method</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>         <span class="c1"># ✅ Correct - utility method in public section</span>
+        <span class="k">pass</span>
+</pre></div>
+</div>
+<p><strong>PyQt Integration:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">CustomDialog</span><span class="p">(</span><span class="n">QDialog</span><span class="p">):</span>
+    <span class="c1"># Lifecycle methods</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span> <span class="c1"># ✅ Correct - initialization</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+
+    <span class="c1"># Event handlers</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">closeEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>     <span class="c1"># ✅ Correct - event handler section</span>
+        <span class="k">pass</span>
+
+    <span class="c1"># Public methods</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>        <span class="c1"># ✅ Correct - public API</span>
+        <span class="k">pass</span>
+</pre></div>
+</div>
+</section>
+<section id="error-messages">
+<h3>Error Messages<a class="headerlink" href="#error-messages" title="Link to this heading"></a></h3>
+<p>Section header validation adds three new message types to provide precise error reporting:</p>
+<dl class="simple">
+<dt><strong>method-wrong-section (W9007)</strong></dt><dd><p>Method appears in incorrect section according to its categorization.</p>
+</dd>
+<dt><strong>missing-section-header (W9008)</strong></dt><dd><p>Required section header is missing for a populated category.</p>
+</dd>
+<dt><strong>empty-section-header (W9009)</strong></dt><dd><p>Section header exists but contains no methods.</p>
+</dd>
+</dl>
+<p><strong>Example Error Output:</strong></p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>example.py:15:4: W9007: Method &#39;test_something&#39; should be in &#39;test_methods&#39; section but found in &#39;public_methods&#39; section (method-wrong-section)
+example.py:1:0: W9008: Missing required section header for category &#39;test_methods&#39; (missing-section-header)
+example.py:8:0: W9009: Empty section header &#39;properties&#39; - no methods found in this category (empty-section-header)
+</pre></div>
+</div>
+</section>
+<section id="benefits">
+<h3>Benefits<a class="headerlink" href="#benefits" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt><strong>Enforced Organization:</strong></dt><dd><p>Section headers become functional elements that enforce intended code organization.</p>
+</dd>
+<dt><strong>Clear Error Messages:</strong></dt><dd><p>Precise reporting shows expected vs actual section placement with line numbers.</p>
+</dd>
+<dt><strong>Framework Compatibility:</strong></dt><dd><p>Works with existing framework presets and custom categorization schemes.</p>
+</dd>
+<dt><strong>Progressive Adoption:</strong></dt><dd><p>Can be enabled gradually - disabled by default for backward compatibility.</p>
+</dd>
+<dt><strong>IDE Integration:</strong></dt><dd><p>Error messages include line numbers for immediate navigation to violations.</p>
+</dd>
+</dl>
+</section>
+</section>
 <section id="message-types">
 <h2>Message Types<a class="headerlink" href="#message-types" title="Link to this heading"></a></h2>
-<p>The plugin reports five types of violations:</p>
+<p>The plugin reports eight types of violations:</p>
 <p><strong>Sorting Violations:</strong></p>
 <section id="w9001-unsorted-functions">
 <h3>W9001: unsorted-functions<a class="headerlink" href="#w9001-unsorted-functions" title="Link to this heading"></a></h3>
@@ -627,6 +950,50 @@ different visibility levels, while avoiding unnecessary headers for single-visib
 <span class="kn">from</span><span class="w"> </span><span class="nn">utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">_format_currency</span>  <span class="c1"># External usage detected</span>
 </pre></div>
 </div>
+<p><strong>Section Header Violations:</strong></p>
+</section>
+<section id="w9006-method-wrong-section">
+<h3>W9006: method-wrong-section<a class="headerlink" href="#w9006-method-wrong-section" title="Link to this heading"></a></h3>
+<p>A method appears in the incorrect section according to its categorization. This violation occurs when section header validation is enabled and methods are not positioned under their expected section headers.</p>
+<p><strong>Example:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">TestClass</span><span class="p">:</span>
+    <span class="c1"># Test methods</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">public_method</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>     <span class="c1"># W9006: Should be in &#39;public_methods&#39; section</span>
+        <span class="k">pass</span>
+
+    <span class="c1"># Public methods</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_something</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>    <span class="c1"># W9006: Should be in &#39;test_methods&#39; section</span>
+        <span class="k">pass</span>
+</pre></div>
+</div>
+</section>
+<section id="w9007-missing-section-header">
+<h3>W9007: missing-section-header<a class="headerlink" href="#w9007-missing-section-header" title="Link to this heading"></a></h3>
+<p>A required section header is missing for a populated category. This violation occurs when <code class="docutils literal notranslate"><span class="pre">require-section-headers</span></code> is enabled and methods exist for a category but no corresponding section header is found.</p>
+<p><strong>Example:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">TestClass</span><span class="p">:</span>
+    <span class="c1"># Missing &quot;# Test methods&quot; header</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_something</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>    <span class="c1"># W9007: Missing section header for &#39;test_methods&#39;</span>
+        <span class="k">pass</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_another</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>      <span class="c1"># Methods exist but no header</span>
+        <span class="k">pass</span>
+</pre></div>
+</div>
+</section>
+<section id="w9008-empty-section-header">
+<h3>W9008: empty-section-header<a class="headerlink" href="#w9008-empty-section-header" title="Link to this heading"></a></h3>
+<p>A section header exists but contains no methods. This violation occurs when <code class="docutils literal notranslate"><span class="pre">allow-empty-sections</span></code> is disabled and section headers are present without any corresponding methods.</p>
+<p><strong>Example:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">TestClass</span><span class="p">:</span>
+    <span class="c1"># Test methods             # W9008: Empty section header</span>
+    <span class="c1"># No test methods defined</span>
+
+    <span class="c1"># Public methods</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">public_method</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+</pre></div>
+</div>
 </section>
 </section>
 <section id="pylint-integration">
@@ -643,8 +1010,8 @@ different visibility levels, while avoiding unnecessary headers for single-visib
 <p>See <a class="reference internal" href="cli.html"><span class="doc">Auto-Fix Tool Reference</span></a> for information about the standalone <code class="docutils literal notranslate"><span class="pre">pylint-sort-functions</span></code> command-line tool
 that provides auto-fix functionality independent of PyLint.</p>
 </section>
-<section id="benefits">
-<h2>Benefits<a class="headerlink" href="#benefits" title="Link to this heading"></a></h2>
+<section id="id4">
+<h2>Benefits<a class="headerlink" href="#id4" title="Link to this heading"></a></h2>
 <section id="consistency">
 <h3>Consistency<a class="headerlink" href="#consistency" title="Link to this heading"></a></h3>
 <ul class="simple">

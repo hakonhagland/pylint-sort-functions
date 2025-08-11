@@ -1,19 +1,21 @@
 Introduction
 ============
 
-``pylint-sort-functions`` is a PyLint plugin that enforces alphabetical sorting of functions and methods within Python classes and modules.
+``pylint-sort-functions`` is a PyLint plugin that enforces organized sorting of functions and methods within Python classes and modules. It supports both traditional binary public/private sorting and advanced multi-category organization with framework-specific presets for pytest, unittest, and PyQt applications.
 
 Features
 --------
 
-* **Function Organization**: Enforces alphabetical sorting of functions within modules
-* **Method Organization**: Enforces alphabetical sorting of methods within classes
-* **Public/Private Separation**: Ensures public functions/methods come before private ones (underscore prefix)
+* **Multi-Category Method Organization**: Framework-aware method categorization beyond binary public/private (Phase 1)
+* **Framework Presets**: Built-in configurations for pytest, unittest, and PyQt frameworks
+* **Custom Categorization**: JSON-configurable method categories with pattern matching and priority resolution
+* **Functional Section Headers**: Validated section headers that enforce organizational structure (Phase 2)
+* **Traditional Binary Sorting**: Classic public/private alphabetical organization (backward compatible)
 * **Privacy Detection**: Identifies functions that should be private/public based on cross-module usage analysis
 * **Automatic Fixing**: CLI tool for automatically fixing function order and privacy violations
-* **Configurable Rules**: Customizable message codes (W9001-W9005) for different violations
+* **Comprehensive Message Codes**: Eight message types (W9001-W9008) covering all organizational violations
 * **Advanced Configuration**: Public API patterns, privacy detection settings, and decorator exclusions
-* **Clear Error Messages**: Helpful messages indicating exactly what needs to be reordered
+* **Clear Error Messages**: Detailed messages with line numbers indicating exactly what needs to be reorganized
 
 Installation
 ------------

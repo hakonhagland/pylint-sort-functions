@@ -65,6 +65,8 @@
 <li class="toctree-l2"><a class="reference internal" href="#plugin-specific-configuration">Plugin-Specific Configuration</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#decorator-exclusions">Decorator Exclusions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#privacy-detection-settings">Privacy Detection Settings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#method-categorization-configuration-phase-1">Method Categorization Configuration (Phase 1)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#section-header-configuration-phase-2">Section Header Configuration (Phase 2)</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#privacy-configuration-options">Privacy Configuration Options</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#directory-exclusions-future-feature">Directory Exclusions (Future Feature)</a></li>
 </ul>
@@ -173,9 +175,10 @@ when used with PyLint.</p>
 </section>
 <section id="message-control">
 <h2>Message Control<a class="headerlink" href="#message-control" title="Link to this heading"></a></h2>
-<p>The plugin defines four message types that can be individually controlled:</p>
+<p>The plugin defines eight message types that can be individually controlled:</p>
 <section id="message-types">
 <h3>Message Types<a class="headerlink" href="#message-types" title="Link to this heading"></a></h3>
+<p><strong>Sorting Violations:</strong></p>
 <dl class="simple">
 <dt>W9001: unsorted-functions</dt><dd><p>Functions in a module are not sorted alphabetically within their visibility scope.</p>
 </dd>
@@ -183,7 +186,21 @@ when used with PyLint.</p>
 </dd>
 <dt>W9003: mixed-function-visibility</dt><dd><p>Public and private functions/methods are not properly separated.</p>
 </dd>
+</dl>
+<p><strong>Privacy Violations:</strong></p>
+<dl class="simple">
 <dt>W9004: function-should-be-private</dt><dd><p>Function appears to be internal-only based on usage analysis and should be renamed with underscore prefix.</p>
+</dd>
+<dt>W9005: function-should-be-public</dt><dd><p>Private function is used externally and should be made public by removing underscore prefix.</p>
+</dd>
+</dl>
+<p><strong>Section Header Violations (Phase 2):</strong></p>
+<dl class="simple">
+<dt>W9006: method-wrong-section</dt><dd><p>Method appears in incorrect section according to its categorization when section header validation is enabled.</p>
+</dd>
+<dt>W9007: missing-section-header</dt><dd><p>Required section header is missing for a populated category when require-section-headers is enabled.</p>
+</dd>
+<dt>W9008: empty-section-header</dt><dd><p>Section header exists but contains no methods when allow-empty-sections is disabled.</p>
 </dd>
 </dl>
 </section>
@@ -266,6 +283,73 @@ when used with PyLint.</p>
 <div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span class="k">[tool.pylint.</span><span class="s2">&quot;function-sort&quot;</span><span class="k">]</span>
 <span class="n">enable-privacy-detection</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span>
 <span class="n">public-api-patterns</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;main&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;run&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;execute&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;setup&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;teardown&quot;</span><span class="p">]</span>
+</pre></div>
+</div>
+</section>
+<section id="method-categorization-configuration-phase-1">
+<h3>Method Categorization Configuration (Phase 1)<a class="headerlink" href="#method-categorization-configuration-phase-1" title="Link to this heading"></a></h3>
+<p>Control multi-category method organization with these options:</p>
+<p><strong>.pylintrc:</strong></p>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[function-sort]</span>
+<span class="c1"># Enable multi-category system (default: no)</span>
+<span class="na">enable-method-categories</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">yes</span>
+
+<span class="c1"># Use built-in framework preset</span>
+<span class="na">framework-preset</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">pytest</span><span class="w">  </span><span class="c1"># or unittest, pyqt</span>
+
+<span class="c1"># Custom JSON category configuration</span>
+<span class="na">method-categories = [{&quot;name&quot;</span><span class="o">:</span><span class="w"> </span><span class="s">&quot;test_methods&quot;</span><span class="na">, &quot;patterns&quot;</span><span class="o">:</span><span class="w"> </span><span class="s">[&quot;test_*&quot;], &quot;priority&quot;: 10}]</span>
+
+<span class="c1"># Category sorting behavior (default: alphabetical)</span>
+<span class="na">category-sorting</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">alphabetical</span><span class="w">  </span><span class="c1"># or declaration</span>
+</pre></div>
+</div>
+<p><strong>pyproject.toml:</strong></p>
+<div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span class="k">[tool.pylint.</span><span class="s2">&quot;function-sort&quot;</span><span class="k">]</span>
+<span class="c1"># Enable multi-category system</span>
+<span class="n">enable-method-categories</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span>
+
+<span class="c1"># Framework preset for common patterns</span>
+<span class="n">framework-preset</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;pytest&quot;</span>
+
+<span class="c1"># Custom categories with pattern matching</span>
+<span class="n">method-categories</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;</span><span class="err">[</span>
+<span class="w">    </span><span class="err">{</span><span class="s2">&quot;name&quot;</span><span class="err">:</span><span class="w"> </span><span class="s2">&quot;properties&quot;</span><span class="err">,</span><span class="w"> </span><span class="s2">&quot;decorators&quot;</span><span class="err">:</span><span class="w"> </span><span class="k">[</span><span class="s2">&quot;@property&quot;</span><span class="k">]</span><span class="err">,</span><span class="w"> </span><span class="s2">&quot;priority&quot;</span><span class="err">:</span><span class="w"> </span><span class="n">15</span><span class="err">},</span>
+<span class="w">    </span><span class="err">{</span><span class="s2">&quot;name&quot;</span><span class="err">:</span><span class="w"> </span><span class="s2">&quot;test_methods&quot;</span><span class="err">,</span><span class="w"> </span><span class="s2">&quot;patterns&quot;</span><span class="err">:</span><span class="w"> </span><span class="k">[</span><span class="s2">&quot;test_*&quot;</span><span class="k">]</span><span class="err">,</span><span class="w"> </span><span class="s2">&quot;priority&quot;</span><span class="err">:</span><span class="w"> </span><span class="n">10</span><span class="err">},</span>
+<span class="w">    </span><span class="err">{</span><span class="s2">&quot;name&quot;</span><span class="err">:</span><span class="w"> </span><span class="s2">&quot;public_methods&quot;</span><span class="err">,</span><span class="w"> </span><span class="s2">&quot;patterns&quot;</span><span class="err">:</span><span class="w"> </span><span class="k">[</span><span class="s2">&quot;*&quot;</span><span class="k">]</span><span class="err">,</span><span class="w"> </span><span class="s2">&quot;priority&quot;</span><span class="err">:</span><span class="w"> </span><span class="n">5</span><span class="err">},</span>
+<span class="w">    </span><span class="err">{</span><span class="s2">&quot;name&quot;</span><span class="err">:</span><span class="w"> </span><span class="s2">&quot;private_methods&quot;</span><span class="err">,</span><span class="w"> </span><span class="s2">&quot;patterns&quot;</span><span class="err">:</span><span class="w"> </span><span class="k">[</span><span class="s2">&quot;_*&quot;</span><span class="k">]</span><span class="err">,</span><span class="w"> </span><span class="s2">&quot;priority&quot;</span><span class="err">:</span><span class="w"> </span><span class="n">1</span><span class="err">}</span>
+<span class="err">]</span><span class="s1">&#39;</span>
+
+<span class="c1"># Sort within categories</span>
+<span class="n">category-sorting</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;alphabetical&quot;</span>
+</pre></div>
+</div>
+</section>
+<section id="section-header-configuration-phase-2">
+<h3>Section Header Configuration (Phase 2)<a class="headerlink" href="#section-header-configuration-phase-2" title="Link to this heading"></a></h3>
+<p>Control functional section header validation with these options:</p>
+<p><strong>.pylintrc:</strong></p>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[function-sort]</span>
+<span class="c1"># Enable section header validation (default: no)</span>
+<span class="na">enforce-section-headers</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">yes</span>
+
+<span class="c1"># Require headers for all populated sections (default: no)</span>
+<span class="na">require-section-headers</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">yes</span>
+
+<span class="c1"># Allow empty section headers (default: yes)</span>
+<span class="na">allow-empty-sections</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">no</span>
+</pre></div>
+</div>
+<p><strong>pyproject.toml:</strong></p>
+<div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span class="k">[tool.pylint.</span><span class="s2">&quot;function-sort&quot;</span><span class="k">]</span>
+<span class="c1"># Make section headers functional, not decorative</span>
+<span class="n">enforce-section-headers</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span>
+
+<span class="c1"># Require headers for all categories with methods</span>
+<span class="n">require-section-headers</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span>
+
+<span class="c1"># Disallow empty section headers</span>
+<span class="n">allow-empty-sections</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">false</span>
 </pre></div>
 </div>
 </section>
