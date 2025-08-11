@@ -71,31 +71,34 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#module-pylint_sort_functions.messages">Messages Module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-pylint_sort_functions.utils">Utilities Module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pylint_sort_functions.utils.CategoryConfig"><code class="docutils literal notranslate"><span class="pre">CategoryConfig</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pylint_sort_functions.utils.CategoryConfig.__init__"><code class="docutils literal notranslate"><span class="pre">CategoryConfig.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pylint_sort_functions.utils.CategoryConfig.category_sorting"><code class="docutils literal notranslate"><span class="pre">CategoryConfig.category_sorting</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pylint_sort_functions.utils.CategoryConfig.default_category"><code class="docutils literal notranslate"><span class="pre">CategoryConfig.default_category</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pylint_sort_functions.utils.CategoryConfig.enable_categories"><code class="docutils literal notranslate"><span class="pre">CategoryConfig.enable_categories</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pylint_sort_functions.utils.CategoryConfig.categories"><code class="docutils literal notranslate"><span class="pre">CategoryConfig.categories</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="#pylint_sort_functions.utils.MethodCategory"><code class="docutils literal notranslate"><span class="pre">MethodCategory</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pylint_sort_functions.utils.MethodCategory.__init__"><code class="docutils literal notranslate"><span class="pre">MethodCategory.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pylint_sort_functions.utils.MethodCategory.priority"><code class="docutils literal notranslate"><span class="pre">MethodCategory.priority</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pylint_sort_functions.utils.MethodCategory.section_header"><code class="docutils literal notranslate"><span class="pre">MethodCategory.section_header</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#pylint_sort_functions.utils.MethodCategory.name"><code class="docutils literal notranslate"><span class="pre">MethodCategory.name</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#pylint_sort_functions.utils.MethodCategory.patterns"><code class="docutils literal notranslate"><span class="pre">MethodCategory.patterns</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#pylint_sort_functions.utils.MethodCategory.decorators"><code class="docutils literal notranslate"><span class="pre">MethodCategory.decorators</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#pylint_sort_functions.utils.MethodCategory.priority"><code class="docutils literal notranslate"><span class="pre">MethodCategory.priority</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#pylint_sort_functions.utils.MethodCategory.section_header"><code class="docutils literal notranslate"><span class="pre">MethodCategory.section_header</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#pylint_sort_functions.utils.MethodCategory.__init__"><code class="docutils literal notranslate"><span class="pre">MethodCategory.__init__()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="#pylint_sort_functions.utils.CategoryConfig"><code class="docutils literal notranslate"><span class="pre">CategoryConfig</span></code></a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#pylint_sort_functions.utils.CategoryConfig.categories"><code class="docutils literal notranslate"><span class="pre">CategoryConfig.categories</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#pylint_sort_functions.utils.CategoryConfig.default_category"><code class="docutils literal notranslate"><span class="pre">CategoryConfig.default_category</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#pylint_sort_functions.utils.CategoryConfig.enable_categories"><code class="docutils literal notranslate"><span class="pre">CategoryConfig.enable_categories</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#pylint_sort_functions.utils.CategoryConfig.category_sorting"><code class="docutils literal notranslate"><span class="pre">CategoryConfig.category_sorting</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#pylint_sort_functions.utils.CategoryConfig.__init__"><code class="docutils literal notranslate"><span class="pre">CategoryConfig.__init__()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#pylint_sort_functions.utils.are_functions_properly_separated"><code class="docutils literal notranslate"><span class="pre">are_functions_properly_separated()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pylint_sort_functions.utils.are_functions_sorted_with_exclusions"><code class="docutils literal notranslate"><span class="pre">are_functions_sorted_with_exclusions()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pylint_sort_functions.utils.are_methods_sorted_with_exclusions"><code class="docutils literal notranslate"><span class="pre">are_methods_sorted_with_exclusions()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pylint_sort_functions.utils.categorize_method"><code class="docutils literal notranslate"><span class="pre">categorize_method()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pylint_sort_functions.utils.decorator_matches_pattern"><code class="docutils literal notranslate"><span class="pre">decorator_matches_pattern()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pylint_sort_functions.utils.find_python_files"><code class="docutils literal notranslate"><span class="pre">find_python_files()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pylint_sort_functions.utils.function_has_excluded_decorator"><code class="docutils literal notranslate"><span class="pre">function_has_excluded_decorator()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pylint_sort_functions.utils.get_decorator_strings"><code class="docutils literal notranslate"><span class="pre">get_decorator_strings()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pylint_sort_functions.utils.get_functions_from_node"><code class="docutils literal notranslate"><span class="pre">get_functions_from_node()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pylint_sort_functions.utils.get_methods_from_class"><code class="docutils literal notranslate"><span class="pre">get_methods_from_class()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pylint_sort_functions.utils.is_dunder_method"><code class="docutils literal notranslate"><span class="pre">is_dunder_method()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pylint_sort_functions.utils.is_private_function"><code class="docutils literal notranslate"><span class="pre">is_private_function()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pylint_sort_functions.utils.is_unittest_file"><code class="docutils literal notranslate"><span class="pre">is_unittest_file()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pylint_sort_functions.utils.should_function_be_private"><code class="docutils literal notranslate"><span class="pre">should_function_be_private()</span></code></a></li>
@@ -256,17 +259,10 @@ User disabling: # pylint: disable=unsorted-functions</p>
 <section id="module-pylint_sort_functions.utils">
 <span id="utilities-module"></span><h2>Utilities Module<a class="headerlink" href="#module-pylint_sort_functions.utils" title="Link to this heading"></a></h2>
 <p>Utility functions for AST analysis and sorting logic.</p>
-<p>This module provides the core analysis functions for the pylint-sort-functions plugin.</p>
-<p>NOTE: Module size (1114 lines) exceeds 1000-line guideline.
-Refactoring tracked in GitHub issue #37:
-<a class="reference external" href="https://github.com/hakonhagland/pylint-sort-functions/issues/37">https://github.com/hakonhagland/pylint-sort-functions/issues/37</a>
-It includes functions for:</p>
-<ol class="arabic simple">
-<li><p>Function/method sorting validation</p></li>
-<li><p>Public/private function separation validation</p></li>
-<li><p>Function privacy detection (identifying functions that should be private)</p></li>
-<li><p>Framework-aware sorting with decorator exclusions</p></li>
-</ol>
+<p>This module provides the core analysis functions for the pylint-sort-functions plugin.
+Refactored from a single 1117-line file into focused modules for better maintainability.</p>
+<p>For backward compatibility, all public functions are re-exported from their
+specialized modules. All existing imports continue to work unchanged.</p>
 <p>For detailed information about the sorting algorithm and rules, see the documentation
 at docs/sorting.rst which explains the complete sorting methodology, special method
 handling, privacy detection, and configuration options.</p>
@@ -277,56 +273,6 @@ scanning actual usage patterns across the project:
 - Identifies functions that are only used within their own module
 - Skips common public API patterns (main, run, setup, etc.)
 - Provides accurate detection based on real usage patterns</p>
-<dl class="py class">
-<dt class="sig sig-object py" id="pylint_sort_functions.utils.MethodCategory">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pylint_sort_functions.utils.</span></span><span class="sig-name descname"><span class="pre">MethodCategory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">patterns=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decorators=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">priority=0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">section_header=''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pylint_sort_functions.utils.MethodCategory" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>Configuration for a method category in the sorting system.</p>
-<p>Defines how methods are categorized based on patterns, decorators, and other
-criteria. Categories determine the sorting order and section organization.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>name</strong> (<em>str</em>) – Unique identifier for this category (e.g., ‘properties’)</p></li>
-<li><p><strong>patterns</strong> (<em>list</em><em>[</em><em>str</em><em>]</em>) – List of glob patterns to match names (e.g., [‘test_*’])</p></li>
-<li><p><strong>decorators</strong> (<em>list</em><em>[</em><em>str</em><em>]</em>) – List of decorator patterns (e.g., [<a class="reference external" href="mailto:'&#37;&#52;&#48;property">‘<span>&#64;</span>property</a>’])</p></li>
-<li><p><strong>priority</strong> (<em>int</em>) – Priority for conflict resolution, higher values win</p></li>
-<li><p><strong>section_header</strong> (<em>str</em>) – Comment header text for this category</p></li>
-</ul>
-</dd>
-</dl>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pylint_sort_functions.utils.MethodCategory.name">
-<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></em><a class="headerlink" href="#pylint_sort_functions.utils.MethodCategory.name" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pylint_sort_functions.utils.MethodCategory.patterns">
-<span class="sig-name descname"><span class="pre">patterns</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">]</span></em><a class="headerlink" href="#pylint_sort_functions.utils.MethodCategory.patterns" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pylint_sort_functions.utils.MethodCategory.decorators">
-<span class="sig-name descname"><span class="pre">decorators</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">]</span></em><a class="headerlink" href="#pylint_sort_functions.utils.MethodCategory.decorators" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pylint_sort_functions.utils.MethodCategory.priority">
-<span class="sig-name descname"><span class="pre">priority</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#pylint_sort_functions.utils.MethodCategory.priority" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pylint_sort_functions.utils.MethodCategory.section_header">
-<span class="sig-name descname"><span class="pre">section_header</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">''</span></em><a class="headerlink" href="#pylint_sort_functions.utils.MethodCategory.section_header" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pylint_sort_functions.utils.MethodCategory.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">patterns=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decorators=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">priority=0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">section_header=''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pylint_sort_functions.utils.MethodCategory.__init__" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
 <dl class="py class">
 <dt class="sig sig-object py" id="pylint_sort_functions.utils.CategoryConfig">
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pylint_sort_functions.utils.</span></span><span class="sig-name descname"><span class="pre">CategoryConfig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">categories=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_category='public_methods'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enable_categories=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">category_sorting='alphabetical'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pylint_sort_functions.utils.CategoryConfig" title="Link to this definition"></a></dt>
@@ -346,9 +292,14 @@ compatibility)</p></li>
 </ul>
 </dd>
 </dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pylint_sort_functions.utils.CategoryConfig.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">categories=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_category='public_methods'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enable_categories=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">category_sorting='alphabetical'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pylint_sort_functions.utils.CategoryConfig.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pylint_sort_functions.utils.CategoryConfig.categories">
-<span class="sig-name descname"><span class="pre">categories</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code><span class="pre">[</span><a class="reference internal" href="#pylint_sort_functions.utils.MethodCategory" title="pylint_sort_functions.utils.MethodCategory"><code class="xref py py-class docutils literal notranslate"><span class="pre">MethodCategory</span></code></a><span class="pre">]</span></em><a class="headerlink" href="#pylint_sort_functions.utils.CategoryConfig.categories" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="pylint_sort_functions.utils.CategoryConfig.category_sorting">
+<span class="sig-name descname"><span class="pre">category_sorting</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'alphabetical'</span></em><a class="headerlink" href="#pylint_sort_functions.utils.CategoryConfig.category_sorting" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -362,13 +313,58 @@ compatibility)</p></li>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pylint_sort_functions.utils.CategoryConfig.category_sorting">
-<span class="sig-name descname"><span class="pre">category_sorting</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'alphabetical'</span></em><a class="headerlink" href="#pylint_sort_functions.utils.CategoryConfig.category_sorting" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="pylint_sort_functions.utils.CategoryConfig.categories">
+<span class="sig-name descname"><span class="pre">categories</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code><span class="pre">[</span><a class="reference internal" href="#pylint_sort_functions.utils.MethodCategory" title="pylint_sort_functions.utils.categorization.MethodCategory"><code class="xref py py-class docutils literal notranslate"><span class="pre">MethodCategory</span></code></a><span class="pre">]</span></em><a class="headerlink" href="#pylint_sort_functions.utils.CategoryConfig.categories" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pylint_sort_functions.utils.MethodCategory">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pylint_sort_functions.utils.</span></span><span class="sig-name descname"><span class="pre">MethodCategory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">patterns=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decorators=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">priority=0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">section_header=''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pylint_sort_functions.utils.MethodCategory" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Configuration for a method category in the sorting system.</p>
+<p>Defines how methods are categorized based on patterns, decorators, and other
+criteria. Categories determine the sorting order and section organization.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>str</em>) – Unique identifier for this category (e.g., ‘properties’)</p></li>
+<li><p><strong>patterns</strong> (<em>list</em><em>[</em><em>str</em><em>]</em>) – List of glob patterns to match names (e.g., [‘test_*’])</p></li>
+<li><p><strong>decorators</strong> (<em>list</em><em>[</em><em>str</em><em>]</em>) – List of decorator patterns (e.g., [<a class="reference external" href="mailto:'&#37;&#52;&#48;property">‘<span>&#64;</span>property</a>’])</p></li>
+<li><p><strong>priority</strong> (<em>int</em>) – Priority for conflict resolution, higher values win</p></li>
+<li><p><strong>section_header</strong> (<em>str</em>) – Comment header text for this category</p></li>
+</ul>
+</dd>
+</dl>
 <dl class="py method">
-<dt class="sig sig-object py" id="pylint_sort_functions.utils.CategoryConfig.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">categories=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_category='public_methods'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enable_categories=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">category_sorting='alphabetical'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pylint_sort_functions.utils.CategoryConfig.__init__" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="pylint_sort_functions.utils.MethodCategory.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">patterns=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decorators=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">priority=0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">section_header=''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pylint_sort_functions.utils.MethodCategory.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pylint_sort_functions.utils.MethodCategory.priority">
+<span class="sig-name descname"><span class="pre">priority</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#pylint_sort_functions.utils.MethodCategory.priority" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pylint_sort_functions.utils.MethodCategory.section_header">
+<span class="sig-name descname"><span class="pre">section_header</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">''</span></em><a class="headerlink" href="#pylint_sort_functions.utils.MethodCategory.section_header" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pylint_sort_functions.utils.MethodCategory.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></em><a class="headerlink" href="#pylint_sort_functions.utils.MethodCategory.name" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pylint_sort_functions.utils.MethodCategory.patterns">
+<span class="sig-name descname"><span class="pre">patterns</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">]</span></em><a class="headerlink" href="#pylint_sort_functions.utils.MethodCategory.patterns" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pylint_sort_functions.utils.MethodCategory.decorators">
+<span class="sig-name descname"><span class="pre">decorators</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">]</span></em><a class="headerlink" href="#pylint_sort_functions.utils.MethodCategory.decorators" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -463,6 +459,32 @@ by returning ‘public_methods’ or ‘private_methods’ based on naming conve
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="pylint_sort_functions.utils.decorator_matches_pattern">
+<span class="sig-prename descclassname"><span class="pre">pylint_sort_functions.utils.</span></span><span class="sig-name descname"><span class="pre">decorator_matches_pattern</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">decorator_str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pattern</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pylint_sort_functions.utils.decorator_matches_pattern" title="Link to this definition"></a></dt>
+<dd><p>Check if a decorator string matches an ignore pattern.</p>
+<p>Supports exact matches and simple wildcard patterns. This allows users to
+exclude functions with specific decorators from sorting requirements when
+the decorators create ordering dependencies.</p>
+<p>Examples:
+- “&#64;app.route” matches both &#64;app.route and &#64;app.route(“/path”)
+- “&#64;*.command” matches &#64;main.command(), &#64;cli.command(), etc.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>decorator_str</strong> (<em>str</em>) – Decorator string to check (e.g., “&#64;main.command()”)</p></li>
+<li><p><strong>pattern</strong> (<em>str</em>) – Pattern to match against (e.g., “&#64;main.command”, “&#64;*.command”)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if decorator matches the pattern</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="pylint_sort_functions.utils.find_python_files">
 <span class="sig-prename descclassname"><span class="pre">pylint_sort_functions.utils.</span></span><span class="sig-name descname"><span class="pre">find_python_files</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">root_path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pylint_sort_functions.utils.find_python_files" title="Link to this definition"></a></dt>
 <dd><p>Find all Python files in a project directory.</p>
@@ -507,6 +529,23 @@ framework behavior.</p>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="pylint_sort_functions.utils.get_decorator_strings">
+<span class="sig-prename descclassname"><span class="pre">pylint_sort_functions.utils.</span></span><span class="sig-name descname"><span class="pre">get_decorator_strings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pylint_sort_functions.utils.get_decorator_strings" title="Link to this definition"></a></dt>
+<dd><p>Extract string representations of all decorators on a function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>func</strong> (<em>nodes.FunctionDef</em>) – Function definition node</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>List of decorator strings (e.g., [“&#64;main.command()”, “&#64;app.route()”])</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list[str]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="pylint_sort_functions.utils.get_functions_from_node">
 <span class="sig-prename descclassname"><span class="pre">pylint_sort_functions.utils.</span></span><span class="sig-name descname"><span class="pre">get_functions_from_node</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pylint_sort_functions.utils.get_functions_from_node" title="Link to this definition"></a></dt>
 <dd><p>Extract all function definitions from a module.</p>
@@ -536,6 +575,25 @@ framework behavior.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>list[nodes.FunctionDef]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pylint_sort_functions.utils.is_dunder_method">
+<span class="sig-prename descclassname"><span class="pre">pylint_sort_functions.utils.</span></span><span class="sig-name descname"><span class="pre">is_dunder_method</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pylint_sort_functions.utils.is_dunder_method" title="Link to this definition"></a></dt>
+<dd><p>Check if a function is a dunder/magic method.</p>
+<p>Dunder methods are special methods that start and end with double underscores,
+like __init__, __str__, __call__, etc.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>func</strong> (<em>nodes.FunctionDef</em>) – Function definition node</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if function is a dunder method</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
 </dd>
 </dl>
 </dd></dl>
