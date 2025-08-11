@@ -152,11 +152,12 @@ The plugin supports several configuration options to customize its behavior:
     enable-method-categories = false        # Enable multi-category system
     framework-preset = "pytest"            # Built-in framework configurations
     category-sorting = "alphabetical"      # How to sort within categories
-    method-categories = '[                  # Custom JSON category definitions
+    # Custom JSON category definitions
+    method-categories = '''[
         {"name": "test_methods", "patterns": ["test_*"], "priority": 10},
         {"name": "public_methods", "patterns": ["*"], "priority": 5},
         {"name": "private_methods", "patterns": ["_*"], "priority": 1}
-    ]'
+    ]'''
 
     # Section header validation options (Phase 2 - ENHANCED!)
     enforce-section-headers = false         # Make headers functional, not decorative
@@ -422,14 +423,14 @@ For advanced customization beyond framework presets:
 
     [tool.pylint.function-sort]
     enable-method-categories = true
-    method-categories = '[
+    method-categories = '''[
         {"name": "initialization", "patterns": ["__init__", "setup*"], "priority": 20},
         {"name": "properties", "decorators": ["@property", "@*.setter"], "priority": 15},
         {"name": "api_endpoints", "decorators": ["@app.route", "@api.*"], "priority": 10},
         {"name": "test_methods", "patterns": ["test_*"], "priority": 8},
         {"name": "public_methods", "patterns": ["*"], "priority": 5},
         {"name": "private_methods", "patterns": ["_*"], "priority": 1}
-    ]'
+    ]'''
     category-sorting = "alphabetical"
     enforce-section-headers = true
 
