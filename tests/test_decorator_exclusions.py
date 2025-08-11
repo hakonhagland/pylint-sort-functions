@@ -11,11 +11,11 @@ import pytest
 from astroid import nodes
 
 from pylint_sort_functions.utils import (
-    _decorator_matches_pattern,
-    _get_decorator_strings,
     are_functions_sorted_with_exclusions,
     are_methods_sorted_with_exclusions,
+    decorator_matches_pattern,
     function_has_excluded_decorator,
+    get_decorator_strings,
 )
 
 
@@ -54,30 +54,30 @@ class TestDecoratorMatching:
 
     def test_exact_match(self):
         """Test exact decorator pattern matching."""
-        assert _decorator_matches_pattern("@main.command", "@main.command")
-        assert _decorator_matches_pattern("@main.command()", "@main.command")
-        assert _decorator_matches_pattern("@main.command", "@main.command()")
-        assert not _decorator_matches_pattern("@main.other", "@main.command")
+        assert decorator_matches_pattern("@main.command", "@main.command")
+        assert decorator_matches_pattern("@main.command()", "@main.command")
+        assert decorator_matches_pattern("@main.command", "@main.command()")
+        assert not decorator_matches_pattern("@main.other", "@main.command")
 
     def test_wildcard_matching(self):
         """Test wildcard pattern matching."""
-        assert _decorator_matches_pattern("@main.command", "@*.command")
-        assert _decorator_matches_pattern("@app.command", "@*.command")
-        assert _decorator_matches_pattern("@cli.command", "@*.command")
-        assert not _decorator_matches_pattern("@main.other", "@*.command")
+        assert decorator_matches_pattern("@main.command", "@*.command")
+        assert decorator_matches_pattern("@app.command", "@*.command")
+        assert decorator_matches_pattern("@cli.command", "@*.command")
+        assert not decorator_matches_pattern("@main.other", "@*.command")
 
     def test_pattern_normalization(self):
         """Test that patterns are normalized correctly."""
         # Patterns should work with or without @ prefix
-        assert _decorator_matches_pattern("@main.command", "main.command")
-        assert _decorator_matches_pattern("@main.command", "@main.command")
+        assert decorator_matches_pattern("@main.command", "main.command")
+        assert decorator_matches_pattern("@main.command", "@main.command")
 
     def test_complex_patterns(self):
         """Test complex decorator patterns."""
-        assert _decorator_matches_pattern("@app.route", "@app.*")
-        assert _decorator_matches_pattern("@app.get", "@app.*")
-        assert _decorator_matches_pattern("@app.post", "@app.*")
-        assert not _decorator_matches_pattern("@other.route", "@app.*")
+        assert decorator_matches_pattern("@app.route", "@app.*")
+        assert decorator_matches_pattern("@app.get", "@app.*")
+        assert decorator_matches_pattern("@app.post", "@app.*")
+        assert not decorator_matches_pattern("@other.route", "@app.*")
 
 
 class TestDecoratorExtraction:
@@ -91,7 +91,7 @@ def test_func():
     pass
 """
         func = parse_function_from_code(code)
-        decorators = _get_decorator_strings(func)
+        decorators = get_decorator_strings(func)
         assert decorators == ["@property"]
 
     def test_attribute_decorator(self):
@@ -102,7 +102,7 @@ def test_func():
     pass
 """
         func = parse_function_from_code(code)
-        decorators = _get_decorator_strings(func)
+        decorators = get_decorator_strings(func)
         assert decorators == ["@main.command"]
 
     def test_call_decorator(self):
@@ -113,7 +113,7 @@ def test_func():
     pass
 """
         func = parse_function_from_code(code)
-        decorators = _get_decorator_strings(func)
+        decorators = get_decorator_strings(func)
         assert decorators == ["@main.command()"]
 
     def test_multiple_decorators(self):
@@ -125,7 +125,7 @@ def test_func():
     pass
 """
         func = parse_function_from_code(code)
-        decorators = _get_decorator_strings(func)
+        decorators = get_decorator_strings(func)
         assert "@property" in decorators
         assert "@main.command()" in decorators
 
@@ -136,7 +136,7 @@ def test_func():
     pass
 """
         func = parse_function_from_code(code)
-        decorators = _get_decorator_strings(func)
+        decorators = get_decorator_strings(func)
         assert decorators == []
 
     def test_nested_attribute_decorator(self):
@@ -149,7 +149,7 @@ def test_func():
     pass
 """
         func = parse_function_from_code(code)
-        decorators = _get_decorator_strings(func)
+        decorators = get_decorator_strings(func)
         assert "@deeply.nested.attribute" in decorators
 
     def test_complex_decorator_fallback(self):
@@ -445,8 +445,8 @@ if __name__ == "__main__":  # pragma: no cover
     print("Testing decorator exclusion functionality...")
 
     # Test basic pattern matching
-    assert _decorator_matches_pattern("@main.command", "@main.command")
-    assert _decorator_matches_pattern("@main.command", "@*.command")
+    assert decorator_matches_pattern("@main.command", "@main.command")
+    assert decorator_matches_pattern("@main.command", "@*.command")
     print("✓ Pattern matching works")
 
     # Test Click example

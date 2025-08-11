@@ -144,12 +144,16 @@ def main():
         # - "helper" is in helper_patterns (has_helper_pattern = True)
         # - "get_special_helper" is NOT in public_patterns normally
 
-        # Temporarily modify utils.py to add our function to public_patterns
-        utils_file = (
-            Path(__file__).parent.parent / "src" / "pylint_sort_functions" / "utils.py"
+        # Temporarily modify privacy.py to add our function to public_patterns
+        privacy_file = (
+            Path(__file__).parent.parent
+            / "src"
+            / "pylint_sort_functions"
+            / "utils"
+            / "privacy.py"
         )
 
-        with open(utils_file, "r") as f:
+        with open(privacy_file, "r") as f:
             original_content = f.read()
 
         try:
@@ -158,12 +162,15 @@ def main():
                 '"import",\n    }', '"import",\n        "get_special_helper",\n    }'
             )
 
-            with open(utils_file, "w") as f:
+            with open(privacy_file, "w") as f:
                 f.write(modified_content)
 
             # Force reload of the module
             import importlib
 
+            from pylint_sort_functions.utils import privacy
+
+            importlib.reload(privacy)
             importlib.reload(utils)
 
             # Now test - this should hit line 285
@@ -177,8 +184,9 @@ def main():
 
         finally:
             # Always restore original content
-            with open(utils_file, "w") as f:
+            with open(privacy_file, "w") as f:
                 f.write(original_content)
+            importlib.reload(privacy)
             importlib.reload(utils)
 
     def test_import_analysis_skip_already_private(self) -> None:
@@ -250,7 +258,10 @@ def some_function():
             module_path = Path("/different/root/module.py")
 
             # Mock the usage graph to return our function
-            with patch.object(utils, "_build_cross_module_usage_graph") as mock_build:
+            patch_path = (
+                "pylint_sort_functions.utils.privacy._build_cross_module_usage_graph"
+            )
+            with patch(patch_path) as mock_build:
                 mock_build.return_value = {"test_func": {"some_module"}}
 
                 # Should return True when it can't determine module name
