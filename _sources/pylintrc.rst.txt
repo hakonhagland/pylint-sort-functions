@@ -206,12 +206,12 @@ Control multi-category method organization with these options:
    framework-preset = "pytest"
 
    # Custom categories with pattern matching
-   method-categories = '[
+   method-categories = '''[
        {"name": "properties", "decorators": ["@property"], "priority": 15},
        {"name": "test_methods", "patterns": ["test_*"], "priority": 10},
        {"name": "public_methods", "patterns": ["*"], "priority": 5},
        {"name": "private_methods", "patterns": ["_*"], "priority": 1}
-   ]'
+   ]'''
 
    # Sort within categories
    category-sorting = "alphabetical"

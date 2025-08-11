@@ -206,13 +206,13 @@ Define your own categories using JSON configuration:
 
     [tool.pylint.function-sort]
     enable-method-categories = true
-    method-categories = '[
+    method-categories = '''[
         {"name": "initialization", "patterns": ["__init__", "setup*"], "priority": 20},
         {"name": "properties", "decorators": ["@property", "@*.setter"], "priority": 15},
         {"name": "api_endpoints", "decorators": ["@app.route"], "priority": 10},
         {"name": "public_methods", "patterns": ["*"], "priority": 5},
         {"name": "private_methods", "patterns": ["_*"], "priority": 1}
-    ]'
+    ]'''
 
 **Pattern Matching System:**
 
