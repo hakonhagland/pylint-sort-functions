@@ -148,10 +148,20 @@ The plugin supports several configuration options to customize its behavior:
     public-api-patterns = ["main", "run", "execute", "start", "stop", "setup", "teardown"]
     enable-privacy-detection = true
 
-    # Section header validation options
-    enforce-section-headers = false
-    require-section-headers = false
-    allow-empty-sections = true
+    # Method categorization options (Phase 1 - NEW!)
+    enable-method-categories = false        # Enable multi-category system
+    framework-preset = "pytest"            # Built-in framework configurations
+    category-sorting = "alphabetical"      # How to sort within categories
+    method-categories = '[                  # Custom JSON category definitions
+        {"name": "test_methods", "patterns": ["test_*"], "priority": 10},
+        {"name": "public_methods", "patterns": ["*"], "priority": 5},
+        {"name": "private_methods", "patterns": ["_*"], "priority": 1}
+    ]'
+
+    # Section header validation options (Phase 2 - ENHANCED!)
+    enforce-section-headers = false         # Make headers functional, not decorative
+    require-section-headers = false        # Require headers for all populated sections
+    allow-empty-sections = true            # Allow headers with no methods
 
 **Using .pylintrc**:
 
@@ -164,10 +174,16 @@ The plugin supports several configuration options to customize its behavior:
     public-api-patterns = main,run,execute,start,stop,setup,teardown
     enable-privacy-detection = yes
 
-    # Section header validation options
-    enforce-section-headers = no
-    require-section-headers = no
-    allow-empty-sections = yes
+    # Method categorization options (Phase 1 - NEW!)
+    enable-method-categories = no           # Enable multi-category system
+    framework-preset = pytest              # Built-in framework configurations
+    category-sorting = alphabetical        # How to sort within categories
+    method-categories = [{"name": "test_methods", "patterns": ["test_*"], "priority": 10}]
+
+    # Section header validation options (Phase 2 - ENHANCED!)
+    enforce-section-headers = no           # Make headers functional, not decorative
+    require-section-headers = no           # Require headers for all populated sections
+    allow-empty-sections = yes             # Allow headers with no methods
 
 Configuration Options Reference
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -182,8 +198,47 @@ Configuration Options Reference
 
     *Default*: ``true``
 
-Section Header Configuration Options
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Method Categorization Options (Phase 1 - NEW!)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+**enable-method-categories**
+    Enable the multi-category method organization system. When disabled (default), uses traditional binary public/private sorting. When enabled, supports framework presets and custom categorization for more sophisticated method organization.
+
+    *Default*: ``false``
+
+**framework-preset**
+    Use built-in framework configurations for common Python frameworks. Available presets: ``"pytest"``, ``"unittest"``, ``"pyqt"``. Each preset defines logical method categories and ordering appropriate for that framework's conventions.
+
+    *Default*: ``None``
+
+    *Examples*:
+    - ``"pytest"``: test fixtures → test methods → public methods → private methods
+    - ``"unittest"``: setUp/tearDown → test methods → public methods → private methods
+    - ``"pyqt"``: initialization → properties → event handlers → public methods → private methods
+
+**category-sorting**
+    Control how methods are sorted within each category. ``"alphabetical"`` sorts methods alphabetically within categories. ``"declaration"`` preserves the original declaration order within categories.
+
+    *Default*: ``"alphabetical"``
+
+**method-categories**
+    Custom JSON configuration for method categories. Allows complete customization of method organization patterns. Each category supports name patterns, decorator patterns, and priority resolution for conflicts.
+
+    *Default*: ``None``
+
+    *Example JSON*:
+
+    .. code-block:: json
+
+        [
+            {"name": "properties", "decorators": ["@property"], "priority": 10},
+            {"name": "test_methods", "patterns": ["test_*"], "priority": 8},
+            {"name": "public_methods", "patterns": ["*"], "priority": 5},
+            {"name": "private_methods", "patterns": ["_*"], "priority": 1}
+        ]
+
+Section Header Configuration Options (Phase 2 - Enhanced!)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 **enforce-section-headers**
     Enable section header validation. When enabled, methods must appear under the correct section headers according to their categorization. Section headers transform from decorative comments into functional organizational elements.
@@ -216,6 +271,167 @@ Section Header Configuration Options
 
     [tool.pylint.function-sort]
     enforce-section-headers = true      # Only validate existing headers
+
+Framework-Specific Usage Examples
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The method categorization system provides built-in support for common Python frameworks. These presets define logical method organization that follows each framework's conventions.
+
+**pytest Framework**
+
+For test classes using pytest:
+
+.. code-block:: toml
+
+    [tool.pylint.function-sort]
+    enable-method-categories = true
+    framework-preset = "pytest"
+    enforce-section-headers = true
+
+**Example pytest class organization:**
+
+.. code-block:: python
+
+    class TestUserService:
+        # Test fixtures
+        def setup_method(self):
+            self.user_service = UserService()
+
+        def teardown_method(self):
+            pass
+
+        # Test methods
+        def test_create_user(self):
+            result = self.user_service.create_user("john")
+            assert result is not None
+
+        def test_delete_user(self):
+            self.user_service.delete_user("john")
+
+        # Public methods
+        def verify_user_data(self):
+            # Helper method for tests
+            pass
+
+        # Private methods
+        def _create_test_data(self):
+            return {"name": "test", "email": "test@example.com"}
+
+**unittest Framework**
+
+For test classes using unittest:
+
+.. code-block:: toml
+
+    [tool.pylint.function-sort]
+    enable-method-categories = true
+    framework-preset = "unittest"
+
+**Example unittest class organization:**
+
+.. code-block:: python
+
+    class TestUserService(unittest.TestCase):
+        # Lifecycle methods
+        def setUp(self):
+            self.user_service = UserService()
+
+        def tearDown(self):
+            pass
+
+        # Test methods
+        def test_create_user(self):
+            result = self.user_service.create_user("john")
+            self.assertIsNotNone(result)
+
+        def test_delete_user(self):
+            self.user_service.delete_user("john")
+
+        # Public methods
+        def assert_user_valid(self, user):
+            self.assertIsNotNone(user.id)
+            self.assertTrue(user.name)
+
+        # Private methods
+        def _create_test_user(self):
+            return {"name": "test", "email": "test@example.com"}
+
+**PyQt Framework**
+
+For PyQt/PySide GUI applications:
+
+.. code-block:: toml
+
+    [tool.pylint.function-sort]
+    enable-method-categories = true
+    framework-preset = "pyqt"
+
+**Example PyQt class organization:**
+
+.. code-block:: python
+
+    class UserDialog(QDialog):
+        # Initialization methods
+        def __init__(self, parent=None):
+            super().__init__(parent)
+            self.setup_ui()
+
+        def setup_ui(self):
+            self.setWindowTitle("User Management")
+
+        # Properties
+        @property
+        def user_data(self):
+            return self._user_data
+
+        @user_data.setter
+        def user_data(self, value):
+            self._user_data = value
+
+        # Event handlers
+        def closeEvent(self, event):
+            self.save_settings()
+            event.accept()
+
+        def keyPressEvent(self, event):
+            if event.key() == Qt.Key_Escape:
+                self.close()
+
+        # Public methods
+        def load_user_data(self):
+            # Load user information
+            pass
+
+        def save_user_data(self):
+            # Save user information
+            pass
+
+        # Private methods
+        def _validate_input(self):
+            return len(self.name_edit.text()) > 0
+
+        def _update_display(self):
+            # Update UI elements
+            pass
+
+**Custom Multi-Category Configuration**
+
+For advanced customization beyond framework presets:
+
+.. code-block:: toml
+
+    [tool.pylint.function-sort]
+    enable-method-categories = true
+    method-categories = '[
+        {"name": "initialization", "patterns": ["__init__", "setup*"], "priority": 20},
+        {"name": "properties", "decorators": ["@property", "@*.setter"], "priority": 15},
+        {"name": "api_endpoints", "decorators": ["@app.route", "@api.*"], "priority": 10},
+        {"name": "test_methods", "patterns": ["test_*"], "priority": 8},
+        {"name": "public_methods", "patterns": ["*"], "priority": 5},
+        {"name": "private_methods", "patterns": ["_*"], "priority": 1}
+    ]'
+    category-sorting = "alphabetical"
+    enforce-section-headers = true
 
 Test File Exclusion
 ~~~~~~~~~~~~~~~~~~~
@@ -557,7 +773,7 @@ The plugin automatically skips common directories that should not be analyzed fo
 Message Types
 -------------
 
-The plugin reports four types of violations:
+The plugin reports eight types of violations:
 
 W9001: unsorted-functions
 ~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -739,6 +955,98 @@ W9005: function-should-be-public
 
   See privacy fixer documentation for comprehensive privacy analysis capabilities.
 
+W9006: method-wrong-section (NEW!)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+**Description**: Method appears in incorrect section according to its categorization
+
+**When triggered**: Section header validation is enabled and a method is not positioned under its expected section header based on the method categorization system
+
+**Example violation**:
+
+.. code-block:: python
+
+    class TestUserService:
+        # Test methods
+        def public_helper(self):         # W9006: Should be in 'public_methods' section
+            pass
+
+        # Public methods
+        def test_create_user(self):      # W9006: Should be in 'test_methods' section
+            pass
+
+**How to fix**: Move methods to their correct sections or update section headers to match method categorization:
+
+.. code-block:: python
+
+    class TestUserService:
+        # Test methods
+        def test_create_user(self):      # ✅ Correct section
+            pass
+
+        # Public methods
+        def public_helper(self):         # ✅ Correct section
+            pass
+
+**Configuration**: Enable with ``enforce-section-headers = true`` and method categorization system.
+
+W9007: missing-section-header (NEW!)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+**Description**: Required section header is missing for a populated category
+
+**When triggered**: ``require-section-headers`` is enabled and methods exist for a category but no corresponding section header is found
+
+**Example violation**:
+
+.. code-block:: python
+
+    class TestUserService:
+        # Missing "# Test methods" header
+        def test_create_user(self):      # W9007: Missing section header for 'test_methods'
+            pass
+
+**How to fix**: Add the required section header:
+
+.. code-block:: python
+
+    class TestUserService:
+        # Test methods                  # ✅ Added required header
+        def test_create_user(self):
+            pass
+
+**Configuration**: Enable with ``require-section-headers = true``.
+
+W9008: empty-section-header (NEW!)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+**Description**: Section header exists but contains no methods
+
+**When triggered**: ``allow-empty-sections`` is disabled and section headers are present without any corresponding methods
+
+**Example violation**:
+
+.. code-block:: python
+
+    class TestUserService:
+        # Test methods                 # W9008: Empty section header
+        # No test methods defined
+
+        # Public methods
+        def helper_method(self):
+            pass
+
+**How to fix**: Either remove the empty header or add methods to the section:
+
+.. code-block:: python
+
+    class TestUserService:
+        # Public methods               # ✅ Removed empty header
+        def helper_method(self):
+            pass
+
+**Configuration**: Control with ``allow-empty-sections = false``.
+
 Sorting Rules
 -------------
 
@@ -907,7 +1215,7 @@ Focus exclusively on sorting violations for clean output:
     # Check only plugin-specific violations
     pylint --load-plugins=pylint_sort_functions \
            --disable=all \
-           --enable=unsorted-functions,unsorted-methods,mixed-function-visibility,function-should-be-private,function-should-be-public \
+           --enable=unsorted-functions,unsorted-methods,mixed-function-visibility,function-should-be-private,function-should-be-public,method-wrong-section,missing-section-header,empty-section-header \
            src/
 
     # Make target equivalent (if available)
@@ -1073,6 +1381,9 @@ The plugin produces standard PyLint output:
     mymodule.py:30:0: W9003: Public and private functions are not properly separated in module (mixed-function-visibility)
     mymodule.py:35:0: W9004: Function 'helper_function' should be private (prefix with underscore) (function-should-be-private)
     mymodule.py:40:0: W9005: Function '_shared_util' should be public (remove underscore prefix) (function-should-be-public)
+    mymodule.py:45:4: W9006: Method 'test_method' is in wrong section (expected: test_methods, found: public_methods) (method-wrong-section)
+    mymodule.py:50:0: W9007: Missing section header 'Test methods' for methods in category 'test_methods' (missing-section-header)
+    mymodule.py:55:0: W9008: Section header 'Private methods' has no matching methods (empty-section-header)
 
 Exit Codes
 ~~~~~~~~~~

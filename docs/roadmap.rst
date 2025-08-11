@@ -3,8 +3,38 @@ Development Roadmap
 
 This document outlines planned improvements for the pylint-sort-functions plugin based on real-world usage feedback.
 
-Version 0.2.0 - Framework Awareness & Configuration
----------------------------------------------------
+Major Features Completed (2025)
+-----------------------------------
+
+✅ **Phase 1: Multi-Category Method Organization System** (Completed)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+**Revolutionary enhancement beyond traditional binary sorting:**
+
+- **Framework Presets**: Built-in configurations for pytest, unittest, and PyQt
+- **Custom JSON Categories**: Flexible method categorization with pattern matching
+- **4 New Configuration Options**: ``enable-method-categories``, ``framework-preset``, ``method-categories``, ``category-sorting``
+- **Priority-Based Resolution**: Intelligent conflict handling when patterns overlap
+- **100% Backward Compatibility**: Traditional public/private sorting preserved as default
+
+**Impact**: Framework projects (pytest, unittest, PyQt) can now adopt the plugin with logical method organization instead of fighting against alphabetical-only requirements.
+
+✅ **Phase 2: Functional Section Headers** (Completed)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+**Section headers transformed from decorative to enforceable:**
+
+- **3 New Configuration Options**: ``enforce-section-headers``, ``require-section-headers``, ``allow-empty-sections``
+- **3 New Message Types**: W9006 (method-wrong-section), W9007 (missing-section-header), W9008 (empty-section-header)
+- **Enhanced Auto-fix**: Automatic section header insertion during code organization
+- **Framework Integration**: Works seamlessly with all Phase 1 framework presets
+
+**Impact**: Section headers like ``# Test methods`` and ``# Properties`` now validate method placement and provide precise error reporting with line numbers.
+
+**Current Status**: The plugin now supports sophisticated method organization with framework awareness while maintaining perfect backward compatibility and 100% test coverage (351 tests).
+
+Version 0.2.0 - Framework Awareness & Configuration (Legacy Features)
+---------------------------------------------------------------------
 
 **Target**: Minor release with framework-specific handling
 
@@ -70,19 +100,30 @@ High Priority Features
 Medium Priority Features
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-4. Test Method Handling 🧪
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
+4. ✅ Test Method Handling (Completed via Phase 1 Framework Presets)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-**Issue**: `#5 <https://github.com/hakonhagland/pylint-sort-functions/issues/5>`_ - Test classes have conventional ordering (setUp, tearDown, test_*)
+**Issue**: `#5 <https://github.com/hakonhagland/pylint-sort-functions/issues/5>`_ - Test classes have conventional ordering (setUp, tearDown, test_*) **(Resolved)**
 
-**Impact**: Medium - common use case
+**Status**: ✅ **Implemented** - Resolved through Phase 1 framework presets system.
 
-**Complexity**: Medium
+**Implementation**:
 
-**Configuration Options**:
+- ✅ **pytest preset**: ``framework-preset = "pytest"`` provides test fixtures → test methods → public → private organization
+- ✅ **unittest preset**: ``framework-preset = "unittest"`` provides setUp/tearDown → test methods → public → private organization
+- ✅ **Custom categories**: Full JSON configurability for any test method organization pattern
 
-- ``test_method_ordering = "conventional"`` - setUp/tearDown first, then alphabetical
-- ``test_method_ordering = "alphabetical"`` - pure alphabetical sorting
+**Configuration Examples**::
+
+    # pytest projects
+    [tool.pylint.function-sort]
+    enable-method-categories = true
+    framework-preset = "pytest"
+
+    # unittest projects
+    [tool.pylint.function-sort]
+    enable-method-categories = true
+    framework-preset = "unittest"
 
 5. Magic Methods Exclusion ✨
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

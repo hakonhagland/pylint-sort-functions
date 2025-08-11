@@ -7,15 +7,48 @@ to organize Python code for improved readability and maintainability.
 Overview
 --------
 
-The plugin enforces a consistent organizational pattern for both module-level functions
-and class methods. This creates predictable code structure that improves navigation
-and reduces cognitive overhead when reading code.
+The plugin enforces consistent organizational patterns for both module-level functions
+and class methods using a flexible multi-category system. Beyond traditional binary
+public/private sorting, the plugin supports framework-specific presets and custom
+categorization that creates predictable code structure improving navigation and
+reducing cognitive overhead when reading code.
+
+**Key Features:**
+- **Traditional binary sorting**: Public functions before private functions (default)
+- **Multi-category system**: Framework-aware method organization (Phase 1)
+- **Framework presets**: Built-in configurations for pytest, unittest, PyQt
+- **Custom categorization**: JSON-configurable method categories with pattern matching
+- **Functional section headers**: Validated headers that enforce organizational structure (Phase 2)
 
 Sorting Rules
 -------------
 
-Module-Level Functions
-~~~~~~~~~~~~~~~~~~~~~~
+Sorting System Overview
+~~~~~~~~~~~~~~~~~~~~~~~
+
+The plugin supports two sorting modes:
+
+1. **Binary Mode (Default)**: Traditional public/private categorization
+2. **Multi-Category Mode**: Framework-aware categorization with custom categories
+
+**Binary Mode** provides backward compatibility and follows simple rules:
+
+- Public functions (no underscore) sorted alphabetically
+- Private functions (underscore prefix) sorted alphabetically
+- Public functions always come before private functions
+
+**Multi-Category Mode** enables sophisticated method organization:
+
+- Multiple categories defined by patterns and decorators
+- Framework-specific presets (pytest, unittest, pyqt)
+- Custom JSON category configuration
+- Priority-based conflict resolution
+- Optional section header validation
+
+Binary Mode Sorting (Default)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+**Module-Level Functions:**
 
 Functions within a module are organized using the following hierarchy:
 
@@ -43,8 +76,7 @@ Functions within a module are organized using the following hierarchy:
    def _log_operation(operation):
        logger.debug(f"Performing: {operation}")
 
-Class Methods
-~~~~~~~~~~~~~
+**Class Methods:**
 
 Methods within classes follow the same organizational pattern:
 
@@ -78,6 +110,123 @@ Methods within classes follow the same organizational pattern:
 
        def _log_transaction(self, transaction):
            logger.info(f"Transaction: {transaction}")
+
+Multi-Category Mode Sorting (Phase 1)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+When ``enable-method-categories = true`` is configured, the plugin uses a sophisticated
+multi-category system that goes beyond binary public/private classification.
+
+**Framework Presets:**
+
+Built-in configurations for common Python frameworks:
+
+**pytest preset** (``framework-preset = "pytest"``):
+
+.. code-block:: python
+
+    class TestUserService:
+        # Test fixtures (priority: highest)
+        def setup_method(self):
+            pass
+
+        # Test methods (priority: high)
+        def test_create_user(self):
+            pass
+
+        def test_delete_user(self):
+            pass
+
+        # Public methods (priority: medium)
+        def verify_result(self):
+            pass
+
+        # Private methods (priority: lowest)
+        def _create_test_data(self):
+            pass
+
+**unittest preset** (``framework-preset = "unittest"``):
+
+.. code-block:: python
+
+    class TestUserService(unittest.TestCase):
+        # Lifecycle methods (priority: highest)
+        def setUp(self):
+            pass
+
+        def tearDown(self):
+            pass
+
+        # Test methods (priority: high)
+        def test_create_user(self):
+            pass
+
+        # Public methods (priority: medium)
+        def assert_user_valid(self, user):
+            pass
+
+        # Private methods (priority: lowest)
+        def _create_test_user(self):
+            pass
+
+**pyqt preset** (``framework-preset = "pyqt"``):
+
+.. code-block:: python
+
+    class UserDialog(QDialog):
+        # Initialization methods (priority: highest)
+        def __init__(self, parent=None):
+            super().__init__(parent)
+
+        def setup_ui(self):
+            pass
+
+        # Properties (priority: high)
+        @property
+        def user_data(self):
+            return self._user_data
+
+        # Event handlers (priority: medium-high)
+        def closeEvent(self, event):
+            pass
+
+        # Public methods (priority: medium)
+        def load_data(self):
+            pass
+
+        # Private methods (priority: lowest)
+        def _validate_input(self):
+            pass
+
+**Custom Category Configuration:**
+
+Define your own categories using JSON configuration:
+
+.. code-block:: toml
+
+    [tool.pylint.function-sort]
+    enable-method-categories = true
+    method-categories = '[
+        {"name": "initialization", "patterns": ["__init__", "setup*"], "priority": 20},
+        {"name": "properties", "decorators": ["@property", "@*.setter"], "priority": 15},
+        {"name": "api_endpoints", "decorators": ["@app.route"], "priority": 10},
+        {"name": "public_methods", "patterns": ["*"], "priority": 5},
+        {"name": "private_methods", "patterns": ["_*"], "priority": 1}
+    ]'
+
+**Pattern Matching System:**
+
+Categories use flexible pattern matching:
+
+- **Name patterns**: Glob patterns like ``test_*``, ``setup*``, ``*Event``
+- **Decorator patterns**: Match decorators like ``@property``, ``@app.route``, ``@*.fixture``
+- **Priority resolution**: Higher priority numbers win when patterns conflict
+- **Alphabetical sorting**: Methods sorted alphabetically within each category
+
+**Category Ordering:**
+
+Categories are ordered by priority (highest to lowest), then methods within each
+category are sorted alphabetically (or by declaration order if ``category-sorting = "declaration"``).
 
 Special Method Handling
 -----------------------
@@ -482,10 +631,10 @@ Examples
            # Validation logic
            pass
 
-Section Header Validation
---------------------------
+Section Header Validation (Phase 2)
+-------------------------------------
 
-The plugin supports functional section headers that validate method placement within their designated sections. This transforms section headers from decorative comments into enforceable organizational elements.
+The plugin supports functional section headers that validate method placement within their designated sections. This transforms section headers from decorative comments into enforceable organizational elements that work seamlessly with both binary and multi-category sorting modes.
 
 Overview
 ~~~~~~~~
@@ -745,7 +894,7 @@ A private function should be made public (remove underscore prefix) because it's
 
 **Section Header Violations:**
 
-W9007: method-wrong-section
+W9006: method-wrong-section
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 A method appears in the incorrect section according to its categorization. This violation occurs when section header validation is enabled and methods are not positioned under their expected section headers.
 
@@ -755,14 +904,14 @@ A method appears in the incorrect section according to its categorization. This 
 
     class TestClass:
         # Test methods
-        def public_method(self):     # W9007: Should be in 'public_methods' section
+        def public_method(self):     # W9006: Should be in 'public_methods' section
             pass
 
         # Public methods
-        def test_something(self):    # W9007: Should be in 'test_methods' section
+        def test_something(self):    # W9006: Should be in 'test_methods' section
             pass
 
-W9008: missing-section-header
+W9007: missing-section-header
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 A required section header is missing for a populated category. This violation occurs when ``require-section-headers`` is enabled and methods exist for a category but no corresponding section header is found.
 
@@ -772,13 +921,13 @@ A required section header is missing for a populated category. This violation oc
 
     class TestClass:
         # Missing "# Test methods" header
-        def test_something(self):    # W9008: Missing section header for 'test_methods'
+        def test_something(self):    # W9007: Missing section header for 'test_methods'
             pass
 
         def test_another(self):      # Methods exist but no header
             pass
 
-W9009: empty-section-header
+W9008: empty-section-header
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 A section header exists but contains no methods. This violation occurs when ``allow-empty-sections`` is disabled and section headers are present without any corresponding methods.
 
@@ -787,7 +936,7 @@ A section header exists but contains no methods. This violation occurs when ``al
 .. code-block:: python
 
     class TestClass:
-        # Test methods             # W9009: Empty section header
+        # Test methods             # W9008: Empty section header
         # No test methods defined
 
         # Public methods
