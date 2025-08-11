@@ -482,10 +482,223 @@ Examples
            # Validation logic
            pass
 
+Section Header Validation
+--------------------------
+
+The plugin supports functional section headers that validate method placement within their designated sections. This transforms section headers from decorative comments into enforceable organizational elements.
+
+Overview
+~~~~~~~~
+
+Traditional section headers are purely visual:
+
+.. code-block:: python
+
+    class MyClass:
+        # Test methods
+        def public_method(self):    # No validation - header ignored
+            pass
+
+        # Public methods
+        def test_something(self):   # Wrong section - not detected
+            pass
+
+With section header validation enabled, these headers become functional:
+
+.. code-block:: python
+
+    class MyClass:
+        # Test methods
+        def test_something(self):   # ✅ Correct section
+            pass
+
+        # Public methods
+        def public_method(self):    # ✅ Correct section
+            pass
+
+Configuration
+~~~~~~~~~~~~~
+
+Section header validation is controlled by three configuration options:
+
+**enforce-section-headers**
+    Enable section header validation. When enabled, methods must appear under the correct section headers according to their categorization.
+
+    *Default*: ``false``
+
+**require-section-headers**
+    Require section headers for all populated categories. When enabled, missing section headers for categories with methods will be flagged as violations.
+
+    *Default*: ``false``
+
+**allow-empty-sections**
+    Allow section headers that have no methods underneath them. When disabled, empty section headers will be flagged as violations.
+
+    *Default*: ``true``
+
+Usage Examples
+~~~~~~~~~~~~~~
+
+**Basic section header validation:**
+
+.. code-block:: toml
+
+    [tool.pylint.'pylint-sort-functions']
+    enforce-section-headers = true
+
+**Strict section header requirements:**
+
+.. code-block:: toml
+
+    [tool.pylint.'pylint-sort-functions']
+    enforce-section-headers = true
+    require-section-headers = true
+    allow-empty-sections = false
+
+**Framework-specific section validation:**
+
+.. code-block:: toml
+
+    [tool.pylint.'pylint-sort-functions']
+    enforce-section-headers = true
+    framework-preset = "pytest"        # Enables test method categories
+
+Section Header Detection
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+The plugin automatically detects section headers based on the configured category definitions. Headers are matched using case-insensitive comparison:
+
+**Default Categories (pytest preset):**
+
+- ``# Test methods`` - for methods matching ``test_*`` patterns
+- ``# Public methods`` - for public methods not matching other patterns
+- ``# Private methods`` - for methods with underscore prefix
+
+**Custom Categories:**
+
+You can define custom section headers through the categorization system:
+
+.. code-block:: toml
+
+    [tool.pylint.'pylint-sort-functions']
+    enforce-section-headers = true
+    method-categories = [
+        {name = "properties", patterns = ["*"], decorators = ["@property"], section_header = "# Properties"},
+        {name = "lifecycle", patterns = ["__init__", "setup*", "teardown*"], section_header = "# Lifecycle"},
+        {name = "public_methods", patterns = ["*"], section_header = "# Public API"},
+        {name = "private_methods", patterns = ["_*"], section_header = "# Private Implementation"}
+    ]
+
+Validation Logic
+~~~~~~~~~~~~~~~~
+
+**Method-to-Section Mapping:**
+
+The plugin creates a mapping of line numbers to section categories based on detected headers:
+
+.. code-block:: python
+
+    class ExampleClass:
+        # Properties                    # Section header (line 1)
+        @property                      # Lines 2-4 belong to "properties"
+        def value(self):               # section
+            return self._value         #
+
+        # Public API                    # Section header (line 5)
+        def process_data(self):        # Lines 6-7 belong to "public_methods"
+            pass                       # section
+
+**Violation Detection:**
+
+Methods are validated against their expected sections:
+
+1. **Categorize method** using configured patterns and decorators
+2. **Find section** where method is located based on line number
+3. **Compare** expected vs actual section
+4. **Report violation** if sections don't match
+
+Framework Integration
+~~~~~~~~~~~~~~~~~~~~~
+
+Section header validation works seamlessly with framework presets:
+
+**pytest Integration:**
+
+.. code-block:: python
+
+    class TestUserService:
+        # Test methods
+        def test_create_user(self):     # ✅ Correct - test method in test section
+            pass
+
+        def test_delete_user(self):     # ✅ Correct - test method in test section
+            pass
+
+        # Public methods
+        def setup_method(self):         # ✅ Correct - utility method in public section
+            pass
+
+**PyQt Integration:**
+
+.. code-block:: python
+
+    class CustomDialog(QDialog):
+        # Lifecycle methods
+        def __init__(self, parent=None): # ✅ Correct - initialization
+            super().__init__(parent)
+
+        # Event handlers
+        def closeEvent(self, event):     # ✅ Correct - event handler section
+            pass
+
+        # Public methods
+        def set_data(self, data):        # ✅ Correct - public API
+            pass
+
+Error Messages
+~~~~~~~~~~~~~~
+
+Section header validation adds three new message types to provide precise error reporting:
+
+**method-wrong-section (W9007)**
+    Method appears in incorrect section according to its categorization.
+
+**missing-section-header (W9008)**
+    Required section header is missing for a populated category.
+
+**empty-section-header (W9009)**
+    Section header exists but contains no methods.
+
+**Example Error Output:**
+
+.. code-block:: text
+
+    example.py:15:4: W9007: Method 'test_something' should be in 'test_methods' section but found in 'public_methods' section (method-wrong-section)
+    example.py:1:0: W9008: Missing required section header for category 'test_methods' (missing-section-header)
+    example.py:8:0: W9009: Empty section header 'properties' - no methods found in this category (empty-section-header)
+
+Benefits
+~~~~~~~~
+
+**Enforced Organization:**
+    Section headers become functional elements that enforce intended code organization.
+
+**Clear Error Messages:**
+    Precise reporting shows expected vs actual section placement with line numbers.
+
+**Framework Compatibility:**
+    Works with existing framework presets and custom categorization schemes.
+
+**Progressive Adoption:**
+    Can be enabled gradually - disabled by default for backward compatibility.
+
+**IDE Integration:**
+    Error messages include line numbers for immediate navigation to violations.
+
 Message Types
 -------------
 
-The plugin reports five types of violations:
+The plugin reports eight types of violations:
 
 **Sorting Violations:**
 
@@ -529,6 +742,57 @@ A private function should be made public (remove underscore prefix) because it's
 
     # main.py imports it:
     from utils import _format_currency  # External usage detected
+
+**Section Header Violations:**
+
+W9007: method-wrong-section
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+A method appears in the incorrect section according to its categorization. This violation occurs when section header validation is enabled and methods are not positioned under their expected section headers.
+
+**Example:**
+
+.. code-block:: python
+
+    class TestClass:
+        # Test methods
+        def public_method(self):     # W9007: Should be in 'public_methods' section
+            pass
+
+        # Public methods
+        def test_something(self):    # W9007: Should be in 'test_methods' section
+            pass
+
+W9008: missing-section-header
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+A required section header is missing for a populated category. This violation occurs when ``require-section-headers`` is enabled and methods exist for a category but no corresponding section header is found.
+
+**Example:**
+
+.. code-block:: python
+
+    class TestClass:
+        # Missing "# Test methods" header
+        def test_something(self):    # W9008: Missing section header for 'test_methods'
+            pass
+
+        def test_another(self):      # Methods exist but no header
+            pass
+
+W9009: empty-section-header
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+A section header exists but contains no methods. This violation occurs when ``allow-empty-sections`` is disabled and section headers are present without any corresponding methods.
+
+**Example:**
+
+.. code-block:: python
+
+    class TestClass:
+        # Test methods             # W9009: Empty section header
+        # No test methods defined
+
+        # Public methods
+        def public_method(self):
+            pass
 
 PyLint Integration
 ------------------

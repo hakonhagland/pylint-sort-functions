@@ -148,6 +148,11 @@ The plugin supports several configuration options to customize its behavior:
     public-api-patterns = ["main", "run", "execute", "start", "stop", "setup", "teardown"]
     enable-privacy-detection = true
 
+    # Section header validation options
+    enforce-section-headers = false
+    require-section-headers = false
+    allow-empty-sections = true
+
 **Using .pylintrc**:
 
 .. code-block:: ini
@@ -158,6 +163,11 @@ The plugin supports several configuration options to customize its behavior:
     [function-sort]
     public-api-patterns = main,run,execute,start,stop,setup,teardown
     enable-privacy-detection = yes
+
+    # Section header validation options
+    enforce-section-headers = no
+    require-section-headers = no
+    allow-empty-sections = yes
 
 Configuration Options Reference
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -171,6 +181,41 @@ Configuration Options Reference
     Enable detection of functions that should be made private based on usage analysis. When enabled, the plugin analyzes cross-module imports to identify functions only used within their defining module.
 
     *Default*: ``true``
+
+Section Header Configuration Options
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+**enforce-section-headers**
+    Enable section header validation. When enabled, methods must appear under the correct section headers according to their categorization. Section headers transform from decorative comments into functional organizational elements.
+
+    *Default*: ``false``
+
+**require-section-headers**
+    Require section headers for all populated categories. When enabled, missing section headers for categories with methods will be flagged as violations (W9008). Only applies when ``enforce-section-headers`` is enabled.
+
+    *Default*: ``false``
+
+**allow-empty-sections**
+    Allow section headers that have no methods underneath them. When disabled, empty section headers will be flagged as violations (W9009). Only applies when ``enforce-section-headers`` is enabled.
+
+    *Default*: ``true``
+
+**Example - Strict Section Header Enforcement:**
+
+.. code-block:: toml
+
+    [tool.pylint.function-sort]
+    enforce-section-headers = true
+    require-section-headers = true
+    allow-empty-sections = false
+    framework-preset = "pytest"        # Enables test method categories
+
+**Example - Basic Section Header Validation:**
+
+.. code-block:: toml
+
+    [tool.pylint.function-sort]
+    enforce-section-headers = true      # Only validate existing headers
 
 Test File Exclusion
 ~~~~~~~~~~~~~~~~~~~

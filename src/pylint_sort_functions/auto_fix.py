@@ -1,4 +1,5 @@
 """Auto-fix functionality for sorting functions and methods."""
+# pylint: disable=too-many-lines
 
 import shutil
 from dataclasses import dataclass
@@ -9,6 +10,7 @@ import astroid  # type: ignore[import-untyped]
 from astroid import nodes
 
 from pylint_sort_functions import utils
+from pylint_sort_functions.utils.categorization import CategoryConfig, categorize_method
 
 
 @dataclass
@@ -52,6 +54,10 @@ class AutoFixConfig:  # pylint: disable=too-many-instance-attributes
     )
     section_header_case_sensitive: bool = False  # Case sensitivity for header detection
 
+    # Multi-category system integration
+    category_config: Optional[CategoryConfig] = None  # Use new categorization system
+    enable_multi_category_headers: bool = False  # Enable multi-category section headers
+
 
 # Note: This class intentionally has only one public method as it encapsulates
 # the configuration state and provides a clean interface for file processing.
@@ -61,10 +67,43 @@ class FunctionSorter:  # pylint: disable=too-many-public-methods,too-few-public-
     This class provides the core functionality for automatically reordering
     functions and methods in Python source files to comply with sorting rules.
 
-    Usage:
+    Supports both traditional binary public/private sorting and the new
+    multi-category system with flexible section headers.
+
+    Basic Usage:
         Used by the CLI tool (cli.py) and can be used programmatically:
 
         config = AutoFixConfig(dry_run=True, backup=True)
+        sorter = FunctionSorter(config)
+        was_modified = sorter.sort_file(Path("my_file.py"))
+
+    Multi-Category Usage:
+        Enhanced functionality with custom categories and section headers:
+
+        from pylint_sort_functions.utils import CategoryConfig, MethodCategory
+
+        # Define custom categories
+        category_config = CategoryConfig(
+            enable_categories=True,
+            categories=[
+                MethodCategory(name="test_methods", patterns=["test_*"],
+                             section_header="# Test methods"),
+                MethodCategory(name="properties", decorators=["@property"],
+                             section_header="# Properties"),
+                MethodCategory(name="public_methods", patterns=["*"],
+                             section_header="# Public methods"),
+                MethodCategory(name="private_methods", patterns=["_*"],
+                             section_header="# Private methods"),
+            ]
+        )
+
+        # Configure auto-fix with multi-category support
+        config = AutoFixConfig(
+            add_section_headers=True,
+            enable_multi_category_headers=True,
+            category_config=category_config
+        )
+
         sorter = FunctionSorter(config)
         was_modified = sorter.sort_file(Path("my_file.py"))
     """
@@ -133,6 +172,75 @@ class FunctionSorter:  # pylint: disable=too-many-public-methods,too-few-public-
             return False
 
     # Private methods
+
+    def _add_multi_category_section_headers_to_functions(
+        self, sorted_spans: List[FunctionSpan], is_methods: bool = False
+    ) -> List[str]:
+        """Add multi-category section headers to sorted function spans.
+
+        This enhanced version supports the new categorization system with multiple
+        categories beyond just public/private. Each category gets its own section
+        header based on the CategoryConfig.
+
+        :param sorted_spans: Function spans in sorted order by category
+        :type sorted_spans: List[FunctionSpan]
+        :param is_methods: True if these are class methods, False for module functions
+        :type is_methods: bool
+        :returns: List of text lines with category headers and functions
+        :rtype: List[str]
+        """
+        if (
+            not self.config.enable_multi_category_headers
+            or not self.config.category_config
+        ):
+            # Fall back to original binary public/private headers
+            return self._add_section_headers_to_functions(sorted_spans, is_methods)
+
+        if not self.config.add_section_headers:
+            # If section headers are disabled, just return function texts
+            result = []
+            for i, span in enumerate(sorted_spans):
+                result.append(span.text)
+                if i < len(sorted_spans) - 1 and not span.text.endswith("\n\n"):
+                    if not span.text.endswith("\n"):
+                        result.append("\n")
+                    result.append("\n")
+            return result
+
+        result_lines: list[str] = []
+        current_category = None
+
+        for span in sorted_spans:
+            # Determine the category for this function/method
+            category = categorize_method(span.node, self.config.category_config)
+
+            # Add section header if we're entering a new category
+            if current_category != category:
+                # Add blank line before section header (except at the very beginning)
+                if result_lines:
+                    result_lines.append("\n")
+
+                # Find the category definition to get section header text
+                category_def = None
+                for cat in self.config.category_config.categories:
+                    if cat.name == category:
+                        category_def = cat
+                        break
+
+                # Add section header if category has one defined
+                if category_def and category_def.section_header:
+                    result_lines.append(f"{category_def.section_header}\n\n")
+                else:
+                    # Fallback to generic header based on category name
+                    header_text = category.replace("_", " ").title()
+                    result_lines.append(f"# {header_text}\n\n")
+
+                current_category = category
+
+            # Add the function text
+            result_lines.append(span.text)
+
+        return result_lines
 
     def _add_section_headers_to_functions(  # pylint: disable=too-many-branches
         self, sorted_spans: List[FunctionSpan], is_methods: bool = False
@@ -584,6 +692,12 @@ class FunctionSorter:  # pylint: disable=too-many-public-methods,too-few-public-
             self.config.private_method_header,
         ]
 
+        # 1a. Add multi-category headers if enabled
+        if self.config.enable_multi_category_headers and self.config.category_config:
+            for category in self.config.category_config.categories:
+                if category.section_header:
+                    configured_headers.append(category.section_header)
+
         for header in configured_headers:
             pattern = (
                 header if self.config.section_header_case_sensitive else header.lower()
@@ -673,7 +787,7 @@ class FunctionSorter:  # pylint: disable=too-many-public-methods,too-few-public-
         new_lines.extend(content_lines[:first_method_start])
 
         # Add sorted methods with optional section headers
-        method_lines = self._add_section_headers_to_functions(
+        method_lines = self._add_multi_category_section_headers_to_functions(
             sorted_spans, is_methods=True
         )
         new_lines.extend(method_lines)
@@ -726,7 +840,7 @@ class FunctionSorter:  # pylint: disable=too-many-public-methods,too-few-public-
         new_lines.extend(lines[:first_func_start])
 
         # Add sorted functions with optional section headers
-        function_lines = self._add_section_headers_to_functions(
+        function_lines = self._add_multi_category_section_headers_to_functions(
             sorted_spans, is_methods=False
         )
         new_lines.extend(function_lines)
@@ -798,6 +912,23 @@ class FunctionSorter:  # pylint: disable=too-many-public-methods,too-few-public-
         :returns: Sorted list of function spans
         :rtype: List[FunctionSpan]
         """
+        # Use multi-category sorting if enabled
+        if self.config.enable_multi_category_headers and self.config.category_config:
+            return self._sort_function_spans_by_categories(spans)
+
+        # Fall back to original binary public/private sorting
+        return self._sort_function_spans_binary(spans)
+
+    def _sort_function_spans_binary(
+        self, spans: List[FunctionSpan]
+    ) -> List[FunctionSpan]:
+        """Sort function spans using the original binary public/private system.
+
+        :param spans: List of function spans to sort
+        :type spans: List[FunctionSpan]
+        :returns: Sorted list of function spans
+        :rtype: List[FunctionSpan]
+        """
         # Separate functions based on exclusions and visibility
         excluded = []
         sortable_public = []
@@ -818,9 +949,57 @@ class FunctionSorter:  # pylint: disable=too-many-public-methods,too-few-public-
         sortable_private.sort(key=lambda s: s.name)
 
         # Reconstruct the order: sortable public + sortable private + excluded
-        # For now, use a simple approach: public sorted + private sorted + excluded
-        # Future enhancement: Preserve relative positions of excluded functions
         return sortable_public + sortable_private + excluded
+
+    def _sort_function_spans_by_categories(
+        self, spans: List[FunctionSpan]
+    ) -> List[FunctionSpan]:
+        """Sort function spans using the multi-category system.
+
+        :param spans: List of function spans to sort
+        :type spans: List[FunctionSpan]
+        :returns: Sorted list of function spans by categories
+        :rtype: List[FunctionSpan]
+        """
+        if not self.config.category_config:
+            return spans
+
+        # Separate excluded functions
+        excluded = []
+        sortable = []
+
+        for span in spans:
+            if utils.function_has_excluded_decorator(
+                span.node, self.config.ignore_decorators or []
+            ):
+                excluded.append(span)
+            else:
+                sortable.append(span)
+
+        # Group functions by category
+        categorized_functions: Dict[str, List[FunctionSpan]] = {}
+
+        for span in sortable:
+            category = categorize_method(span.node, self.config.category_config)
+            if category not in categorized_functions:
+                categorized_functions[category] = []
+            categorized_functions[category].append(span)
+
+        # Sort within each category if category_sorting is alphabetical
+        if self.config.category_config.category_sorting == "alphabetical":
+            for category_functions in categorized_functions.values():
+                category_functions.sort(key=lambda s: s.name)
+
+        # Reconstruct in category order
+        result = []
+        for category_def in self.config.category_config.categories:
+            if category_def.name in categorized_functions:
+                result.extend(categorized_functions[category_def.name])
+
+        # Add any excluded functions at the end
+        result.extend(excluded)
+
+        return result
 
     def _sort_functions_in_content(self, content: str) -> str:
         """Sort functions in file content and return new content.
