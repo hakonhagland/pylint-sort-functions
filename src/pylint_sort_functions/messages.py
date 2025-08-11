@@ -59,4 +59,27 @@ MESSAGES: dict[str, tuple[str, str, str]] = {
         "prefix. This rule detects cross-module imports and usage of private "
         "functions, indicating they are part of the module's public API.",
     ),
+    "W9006": (
+        "Method '%s' is in wrong section (expected: %s, found: %s)",
+        "method-wrong-section",
+        "Method appears under an incorrect section header. Methods should be "
+        "organized under section headers that match their categorization "
+        "(e.g., test methods under '# Test methods', properties under "
+        "'# Properties'). Enable section header enforcement with "
+        "enforce-section-headers=true.",
+    ),
+    "W9007": (
+        "Missing section header '%s' for methods in category '%s'",
+        "missing-section-header",
+        "A section header is required for methods in this category, but no "
+        "matching header was found. Add the appropriate section header comment "
+        "before methods of this type. Enable with require-section-headers=true.",
+    ),
+    "W9008": (
+        "Section header '%s' has no matching methods",
+        "empty-section-header",
+        "Section header exists but contains no methods underneath. Either add "
+        "methods to this section or remove the unnecessary header. Control with "
+        "allow-empty-sections configuration option.",
+    ),
 }

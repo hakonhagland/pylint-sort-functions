@@ -20,7 +20,7 @@ class TestFunctionSortCheckerConfiguration(CheckerTestCase):
         # Verify options are defined
         assert hasattr(self.checker, "options")
         assert isinstance(self.checker.options, tuple)
-        assert len(self.checker.options) == 12
+        assert len(self.checker.options) == 15
 
         # Test public-api-patterns option
         public_api_option = self.checker.options[0]

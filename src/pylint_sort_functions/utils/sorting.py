@@ -73,6 +73,39 @@ def are_functions_sorted_with_exclusions(
     return _are_functions_sorted(sortable_functions, config)
 
 
+def are_methods_in_correct_sections(  # pylint: disable=function-should-be-private
+    methods: list[nodes.FunctionDef], lines: list[str], config: CategoryConfig
+) -> bool:
+    """Check if methods are positioned in their correct sections.
+
+    Validates that all methods appear under the appropriate section headers
+    according to their categorization. This makes section headers functional
+    rather than just decorative.
+
+    :param methods: List of method nodes to validate
+    :type methods: list[nodes.FunctionDef]
+    :param lines: Source code lines containing the methods
+    :type lines: list[str]
+    :param config: Category configuration with section headers
+    :type config: CategoryConfig
+    :returns: True if all methods are in correct sections
+    :rtype: bool
+    """
+    # Import here to avoid circular dependency
+    from .categorization import (  # pylint: disable=import-outside-toplevel
+        is_method_in_correct_section,
+    )
+
+    for method in methods:
+        # Convert 1-based AST line number to 0-based array index
+        method_line = method.lineno - 1
+
+        if not is_method_in_correct_section(method, method_line, lines, config):
+            return False
+
+    return True
+
+
 def are_methods_sorted_with_exclusions(
     methods: list[nodes.FunctionDef],
     ignore_decorators: list[str] | None = None,
@@ -91,6 +124,117 @@ def are_methods_sorted_with_exclusions(
     """
     # Methods follow the same sorting rules as functions
     return are_functions_sorted_with_exclusions(methods, ignore_decorators, config)
+
+
+def find_empty_section_headers(  # pylint: disable=function-should-be-private
+    methods: list[nodes.FunctionDef], lines: list[str], config: CategoryConfig
+) -> list[str]:
+    """Find section headers that exist but have no methods underneath.
+
+    Identifies section headers that are present in the source code but
+    have no corresponding methods in that category.
+
+    :param methods: List of method nodes to analyze
+    :type methods: list[nodes.FunctionDef]
+    :param lines: Source code lines to check for headers
+    :type lines: list[str]
+    :param config: Category configuration with section headers
+    :type config: CategoryConfig
+    :returns: List of empty section header category names
+    :rtype: list[str]
+    """
+    # Import here to avoid circular dependency
+    from .categorization import (  # pylint: disable=import-outside-toplevel
+        parse_section_headers,
+    )
+
+    # Get existing headers
+    existing_headers = parse_section_headers(lines, config)
+    existing_categories = set(existing_headers.keys())
+
+    # Get categories that have methods
+    method_categories = _get_function_categories(methods, config)
+    populated_categories = set(method_categories.keys())
+
+    # Find categories with headers but no methods
+    empty_categories = existing_categories - populated_categories
+
+    return list(empty_categories)
+
+
+def find_missing_section_headers(  # pylint: disable=function-should-be-private
+    methods: list[nodes.FunctionDef], lines: list[str], config: CategoryConfig
+) -> list[str]:
+    """Find section headers that should exist but are missing.
+
+    Analyzes methods to determine which categories have methods but no
+    corresponding section header in the source code.
+
+    :param methods: List of method nodes to analyze
+    :type methods: list[nodes.FunctionDef]
+    :param lines: Source code lines to check for headers
+    :type lines: list[str]
+    :param config: Category configuration with section headers
+    :type config: CategoryConfig
+    :returns: List of missing section header category names
+    :rtype: list[str]
+    """
+    # Import here to avoid circular dependency
+    from .categorization import (  # pylint: disable=import-outside-toplevel
+        parse_section_headers,
+    )
+
+    # Get existing headers
+    existing_headers = parse_section_headers(lines, config)
+    existing_categories = set(existing_headers.keys())
+
+    # Get categories that have methods
+    method_categories = _get_function_categories(methods, config)
+    populated_categories = set(method_categories.keys())
+
+    # Find categories with methods but no headers
+    missing_categories = populated_categories - existing_categories
+
+    return list(missing_categories)
+
+
+def get_section_violations(  # pylint: disable=function-should-be-private
+    methods: list[nodes.FunctionDef], lines: list[str], config: CategoryConfig
+) -> list[tuple[nodes.FunctionDef, str, str]]:
+    """Get detailed information about methods in wrong sections.
+
+    Returns a list of violations where methods are not in their expected
+    sections, including the expected and actual section information.
+
+    :param methods: List of method nodes to analyze
+    :type methods: list[nodes.FunctionDef]
+    :param lines: Source code lines containing the methods
+    :type lines: list[str]
+    :param config: Category configuration with section headers
+    :type config: CategoryConfig
+    :returns: List of (method, expected_section, actual_section) tuples
+    :rtype: list[tuple[nodes.FunctionDef, str, str]]
+    """
+    # Import here to avoid circular dependency
+    from .categorization import (  # pylint: disable=import-outside-toplevel
+        find_method_section_boundaries,
+        get_expected_section_for_method,
+    )
+
+    violations = []
+    boundaries = find_method_section_boundaries(lines, config)
+
+    for method in methods:
+        # Convert 1-based AST line number to 0-based array index
+        method_line = method.lineno - 1
+
+        expected_section = get_expected_section_for_method(method, config)
+        actual_section = boundaries.get(method_line, "unknown")
+
+        if actual_section != expected_section:
+            violations.append((method, expected_section, actual_section))
+
+    return violations
 
 
 def _are_categories_properly_ordered(

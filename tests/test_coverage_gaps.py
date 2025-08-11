@@ -57,6 +57,10 @@ def main():
                 "setup",
                 "teardown",
             ]
+            # Disable section header validation for this test
+            mock_linter.config.enforce_section_headers = False
+            mock_linter.config.require_section_headers = False
+            mock_linter.config.allow_empty_sections = True
             self.checker.linter = mock_linter
 
             # Collect messages

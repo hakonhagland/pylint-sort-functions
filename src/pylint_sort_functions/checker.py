@@ -215,6 +215,46 @@ class FunctionSortChecker(BaseChecker):
                 ),
             },
         ),
+        (
+            "enforce-section-headers",
+            {
+                "default": False,
+                "type": "yn",
+                "metavar": "<y or n>",
+                "help": (
+                    "Enforce that methods must be organized under correct section "
+                    "headers according to their categorization. When enabled, "
+                    "methods appearing under wrong section headers will trigger "
+                    "warnings. Requires enable-method-categories=true."
+                ),
+            },
+        ),
+        (
+            "require-section-headers",
+            {
+                "default": False,
+                "type": "yn",
+                "metavar": "<y or n>",
+                "help": (
+                    "Require section headers to be present for each category that "
+                    "contains methods. When enabled, missing section headers will "
+                    "trigger warnings. Requires enforce-section-headers=true."
+                ),
+            },
+        ),
+        (
+            "allow-empty-sections",
+            {
+                "default": True,
+                "type": "yn",
+                "metavar": "<y or n>",
+                "help": (
+                    "Allow section headers to exist without any methods underneath. "
+                    "When disabled, empty section headers will trigger warnings. "
+                    "Requires enforce-section-headers=true."
+                ),
+            },
+        ),
     )
 
     # Public methods
@@ -247,6 +287,10 @@ class FunctionSortChecker(BaseChecker):
                 args=(f"class {node.name}",),
             )
 
+        # Check section header validation if enabled
+        if getattr(self.linter.config, "enforce_section_headers", False):
+            self._validate_method_sections(methods, node)
+
     def visit_module(self, node: nodes.Module) -> None:
         """Visit a module node to check function sorting and privacy.
 
@@ -270,6 +314,10 @@ class FunctionSortChecker(BaseChecker):
         if not utils.are_functions_properly_separated(functions):
             # Report mixed visibility - see docs/usage.rst for severity levels
             self.add_message("mixed-function-visibility", node=node, args=("module",))
+
+        # Check section header validation if enabled
+        if getattr(self.linter.config, "enforce_section_headers", False):
+            self._validate_function_sections(functions, node)
 
         # Check if any public functions should be private
         self._check_function_privacy(functions, node)
@@ -505,7 +553,16 @@ class FunctionSortChecker(BaseChecker):
         # Defensive check: ensure linter has current_file attribute
         # (version compatibility)
         if hasattr(self.linter, "current_file") and self.linter.current_file:
-            return Path(self.linter.current_file).resolve()
+            try:
+                # Handle Mock objects and other invalid file paths gracefully
+                current_file = self.linter.current_file
+                if hasattr(current_file, "_mock_name"):
+                    # This is a Mock object, return None
+                    return None
+                return Path(current_file).resolve()
+            except (TypeError, OSError, ValueError):
+                # Handle cases where current_file is not a valid path
+                return None
         return None
 
     def _get_privacy_config(self) -> dict[str, Any]:
@@ -621,3 +678,114 @@ class FunctionSortChecker(BaseChecker):
                 ) from e
 
         return categories
+
+    def _validate_function_sections(
+        self, functions: list[nodes.FunctionDef], module_node: nodes.Module
+    ) -> None:
+        """Validate that functions are in correct sections according to headers.
+
+        :param functions: List of function nodes to validate
+        :type functions: list[nodes.FunctionDef]
+        :param module_node: Module containing the functions
+        :type module_node: nodes.Module
+        """
+        if not functions:
+            return
+
+        # Get the source file content
+        module_path = self._get_module_path()
+        if not module_path or not module_path.exists():
+            return
+
+        try:
+            lines = module_path.read_text(encoding="utf-8").splitlines()
+        except (OSError, UnicodeDecodeError):
+            return
+
+        category_config = self._get_category_config()
+        self._validate_sections_common(functions, lines, category_config, module_node)
+
+    def _validate_method_sections(
+        self, methods: list[nodes.FunctionDef], class_node: nodes.ClassDef
+    ) -> None:
+        """Validate that methods are in correct sections according to headers.
+
+        :param methods: List of method nodes to validate
+        :type methods: list[nodes.FunctionDef]
+        :param class_node: Class containing the methods
+        :type class_node: nodes.ClassDef
+        """
+        if not methods:
+            return
+
+        # Get the source file content
+        module_path = self._get_module_path()
+        if not module_path or not module_path.exists():
+            return
+
+        try:
+            lines = module_path.read_text(encoding="utf-8").splitlines()
+        except (OSError, UnicodeDecodeError):
+            return
+
+        category_config = self._get_category_config()
+        self._validate_sections_common(methods, lines, category_config, class_node)
+
+    def _validate_sections_common(
+        self,
+        methods: list[nodes.FunctionDef],
+        lines: list[str],
+        config: utils.CategoryConfig,
+        node: nodes.ClassDef | nodes.Module,
+    ) -> None:
+        """Common section validation logic for both methods and functions.
+
+        :param methods: List of method/function nodes to validate
+        :type methods: list[nodes.FunctionDef]
+        :param lines: Source file lines
+        :type lines: list[str]
+        :param config: Category configuration
+        :type config: utils.CategoryConfig
+        :param node: AST node for error reporting (class or module)
+        :type node: nodes.ClassDef | nodes.Module
+        """
+        # Check for methods in wrong sections
+        violations = utils.get_section_violations(methods, lines, config)
+        for method, expected_section, actual_section in violations:
+            self.add_message(
+                "method-wrong-section",
+                node=method,
+                args=(method.name, expected_section, actual_section),
+            )
+
+        # Check for missing section headers if required
+        if getattr(self.linter.config, "require_section_headers", False):
+            missing_headers = utils.find_missing_section_headers(methods, lines, config)
+            for category_name in missing_headers:
+                # Find category to get section header text
+                category = next(
+                    (cat for cat in config.categories if cat.name == category_name),
+                    None,
+                )
+                if category and category.section_header:
+                    self.add_message(
+                        "missing-section-header",
+                        node=node,
+                        args=(category.section_header, category_name),
+                    )
+
+        # Check for empty section headers if not allowed
+        if not getattr(self.linter.config, "allow_empty_sections", True):
+            empty_headers = utils.find_empty_section_headers(methods, lines, config)
+            for category_name in empty_headers:
+                # Find category to get section header text
+                category = next(
+                    (cat for cat in config.categories if cat.name == category_name),
+                    None,
+                )
+                if category and category.section_header:
+                    self.add_message(
+                        "empty-section-header",
+                        node=node,
+                        args=(category.section_header,),
+                    )

@@ -133,6 +133,129 @@ def categorize_method(  # pylint: disable=function-should-be-private
     return matching_categories[0][0].name
 
 
+def find_method_section_boundaries(  # pylint: disable=function-should-be-private
+    lines: list[str], config: CategoryConfig
+) -> dict[int, str]:
+    """Map line numbers to their section categories based on headers.
+
+    Creates a mapping from line numbers to category names, where each line
+    between section headers belongs to the category of the preceding header.
+
+    :param lines: Source code lines to analyze
+    :type lines: list[str]
+    :param config: Category configuration with section headers
+    :type config: CategoryConfig
+    :returns: Dict mapping line numbers to category names
+    :rtype: dict[int, str]
+    """
+    boundaries = {}
+    current_section = None
+
+    # Parse all section headers first
+    headers = parse_section_headers(lines, config)
+    header_lines = {line_num: category for category, (line_num, _) in headers.items()}
+
+    # Map each line to its section
+    for line_num in range(len(lines)):
+        # Check if this line is a section header
+        if line_num in header_lines:
+            current_section = header_lines[line_num]
+
+        # Assign current section to this line
+        if current_section:
+            boundaries[line_num] = current_section
+
+    return boundaries
+
+
+def get_expected_section_for_method(  # pylint: disable=function-should-be-private
+    method: nodes.FunctionDef, config: CategoryConfig
+) -> str:
+    """Get expected section name for a method based on categorization.
+
+    Uses the categorization system to determine which section header a method
+    should appear under according to the configuration.
+
+    :param method: Method node to analyze
+    :type method: nodes.FunctionDef
+    :param config: Category configuration
+    :type config: CategoryConfig
+    :returns: Expected category/section name for this method
+    :rtype: str
+    """
+    return categorize_method(method, config)
+
+
+def is_method_in_correct_section(  # pylint: disable=function-should-be-private
+    method: nodes.FunctionDef,
+    method_line: int,
+    lines: list[str],
+    config: CategoryConfig,
+) -> bool:
+    """Check if a method is positioned in its correct section.
+
+    Validates that a method appears under the appropriate section header
+    according to its categorization.
+
+    :param method: Method node to validate
+    :type method: nodes.FunctionDef
+    :param method_line: Line number where method is defined (0-based)
+    :type method_line: int
+    :param lines: Source code lines
+    :type lines: list[str]
+    :param config: Category configuration
+    :type config: CategoryConfig
+    :returns: True if method is in correct section, False otherwise
+    :rtype: bool
+    """
+    # Get expected section for this method
+    expected_section = get_expected_section_for_method(method, config)
+
+    # Get section boundaries mapping
+    boundaries = find_method_section_boundaries(lines, config)
+
+    # Check if method line has correct section assignment
+    actual_section = boundaries.get(method_line)
+
+    return actual_section == expected_section
+
+
+def parse_section_headers(  # pylint: disable=function-should-be-private
+    lines: list[str], config: CategoryConfig
+) -> dict[str, tuple[int, str]]:
+    """Parse existing section headers and map them to categories.
+
+    Scans source code lines to find comment lines that match section header
+    patterns for any of the configured categories. Returns a mapping from
+    category names to their header line numbers and text.
+
+    :param lines: Source code lines to scan for headers
+    :type lines: list[str]
+    :param config: Category configuration with header patterns
+    :type config: CategoryConfig
+    :returns: Dict mapping category names to (line_number, header_text) tuples
+    :rtype: dict[str, tuple[int, str]]
+    """
+    headers = {}
+
+    for line_num, line in enumerate(lines):
+        stripped_line = line.strip()
+
+        # Skip non-comment lines
+        if not stripped_line.startswith("#"):
+            continue
+
+        # Check if this line matches any category's section header
+        for category in config.categories:
+            if category.section_header and _is_header_match(
+                stripped_line, category.section_header, config
+            ):
+                headers[category.name] = (line_num, stripped_line)
+                break  # Each line can only match one category
+
+    return headers
+
+
 def _get_category_match_priority(
     func: nodes.FunctionDef, category: MethodCategory
 ) -> int:
@@ -175,6 +298,30 @@ def _get_category_match_priority(
                 break
 
     return priority
+
+
+def _is_header_match(
+    comment_line: str,
+    header_pattern: str,
+    config: CategoryConfig,  # pylint: disable=unused-argument
+) -> bool:
+    """Check if a comment line matches a section header pattern.
+
+    Supports flexible matching including case-insensitive comparison and
+    substring matching for section headers.
+
+    :param comment_line: Comment line to check (already stripped)
+    :type comment_line: str
+    :param header_pattern: Expected header text pattern
+    :type header_pattern: str
+    :param config: Category configuration (for future case sensitivity options)
+    :type config: CategoryConfig
+    :returns: True if comment matches header pattern
+    :rtype: bool
+    """
+    # For now, use case-insensitive exact match
+    # Future enhancement: Add case sensitivity options to CategoryConfig
+    return comment_line.lower() == header_pattern.lower()
 
 
 def _method_name_matches_pattern(method_name: str, pattern: str) -> bool:

@@ -40,6 +40,10 @@ from .categorization import (
     _get_category_match_priority,
     _method_name_matches_pattern,
     categorize_method,
+    find_method_section_boundaries,
+    get_expected_section_for_method,
+    is_method_in_correct_section,
+    parse_section_headers,
 )
 
 # Decorator analysis
@@ -76,7 +80,11 @@ from .sorting import (
     _get_function_groups,
     are_functions_properly_separated,
     are_functions_sorted_with_exclusions,
+    are_methods_in_correct_sections,
     are_methods_sorted_with_exclusions,
+    find_empty_section_headers,
+    find_missing_section_headers,
+    get_section_violations,
 )
 
 __all__ = [
@@ -85,17 +93,25 @@ __all__ = [
     "MethodCategory",
     "are_functions_properly_separated",
     "are_functions_sorted_with_exclusions",
+    "are_methods_in_correct_sections",
     "are_methods_sorted_with_exclusions",
     "categorize_method",
     "decorator_matches_pattern",
+    "find_empty_section_headers",
+    "find_method_section_boundaries",
+    "find_missing_section_headers",
     "find_python_files",
     "function_has_excluded_decorator",
     "get_decorator_strings",
+    "get_expected_section_for_method",
     "get_functions_from_node",
     "get_methods_from_class",
+    "get_section_violations",
     "is_dunder_method",
+    "is_method_in_correct_section",
     "is_private_function",
     "is_unittest_file",
+    "parse_section_headers",
     "should_function_be_private",
     "should_function_be_public",
     # Private functions that tests depend on
