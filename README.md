@@ -174,6 +174,88 @@ For comprehensive documentation, including:
 
 See [hakonhagland.github.io/pylint-sort-functions](https://hakonhagland.github.io/pylint-sort-functions)
 
+## Development and Testing
+
+### Running Tests
+
+The project uses a comprehensive testing framework with both unit tests and fixture-based integration tests:
+
+```bash
+# Run all tests (unit + integration)
+make test-all
+
+# Run unit tests only (fast)
+make test
+
+# Run integration tests only  
+make test-integration
+
+# Run with coverage (enforces 100%)
+make coverage
+
+# Run specific integration test
+pytest tests/integration/test_method_categorization_integration.py -v
+```
+
+### Integration Testing with Fixtures
+
+The project includes a robust fixture-based integration testing system for end-to-end validation:
+
+```python
+# Example integration test using fixtures
+def test_framework_preset_integration(
+    pylint_runner, file_creator, config_writer, sample_test_class
+):
+    """Test pytest framework preset with proper configuration."""
+    # Create test file using sample data
+    file_creator("src/test_example.py", sample_test_class["pytest"])
+    
+    # Create configuration with required settings
+    config_writer("pylintrc", """[MASTER]
+load-plugins = pylint_sort_functions
+
+[function-sort]
+enable-method-categories = yes
+framework-preset = pytest
+category-sorting = declaration
+""")
+    
+    # Run PyLint and validate results
+    returncode, stdout, stderr = pylint_runner(
+        ["src/test_example.py"], 
+        extra_args=["--enable=unsorted-methods"]
+    )
+    
+    assert "unsorted-methods" not in stdout
+```
+
+### Available Testing Fixtures
+
+- `test_project`: Creates temporary Python project structure
+- `file_creator`: Factory for creating test files with content
+- `config_writer`: Factory for PyLint configuration files (.pylintrc, pyproject.toml)
+- `pylint_runner`: Factory for running PyLint with plugin loaded
+- `cli_runner`: Factory for CLI command execution
+- `sample_test_class`: Framework-specific test class templates
+
+### Framework Preset Testing
+
+When testing framework presets, always include the `category-sorting = declaration` setting:
+
+```python
+# Correct framework preset configuration for testing
+config_content = """[MASTER]
+load-plugins = pylint_sort_functions
+
+[function-sort]
+enable-method-categories = yes
+framework-preset = pytest  # or unittest, pyqt
+category-sorting = declaration  # Required!
+"""
+```
+
+For complete development documentation, see the [Testing Guide](https://hakonhagland.github.io/pylint-sort-functions/testing.html) and [Developer Guide](https://hakonhagland.github.io/pylint-sort-functions/developer.html).
+
 ## Links
 
 - **PyPI Package**: [pylint-sort-functions](https://pypi.org/project/pylint-sort-functions/)

@@ -783,6 +783,144 @@ For performance-critical environments, privacy detection can be disabled:
 
 This reduces the plugin to near-zero performance overhead while maintaining all sorting functionality.
 
+Testing Best Practices
+-----------------------
+
+The plugin uses a comprehensive testing strategy combining unit tests and fixture-based integration tests.
+
+Testing Architecture
+~~~~~~~~~~~~~~~~~~~~~
+
+**Unit Testing with CheckerTestCase**
+
+For testing plugin functionality, use PyLint's ``CheckerTestCase`` framework:
+
+.. code-block:: python
+
+   from pylint.testutils import CheckerTestCase
+   from pylint_sort_functions.checker import FunctionSortChecker
+   
+   class TestFunctionSortChecker(CheckerTestCase):
+       CHECKER_CLASS = FunctionSortChecker
+       
+       def test_feature(self):
+           node = astroid.extract_node("""
+           def zebra_function():  #@
+               pass
+           """)
+           
+           with self.assertAddsMessages(
+               pylint.testutils.MessageTest(msg_id="W9001", node=node)
+           ):
+               self.checker.visit_module(node)
+
+**Integration Testing with Fixtures**
+
+For end-to-end testing, use the fixture-based integration test framework located in ``tests/integration/conftest.py``:
+
+.. code-block:: python
+
+   from typing import Any
+   
+   class TestFeatureIntegration:
+       def test_feature_end_to_end(
+           self, pylint_runner: Any, file_creator: Any, config_writer: Any
+       ) -> None:
+           # Create test files
+           file_creator("src/module.py", "def test(): pass")
+           
+           # Create configuration
+           config_writer("pylintrc", "[MASTER]\nload-plugins = pylint_sort_functions")
+           
+           # Test with PyLint
+           returncode, stdout, stderr = pylint_runner(["src/module.py"])
+           assert returncode == 0
+
+**Framework Preset Testing**
+
+When developing framework presets or testing method categorization:
+
+.. code-block:: python
+
+   def test_framework_preset(
+       pylint_runner: Any, file_creator: Any, config_writer: Any, sample_test_class: Any
+   ) -> None:
+       # Use sample test classes for consistency
+       file_creator("src/test.py", sample_test_class["pytest"])
+       
+       # ALWAYS include category-sorting = declaration for framework presets
+       config_content = """[MASTER]
+   load-plugins = pylint_sort_functions
+   
+   [function-sort]  
+   enable-method-categories = yes
+   framework-preset = pytest
+   category-sorting = declaration
+   """
+       config_writer("pylintrc", config_content)
+       
+       returncode, stdout, stderr = pylint_runner(
+           ["src/test.py"], extra_args=["--enable=unsorted-methods"]
+       )
+       
+       assert "unsorted-methods" not in stdout
+
+Fixture Development Guidelines
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+When extending the integration test infrastructure:
+
+1. **Follow Factory Pattern**: Create fixtures that return functions for flexibility
+2. **Use Type Hints**: Ensure fixtures have proper type annotations  
+3. **Provide Realistic Data**: Sample data should represent real-world usage
+4. **Maintain Backwards Compatibility**: Don't break existing tests when adding features
+5. **Document Fixture Purpose**: Include clear docstrings explaining fixture usage
+
+**Example Fixture Development:**
+
+.. code-block:: python
+
+   @pytest.fixture
+   def custom_fixture(test_project: Path) -> Callable[[str], Path]:
+       """Factory for creating custom test scenarios."""
+       
+       def create_scenario(scenario_type: str) -> Path:
+           # Implementation specific to your testing needs
+           file_path = test_project / f"{scenario_type}.py" 
+           file_path.write_text(get_scenario_content(scenario_type))
+           return file_path
+           
+       return create_scenario
+
+**Available Integration Test Fixtures:**
+
+- ``test_project``: Creates temporary Python project structure
+- ``file_creator``: Factory for creating test files within project
+- ``config_writer``: Factory for creating PyLint configuration files
+- ``pylint_runner``: Factory for running PyLint with plugin loaded
+- ``cli_runner``: Factory for running CLI commands in test project
+- ``sample_test_class``: Provides framework-specific test class templates
+- ``IntegrationTestHelper``: Utility class for complex test scenarios
+
+**Performance Guidelines**
+
+- **Unit tests**: Should run in milliseconds
+- **Integration tests**: Full suite should complete in <5 seconds
+- **Use fixtures efficiently**: Prefer shared fixtures over repeated setup  
+- **Minimize file I/O**: Use temporary directories with automatic cleanup
+
+Test Development Guidelines
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+- **100% Coverage Required**: All new code must include comprehensive tests
+- **Use CheckerTestCase**: For unit testing PyLint plugin functionality
+- **Use Fixture Pattern**: For integration tests with realistic scenarios
+- **Framework Configuration**: Always include ``category-sorting = declaration`` for preset tests
+- **Test Real Examples**: Use realistic code patterns in test cases
+- **Cover Edge Cases**: Test boundary conditions and error handling
+- **Maintain Performance**: Keep tests fast and efficient
+- **Update Documentation**: Keep testing documentation current with changes
+
 Conclusion
 ----------
 
@@ -793,9 +931,9 @@ The ``pylint-sort-functions`` plugin demonstrates a complete PyLint plugin imple
 - Comprehensive message definitions and error reporting
 - Advanced features like import analysis and auto-fixing
 - Framework-aware sorting with decorator exclusions
-- Thorough testing using PyLint's testing framework
+- Thorough testing using both unit tests and fixture-based integration tests
 
-The modular architecture makes it easy to extend and maintain while providing a solid foundation for enforcing code organization standards.
+The modular architecture and comprehensive testing framework make it easy to extend and maintain while providing a solid foundation for enforcing code organization standards.
 
 See Also
 --------
