@@ -836,6 +836,7 @@ def internal_only():
                 is False
             )
 
+    @pytest.mark.slow
     def test_should_function_be_private_exception_fallback(self) -> None:
         """Test fallback to heuristics when cross-module analysis fails."""
         from unittest.mock import patch

@@ -4,6 +4,7 @@ from pathlib import Path
 from unittest.mock import Mock, patch
 
 import astroid  # type: ignore[import-untyped]
+import pytest
 from pylint.testutils import CheckerTestCase, MessageTest
 
 from pylint_sort_functions.checker import FunctionSortChecker
@@ -35,6 +36,7 @@ class TestFunctionSortCheckerPrivacy(CheckerTestCase):
             # Run our checker on the parsed module
             self.checker.visit_module(module)
 
+    @pytest.mark.slow
     def test_function_should_be_private_with_import_analysis(self) -> None:
         """Test import analysis correctly identifies should-be-private functions."""
         # Mock the linter to provide path information so import analysis runs

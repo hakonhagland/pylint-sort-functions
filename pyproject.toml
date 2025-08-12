@@ -62,7 +62,8 @@ fail_under = 100
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 markers = [
-    "integration: marks tests as integration tests"
+    "integration: marks tests as integration tests",
+    "slow: marks tests that take significant time (>0.5s)"
 ]
 
 # Mypy automatically discovers this configuration from pyproject.toml

@@ -1,6 +1,6 @@
 ROOT := $(shell pwd)
 
-.PHONY: coverage docs eof-fix help mypy ruff-check ruff-fix ruff-format test test-integration test-all test-plugin test-plugin-strict tox
+.PHONY: coverage docs eof-fix help mypy ruff-check ruff-fix ruff-format test test-unit test-fast test-integration test-all test-plugin test-plugin-strict tox
 .PHONY: publish-to-pypi publish-to-pypi-minor publish-to-pypi-major rstcheck rst-list-check rst-toml-check self-check
 .PHONY: build-docker-image run-docker-container stop-docker-container test-documentation
 .PHONY: changelog-add changelog-prepare changelog-validate
@@ -65,6 +65,8 @@ help:
 	@echo "  ruff-format           - Format code with ruff"
 	@echo "  self-check            - Check code with our plugin (relaxed test rules)"
 	@echo "  test                  - Run pytest tests"
+	@echo "  test-unit             - Run unit tests only (~4s, excludes integration tests)"
+	@echo "  test-fast             - Run unit tests excluding slow tests (~2s)"
 	@echo "  test-integration      - Run integration tests only"
 	@echo "  test-all              - Run all tests (unit + integration)"
 	@echo "  test-plugin           - Check code with our plugin (relaxed test rules)"
@@ -148,6 +150,12 @@ self-check:
 
 test:
 	pytest tests/
+
+test-unit:
+	pytest tests/ --ignore=tests/integration/
+
+test-fast:
+	pytest tests/ --ignore=tests/integration/ -m "not slow"
 
 test-integration:
 	pytest tests/integration/ -v
