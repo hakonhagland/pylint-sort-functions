@@ -65,9 +65,11 @@ jobs:
           pylint_check_relaxed
 
       - name: Code coverage
+        shell: bash
         run: |
           source scripts/coverage-config.sh
-          uv run bash -c "coverage_unit_with_report"
+          uv run coverage run -m pytest tests/ --ignore=tests/integration/
+          uv run coverage report -m --fail-under=100
 
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v5
