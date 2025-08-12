@@ -1,6 +1,6 @@
 ROOT := $(shell pwd)
 
-.PHONY: coverage coverage-all coverage-html docs eof-fix help mypy ruff-check ruff-fix ruff-format test test-unit test-fast test-integration test-all test-plugin test-plugin-strict tox
+.PHONY: coverage coverage-all coverage-html docs eof-fix help mypy ruff-check ruff-fix ruff-format test test-unit test-fast test-integration test-all test-plugin test-plugin-strict tox view-cover view-docs
 .PHONY: publish-to-pypi publish-to-pypi-minor publish-to-pypi-major rstcheck rst-list-check rst-toml-check self-check
 .PHONY: build-docker-image run-docker-container stop-docker-container test-documentation
 .PHONY: changelog-add changelog-prepare changelog-validate
@@ -60,6 +60,7 @@ help:
 	@echo "  coverage              - Run unit tests with coverage report (~6s)"
 	@echo "  coverage-html         - Generate HTML coverage report (unit tests only)"
 	@echo "  coverage-all          - Run all tests with coverage report (~23s)"
+	@echo "  view-cover            - Open coverage report in browser"
 	@echo "  mypy                  - Run type checking"
 	@echo "  pre-commit            - Run all pre-commit hooks"
 	@echo "  rstcheck              - Check reStructuredText documentation (syntax + formatting + TOML blocks)"
@@ -188,6 +189,9 @@ test-plugin-strict:
 
 tox:
 	tox
+
+view-cover:
+	@xdg-open "file://$(ROOT)/htmlcov/index.html"
 
 view-docs:
 	@xdg-open "file://$(ROOT)/docs/_build/html/index.html"
