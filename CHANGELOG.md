@@ -11,15 +11,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Complete Phase 1 implementation with dogfooding success - enhanced privacy analysis and detection system
 - Complete Phase 2 Test File Update System - automatic test file import and mock pattern updates for privacy fixes ([#28](https://github.com/hakonhagland/pylint-sort-functions/issues/28))
+- Flexible method categorization system supporting multi-category organization beyond simple public/private separation
+- Comprehensive TOML validation system for RST documentation code blocks
+- Fast test targets for optimized development workflow with coverage exclusions
 
 ### Changed
 
 - Complete modularization of privacy_fixer.py - transform monolithic 1119-line file into focused single-responsibility modules ([#32](https://github.com/hakonhagland/pylint-sort-functions/issues/32))
 - Break down complex _handle_privacy_fixing() function into focused helper methods for better maintainability ([#31](https://github.com/hakonhagland/pylint-sort-functions/issues/31))
+- Centralized coverage configuration with single source of truth for consistent testing
+- Split utils.py and test modules into focused single-responsibility modules for better maintainability ([#37](https://github.com/hakonhagland/pylint-sort-functions/pull/37))
+- Optimized pre-commit hooks for faster development workflow with improved performance
 
 ### Fixed
 
 - Resolve all pylint warnings to achieve perfect 10.00/10 code quality scores for both source and test files
+- Integration test failures and method categorization test issues ([#47](https://github.com/hakonhagland/pylint-sort-functions/pull/47))
 ## [1.3.2] - 2025-08-10
 
 ### Fixed
