@@ -164,6 +164,81 @@ pylint-sort-functions --fix --ignore-decorators "@app.route" --ignore-decorators
 pylint-sort-functions --fix --add-section-headers --public-header "=== PUBLIC API ===" src/
 ```
 
+## Framework Presets
+
+PyLint Sort Functions includes built-in configurations for popular Python frameworks that organize methods according to each framework's conventions.
+
+### Quick Start
+
+**pytest Framework**:
+```toml
+[tool.pylint.function-sort]
+enable-method-categories = true
+framework-preset = "pytest"
+category-sorting = "declaration"  # Required for framework presets!
+```
+
+**unittest Framework**:
+```toml
+[tool.pylint.function-sort]
+enable-method-categories = true
+framework-preset = "unittest"
+category-sorting = "declaration"  # Required for framework presets!
+```
+
+**PyQt Framework**:
+```toml
+[tool.pylint.function-sort]
+enable-method-categories = true
+framework-preset = "pyqt"
+category-sorting = "declaration"  # Required for framework presets!
+```
+
+### Method Organization Patterns
+
+**pytest preset**: Test fixtures → Test methods → Public helpers → Private helpers
+
+```python
+class TestUserService:
+    def setup_method(self):      # Test fixtures first
+        self.service = UserService()
+    
+    def test_user_creation(self):    # Test methods second
+        assert self.service.create_user("test")
+    
+    def helper_method(self):         # Public helpers third
+        return "helper"
+    
+    def _private_helper(self):       # Private helpers last
+        return "private"
+```
+
+**unittest preset**: setUp/tearDown → Test methods → Public helpers → Private helpers
+
+**pyqt preset**: Initialization → Properties → Event handlers → Public methods → Private methods
+
+### Common Issues
+
+**❌ Problem**: Getting `W9002: unsorted-methods` violations with framework presets
+
+**✅ Solution**: Add `category-sorting = "declaration"` to your configuration. Framework presets preserve conventional method ordering within categories instead of sorting alphabetically.
+
+**❌ Incorrect Configuration**:
+```toml
+[tool.pylint.function-sort]
+enable-method-categories = true
+framework-preset = "pytest"
+# Missing category-sorting = "declaration" - causes violations!
+```
+
+**✅ Correct Configuration**:
+```toml
+[tool.pylint.function-sort]
+enable-method-categories = true
+framework-preset = "pytest"
+category-sorting = "declaration"  # This prevents violations
+```
+
 ## Documentation
 
 For comprehensive documentation, including:

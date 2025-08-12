@@ -5,4 +5,9 @@ load-plugins = pylint_sort_functions
 enable = unsorted-functions,unsorted-methods,mixed-function-visibility,function-should-be-private
 
 [PYLINT_SORT_FUNCTIONS]
+# Framework preset configuration (this validates documentation examples!)
+enable-method-categories = yes
+framework-preset = pytest
+category-sorting = declaration
+# Decorator exclusions for pytest decorators
 ignore-decorators = pytest.fixture,pytest.mark.slow,pytest.mark.integration,pytest.mark.unit,pytest.parametrize

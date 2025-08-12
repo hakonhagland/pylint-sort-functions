@@ -1,0 +1,11 @@
+[MASTER]
+load-plugins = pylint_sort_functions
+
+[MESSAGES CONTROL]
+enable = unsorted-functions,unsorted-methods,mixed-function-visibility,function-should-be-private
+
+[PYLINT_SORT_FUNCTIONS]
+# Framework preset configuration (validates unittest documentation examples!)
+enable-method-categories = yes
+framework-preset = unittest
+category-sorting = declaration

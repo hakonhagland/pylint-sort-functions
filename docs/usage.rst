@@ -149,9 +149,9 @@ The plugin supports several configuration options to customize its behavior:
     enable-privacy-detection = true
 
     # Method categorization options (Phase 1 - NEW!)
-    enable-method-categories = false        # Enable multi-category system
+    enable-method-categories = true         # Enable multi-category system
     framework-preset = "pytest"            # Built-in framework configurations
-    category-sorting = "alphabetical"      # How to sort within categories
+    category-sorting = "declaration"       # Required for framework presets!
     # Custom JSON category definitions
     method-categories = '''[
         {"name": "test_methods", "patterns": ["test_*"], "priority": 10},
@@ -176,9 +176,9 @@ The plugin supports several configuration options to customize its behavior:
     enable-privacy-detection = yes
 
     # Method categorization options (Phase 1 - NEW!)
-    enable-method-categories = no           # Enable multi-category system
+    enable-method-categories = yes          # Enable multi-category system
     framework-preset = pytest              # Built-in framework configurations
-    category-sorting = alphabetical        # How to sort within categories
+    category-sorting = declaration          # Required for framework presets!
     method-categories = [{"name": "test_methods", "patterns": ["test_*"], "priority": 10}]
 
     # Section header validation options (Phase 2 - ENHANCED!)
@@ -265,6 +265,7 @@ Section Header Configuration Options
     require-section-headers = true
     allow-empty-sections = false
     framework-preset = "pytest"        # Enables test method categories
+    category-sorting = "declaration"   # Required for framework presets!
 
 **Example - Basic Section Header Validation:**
 
@@ -287,6 +288,7 @@ For test classes using pytest:
     [tool.pylint.function-sort]
     enable-method-categories = true
     framework-preset = "pytest"
+    category-sorting = "declaration"       # Required for framework presets!
     enforce-section-headers = true
 
 **Example pytest class organization:**
@@ -327,6 +329,7 @@ For test classes using unittest:
     [tool.pylint.function-sort]
     enable-method-categories = true
     framework-preset = "unittest"
+    category-sorting = "declaration"       # Required for framework presets!
 
 **Example unittest class organization:**
 
@@ -366,6 +369,7 @@ For PyQt/PySide GUI applications:
     [tool.pylint.function-sort]
     enable-method-categories = true
     framework-preset = "pyqt"
+    category-sorting = "declaration"       # Required for framework presets!
 
 **Example PyQt class organization:**
 
@@ -431,8 +435,106 @@ For advanced customization beyond framework presets:
         {"name": "public_methods", "patterns": ["*"], "priority": 5},
         {"name": "private_methods", "patterns": ["_*"], "priority": 1}
     ]'''
-    category-sorting = "alphabetical"
+    category-sorting = "declaration"       # Required for framework presets!
     enforce-section-headers = true
+
+Framework Preset Troubleshooting
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This section addresses common issues when using framework presets and provides solutions for configuration problems.
+
+**Common Issues and Solutions**
+
+**Problem**: Getting ``W9002: unsorted-methods`` violations with framework presets
+    **Root Cause**: Framework presets require ``category-sorting = "declaration"`` to preserve conventional method ordering within categories. The default ``"alphabetical"`` sorting conflicts with framework conventions.
+    
+    **Solution**: Add ``category-sorting = "declaration"`` to your configuration:
+
+    .. code-block:: ini
+
+        [function-sort]
+        enable-method-categories = yes
+        framework-preset = pytest
+        category-sorting = declaration  # This prevents violations
+
+**Problem**: Framework preset not working as expected
+    **Root Cause**: Method categorization is not enabled, or preset is misspelled.
+    
+    **Solution**: Verify both settings are correct:
+
+    .. code-block:: toml
+
+        [tool.pylint.function-sort]
+        enable-method-categories = true    # Must be true for presets
+        framework-preset = "pytest"       # Check spelling: pytest, unittest, pyqt
+
+**Problem**: Want alphabetical sorting within preset categories
+    **Root Cause**: You prefer alphabetical ordering over conventional framework ordering.
+    
+    **Solution**: Keep ``category-sorting = "alphabetical"`` (default) if that's your preference, but expect some violations for conventional method ordering:
+
+    .. code-block:: toml
+
+        [tool.pylint.function-sort]
+        enable-method-categories = true
+        framework-preset = "pytest"
+        category-sorting = "alphabetical"  # Alphabetical within categories
+
+**Problem**: Preset conflicts with custom categories
+    **Root Cause**: Both ``framework-preset`` and ``method-categories`` are specified.
+    
+    **Solution**: Use either framework presets OR custom categories, not both:
+
+    .. code-block:: toml
+
+        # Option 1: Use framework preset
+        [tool.pylint.function-sort]
+        enable-method-categories = true
+        framework-preset = "pytest"
+        category-sorting = "declaration"
+        
+        # Option 2: Use custom categories (remove framework-preset)
+        [tool.pylint.function-sort]
+        enable-method-categories = true
+        method-categories = '[{"name": "test_methods", "patterns": ["test_*"], "priority": 10}]'
+
+**Understanding category-sorting Setting**
+
+The ``category-sorting`` setting controls how methods are ordered within each category:
+
+- **``"alphabetical"`` (default)**: Sort methods alphabetically within categories
+- **``"declaration"``**: Preserve original declaration order within categories
+
+**Framework presets expect ``"declaration"`` order** to maintain conventional patterns like:
+
+- **pytest**: ``setup_method`` → ``test_*`` methods → helpers (not alphabetical)
+- **unittest**: ``setUp`` → ``tearDown`` → ``test_*`` methods → helpers (not alphabetical)
+- **pyqt**: ``__init__`` → ``setup_ui`` → properties → event handlers (not alphabetical)
+
+**Configuration Validation**
+
+If you're unsure about your configuration, test it with a simple example:
+
+.. code-block:: python
+
+    # test_config.py
+    class TestExample:
+        def setup_method(self):
+            pass
+        
+        def test_feature(self):
+            pass
+        
+        def helper_method(self):
+            pass
+
+Run PyLint with your configuration:
+
+.. code-block:: bash
+
+    pylint --load-plugins=pylint_sort_functions test_config.py
+
+Expected results with correct framework preset configuration: **No sorting violations** for the class methods.
 
 Test File Exclusion
 ~~~~~~~~~~~~~~~~~~~
