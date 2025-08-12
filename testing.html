@@ -74,6 +74,7 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#integration-testing">Integration Testing</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#test-types">Test Types</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#fixture-based-integration-testing">Fixture-Based Integration Testing</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#running-integration-tests">Running Integration Tests</a></li>
 </ul>
 </li>
@@ -162,49 +163,50 @@
 <li><p><a class="reference internal" href="#integration-testing" id="id9">Integration Testing</a></p>
 <ul>
 <li><p><a class="reference internal" href="#test-types" id="id10">Test Types</a></p></li>
-<li><p><a class="reference internal" href="#running-integration-tests" id="id11">Running Integration Tests</a></p></li>
+<li><p><a class="reference internal" href="#fixture-based-integration-testing" id="id11">Fixture-Based Integration Testing</a></p></li>
+<li><p><a class="reference internal" href="#running-integration-tests" id="id12">Running Integration Tests</a></p></li>
 </ul>
 </li>
-<li><p><a class="reference internal" href="#plugin-integration-testing" id="id12">Plugin Integration Testing</a></p>
+<li><p><a class="reference internal" href="#plugin-integration-testing" id="id13">Plugin Integration Testing</a></p>
 <ul>
-<li><p><a class="reference internal" href="#testing-with-pylint" id="id13">Testing with PyLint</a></p></li>
-<li><p><a class="reference internal" href="#configuration-testing" id="id14">Configuration Testing</a></p></li>
+<li><p><a class="reference internal" href="#testing-with-pylint" id="id14">Testing with PyLint</a></p></li>
+<li><p><a class="reference internal" href="#configuration-testing" id="id15">Configuration Testing</a></p></li>
 </ul>
 </li>
-<li><p><a class="reference internal" href="#cli-tool-testing" id="id15">CLI Tool Testing</a></p></li>
-<li><p><a class="reference internal" href="#docker-validation-system" id="id16">Docker Validation System</a></p></li>
-<li><p><a class="reference internal" href="#framework-integration-testing" id="id17">Framework Integration Testing</a></p>
+<li><p><a class="reference internal" href="#cli-tool-testing" id="id16">CLI Tool Testing</a></p></li>
+<li><p><a class="reference internal" href="#docker-validation-system" id="id17">Docker Validation System</a></p></li>
+<li><p><a class="reference internal" href="#framework-integration-testing" id="id18">Framework Integration Testing</a></p>
 <ul>
-<li><p><a class="reference internal" href="#testing-decorator-exclusions" id="id18">Testing Decorator Exclusions</a></p></li>
-<li><p><a class="reference internal" href="#testing-custom-frameworks" id="id19">Testing Custom Frameworks</a></p></li>
+<li><p><a class="reference internal" href="#testing-decorator-exclusions" id="id19">Testing Decorator Exclusions</a></p></li>
+<li><p><a class="reference internal" href="#testing-custom-frameworks" id="id20">Testing Custom Frameworks</a></p></li>
 </ul>
 </li>
-<li><p><a class="reference internal" href="#continuous-integration-testing" id="id20">Continuous Integration Testing</a></p>
+<li><p><a class="reference internal" href="#continuous-integration-testing" id="id21">Continuous Integration Testing</a></p>
 <ul>
-<li><p><a class="reference internal" href="#github-actions-integration" id="id21">GitHub Actions Integration</a></p></li>
-<li><p><a class="reference internal" href="#pre-commit-integration" id="id22">Pre-commit Integration</a></p></li>
+<li><p><a class="reference internal" href="#github-actions-integration" id="id22">GitHub Actions Integration</a></p></li>
+<li><p><a class="reference internal" href="#pre-commit-integration" id="id23">Pre-commit Integration</a></p></li>
 </ul>
 </li>
-<li><p><a class="reference internal" href="#performance-testing" id="id23">Performance Testing</a></p>
+<li><p><a class="reference internal" href="#performance-testing" id="id24">Performance Testing</a></p>
 <ul>
-<li><p><a class="reference internal" href="#load-testing-the-api" id="id24">Load Testing the API</a></p></li>
-<li><p><a class="reference internal" href="#container-resource-usage" id="id25">Container Resource Usage</a></p></li>
-<li><p><a class="reference internal" href="#benchmark-plugin-performance" id="id26">Benchmark Plugin Performance</a></p></li>
+<li><p><a class="reference internal" href="#load-testing-the-api" id="id25">Load Testing the API</a></p></li>
+<li><p><a class="reference internal" href="#container-resource-usage" id="id26">Container Resource Usage</a></p></li>
+<li><p><a class="reference internal" href="#benchmark-plugin-performance" id="id27">Benchmark Plugin Performance</a></p></li>
 </ul>
 </li>
-<li><p><a class="reference internal" href="#troubleshooting" id="id27">Troubleshooting</a></p>
+<li><p><a class="reference internal" href="#troubleshooting" id="id28">Troubleshooting</a></p>
 <ul>
-<li><p><a class="reference internal" href="#common-issues" id="id28">Common Issues</a></p></li>
-<li><p><a class="reference internal" href="#debug-mode" id="id29">Debug Mode</a></p></li>
+<li><p><a class="reference internal" href="#common-issues" id="id29">Common Issues</a></p></li>
+<li><p><a class="reference internal" href="#debug-mode" id="id30">Debug Mode</a></p></li>
 </ul>
 </li>
-<li><p><a class="reference internal" href="#contributing-to-tests" id="id30">Contributing to Tests</a></p>
+<li><p><a class="reference internal" href="#contributing-to-tests" id="id31">Contributing to Tests</a></p>
 <ul>
-<li><p><a class="reference internal" href="#adding-new-test-cases" id="id31">Adding New Test Cases</a></p></li>
-<li><p><a class="reference internal" href="#test-guidelines" id="id32">Test Guidelines</a></p></li>
+<li><p><a class="reference internal" href="#adding-new-test-cases" id="id32">Adding New Test Cases</a></p></li>
+<li><p><a class="reference internal" href="#test-guidelines" id="id33">Test Guidelines</a></p></li>
 </ul>
 </li>
-<li><p><a class="reference internal" href="#see-also" id="id33">See Also</a></p></li>
+<li><p><a class="reference internal" href="#see-also" id="id34">See Also</a></p></li>
 </ul>
 </nav>
 <section id="overview">
@@ -388,7 +390,7 @@ make<span class="w"> </span>coverage
 </section>
 <section id="integration-testing">
 <h2><a class="toc-backref" href="#id9" role="doc-backlink">Integration Testing</a><a class="headerlink" href="#integration-testing" title="Link to this heading"></a></h2>
-<p>Integration tests validate end-to-end functionality and CLI behavior. These tests are located in <code class="docutils literal notranslate"><span class="pre">tests/integration/</span></code> and use pytest exclusively.</p>
+<p>Integration tests validate end-to-end functionality and CLI behavior. These tests are located in <code class="docutils literal notranslate"><span class="pre">tests/integration/</span></code> and use pytest exclusively with a comprehensive fixture-based architecture.</p>
 <section id="test-types">
 <h3><a class="toc-backref" href="#id10" role="doc-backlink">Test Types</a><a class="headerlink" href="#test-types" title="Link to this heading"></a></h3>
 <dl class="simple">
@@ -396,40 +398,191 @@ make<span class="w"> </span>coverage
 </dd>
 <dt><strong>Privacy Fixer Integration</strong></dt><dd><p>Test privacy detection and fixing workflows. The privacy fixer implementation is complete with full cross-module import analysis and comprehensive CLI support</p>
 </dd>
+<dt><strong>Method Categorization Integration</strong></dt><dd><p>Test framework presets and custom categorization features end-to-end</p>
+</dd>
+<dt><strong>Configuration Validation Integration</strong></dt><dd><p>Test configuration handling, error recovery, and edge cases</p>
+</dd>
 <dt><strong>Cross-Module Testing</strong></dt><dd><p>Test functionality across multiple Python modules and packages</p>
 </dd>
 </dl>
 </section>
+<section id="fixture-based-integration-testing">
+<h3><a class="toc-backref" href="#id11" role="doc-backlink">Fixture-Based Integration Testing</a><a class="headerlink" href="#fixture-based-integration-testing" title="Link to this heading"></a></h3>
+<p>The integration testing system uses a comprehensive set of pytest fixtures to eliminate code duplication and provide consistent test infrastructure.</p>
+<p><strong>Core Fixtures</strong></p>
+<dl>
+<dt><code class="docutils literal notranslate"><span class="pre">test_project</span></code> <strong>Fixture</strong></dt><dd><p>Creates a temporary Python project structure for testing:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@pytest</span><span class="o">.</span><span class="n">fixture</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_project</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Generator</span><span class="p">[</span><span class="n">Path</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create temporary Python project with src/ directory structure.&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<p>Usage:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">test_feature</span><span class="p">(</span><span class="n">test_project</span><span class="p">):</span>
+    <span class="c1"># test_project is a Path to temporary project root</span>
+    <span class="n">src_dir</span> <span class="o">=</span> <span class="n">test_project</span> <span class="o">/</span> <span class="s2">&quot;src&quot;</span>
+    <span class="k">assert</span> <span class="n">src_dir</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">file_creator</span></code> <strong>Fixture</strong></dt><dd><p>Factory fixture for creating test files within the project:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">test_with_files</span><span class="p">(</span><span class="n">file_creator</span><span class="p">):</span>
+    <span class="c1"># Create test files with content</span>
+    <span class="n">module_path</span> <span class="o">=</span> <span class="n">file_creator</span><span class="p">(</span><span class="s2">&quot;src/module.py&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">def zebra_function():</span>
+<span class="s2">    pass</span>
+
+<span class="s2">def alpha_function():</span>
+<span class="s2">    pass</span>
+<span class="s2">&quot;&quot;&quot;</span><span class="p">)</span>
+
+    <span class="k">assert</span> <span class="n">module_path</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">config_writer</span></code> <strong>Fixture</strong></dt><dd><p>Factory fixture for creating PyLint configuration files:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">test_with_config</span><span class="p">(</span><span class="n">config_writer</span><span class="p">):</span>
+    <span class="c1"># Create .pylintrc configuration</span>
+    <span class="n">config_path</span> <span class="o">=</span> <span class="n">config_writer</span><span class="p">(</span><span class="s2">&quot;pylintrc&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">[MASTER]</span>
+<span class="s2">load-plugins = pylint_sort_functions</span>
+
+<span class="s2">[function-sort]</span>
+<span class="s2">enable-method-categories = yes</span>
+<span class="s2">framework-preset = pytest</span>
+<span class="s2">category-sorting = declaration</span>
+<span class="s2">&quot;&quot;&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">pylint_runner</span></code> <strong>Fixture</strong></dt><dd><p>Factory fixture for running PyLint with the plugin loaded:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">test_pylint_execution</span><span class="p">(</span><span class="n">pylint_runner</span><span class="p">):</span>
+    <span class="n">returncode</span><span class="p">,</span> <span class="n">stdout</span><span class="p">,</span> <span class="n">stderr</span> <span class="o">=</span> <span class="n">pylint_runner</span><span class="p">(</span>
+        <span class="p">[</span><span class="s2">&quot;src/module.py&quot;</span><span class="p">],</span>
+        <span class="n">extra_args</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;--enable=unsorted-methods&quot;</span><span class="p">]</span>
+    <span class="p">)</span>
+
+    <span class="k">assert</span> <span class="n">returncode</span> <span class="o">==</span> <span class="mi">0</span>
+    <span class="k">assert</span> <span class="s2">&quot;unsorted-methods&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">stdout</span>
+</pre></div>
+</div>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">cli_runner</span></code> <strong>Fixture</strong></dt><dd><p>Factory fixture for running CLI commands in the test project:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">test_cli_functionality</span><span class="p">(</span><span class="n">cli_runner</span><span class="p">):</span>
+    <span class="n">returncode</span><span class="p">,</span> <span class="n">stdout</span><span class="p">,</span> <span class="n">stderr</span> <span class="o">=</span> <span class="n">cli_runner</span><span class="p">(</span>
+        <span class="p">[</span><span class="s2">&quot;--dry-run&quot;</span><span class="p">,</span> <span class="s2">&quot;src/module.py&quot;</span><span class="p">]</span>
+    <span class="p">)</span>
+
+    <span class="k">assert</span> <span class="n">returncode</span> <span class="o">==</span> <span class="mi">0</span>
+</pre></div>
+</div>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">sample_test_class</span></code> <strong>Fixture</strong></dt><dd><p>Provides sample test class code for framework preset testing:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">test_framework_preset</span><span class="p">(</span><span class="n">sample_test_class</span><span class="p">,</span> <span class="n">file_creator</span><span class="p">):</span>
+    <span class="c1"># Get pytest-style test class code</span>
+    <span class="n">pytest_code</span> <span class="o">=</span> <span class="n">sample_test_class</span><span class="p">[</span><span class="s2">&quot;pytest&quot;</span><span class="p">]</span>
+    <span class="n">file_creator</span><span class="p">(</span><span class="s2">&quot;src/test_example.py&quot;</span><span class="p">,</span> <span class="n">pytest_code</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+<p><strong>IntegrationTestHelper Class</strong></p>
+<p>The <code class="docutils literal notranslate"><span class="pre">IntegrationTestHelper</span></code> class provides utilities for complex test scenarios:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">tests.integration.conftest</span><span class="w"> </span><span class="kn">import</span> <span class="n">IntegrationTestHelper</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">test_complex_scenario</span><span class="p">(</span><span class="n">file_creator</span><span class="p">):</span>
+    <span class="c1"># Create import chain for cross-module testing</span>
+    <span class="n">modules</span> <span class="o">=</span> <span class="n">IntegrationTestHelper</span><span class="o">.</span><span class="n">create_import_chain</span><span class="p">(</span><span class="n">file_creator</span><span class="p">)</span>
+
+    <span class="c1"># modules contains {&quot;module_a&quot;: path, &quot;module_b&quot;: path, &quot;module_c&quot;: path}</span>
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">modules</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span>
+</pre></div>
+</div>
+<p><strong>Available Helper Methods:</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">create_import_chain(file_creator)</span></code></dt><dd><p>Creates modules with import dependencies for testing cross-module functionality</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">create_multi_module_project(file_creator,</span> <span class="pre">num_modules=3)</span></code></dt><dd><p>Creates a project with multiple interdependent modules for scalability testing</p>
+</dd>
+</dl>
+<p><strong>Framework Preset Testing Patterns</strong></p>
+<p>Integration tests include comprehensive framework preset testing with proper configuration patterns:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">test_pytest_framework_preset</span><span class="p">(</span>
+    <span class="n">pylint_runner</span><span class="p">,</span> <span class="n">file_creator</span><span class="p">,</span> <span class="n">config_writer</span><span class="p">,</span> <span class="n">sample_test_class</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Test pytest framework preset with correct configuration.&quot;&quot;&quot;</span>
+    <span class="c1"># Create test file with pytest-style class</span>
+    <span class="n">file_creator</span><span class="p">(</span><span class="s2">&quot;src/test_example.py&quot;</span><span class="p">,</span> <span class="n">sample_test_class</span><span class="p">[</span><span class="s2">&quot;pytest&quot;</span><span class="p">])</span>
+
+    <span class="c1"># CRITICAL: Include category-sorting = declaration</span>
+    <span class="n">config_content</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;[MASTER]</span>
+<span class="s2">load-plugins = pylint_sort_functions</span>
+
+<span class="s2">[function-sort]</span>
+<span class="s2">enable-method-categories = yes</span>
+<span class="s2">framework-preset = pytest</span>
+<span class="s2">category-sorting = declaration</span>
+<span class="s2">&quot;&quot;&quot;</span>
+    <span class="n">config_writer</span><span class="p">(</span><span class="s2">&quot;pylintrc&quot;</span><span class="p">,</span> <span class="n">config_content</span><span class="p">)</span>
+
+    <span class="c1"># Run PyLint - should accept conventional pytest ordering</span>
+    <span class="n">returncode</span><span class="p">,</span> <span class="n">stdout</span><span class="p">,</span> <span class="n">stderr</span> <span class="o">=</span> <span class="n">pylint_runner</span><span class="p">(</span>
+        <span class="p">[</span><span class="s2">&quot;src/test_example.py&quot;</span><span class="p">],</span>
+        <span class="n">extra_args</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;--enable=unsorted-methods&quot;</span><span class="p">]</span>
+    <span class="p">)</span>
+
+    <span class="k">assert</span> <span class="s2">&quot;unsorted-methods&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">stdout</span>
+</pre></div>
+</div>
+<p><strong>Framework Preset Configuration Requirements</strong></p>
+<p>When testing framework presets, always include <code class="docutils literal notranslate"><span class="pre">category-sorting</span> <span class="pre">=</span> <span class="pre">declaration</span></code>:</p>
+<ul class="simple">
+<li><p><strong>pytest preset</strong>: Test fixtures → test methods → helpers → private methods</p></li>
+<li><p><strong>unittest preset</strong>: setUp/tearDown → test methods → helpers → private methods</p></li>
+<li><p><strong>pyqt preset</strong>: __init__ → properties → event handlers → public → private methods</p></li>
+</ul>
+<p><strong>Best Practices for Integration Tests</strong></p>
+<ol class="arabic simple">
+<li><p><strong>Use Fixtures Consistently</strong>: Always use provided fixtures rather than manual setup</p></li>
+<li><p><strong>Framework Configuration</strong>: Include proper <code class="docutils literal notranslate"><span class="pre">category-sorting</span></code> setting for presets</p></li>
+<li><p><strong>Test Real Scenarios</strong>: Use realistic code examples in test cases</p></li>
+<li><p><strong>Validate Output</strong>: Check both return codes and output content</p></li>
+<li><p><strong>Performance Awareness</strong>: Integration tests should complete quickly (&lt;5 seconds total)</p></li>
+</ol>
+</section>
 <section id="running-integration-tests">
-<h3><a class="toc-backref" href="#id11" role="doc-backlink">Running Integration Tests</a><a class="headerlink" href="#running-integration-tests" title="Link to this heading"></a></h3>
+<h3><a class="toc-backref" href="#id12" role="doc-backlink">Running Integration Tests</a><a class="headerlink" href="#running-integration-tests" title="Link to this heading"></a></h3>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Run all integration tests</span>
 make<span class="w"> </span>test-integration
 
 <span class="c1"># Run specific integration test file</span>
-pytest<span class="w"> </span>tests/integration/test_privacy_cli_integration.py<span class="w"> </span>-v
+pytest<span class="w"> </span>tests/integration/test_method_categorization_integration.py<span class="w"> </span>-v
 
 <span class="c1"># Run integration tests with verbose output</span>
 pytest<span class="w"> </span>tests/integration/<span class="w"> </span>-v
 
 <span class="c1"># Run all tests (unit + integration)</span>
 make<span class="w"> </span>test-all
+
+<span class="c1"># Run with fixture debugging (if needed)</span>
+pytest<span class="w"> </span>tests/integration/<span class="w"> </span>-v<span class="w"> </span>-s<span class="w"> </span>--tb<span class="o">=</span>short
 </pre></div>
 </div>
-<p><strong>Current Status</strong>: ✅ <strong>All 19 integration tests are passing successfully!</strong> The privacy fixer implementation is complete with cross-module import analysis, comprehensive CLI integration, and 100% test coverage. Integration tests complete in approximately 4 seconds, demonstrating excellent performance. GitHub issues #20, #21, and #23 have been resolved.</p>
+<p><strong>Current Status</strong>: ✅ <strong>All integration tests are passing successfully!</strong> The privacy fixer implementation is complete with cross-module import analysis, comprehensive CLI integration, and 100% test coverage. Integration tests complete in approximately 4 seconds, demonstrating excellent performance.</p>
 <p><strong>Integration Test Success Metrics</strong>:</p>
 <ul class="simple">
-<li><p><strong>Test Count</strong>: 19 integration tests</p></li>
+<li><p><strong>Test Count</strong>: Multiple integration test files covering all features</p></li>
 <li><p><strong>Success Rate</strong>: 100% (all tests passing)</p></li>
-<li><p><strong>Execution Time</strong>: ~4.10 seconds</p></li>
-<li><p><strong>Coverage Areas</strong>: CLI integration, privacy fixer workflows, cross-module analysis</p></li>
-<li><p><strong>Test Categories</strong>: API integration, command-line interface, performance validation</p></li>
+<li><p><strong>Execution Time</strong>: ~4.10 seconds for full suite</p></li>
+<li><p><strong>Coverage Areas</strong>: CLI integration, privacy fixer workflows, framework presets, method categorization</p></li>
+<li><p><strong>Test Categories</strong>: API integration, command-line interface, configuration validation</p></li>
 </ul>
 </section>
 </section>
 <section id="plugin-integration-testing">
-<h2><a class="toc-backref" href="#id12" role="doc-backlink">Plugin Integration Testing</a><a class="headerlink" href="#plugin-integration-testing" title="Link to this heading"></a></h2>
+<h2><a class="toc-backref" href="#id13" role="doc-backlink">Plugin Integration Testing</a><a class="headerlink" href="#plugin-integration-testing" title="Link to this heading"></a></h2>
 <section id="testing-with-pylint">
-<h3><a class="toc-backref" href="#id13" role="doc-backlink">Testing with PyLint</a><a class="headerlink" href="#testing-with-pylint" title="Link to this heading"></a></h3>
+<h3><a class="toc-backref" href="#id14" role="doc-backlink">Testing with PyLint</a><a class="headerlink" href="#testing-with-pylint" title="Link to this heading"></a></h3>
 <p>Test the plugin with real PyLint execution:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Basic plugin testing</span>
 pylint<span class="w"> </span>--load-plugins<span class="o">=</span>pylint_sort_functions<span class="w"> </span>src/
@@ -448,7 +601,7 @@ make<span class="w"> </span>self-check<span class="w">          </span><span cla
 </div>
 </section>
 <section id="configuration-testing">
-<h3><a class="toc-backref" href="#id14" role="doc-backlink">Configuration Testing</a><a class="headerlink" href="#configuration-testing" title="Link to this heading"></a></h3>
+<h3><a class="toc-backref" href="#id15" role="doc-backlink">Configuration Testing</a><a class="headerlink" href="#configuration-testing" title="Link to this heading"></a></h3>
 <p>Test different configuration approaches:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Test with .pylintrc</span>
 <span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;[MASTER]\nload-plugins = pylint_sort_functions&quot;</span><span class="w"> </span>&gt;<span class="w"> </span>.test-pylintrc
@@ -461,7 +614,7 @@ pylint<span class="w"> </span>src/<span class="w">  </span><span class="c1"># Us
 </section>
 </section>
 <section id="cli-tool-testing">
-<h2><a class="toc-backref" href="#id15" role="doc-backlink">CLI Tool Testing</a><a class="headerlink" href="#cli-tool-testing" title="Link to this heading"></a></h2>
+<h2><a class="toc-backref" href="#id16" role="doc-backlink">CLI Tool Testing</a><a class="headerlink" href="#cli-tool-testing" title="Link to this heading"></a></h2>
 <p>The standalone CLI tool provides auto-fix functionality:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Dry-run (show what would be changed)</span>
 python<span class="w"> </span>-m<span class="w"> </span>pylint_sort_functions.cli<span class="w"> </span>--dry-run<span class="w"> </span>src/
@@ -477,7 +630,7 @@ python<span class="w"> </span>-m<span class="w"> </span>pylint_sort_functions.cl
 <p>See <a class="reference internal" href="cli.html"><span class="doc">Auto-Fix Tool Reference</span></a> for complete CLI documentation.</p>
 </section>
 <section id="docker-validation-system">
-<h2><a class="toc-backref" href="#id16" role="doc-backlink">Docker Validation System</a><a class="headerlink" href="#docker-validation-system" title="Link to this heading"></a></h2>
+<h2><a class="toc-backref" href="#id17" role="doc-backlink">Docker Validation System</a><a class="headerlink" href="#docker-validation-system" title="Link to this heading"></a></h2>
 <p>The project includes a comprehensive Docker-based validation system for testing all configuration examples in the documentation. This system ensures that all documented PyLint configurations actually work correctly with the plugin implementation.</p>
 <p>See <a class="reference internal" href="docker.html"><span class="doc">Docker Validation System</span></a> for complete documentation of the Docker validation system, including:</p>
 <ul class="simple">
@@ -495,9 +648,9 @@ make<span class="w"> </span>test-documentation
 </div>
 </section>
 <section id="framework-integration-testing">
-<h2><a class="toc-backref" href="#id17" role="doc-backlink">Framework Integration Testing</a><a class="headerlink" href="#framework-integration-testing" title="Link to this heading"></a></h2>
+<h2><a class="toc-backref" href="#id18" role="doc-backlink">Framework Integration Testing</a><a class="headerlink" href="#framework-integration-testing" title="Link to this heading"></a></h2>
 <section id="testing-decorator-exclusions">
-<h3><a class="toc-backref" href="#id18" role="doc-backlink">Testing Decorator Exclusions</a><a class="headerlink" href="#testing-decorator-exclusions" title="Link to this heading"></a></h3>
+<h3><a class="toc-backref" href="#id19" role="doc-backlink">Testing Decorator Exclusions</a><a class="headerlink" href="#testing-decorator-exclusions" title="Link to this heading"></a></h3>
 <p>The Docker validation system includes comprehensive framework testing:</p>
 <p><strong>Flask Example</strong> (<code class="docutils literal notranslate"><span class="pre">test-validation/test-projects/flask-project/</span></code>):</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># These should be excluded from sorting due to @app.route</span>
@@ -531,7 +684,7 @@ make<span class="w"> </span>test-documentation
 </dl>
 </section>
 <section id="testing-custom-frameworks">
-<h3><a class="toc-backref" href="#id19" role="doc-backlink">Testing Custom Frameworks</a><a class="headerlink" href="#testing-custom-frameworks" title="Link to this heading"></a></h3>
+<h3><a class="toc-backref" href="#id20" role="doc-backlink">Testing Custom Frameworks</a><a class="headerlink" href="#testing-custom-frameworks" title="Link to this heading"></a></h3>
 <p>To test decorator exclusions with your own framework:</p>
 <ol class="arabic">
 <li><p><strong>Create Test Project</strong>:</p>
@@ -565,9 +718,9 @@ curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </spa
 </section>
 </section>
 <section id="continuous-integration-testing">
-<h2><a class="toc-backref" href="#id20" role="doc-backlink">Continuous Integration Testing</a><a class="headerlink" href="#continuous-integration-testing" title="Link to this heading"></a></h2>
+<h2><a class="toc-backref" href="#id21" role="doc-backlink">Continuous Integration Testing</a><a class="headerlink" href="#continuous-integration-testing" title="Link to this heading"></a></h2>
 <section id="github-actions-integration">
-<h3><a class="toc-backref" href="#id21" role="doc-backlink">GitHub Actions Integration</a><a class="headerlink" href="#github-actions-integration" title="Link to this heading"></a></h3>
+<h3><a class="toc-backref" href="#id22" role="doc-backlink">GitHub Actions Integration</a><a class="headerlink" href="#github-actions-integration" title="Link to this heading"></a></h3>
 <p>The validation system integrates with CI/CD:</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># .github/workflows/validate-docs.yml</span>
 <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Documentation Validation</span>
@@ -592,7 +745,7 @@ curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </spa
 </div>
 </section>
 <section id="pre-commit-integration">
-<h3><a class="toc-backref" href="#id22" role="doc-backlink">Pre-commit Integration</a><a class="headerlink" href="#pre-commit-integration" title="Link to this heading"></a></h3>
+<h3><a class="toc-backref" href="#id23" role="doc-backlink">Pre-commit Integration</a><a class="headerlink" href="#pre-commit-integration" title="Link to this heading"></a></h3>
 <p>Validation tests can run in pre-commit hooks:</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># .pre-commit-config.yaml</span>
 <span class="nt">repos</span><span class="p">:</span>
@@ -608,9 +761,9 @@ curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </spa
 </section>
 </section>
 <section id="performance-testing">
-<h2><a class="toc-backref" href="#id23" role="doc-backlink">Performance Testing</a><a class="headerlink" href="#performance-testing" title="Link to this heading"></a></h2>
+<h2><a class="toc-backref" href="#id24" role="doc-backlink">Performance Testing</a><a class="headerlink" href="#performance-testing" title="Link to this heading"></a></h2>
 <section id="load-testing-the-api">
-<h3><a class="toc-backref" href="#id24" role="doc-backlink">Load Testing the API</a><a class="headerlink" href="#load-testing-the-api" title="Link to this heading"></a></h3>
+<h3><a class="toc-backref" href="#id25" role="doc-backlink">Load Testing the API</a><a class="headerlink" href="#load-testing-the-api" title="Link to this heading"></a></h3>
 <p>Test the validation API under load:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Install hey (HTTP load testing tool)</span>
 go<span class="w"> </span>install<span class="w"> </span>github.com/rakyll/hey@latest
@@ -624,7 +777,7 @@ hey<span class="w"> </span>-n<span class="w"> </span><span class="m">100</span><
 </div>
 </section>
 <section id="container-resource-usage">
-<h3><a class="toc-backref" href="#id25" role="doc-backlink">Container Resource Usage</a><a class="headerlink" href="#container-resource-usage" title="Link to this heading"></a></h3>
+<h3><a class="toc-backref" href="#id26" role="doc-backlink">Container Resource Usage</a><a class="headerlink" href="#container-resource-usage" title="Link to this heading"></a></h3>
 <p>Monitor container performance:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># View container resource usage</span>
 docker<span class="w"> </span>stats<span class="w"> </span>pylint-validation-container
@@ -638,7 +791,7 @@ docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </spa
 </div>
 </section>
 <section id="benchmark-plugin-performance">
-<h3><a class="toc-backref" href="#id26" role="doc-backlink">Benchmark Plugin Performance</a><a class="headerlink" href="#benchmark-plugin-performance" title="Link to this heading"></a></h3>
+<h3><a class="toc-backref" href="#id27" role="doc-backlink">Benchmark Plugin Performance</a><a class="headerlink" href="#benchmark-plugin-performance" title="Link to this heading"></a></h3>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Time plugin execution</span>
 <span class="nb">time</span><span class="w"> </span>pylint<span class="w"> </span>--load-plugins<span class="o">=</span>pylint_sort_functions<span class="w"> </span>large_project/
 
@@ -652,9 +805,9 @@ python<span class="w"> </span>-m<span class="w"> </span>cProfile<span class="w">
 </section>
 </section>
 <section id="troubleshooting">
-<h2><a class="toc-backref" href="#id27" role="doc-backlink">Troubleshooting</a><a class="headerlink" href="#troubleshooting" title="Link to this heading"></a></h2>
+<h2><a class="toc-backref" href="#id28" role="doc-backlink">Troubleshooting</a><a class="headerlink" href="#troubleshooting" title="Link to this heading"></a></h2>
 <section id="common-issues">
-<h3><a class="toc-backref" href="#id28" role="doc-backlink">Common Issues</a><a class="headerlink" href="#common-issues" title="Link to this heading"></a></h3>
+<h3><a class="toc-backref" href="#id29" role="doc-backlink">Common Issues</a><a class="headerlink" href="#common-issues" title="Link to this heading"></a></h3>
 <p><strong>Docker Build Failures</strong></p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Clear Docker cache</span>
 docker<span class="w"> </span>system<span class="w"> </span>prune<span class="w"> </span>-f
@@ -697,7 +850,7 @@ pytest<span class="w"> </span>tests/<span class="w"> </span>--pdb
 </div>
 </section>
 <section id="debug-mode">
-<h3><a class="toc-backref" href="#id29" role="doc-backlink">Debug Mode</a><a class="headerlink" href="#debug-mode" title="Link to this heading"></a></h3>
+<h3><a class="toc-backref" href="#id30" role="doc-backlink">Debug Mode</a><a class="headerlink" href="#debug-mode" title="Link to this heading"></a></h3>
 <p>Enable debug output in various components:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># PyLint debug output</span>
 pylint<span class="w"> </span>--load-plugins<span class="o">=</span>pylint_sort_functions<span class="w"> </span>--verbose<span class="w"> </span>src/
@@ -712,28 +865,125 @@ python<span class="w"> </span>test-validation/test-runner.py<span class="w"> </s
 </section>
 </section>
 <section id="contributing-to-tests">
-<h2><a class="toc-backref" href="#id30" role="doc-backlink">Contributing to Tests</a><a class="headerlink" href="#contributing-to-tests" title="Link to this heading"></a></h2>
+<h2><a class="toc-backref" href="#id31" role="doc-backlink">Contributing to Tests</a><a class="headerlink" href="#contributing-to-tests" title="Link to this heading"></a></h2>
 <section id="adding-new-test-cases">
-<h3><a class="toc-backref" href="#id31" role="doc-backlink">Adding New Test Cases</a><a class="headerlink" href="#adding-new-test-cases" title="Link to this heading"></a></h3>
+<h3><a class="toc-backref" href="#id32" role="doc-backlink">Adding New Test Cases</a><a class="headerlink" href="#adding-new-test-cases" title="Link to this heading"></a></h3>
 <ol class="arabic simple">
 <li><p><strong>Unit Tests</strong>: Add to appropriate file in <code class="docutils literal notranslate"><span class="pre">tests/</span></code></p></li>
-<li><p><strong>Integration Tests</strong>: Add new test projects to <code class="docutils literal notranslate"><span class="pre">test-validation/test-projects/</span></code></p></li>
-<li><p><strong>Framework Tests</strong>: Create framework-specific test projects</p></li>
+<li><p><strong>Integration Tests</strong>: Add new test files to <code class="docutils literal notranslate"><span class="pre">tests/integration/</span></code> using fixture patterns</p></li>
+<li><p><strong>Framework Tests</strong>: Create framework-specific test projects in <code class="docutils literal notranslate"><span class="pre">test-validation/test-projects/</span></code></p></li>
 </ol>
+<p><strong>Adding New Integration Tests</strong></p>
+<p>When adding new integration tests, follow the fixture-based pattern:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="ch">#!/usr/bin/env python3</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Integration tests for new feature.</span>
+
+<span class="sd">Description of what the tests validate.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">TestNewFeature</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Integration tests for new feature functionality.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_basic_functionality</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">pylint_runner</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">file_creator</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">config_writer</span><span class="p">:</span> <span class="n">Any</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Test basic functionality with proper fixtures.&quot;&quot;&quot;</span>
+        <span class="c1"># Create test file</span>
+        <span class="n">file_creator</span><span class="p">(</span><span class="s2">&quot;src/test_module.py&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">def function_to_test():</span>
+<span class="s2">    pass</span>
+<span class="s2">&quot;&quot;&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Create configuration</span>
+        <span class="n">config_content</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;[MASTER]</span>
+<span class="s2">load-plugins = pylint_sort_functions</span>
+
+<span class="s2">[function-sort]</span>
+<span class="s2">enable-new-feature = yes</span>
+<span class="s2">&quot;&quot;&quot;</span>
+        <span class="n">config_writer</span><span class="p">(</span><span class="s2">&quot;pylintrc&quot;</span><span class="p">,</span> <span class="n">config_content</span><span class="p">)</span>
+
+        <span class="c1"># Test with PyLint</span>
+        <span class="n">returncode</span><span class="p">,</span> <span class="n">stdout</span><span class="p">,</span> <span class="n">stderr</span> <span class="o">=</span> <span class="n">pylint_runner</span><span class="p">(</span>
+            <span class="p">[</span><span class="s2">&quot;src/test_module.py&quot;</span><span class="p">],</span>
+            <span class="n">extra_args</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;--enable=new-feature-message&quot;</span><span class="p">]</span>
+        <span class="p">)</span>
+
+        <span class="k">assert</span> <span class="n">returncode</span> <span class="o">==</span> <span class="mi">0</span>
+        <span class="k">assert</span> <span class="s2">&quot;expected-behavior&quot;</span> <span class="ow">in</span> <span class="n">stdout</span>
+</pre></div>
+</div>
+<p><strong>Adding Framework Preset Tests</strong></p>
+<p>For framework preset testing, always use the <code class="docutils literal notranslate"><span class="pre">sample_test_class</span></code> fixture and proper configuration:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">test_new_framework_preset</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="n">pylint_runner</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+    <span class="n">file_creator</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+    <span class="n">config_writer</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+    <span class="n">sample_test_class</span><span class="p">:</span> <span class="n">Any</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Test new framework preset.&quot;&quot;&quot;</span>
+    <span class="c1"># Use sample test class or create framework-specific code</span>
+    <span class="n">file_creator</span><span class="p">(</span><span class="s2">&quot;src/framework_code.py&quot;</span><span class="p">,</span> <span class="n">sample_test_class</span><span class="p">[</span><span class="s2">&quot;new_framework&quot;</span><span class="p">])</span>
+
+    <span class="c1"># CRITICAL: Include category-sorting = declaration for framework presets</span>
+    <span class="n">config_content</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;[MASTER]</span>
+<span class="s2">load-plugins = pylint_sort_functions</span>
+
+<span class="s2">[function-sort]</span>
+<span class="s2">enable-method-categories = yes</span>
+<span class="s2">framework-preset = new_framework</span>
+<span class="s2">category-sorting = declaration</span>
+<span class="s2">&quot;&quot;&quot;</span>
+    <span class="n">config_writer</span><span class="p">(</span><span class="s2">&quot;pylintrc&quot;</span><span class="p">,</span> <span class="n">config_content</span><span class="p">)</span>
+
+    <span class="c1"># Validate framework preset behavior</span>
+    <span class="n">returncode</span><span class="p">,</span> <span class="n">stdout</span><span class="p">,</span> <span class="n">stderr</span> <span class="o">=</span> <span class="n">pylint_runner</span><span class="p">(</span>
+        <span class="p">[</span><span class="s2">&quot;src/framework_code.py&quot;</span><span class="p">],</span>
+        <span class="n">extra_args</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;--enable=unsorted-methods&quot;</span><span class="p">]</span>
+    <span class="p">)</span>
+
+    <span class="k">assert</span> <span class="s2">&quot;unsorted-methods&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">stdout</span>
+</pre></div>
+</div>
+<p><strong>Extending IntegrationTestHelper</strong></p>
+<p>To add new helper methods to <code class="docutils literal notranslate"><span class="pre">IntegrationTestHelper</span></code>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># In tests/integration/conftest.py</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">IntegrationTestHelper</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Helper class with utilities for integration testing.&quot;&quot;&quot;</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">create_new_test_scenario</span><span class="p">(</span>
+        <span class="n">file_creator</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span> <span class="n">Path</span><span class="p">],</span>
+        <span class="n">scenario_type</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a new type of test scenario.&quot;&quot;&quot;</span>
+        <span class="c1"># Implementation here</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;file1&quot;</span><span class="p">:</span> <span class="n">path1</span><span class="p">,</span> <span class="s2">&quot;file2&quot;</span><span class="p">:</span> <span class="n">path2</span><span class="p">}</span>
+</pre></div>
+</div>
 </section>
 <section id="test-guidelines">
-<h3><a class="toc-backref" href="#id32" role="doc-backlink">Test Guidelines</a><a class="headerlink" href="#test-guidelines" title="Link to this heading"></a></h3>
+<h3><a class="toc-backref" href="#id33" role="doc-backlink">Test Guidelines</a><a class="headerlink" href="#test-guidelines" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p><strong>100% Coverage Required</strong>: All new code must include tests</p></li>
 <li><p><strong>PyLint Framework</strong>: Use <code class="docutils literal notranslate"><span class="pre">CheckerTestCase</span></code> for plugin tests</p></li>
+<li><p><strong>Fixture Consistency</strong>: Always use provided fixtures for integration tests</p></li>
+<li><p><strong>Framework Configuration</strong>: Include proper <code class="docutils literal notranslate"><span class="pre">category-sorting</span></code> setting for preset tests</p></li>
 <li><p><strong>Real Examples</strong>: Use realistic code in test cases</p></li>
 <li><p><strong>Edge Cases</strong>: Test boundary conditions and error cases</p></li>
+<li><p><strong>Performance</strong>: Keep integration tests fast (&lt;5 seconds total runtime)</p></li>
 <li><p><strong>Documentation</strong>: Update this guide when adding new testing approaches</p></li>
 </ul>
 </section>
 </section>
 <section id="see-also">
-<h2><a class="toc-backref" href="#id33" role="doc-backlink">See Also</a><a class="headerlink" href="#see-also" title="Link to this heading"></a></h2>
+<h2><a class="toc-backref" href="#id34" role="doc-backlink">See Also</a><a class="headerlink" href="#see-also" title="Link to this heading"></a></h2>
 <ul class="simple">
 <li><p><a class="reference internal" href="developer.html"><span class="doc">Developer Guide</span></a> - Plugin development and architecture</p></li>
 <li><p><a class="reference internal" href="cli.html"><span class="doc">Auto-Fix Tool Reference</span></a> - Command-line tool usage</p></li>

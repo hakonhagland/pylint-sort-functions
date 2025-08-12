@@ -122,6 +122,12 @@
 <li class="toctree-l3"><a class="reference internal" href="#performance-benchmarks">Performance Benchmarks</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#testing-best-practices">Testing Best Practices</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id1">Testing Architecture</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#fixture-development-guidelines">Fixture Development Guidelines</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#test-development-guidelines">Test Development Guidelines</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#conclusion">Conclusion</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#see-also">See Also</a></li>
 </ul>
@@ -884,6 +890,133 @@ pylint<span class="w"> </span>--load-plugins<span class="o">=</span>pylint_sort_
 <p>This reduces the plugin to near-zero performance overhead while maintaining all sorting functionality.</p>
 </section>
 </section>
+<section id="testing-best-practices">
+<h2>Testing Best Practices<a class="headerlink" href="#testing-best-practices" title="Link to this heading"></a></h2>
+<p>The plugin uses a comprehensive testing strategy combining unit tests and fixture-based integration tests.</p>
+<section id="id1">
+<h3>Testing Architecture<a class="headerlink" href="#id1" title="Link to this heading"></a></h3>
+<p><strong>Unit Testing with CheckerTestCase</strong></p>
+<p>For testing plugin functionality, use PyLint’s <code class="docutils literal notranslate"><span class="pre">CheckerTestCase</span></code> framework:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pylint.testutils</span><span class="w"> </span><span class="kn">import</span> <span class="n">CheckerTestCase</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pylint_sort_functions.checker</span><span class="w"> </span><span class="kn">import</span> <span class="n">FunctionSortChecker</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">TestFunctionSortChecker</span><span class="p">(</span><span class="n">CheckerTestCase</span><span class="p">):</span>
+    <span class="n">CHECKER_CLASS</span> <span class="o">=</span> <span class="n">FunctionSortChecker</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_feature</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">node</span> <span class="o">=</span> <span class="n">astroid</span><span class="o">.</span><span class="n">extract_node</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">        def zebra_function():  #@</span>
+<span class="s2">            pass</span>
+<span class="s2">        &quot;&quot;&quot;</span><span class="p">)</span>
+
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">assertAddsMessages</span><span class="p">(</span>
+            <span class="n">pylint</span><span class="o">.</span><span class="n">testutils</span><span class="o">.</span><span class="n">MessageTest</span><span class="p">(</span><span class="n">msg_id</span><span class="o">=</span><span class="s2">&quot;W9001&quot;</span><span class="p">,</span> <span class="n">node</span><span class="o">=</span><span class="n">node</span><span class="p">)</span>
+        <span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">checker</span><span class="o">.</span><span class="n">visit_module</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>Integration Testing with Fixtures</strong></p>
+<p>For end-to-end testing, use the fixture-based integration test framework located in <code class="docutils literal notranslate"><span class="pre">tests/integration/conftest.py</span></code>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">TestFeatureIntegration</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_feature_end_to_end</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">pylint_runner</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">file_creator</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">config_writer</span><span class="p">:</span> <span class="n">Any</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># Create test files</span>
+        <span class="n">file_creator</span><span class="p">(</span><span class="s2">&quot;src/module.py&quot;</span><span class="p">,</span> <span class="s2">&quot;def test(): pass&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Create configuration</span>
+        <span class="n">config_writer</span><span class="p">(</span><span class="s2">&quot;pylintrc&quot;</span><span class="p">,</span> <span class="s2">&quot;[MASTER]</span><span class="se">\n</span><span class="s2">load-plugins = pylint_sort_functions&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Test with PyLint</span>
+        <span class="n">returncode</span><span class="p">,</span> <span class="n">stdout</span><span class="p">,</span> <span class="n">stderr</span> <span class="o">=</span> <span class="n">pylint_runner</span><span class="p">([</span><span class="s2">&quot;src/module.py&quot;</span><span class="p">])</span>
+        <span class="k">assert</span> <span class="n">returncode</span> <span class="o">==</span> <span class="mi">0</span>
+</pre></div>
+</div>
+<p><strong>Framework Preset Testing</strong></p>
+<p>When developing framework presets or testing method categorization:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">test_framework_preset</span><span class="p">(</span>
+    <span class="n">pylint_runner</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">file_creator</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">config_writer</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">sample_test_class</span><span class="p">:</span> <span class="n">Any</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="c1"># Use sample test classes for consistency</span>
+    <span class="n">file_creator</span><span class="p">(</span><span class="s2">&quot;src/test.py&quot;</span><span class="p">,</span> <span class="n">sample_test_class</span><span class="p">[</span><span class="s2">&quot;pytest&quot;</span><span class="p">])</span>
+
+    <span class="c1"># ALWAYS include category-sorting = declaration for framework presets</span>
+    <span class="n">config_content</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;[MASTER]</span>
+<span class="s2">load-plugins = pylint_sort_functions</span>
+
+<span class="s2">[function-sort]</span>
+<span class="s2">enable-method-categories = yes</span>
+<span class="s2">framework-preset = pytest</span>
+<span class="s2">category-sorting = declaration</span>
+<span class="s2">&quot;&quot;&quot;</span>
+    <span class="n">config_writer</span><span class="p">(</span><span class="s2">&quot;pylintrc&quot;</span><span class="p">,</span> <span class="n">config_content</span><span class="p">)</span>
+
+    <span class="n">returncode</span><span class="p">,</span> <span class="n">stdout</span><span class="p">,</span> <span class="n">stderr</span> <span class="o">=</span> <span class="n">pylint_runner</span><span class="p">(</span>
+        <span class="p">[</span><span class="s2">&quot;src/test.py&quot;</span><span class="p">],</span> <span class="n">extra_args</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;--enable=unsorted-methods&quot;</span><span class="p">]</span>
+    <span class="p">)</span>
+
+    <span class="k">assert</span> <span class="s2">&quot;unsorted-methods&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">stdout</span>
+</pre></div>
+</div>
+</section>
+<section id="fixture-development-guidelines">
+<h3>Fixture Development Guidelines<a class="headerlink" href="#fixture-development-guidelines" title="Link to this heading"></a></h3>
+<p>When extending the integration test infrastructure:</p>
+<ol class="arabic simple">
+<li><p><strong>Follow Factory Pattern</strong>: Create fixtures that return functions for flexibility</p></li>
+<li><p><strong>Use Type Hints</strong>: Ensure fixtures have proper type annotations</p></li>
+<li><p><strong>Provide Realistic Data</strong>: Sample data should represent real-world usage</p></li>
+<li><p><strong>Maintain Backwards Compatibility</strong>: Don’t break existing tests when adding features</p></li>
+<li><p><strong>Document Fixture Purpose</strong>: Include clear docstrings explaining fixture usage</p></li>
+</ol>
+<p><strong>Example Fixture Development:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@pytest</span><span class="o">.</span><span class="n">fixture</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">custom_fixture</span><span class="p">(</span><span class="n">test_project</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">str</span><span class="p">],</span> <span class="n">Path</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Factory for creating custom test scenarios.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">create_scenario</span><span class="p">(</span><span class="n">scenario_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+        <span class="c1"># Implementation specific to your testing needs</span>
+        <span class="n">file_path</span> <span class="o">=</span> <span class="n">test_project</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">scenario_type</span><span class="si">}</span><span class="s2">.py&quot;</span>
+        <span class="n">file_path</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">get_scenario_content</span><span class="p">(</span><span class="n">scenario_type</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">file_path</span>
+
+    <span class="k">return</span> <span class="n">create_scenario</span>
+</pre></div>
+</div>
+<p><strong>Available Integration Test Fixtures:</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">test_project</span></code>: Creates temporary Python project structure</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">file_creator</span></code>: Factory for creating test files within project</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">config_writer</span></code>: Factory for creating PyLint configuration files</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pylint_runner</span></code>: Factory for running PyLint with plugin loaded</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">cli_runner</span></code>: Factory for running CLI commands in test project</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sample_test_class</span></code>: Provides framework-specific test class templates</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">IntegrationTestHelper</span></code>: Utility class for complex test scenarios</p></li>
+</ul>
+<p><strong>Performance Guidelines</strong></p>
+<ul class="simple">
+<li><p><strong>Unit tests</strong>: Should run in milliseconds</p></li>
+<li><p><strong>Integration tests</strong>: Full suite should complete in &lt;5 seconds</p></li>
+<li><p><strong>Use fixtures efficiently</strong>: Prefer shared fixtures over repeated setup</p></li>
+<li><p><strong>Minimize file I/O</strong>: Use temporary directories with automatic cleanup</p></li>
+</ul>
+</section>
+<section id="test-development-guidelines">
+<h3>Test Development Guidelines<a class="headerlink" href="#test-development-guidelines" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>100% Coverage Required</strong>: All new code must include comprehensive tests</p></li>
+<li><p><strong>Use CheckerTestCase</strong>: For unit testing PyLint plugin functionality</p></li>
+<li><p><strong>Use Fixture Pattern</strong>: For integration tests with realistic scenarios</p></li>
+<li><p><strong>Framework Configuration</strong>: Always include <code class="docutils literal notranslate"><span class="pre">category-sorting</span> <span class="pre">=</span> <span class="pre">declaration</span></code> for preset tests</p></li>
+<li><p><strong>Test Real Examples</strong>: Use realistic code patterns in test cases</p></li>
+<li><p><strong>Cover Edge Cases</strong>: Test boundary conditions and error handling</p></li>
+<li><p><strong>Maintain Performance</strong>: Keep tests fast and efficient</p></li>
+<li><p><strong>Update Documentation</strong>: Keep testing documentation current with changes</p></li>
+</ul>
+</section>
+</section>
 <section id="conclusion">
 <h2>Conclusion<a class="headerlink" href="#conclusion" title="Link to this heading"></a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">pylint-sort-functions</span></code> plugin demonstrates a complete PyLint plugin implementation with:</p>
@@ -893,9 +1026,9 @@ pylint<span class="w"> </span>--load-plugins<span class="o">=</span>pylint_sort_
 <li><p>Comprehensive message definitions and error reporting</p></li>
 <li><p>Advanced features like import analysis and auto-fixing</p></li>
 <li><p>Framework-aware sorting with decorator exclusions</p></li>
-<li><p>Thorough testing using PyLint’s testing framework</p></li>
+<li><p>Thorough testing using both unit tests and fixture-based integration tests</p></li>
 </ul>
-<p>The modular architecture makes it easy to extend and maintain while providing a solid foundation for enforcing code organization standards.</p>
+<p>The modular architecture and comprehensive testing framework make it easy to extend and maintain while providing a solid foundation for enforcing code organization standards.</p>
 </section>
 <section id="see-also">
 <h2>See Also<a class="headerlink" href="#see-also" title="Link to this heading"></a></h2>

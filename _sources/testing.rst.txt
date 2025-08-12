@@ -210,7 +210,7 @@ This approach achieves 100% coverage efficiently while maintaining focus on valu
 Integration Testing
 -------------------
 
-Integration tests validate end-to-end functionality and CLI behavior. These tests are located in ``tests/integration/`` and use pytest exclusively.
+Integration tests validate end-to-end functionality and CLI behavior. These tests are located in ``tests/integration/`` and use pytest exclusively with a comprehensive fixture-based architecture.
 
 Test Types
 ~~~~~~~~~~
@@ -221,8 +221,180 @@ Test Types
 **Privacy Fixer Integration**
    Test privacy detection and fixing workflows. The privacy fixer implementation is complete with full cross-module import analysis and comprehensive CLI support
 
+**Method Categorization Integration**
+   Test framework presets and custom categorization features end-to-end
+
+**Configuration Validation Integration**
+   Test configuration handling, error recovery, and edge cases
+
 **Cross-Module Testing**
    Test functionality across multiple Python modules and packages
+
+Fixture-Based Integration Testing
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The integration testing system uses a comprehensive set of pytest fixtures to eliminate code duplication and provide consistent test infrastructure.
+
+**Core Fixtures**
+
+``test_project`` **Fixture**
+   Creates a temporary Python project structure for testing:
+
+   .. code-block:: python
+
+      @pytest.fixture
+      def test_project(tmp_path: Any) -> Generator[Path, None, None]:
+          """Create temporary Python project with src/ directory structure."""
+
+   Usage:
+   
+   .. code-block:: python
+
+      def test_feature(test_project):
+          # test_project is a Path to temporary project root
+          src_dir = test_project / "src"
+          assert src_dir.exists()
+
+``file_creator`` **Fixture**
+   Factory fixture for creating test files within the project:
+
+   .. code-block:: python
+
+      def test_with_files(file_creator):
+          # Create test files with content
+          module_path = file_creator("src/module.py", """
+      def zebra_function():
+          pass
+      
+      def alpha_function():
+          pass
+      """)
+          
+          assert module_path.exists()
+
+``config_writer`` **Fixture**
+   Factory fixture for creating PyLint configuration files:
+
+   .. code-block:: python
+
+      def test_with_config(config_writer):
+          # Create .pylintrc configuration
+          config_path = config_writer("pylintrc", """
+      [MASTER]
+      load-plugins = pylint_sort_functions
+      
+      [function-sort]
+      enable-method-categories = yes
+      framework-preset = pytest
+      category-sorting = declaration
+      """)
+
+``pylint_runner`` **Fixture**
+   Factory fixture for running PyLint with the plugin loaded:
+
+   .. code-block:: python
+
+      def test_pylint_execution(pylint_runner):
+          returncode, stdout, stderr = pylint_runner(
+              ["src/module.py"], 
+              extra_args=["--enable=unsorted-methods"]
+          )
+          
+          assert returncode == 0
+          assert "unsorted-methods" not in stdout
+
+``cli_runner`` **Fixture**
+   Factory fixture for running CLI commands in the test project:
+
+   .. code-block:: python
+
+      def test_cli_functionality(cli_runner):
+          returncode, stdout, stderr = cli_runner(
+              ["--dry-run", "src/module.py"]
+          )
+          
+          assert returncode == 0
+
+``sample_test_class`` **Fixture**
+   Provides sample test class code for framework preset testing:
+
+   .. code-block:: python
+
+      def test_framework_preset(sample_test_class, file_creator):
+          # Get pytest-style test class code
+          pytest_code = sample_test_class["pytest"]
+          file_creator("src/test_example.py", pytest_code)
+
+**IntegrationTestHelper Class**
+
+The ``IntegrationTestHelper`` class provides utilities for complex test scenarios:
+
+.. code-block:: python
+
+   from tests.integration.conftest import IntegrationTestHelper
+
+   def test_complex_scenario(file_creator):
+       # Create import chain for cross-module testing
+       modules = IntegrationTestHelper.create_import_chain(file_creator)
+       
+       # modules contains {"module_a": path, "module_b": path, "module_c": path}
+       assert len(modules) == 3
+
+**Available Helper Methods:**
+
+``create_import_chain(file_creator)``
+   Creates modules with import dependencies for testing cross-module functionality
+
+``create_multi_module_project(file_creator, num_modules=3)``
+   Creates a project with multiple interdependent modules for scalability testing
+
+**Framework Preset Testing Patterns**
+
+Integration tests include comprehensive framework preset testing with proper configuration patterns:
+
+.. code-block:: python
+
+   def test_pytest_framework_preset(
+       pylint_runner, file_creator, config_writer, sample_test_class
+   ):
+       """Test pytest framework preset with correct configuration."""
+       # Create test file with pytest-style class
+       file_creator("src/test_example.py", sample_test_class["pytest"])
+       
+       # CRITICAL: Include category-sorting = declaration
+       config_content = """[MASTER]
+   load-plugins = pylint_sort_functions
+   
+   [function-sort]
+   enable-method-categories = yes
+   framework-preset = pytest
+   category-sorting = declaration
+   """
+       config_writer("pylintrc", config_content)
+       
+       # Run PyLint - should accept conventional pytest ordering
+       returncode, stdout, stderr = pylint_runner(
+           ["src/test_example.py"], 
+           extra_args=["--enable=unsorted-methods"]
+       )
+       
+       assert "unsorted-methods" not in stdout
+
+**Framework Preset Configuration Requirements**
+
+When testing framework presets, always include ``category-sorting = declaration``:
+
+- **pytest preset**: Test fixtures → test methods → helpers → private methods
+- **unittest preset**: setUp/tearDown → test methods → helpers → private methods  
+- **pyqt preset**: __init__ → properties → event handlers → public → private methods
+
+**Best Practices for Integration Tests**
+
+1. **Use Fixtures Consistently**: Always use provided fixtures rather than manual setup
+2. **Framework Configuration**: Include proper ``category-sorting`` setting for presets
+3. **Test Real Scenarios**: Use realistic code examples in test cases
+4. **Validate Output**: Check both return codes and output content
+5. **Performance Awareness**: Integration tests should complete quickly (<5 seconds total)
 
 Running Integration Tests
 ~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -233,7 +405,7 @@ Running Integration Tests
    make test-integration
 
    # Run specific integration test file
-   pytest tests/integration/test_privacy_cli_integration.py -v
+   pytest tests/integration/test_method_categorization_integration.py -v
 
    # Run integration tests with verbose output
    pytest tests/integration/ -v
@@ -241,15 +413,18 @@ Running Integration Tests
    # Run all tests (unit + integration)
    make test-all
 
-**Current Status**: ✅ **All 19 integration tests are passing successfully!** The privacy fixer implementation is complete with cross-module import analysis, comprehensive CLI integration, and 100% test coverage. Integration tests complete in approximately 4 seconds, demonstrating excellent performance. GitHub issues #20, #21, and #23 have been resolved.
+   # Run with fixture debugging (if needed)
+   pytest tests/integration/ -v -s --tb=short
+
+**Current Status**: ✅ **All integration tests are passing successfully!** The privacy fixer implementation is complete with cross-module import analysis, comprehensive CLI integration, and 100% test coverage. Integration tests complete in approximately 4 seconds, demonstrating excellent performance.
 
 **Integration Test Success Metrics**:
 
-- **Test Count**: 19 integration tests
+- **Test Count**: Multiple integration test files covering all features
 - **Success Rate**: 100% (all tests passing)
-- **Execution Time**: ~4.10 seconds
-- **Coverage Areas**: CLI integration, privacy fixer workflows, cross-module analysis
-- **Test Categories**: API integration, command-line interface, performance validation
+- **Execution Time**: ~4.10 seconds for full suite
+- **Coverage Areas**: CLI integration, privacy fixer workflows, framework presets, method categorization
+- **Test Categories**: API integration, command-line interface, configuration validation
 
 Plugin Integration Testing
 ---------------------------
@@ -573,16 +748,122 @@ Adding New Test Cases
 ~~~~~~~~~~~~~~~~~~~~~
 
 1. **Unit Tests**: Add to appropriate file in ``tests/``
-2. **Integration Tests**: Add new test projects to ``test-validation/test-projects/``
-3. **Framework Tests**: Create framework-specific test projects
+2. **Integration Tests**: Add new test files to ``tests/integration/`` using fixture patterns
+3. **Framework Tests**: Create framework-specific test projects in ``test-validation/test-projects/``
+
+**Adding New Integration Tests**
+
+When adding new integration tests, follow the fixture-based pattern:
+
+.. code-block:: python
+
+   #!/usr/bin/env python3
+   """
+   Integration tests for new feature.
+   
+   Description of what the tests validate.
+   """
+   
+   from typing import Any
+   
+   
+   class TestNewFeature:
+       """Integration tests for new feature functionality."""
+       
+       def test_basic_functionality(
+           self, pylint_runner: Any, file_creator: Any, config_writer: Any
+       ) -> None:
+           """Test basic functionality with proper fixtures."""
+           # Create test file
+           file_creator("src/test_module.py", """
+   def function_to_test():
+       pass
+   """)
+           
+           # Create configuration
+           config_content = """[MASTER]
+   load-plugins = pylint_sort_functions
+   
+   [function-sort]
+   enable-new-feature = yes
+   """
+           config_writer("pylintrc", config_content)
+           
+           # Test with PyLint
+           returncode, stdout, stderr = pylint_runner(
+               ["src/test_module.py"], 
+               extra_args=["--enable=new-feature-message"]
+           )
+           
+           assert returncode == 0
+           assert "expected-behavior" in stdout
+
+**Adding Framework Preset Tests**
+
+For framework preset testing, always use the ``sample_test_class`` fixture and proper configuration:
+
+.. code-block:: python
+
+   def test_new_framework_preset(
+       self, 
+       pylint_runner: Any, 
+       file_creator: Any, 
+       config_writer: Any,
+       sample_test_class: Any
+   ) -> None:
+       """Test new framework preset."""
+       # Use sample test class or create framework-specific code
+       file_creator("src/framework_code.py", sample_test_class["new_framework"])
+       
+       # CRITICAL: Include category-sorting = declaration for framework presets
+       config_content = """[MASTER]
+   load-plugins = pylint_sort_functions
+   
+   [function-sort]
+   enable-method-categories = yes
+   framework-preset = new_framework
+   category-sorting = declaration
+   """
+       config_writer("pylintrc", config_content)
+       
+       # Validate framework preset behavior
+       returncode, stdout, stderr = pylint_runner(
+           ["src/framework_code.py"],
+           extra_args=["--enable=unsorted-methods"]
+       )
+       
+       assert "unsorted-methods" not in stdout
+
+**Extending IntegrationTestHelper**
+
+To add new helper methods to ``IntegrationTestHelper``:
+
+.. code-block:: python
+
+   # In tests/integration/conftest.py
+   
+   class IntegrationTestHelper:
+       """Helper class with utilities for integration testing."""
+       
+       @staticmethod
+       def create_new_test_scenario(
+           file_creator: Callable[[str, str], Path], 
+           scenario_type: str
+       ) -> dict[str, Path]:
+           """Create a new type of test scenario."""
+           # Implementation here
+           return {"file1": path1, "file2": path2}
 
 Test Guidelines
 ~~~~~~~~~~~~~~~
 
 - **100% Coverage Required**: All new code must include tests
 - **PyLint Framework**: Use ``CheckerTestCase`` for plugin tests
+- **Fixture Consistency**: Always use provided fixtures for integration tests  
+- **Framework Configuration**: Include proper ``category-sorting`` setting for preset tests
 - **Real Examples**: Use realistic code in test cases
 - **Edge Cases**: Test boundary conditions and error cases
+- **Performance**: Keep integration tests fast (<5 seconds total runtime)
 - **Documentation**: Update this guide when adding new testing approaches
 
 See Also
