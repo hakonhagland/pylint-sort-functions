@@ -63,6 +63,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#method-categorization-options">Method Categorization Options</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#section-header-configuration-options">Section Header Configuration Options</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#framework-specific-usage-examples">Framework-Specific Usage Examples</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#framework-preset-troubleshooting">Framework Preset Troubleshooting</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#test-file-exclusion">Test File Exclusion</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#privacy-configuration-options">Privacy Configuration Options</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#automatic-directory-exclusion">Automatic Directory Exclusion</a></li>
@@ -284,9 +285,9 @@ pip<span class="w"> </span>install<span class="w"> </span>pylint-sort-functions<
 <span class="n">enable-privacy-detection</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span>
 
 <span class="c1"># Method categorization options (Phase 1 - NEW!)</span>
-<span class="n">enable-method-categories</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">false</span><span class="w">        </span><span class="c1"># Enable multi-category system</span>
+<span class="n">enable-method-categories</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span><span class="w">         </span><span class="c1"># Enable multi-category system</span>
 <span class="n">framework-preset</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;pytest&quot;</span><span class="w">            </span><span class="c1"># Built-in framework configurations</span>
-<span class="n">category-sorting</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;alphabetical&quot;</span><span class="w">      </span><span class="c1"># How to sort within categories</span>
+<span class="n">category-sorting</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;declaration&quot;</span><span class="w">       </span><span class="c1"># Required for framework presets!</span>
 <span class="c1"># Custom JSON category definitions</span>
 <span class="n">method-categories</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;&#39;&#39;[</span>
 <span class="s1">    {&quot;name&quot;: &quot;test_methods&quot;, &quot;patterns&quot;: [&quot;test_*&quot;], &quot;priority&quot;: 10},</span>
@@ -309,9 +310,9 @@ pip<span class="w"> </span>install<span class="w"> </span>pylint-sort-functions<
 <span class="na">enable-privacy-detection</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">yes</span>
 
 <span class="c1"># Method categorization options (Phase 1 - NEW!)</span>
-<span class="na">enable-method-categories</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">no</span><span class="w">           </span><span class="c1"># Enable multi-category system</span>
+<span class="na">enable-method-categories</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">yes</span><span class="w">          </span><span class="c1"># Enable multi-category system</span>
 <span class="na">framework-preset</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">pytest</span><span class="w">              </span><span class="c1"># Built-in framework configurations</span>
-<span class="na">category-sorting</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">alphabetical</span><span class="w">        </span><span class="c1"># How to sort within categories</span>
+<span class="na">category-sorting</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">declaration</span><span class="w">          </span><span class="c1"># Required for framework presets!</span>
 <span class="na">method-categories = [{&quot;name&quot;</span><span class="o">:</span><span class="w"> </span><span class="s">&quot;test_methods&quot;</span><span class="na">, &quot;patterns&quot;</span><span class="o">:</span><span class="w"> </span><span class="s">[&quot;test_*&quot;], &quot;priority&quot;: 10}]</span>
 
 <span class="c1"># Section header validation options (Phase 2 - ENHANCED!)</span>
@@ -381,6 +382,7 @@ pip<span class="w"> </span>install<span class="w"> </span>pylint-sort-functions<
 <span class="n">require-section-headers</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span>
 <span class="n">allow-empty-sections</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">false</span>
 <span class="n">framework-preset</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;pytest&quot;</span><span class="w">        </span><span class="c1"># Enables test method categories</span>
+<span class="n">category-sorting</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;declaration&quot;</span><span class="w">   </span><span class="c1"># Required for framework presets!</span>
 </pre></div>
 </div>
 <p><strong>Example - Basic Section Header Validation:</strong></p>
@@ -397,6 +399,7 @@ pip<span class="w"> </span>install<span class="w"> </span>pylint-sort-functions<
 <div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span class="k">[tool.pylint.function-sort]</span>
 <span class="n">enable-method-categories</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span>
 <span class="n">framework-preset</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;pytest&quot;</span>
+<span class="n">category-sorting</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;declaration&quot;</span><span class="w">       </span><span class="c1"># Required for framework presets!</span>
 <span class="n">enforce-section-headers</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span>
 </pre></div>
 </div>
@@ -432,6 +435,7 @@ pip<span class="w"> </span>install<span class="w"> </span>pylint-sort-functions<
 <div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span class="k">[tool.pylint.function-sort]</span>
 <span class="n">enable-method-categories</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span>
 <span class="n">framework-preset</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;unittest&quot;</span>
+<span class="n">category-sorting</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;declaration&quot;</span><span class="w">       </span><span class="c1"># Required for framework presets!</span>
 </pre></div>
 </div>
 <p><strong>Example unittest class organization:</strong></p>
@@ -466,6 +470,7 @@ pip<span class="w"> </span>install<span class="w"> </span>pylint-sort-functions<
 <div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span class="k">[tool.pylint.function-sort]</span>
 <span class="n">enable-method-categories</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span>
 <span class="n">framework-preset</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;pyqt&quot;</span>
+<span class="n">category-sorting</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;declaration&quot;</span><span class="w">       </span><span class="c1"># Required for framework presets!</span>
 </pre></div>
 </div>
 <p><strong>Example PyQt class organization:</strong></p>
@@ -526,10 +531,89 @@ pip<span class="w"> </span>install<span class="w"> </span>pylint-sort-functions<
 <span class="s1">    {&quot;name&quot;: &quot;public_methods&quot;, &quot;patterns&quot;: [&quot;*&quot;], &quot;priority&quot;: 5},</span>
 <span class="s1">    {&quot;name&quot;: &quot;private_methods&quot;, &quot;patterns&quot;: [&quot;_*&quot;], &quot;priority&quot;: 1}</span>
 <span class="s1">]&#39;&#39;&#39;</span>
-<span class="n">category-sorting</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;alphabetical&quot;</span>
+<span class="n">category-sorting</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;declaration&quot;</span><span class="w">       </span><span class="c1"># Required for framework presets!</span>
 <span class="n">enforce-section-headers</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span>
 </pre></div>
 </div>
+</section>
+<section id="framework-preset-troubleshooting">
+<h3>Framework Preset Troubleshooting<a class="headerlink" href="#framework-preset-troubleshooting" title="Link to this heading"></a></h3>
+<p>This section addresses common issues when using framework presets and provides solutions for configuration problems.</p>
+<p><strong>Common Issues and Solutions</strong></p>
+<dl>
+<dt><strong>Problem</strong>: Getting <code class="docutils literal notranslate"><span class="pre">W9002:</span> <span class="pre">unsorted-methods</span></code> violations with framework presets</dt><dd><p><strong>Root Cause</strong>: Framework presets require <code class="docutils literal notranslate"><span class="pre">category-sorting</span> <span class="pre">=</span> <span class="pre">&quot;declaration&quot;</span></code> to preserve conventional method ordering within categories. The default <code class="docutils literal notranslate"><span class="pre">&quot;alphabetical&quot;</span></code> sorting conflicts with framework conventions.</p>
+<p><strong>Solution</strong>: Add <code class="docutils literal notranslate"><span class="pre">category-sorting</span> <span class="pre">=</span> <span class="pre">&quot;declaration&quot;</span></code> to your configuration:</p>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[function-sort]</span>
+<span class="na">enable-method-categories</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">yes</span>
+<span class="na">framework-preset</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">pytest</span>
+<span class="na">category-sorting</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">declaration</span><span class="w">  </span><span class="c1"># This prevents violations</span>
+</pre></div>
+</div>
+</dd>
+<dt><strong>Problem</strong>: Framework preset not working as expected</dt><dd><p><strong>Root Cause</strong>: Method categorization is not enabled, or preset is misspelled.</p>
+<p><strong>Solution</strong>: Verify both settings are correct:</p>
+<div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span class="k">[tool.pylint.function-sort]</span>
+<span class="n">enable-method-categories</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span><span class="w">    </span><span class="c1"># Must be true for presets</span>
+<span class="n">framework-preset</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;pytest&quot;</span><span class="w">       </span><span class="c1"># Check spelling: pytest, unittest, pyqt</span>
+</pre></div>
+</div>
+</dd>
+<dt><strong>Problem</strong>: Want alphabetical sorting within preset categories</dt><dd><p><strong>Root Cause</strong>: You prefer alphabetical ordering over conventional framework ordering.</p>
+<p><strong>Solution</strong>: Keep <code class="docutils literal notranslate"><span class="pre">category-sorting</span> <span class="pre">=</span> <span class="pre">&quot;alphabetical&quot;</span></code> (default) if that’s your preference, but expect some violations for conventional method ordering:</p>
+<div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span class="k">[tool.pylint.function-sort]</span>
+<span class="n">enable-method-categories</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span>
+<span class="n">framework-preset</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;pytest&quot;</span>
+<span class="n">category-sorting</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;alphabetical&quot;</span><span class="w">  </span><span class="c1"># Alphabetical within categories</span>
+</pre></div>
+</div>
+</dd>
+<dt><strong>Problem</strong>: Preset conflicts with custom categories</dt><dd><p><strong>Root Cause</strong>: Both <code class="docutils literal notranslate"><span class="pre">framework-preset</span></code> and <code class="docutils literal notranslate"><span class="pre">method-categories</span></code> are specified.</p>
+<p><strong>Solution</strong>: Use either framework presets OR custom categories, not both:</p>
+<div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span class="c1"># Option 1: Use framework preset</span>
+<span class="k">[tool.pylint.function-sort]</span>
+<span class="n">enable-method-categories</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span>
+<span class="n">framework-preset</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;pytest&quot;</span>
+<span class="n">category-sorting</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;declaration&quot;</span>
+
+<span class="c1"># Option 2: Use custom categories (remove framework-preset)</span>
+<span class="k">[tool.pylint.function-sort]</span>
+<span class="n">enable-method-categories</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span>
+<span class="n">method-categories</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;[{&quot;name&quot;: &quot;test_methods&quot;, &quot;patterns&quot;: [&quot;test_*&quot;], &quot;priority&quot;: 10}]&#39;</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+<p><strong>Understanding category-sorting Setting</strong></p>
+<p>The <code class="docutils literal notranslate"><span class="pre">category-sorting</span></code> setting controls how methods are ordered within each category:</p>
+<ul class="simple">
+<li><p><strong>``”alphabetical”`` (default)</strong>: Sort methods alphabetically within categories</p></li>
+<li><p><strong>``”declaration”``</strong>: Preserve original declaration order within categories</p></li>
+</ul>
+<p><strong>Framework presets expect ``”declaration”`` order</strong> to maintain conventional patterns like:</p>
+<ul class="simple">
+<li><p><strong>pytest</strong>: <code class="docutils literal notranslate"><span class="pre">setup_method</span></code> → <code class="docutils literal notranslate"><span class="pre">test_*</span></code> methods → helpers (not alphabetical)</p></li>
+<li><p><strong>unittest</strong>: <code class="docutils literal notranslate"><span class="pre">setUp</span></code> → <code class="docutils literal notranslate"><span class="pre">tearDown</span></code> → <code class="docutils literal notranslate"><span class="pre">test_*</span></code> methods → helpers (not alphabetical)</p></li>
+<li><p><strong>pyqt</strong>: <code class="docutils literal notranslate"><span class="pre">__init__</span></code> → <code class="docutils literal notranslate"><span class="pre">setup_ui</span></code> → properties → event handlers (not alphabetical)</p></li>
+</ul>
+<p><strong>Configuration Validation</strong></p>
+<p>If you’re unsure about your configuration, test it with a simple example:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># test_config.py</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">TestExample</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">setup_method</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_feature</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">helper_method</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+</pre></div>
+</div>
+<p>Run PyLint with your configuration:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pylint<span class="w"> </span>--load-plugins<span class="o">=</span>pylint_sort_functions<span class="w"> </span>test_config.py
+</pre></div>
+</div>
+<p>Expected results with correct framework preset configuration: <strong>No sorting violations</strong> for the class methods.</p>
 </section>
 <section id="test-file-exclusion">
 <h3>Test File Exclusion<a class="headerlink" href="#test-file-exclusion" title="Link to this heading"></a></h3>
