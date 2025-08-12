@@ -1,6 +1,5 @@
 """Tests for auto-fix functionality."""  # pylint: disable=too-many-lines
 
-import os
 import tempfile
 from pathlib import Path
 from typing import Any
@@ -464,7 +463,8 @@ def beta_function():
             assert zebra_comment_pos < func_positions["zebra"]
             assert beta_comment_pos < func_positions["beta"]
 
-            os.unlink(f.name)
+            # Close file handle before deletion to avoid Windows permission error
+            Path(f.name).unlink(missing_ok=True)
 
     def test_empty_file_handling(self) -> None:
         """Test handling of empty files."""

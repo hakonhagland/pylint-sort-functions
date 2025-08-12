@@ -3,7 +3,7 @@
 
 import tempfile
 import unittest.mock
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from textwrap import dedent
 from typing import Any, Dict, List
 
@@ -1421,7 +1421,11 @@ class TestPrivacyFixerIntegration:  # pylint: disable=too-few-public-methods
         # Should use the real file path
         assert len(grouped) == 1
         file_paths = list(grouped.keys())
-        assert str(file_paths[0]) == "/real/path/to/file.py"
+        # Use Path to handle platform-specific path separators
+        expected_path = PurePosixPath("/real/path/to/file.py")
+        actual_path = Path(str(file_paths[0]))
+        # Compare as PurePosixPath to handle Windows backslash conversion
+        assert PurePosixPath(actual_path.as_posix()) == expected_path
 
 
 class TestPhase1Functionality:
