@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.4.0] - 2025-08-12
+
 ### Added
 
 - Complete Phase 1 implementation with dogfooding success - enhanced privacy analysis and detection system
@@ -254,6 +256,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Minimal memory footprint** with efficient data structures
 - **Large project optimization** tested on 100+ file codebases
 
+[1.4.0]: https://github.com/hakonhagland/pylint-sort-functions/releases/tag/v1.4.0
 [1.3.2]: https://github.com/hakonhagland/pylint-sort-functions/releases/tag/v1.3.2
 [1.3.1]: https://github.com/hakonhagland/pylint-sort-functions/releases/tag/v1.3.1
 [1.3.0]: https://github.com/hakonhagland/pylint-sort-functions/releases/tag/v1.3.0
