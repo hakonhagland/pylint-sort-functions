@@ -7,6 +7,7 @@ Now uses shared fixtures from conftest.py for better maintainability.
 """
 
 import sys
+from typing import Any
 
 import pytest
 
@@ -16,7 +17,7 @@ from pylint_sort_functions.cli import main as cli_main
 class TestPrivacyFixerCLIIntegration:
     """Test privacy fixer CLI integration using shared fixtures."""
 
-    def test_privacy_dry_run_cli_integration(self, file_creator) -> None:
+    def test_privacy_dry_run_cli_integration(self, file_creator: Any) -> None:
         """Test that privacy dry-run CLI integration doesn't crash."""
         content = '''"""Test module."""
 
@@ -33,9 +34,9 @@ def main():
         test_file = file_creator("test_module.py", content)
 
         # Test that CLI can handle privacy dry-run without crashing
+        original_argv = sys.argv
         try:
             # Mock sys.argv
-            original_argv = sys.argv
             sys.argv = [
                 "pylint-sort-functions",
                 "--fix-privacy",
@@ -56,7 +57,7 @@ def main():
         # File should be unchanged
         assert test_file.read_text() == content
 
-    def test_integrated_privacy_and_sorting_cli(self, file_creator) -> None:
+    def test_integrated_privacy_and_sorting_cli(self, file_creator: Any) -> None:
         """Test integrated privacy and sorting CLI options."""
         content = '''"""Test unsorted module."""
 
@@ -76,8 +77,8 @@ def helper_a():
         test_file = file_creator("test_sorting.py", content)
 
         # Test integrated privacy + sorting
+        original_argv = sys.argv
         try:
-            original_argv = sys.argv
             sys.argv = [
                 "pylint-sort-functions",
                 "--fix-privacy",
@@ -96,8 +97,8 @@ def helper_a():
 
     def test_privacy_help_options_exist(self) -> None:
         """Test that privacy options exist in CLI help."""
+        original_argv = sys.argv
         try:
-            original_argv = sys.argv
             sys.argv = ["pylint-sort-functions", "--help"]
 
             with pytest.raises(SystemExit) as exc_info:

@@ -10,19 +10,24 @@ Tests the flexible method categorization system including:
 """
 
 import json
+from typing import Any
 
 
-class TestMethodCategorizationIntegration:
+class TestMethodCategorizationIntegration:  # pylint: disable=too-few-public-methods
     """Integration tests for method categorization features."""
 
     def test_pytest_framework_preset(
-        self, pylint_runner, file_creator, config_writer, sample_test_class
-    ):
+        self,
+        pylint_runner: Any,
+        file_creator: Any,
+        config_writer: Any,
+        sample_test_class: Any,
+    ) -> None:
         """Test pytest framework preset categorization."""
         # Create test file with pytest-style test class
-        test_file = file_creator("src/test_example.py", sample_test_class["pytest"])
+        file_creator("src/test_example.py", sample_test_class["pytest"])
 
-        # Create config with pytest preset (framework presets need config file, not CLI args)
+        # Create config with pytest preset (needs config file, not CLI args)
         config_content = """[MASTER]
 load-plugins = pylint_sort_functions
 
@@ -45,11 +50,15 @@ category-sorting = declaration
         )
 
     def test_unittest_framework_preset(
-        self, pylint_runner, file_creator, config_writer, sample_test_class
-    ):
+        self,
+        pylint_runner: Any,
+        file_creator: Any,
+        config_writer: Any,
+        sample_test_class: Any,
+    ) -> None:
         """Test unittest framework preset categorization."""
         # Create test file with unittest-style test class
-        test_file = file_creator("src/test_example.py", sample_test_class["unittest"])
+        file_creator("src/test_example.py", sample_test_class["unittest"])
 
         # Create config with unittest preset
         config_content = """[MASTER]
@@ -73,11 +82,15 @@ category-sorting = declaration
         )
 
     def test_pyqt_framework_preset(
-        self, pylint_runner, file_creator, config_writer, sample_test_class
-    ):
+        self,
+        pylint_runner: Any,
+        file_creator: Any,
+        config_writer: Any,
+        sample_test_class: Any,
+    ) -> None:
         """Test PyQt framework preset categorization."""
         # Create test file with PyQt-style dialog class
-        test_file = file_creator("src/dialog.py", sample_test_class["pyqt"])
+        file_creator("src/dialog.py", sample_test_class["pyqt"])
 
         # Create config with PyQt preset
         config_content = """[MASTER]
@@ -100,7 +113,9 @@ category-sorting = declaration
             "PyQt preset should accept conventional ordering"
         )
 
-    def test_custom_json_categories(self, pylint_runner, file_creator, config_writer):
+    def test_custom_json_categories(
+        self, pylint_runner: Any, file_creator: Any, config_writer: Any
+    ) -> None:
         """Test basic method categorization with declaration order."""
         # Create simple test file
         test_code = '''"""Test basic categorization."""
@@ -118,7 +133,7 @@ class Service:
         """Private method."""
         pass
 '''
-        test_file = file_creator("src/service.py", test_code)
+        file_creator("src/service.py", test_code)
 
         # Use basic categorization with declaration order
         config_content = """[MASTER]
@@ -141,8 +156,8 @@ category-sorting = declaration
         )
 
     def test_category_sorting_alphabetical(
-        self, pylint_runner, file_creator, config_writer
-    ):
+        self, pylint_runner: Any, file_creator: Any, config_writer: Any
+    ) -> None:
         """Test alphabetical sorting within categories."""
         # Create test file with methods needing alphabetical sorting
         test_code = '''"""Test alphabetical sorting within categories."""
@@ -164,7 +179,7 @@ class Service:
         """Private method A - should come first."""
         pass
 '''
-        test_file = file_creator("src/service.py", test_code)
+        file_creator("src/service.py", test_code)
 
         # Configure for alphabetical sorting
         config_content = """[MASTER]
@@ -186,8 +201,8 @@ category-sorting = alphabetical
         # The plugin detects unsorted methods but doesn't include specific method names
 
     def test_category_sorting_declaration(
-        self, pylint_runner, file_creator, config_writer
-    ):
+        self, pylint_runner: Any, file_creator: Any, config_writer: Any
+    ) -> None:
         """Test declaration order preservation within categories."""
         # Create test file with methods in declaration order
         test_code = '''"""Test declaration order preservation."""
@@ -209,7 +224,7 @@ class Service:
         """Private method A."""
         pass
 '''
-        test_file = file_creator("src/service.py", test_code)
+        file_creator("src/service.py", test_code)
 
         # Configure for declaration order preservation
         config_content = """[MASTER]
@@ -230,8 +245,8 @@ category-sorting = declaration
         assert "unsorted-methods" not in stdout, "Declaration order should be accepted"
 
     def test_pattern_priority_resolution(
-        self, pylint_runner, file_creator, config_writer
-    ):
+        self, pylint_runner: Any, file_creator: Any, config_writer: Any
+    ) -> None:
         """Test priority-based conflict resolution for overlapping patterns."""
         # Create test with methods matching multiple patterns in correct category order
         test_code = '''"""Test priority resolution."""
@@ -251,7 +266,7 @@ class TestService:
         """This only matches test_* pattern."""
         pass
 '''
-        test_file = file_creator("src/test_service.py", test_code)
+        file_creator("src/test_service.py", test_code)
 
         # Configure with overlapping patterns
         categories = [
@@ -282,8 +297,10 @@ category-sorting = declaration
             "Priority resolution should work correctly"
         )
 
-    def test_backward_compatibility_disabled(self, pylint_runner, file_creator):
-        """Test that categorization is disabled by default for backward compatibility."""
+    def test_backward_compatibility_disabled(
+        self, pylint_runner: Any, file_creator: Any
+    ) -> None:
+        """Test that categorization is disabled by default for compatibility."""
         # Create test file with non-standard ordering
         test_code = '''"""Test backward compatibility."""
 
@@ -296,7 +313,7 @@ class Service:
         """Public method should be first."""
         pass
 '''
-        test_file = file_creator("src/service.py", test_code)
+        file_creator("src/service.py", test_code)
 
         # Run PyLint WITHOUT enabling categorization
         returncode, stdout, stderr = pylint_runner(
@@ -309,8 +326,8 @@ class Service:
         )
 
     def test_framework_preset_with_violations(
-        self, pylint_runner, file_creator, config_writer
-    ):
+        self, pylint_runner: Any, file_creator: Any, config_writer: Any
+    ) -> None:
         """Test that framework presets still detect real violations."""
         # Create test file with incorrect ordering even for pytest
         test_code = '''"""Test with violations."""
@@ -328,7 +345,7 @@ class TestExample:
         """Setup should be at the top in pytest preset."""
         pass
 '''
-        test_file = file_creator("src/test_incorrect.py", test_code)
+        file_creator("src/test_incorrect.py", test_code)
 
         # Create config file with pytest preset
         config_content = """[MASTER]
@@ -351,9 +368,11 @@ category-sorting = alphabetical
             "Should detect violations within categories"
         )
 
-    def test_invalid_framework_preset(self, pylint_runner, file_creator, config_writer):
+    def test_invalid_framework_preset(
+        self, pylint_runner: Any, file_creator: Any, config_writer: Any
+    ) -> None:
         """Test handling of invalid framework preset names."""
-        test_file = file_creator("src/test.py", "class Test:\n    pass")
+        file_creator("src/test.py", "class Test:\n    pass")
 
         # Try to use invalid framework preset
         config_content = """[MASTER]
@@ -375,10 +394,10 @@ framework-preset = invalid_framework
         assert returncode != 1, "Should not crash on invalid preset"
 
     def test_malformed_json_categories(
-        self, pylint_runner, file_creator, config_writer
-    ):
+        self, pylint_runner: Any, file_creator: Any, config_writer: Any
+    ) -> None:
         """Test handling of malformed JSON in method-categories."""
-        test_file = file_creator("src/test.py", "class Test:\n    pass")
+        file_creator("src/test.py", "class Test:\n    pass")
 
         # Write malformed JSON configuration
         config_content = """[MASTER]
@@ -399,8 +418,8 @@ method-categories = {invalid json here}
         assert returncode != 1, "Should not crash on malformed JSON"
 
     def test_empty_categories_configuration(
-        self, pylint_runner, file_creator, config_writer
-    ):
+        self, pylint_runner: Any, file_creator: Any, config_writer: Any
+    ) -> None:
         """Test behavior with empty category configuration."""
         test_code = '''"""Test empty categories."""
 
@@ -411,7 +430,7 @@ class Service:
     def _private_method(self):
         pass
 '''
-        test_file = file_creator("src/service.py", test_code)
+        file_creator("src/service.py", test_code)
 
         # Configure with empty categories
         config_content = """[MASTER]
@@ -432,13 +451,13 @@ method-categories = []
         assert returncode != 1, "Should not crash on empty categories"
 
 
-class TestMethodCategorizationCLI:
+class TestMethodCategorizationCLI:  # pylint: disable=too-few-public-methods
     """Test method categorization via CLI auto-fix tool."""
 
     def test_cli_with_framework_preset(
-        self, cli_runner, file_creator, sample_test_class
-    ):
-        """Test CLI auto-fix with section headers (framework presets are PyLint-only)."""
+        self, cli_runner: Any, file_creator: Any
+    ) -> None:
+        """Test CLI auto-fix with section headers (presets are PyLint-only)."""
         # Create unsorted pytest test file
         unsorted_pytest = '''"""Unsorted pytest test."""
 
@@ -486,7 +505,9 @@ class TestExample:
             "Test methods should be sorted alphabetically"
         )
 
-    def test_cli_auto_sort_with_categories(self, cli_runner, file_creator):
+    def test_cli_auto_sort_with_categories(
+        self, cli_runner: Any, file_creator: Any
+    ) -> None:
         """Test CLI auto-sort (CLI uses basic sorting, categories are PyLint-only)."""
         # Create file needing sorting
         test_code = '''"""Unsorted methods."""

@@ -29,7 +29,7 @@ import pytest
 from pylint_sort_functions.privacy_fixer import PrivacyFixer
 
 
-class TestPrivacyFixerIntegration:
+class TestPrivacyFixerIntegration:  # pylint: disable=attribute-defined-outside-init
     """Integration tests for the complete privacy fixer workflow."""
 
     def setup_method(self) -> None:
@@ -68,7 +68,12 @@ class TestPrivacyFixerIntegration:
 
         cmd = [self.python_executable, self.cli_module] + args
         result = subprocess.run(
-            cmd, capture_output=True, text=True, cwd=self.project_root, env=env
+            cmd,
+            capture_output=True,
+            text=True,
+            cwd=self.project_root,
+            env=env,
+            check=False,
         )
         return result.returncode, result.stdout, result.stderr
 

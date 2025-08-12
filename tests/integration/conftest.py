@@ -10,39 +10,47 @@ import os
 import subprocess
 import sys
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import Any, Callable, Generator, List, Optional, Tuple
 
 import pytest
 
 
 @pytest.fixture
-def test_project(tmp_path):
+def assert_no_syntax_errors() -> Callable[[Path], bool]:
     """
-    Create a temporary Python project structure for testing.
+    Provide a helper function to verify Python syntax.
 
-    Creates a project with:
-    - test_project/ root directory
-    - test_project/src/ package directory
-    - test_project/src/__init__.py package marker
-
-    Yields:
-        Path: The project root directory path
+    Returns:
+        Callable: Function that checks if content has valid Python syntax
     """
-    project_root = tmp_path / "test_project"
-    project_root.mkdir()
 
-    # Create standard Python package structure
-    src_dir = project_root / "src"
-    src_dir.mkdir()
-    (src_dir / "__init__.py").touch()
+    def check_syntax(file_path: Path) -> bool:
+        """
+        Check if a Python file has valid syntax.
 
-    yield project_root
+        Args:
+            file_path: Path to Python file to check
 
-    # Cleanup is handled automatically by tmp_path fixture
+        Returns:
+            bool: True if syntax is valid, False otherwise
+        """
+        try:
+            content = file_path.read_text(encoding="utf-8")
+            compile(content, str(file_path), "exec")
+            return True
+        except SyntaxError:
+            return False
+
+    return check_syntax
+
+
+# Helper class for complex test scenarios
+
+# Cleanup is handled automatically by tmp_path fixture
 
 
 @pytest.fixture
-def cli_runner(test_project):
+def cli_runner(test_project: Path) -> Callable[[List[str]], Tuple[int, str, str]]:
     """
     Factory fixture for running CLI commands in the test project.
 
@@ -83,7 +91,9 @@ def cli_runner(test_project):
         cmd = [python_executable, cli_module] + args
 
         # Execute command
-        result = subprocess.run(cmd, capture_output=True, text=True, cwd=cwd, env=env)
+        result = subprocess.run(
+            cmd, capture_output=True, text=True, cwd=cwd, env=env, check=False
+        )
 
         return result.returncode, result.stdout, result.stderr
 
@@ -91,7 +101,43 @@ def cli_runner(test_project):
 
 
 @pytest.fixture
-def file_creator(test_project):
+def config_writer(test_project: Path) -> Callable[[str, str], Path]:
+    """
+    Factory fixture for creating PyLint configuration files.
+
+    Args:
+        test_project: The test project fixture
+
+    Returns:
+        Callable: A function that creates .pylintrc or pyproject.toml configs
+    """
+
+    def write_config(config_type: str, content: str) -> Path:
+        """
+        Write a PyLint configuration file.
+
+        Args:
+            config_type: Either "pylintrc" or "pyproject.toml"
+            content: Configuration content
+
+        Returns:
+            Path: The created configuration file
+        """
+        if config_type == "pylintrc":
+            config_path = test_project / ".pylintrc"
+        elif config_type == "pyproject.toml":
+            config_path = test_project / "pyproject.toml"
+        else:
+            raise ValueError(f"Unknown config type: {config_type}")
+
+        config_path.write_text(content, encoding="utf-8")
+        return config_path
+
+    return write_config
+
+
+@pytest.fixture
+def file_creator(test_project: Path) -> Callable[[str, str], Path]:
     """
     Factory fixture for creating test files within the project.
 
@@ -122,7 +168,9 @@ def file_creator(test_project):
 
 
 @pytest.fixture
-def pylint_runner(test_project):
+def pylint_runner(
+    test_project: Path,
+) -> Callable[[List[str], Optional[List[str]]], Tuple[int, str, str]]:
     """
     Factory fixture for running PyLint with the plugin loaded.
 
@@ -171,7 +219,9 @@ def pylint_runner(test_project):
         env["PYTHONPATH"] = str(project_root)
 
         # Execute command
-        result = subprocess.run(cmd, capture_output=True, text=True, cwd=cwd, env=env)
+        result = subprocess.run(
+            cmd, capture_output=True, text=True, cwd=cwd, env=env, check=False
+        )
 
         return result.returncode, result.stdout, result.stderr
 
@@ -179,7 +229,7 @@ def pylint_runner(test_project):
 
 
 @pytest.fixture
-def sample_test_class():
+def sample_test_class() -> dict[str, str]:
     """
     Provide sample test class code for framework preset testing.
 
@@ -295,109 +345,36 @@ class ExampleDialog(QDialog):
 
 
 @pytest.fixture
-def config_writer(test_project):
+def test_project(tmp_path: Any) -> Generator[Path, None, None]:
     """
-    Factory fixture for creating PyLint configuration files.
+    Create a temporary Python project structure for testing.
 
-    Args:
-        test_project: The test project fixture
+    Creates a project with:
+    - test_project/ root directory
+    - test_project/src/ package directory
+    - test_project/src/__init__.py package marker
 
-    Returns:
-        Callable: A function that creates .pylintrc or pyproject.toml configs
+    Yields:
+        Path: The project root directory path
     """
+    project_root = tmp_path / "test_project"
+    project_root.mkdir()
 
-    def write_config(config_type: str, content: str) -> Path:
-        """
-        Write a PyLint configuration file.
+    # Create standard Python package structure
+    src_dir = project_root / "src"
+    src_dir.mkdir()
+    (src_dir / "__init__.py").touch()
 
-        Args:
-            config_type: Either "pylintrc" or "pyproject.toml"
-            content: Configuration content
-
-        Returns:
-            Path: The created configuration file
-        """
-        if config_type == "pylintrc":
-            config_path = test_project / ".pylintrc"
-        elif config_type == "pyproject.toml":
-            config_path = test_project / "pyproject.toml"
-        else:
-            raise ValueError(f"Unknown config type: {config_type}")
-
-        config_path.write_text(content, encoding="utf-8")
-        return config_path
-
-    return write_config
+    yield project_root
 
 
-@pytest.fixture
-def assert_no_syntax_errors():
-    """
-    Provide a helper function to verify Python syntax.
-
-    Returns:
-        Callable: Function that checks if content has valid Python syntax
-    """
-
-    def check_syntax(file_path: Path) -> bool:
-        """
-        Check if a Python file has valid syntax.
-
-        Args:
-            file_path: Path to Python file to check
-
-        Returns:
-            bool: True if syntax is valid, False otherwise
-        """
-        try:
-            content = file_path.read_text(encoding="utf-8")
-            compile(content, str(file_path), "exec")
-            return True
-        except SyntaxError:
-            return False
-
-    return check_syntax
-
-
-# Helper class for complex test scenarios
 class IntegrationTestHelper:
     """Helper class with utilities for integration testing."""
 
     @staticmethod
-    def create_multi_module_project(file_creator, num_modules: int = 3):
-        """
-        Create a project with multiple interdependent modules.
-
-        Args:
-            file_creator: The file_creator fixture
-            num_modules: Number of modules to create
-
-        Returns:
-            List[Path]: List of created module paths
-        """
-        modules = []
-        for i in range(num_modules):
-            content = f'''"""Module {i}."""
-
-def public_function_{i}():
-    """Public API function."""
-    return helper_{i}()
-
-def helper_{i}():
-    """Helper function."""
-    return "help {i}"
-
-def _private_{i}():
-    """Private function."""
-    return "private {i}"
-'''
-            module_path = file_creator(f"src/module_{i}.py", content)
-            modules.append(module_path)
-
-        return modules
-
-    @staticmethod
-    def create_import_chain(file_creator):
+    def create_import_chain(
+        file_creator: Callable[[str, str], Path],
+    ) -> dict[str, Path]:
         """
         Create modules with import dependencies for testing.
 
@@ -449,3 +426,38 @@ def final_usage():
         )
 
         return {"module_a": module_a, "module_b": module_b, "module_c": module_c}
+
+    @staticmethod
+    def create_multi_module_project(
+        file_creator: Callable[[str, str], Path], num_modules: int = 3
+    ) -> List[Path]:
+        """
+        Create a project with multiple interdependent modules.
+
+        Args:
+            file_creator: The file_creator fixture
+            num_modules: Number of modules to create
+
+        Returns:
+            List[Path]: List of created module paths
+        """
+        modules = []
+        for i in range(num_modules):
+            content = f'''"""Module {i}."""
+
+def public_function_{i}():
+    """Public API function."""
+    return helper_{i}()
+
+def helper_{i}():
+    """Helper function."""
+    return "help {i}"
+
+def _private_{i}():
+    """Private function."""
+    return "private {i}"
+'''
+            module_path = file_creator(f"src/module_{i}.py", content)
+            modules.append(module_path)
+
+        return modules

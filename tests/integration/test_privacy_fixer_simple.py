@@ -18,7 +18,7 @@ from typing import List, Tuple
 import pytest
 
 
-class TestPrivacyFixerCLIIntegration:
+class TestPrivacyFixerCLIIntegration:  # pylint: disable=attribute-defined-outside-init
     """Integration tests for privacy fixer CLI workflow."""
 
     def setup_method(self) -> None:
@@ -56,7 +56,12 @@ class TestPrivacyFixerCLIIntegration:
 
         cmd = [self.python_executable, self.cli_module] + args
         result = subprocess.run(
-            cmd, capture_output=True, text=True, cwd=self.project_root, env=env
+            cmd,
+            capture_output=True,
+            text=True,
+            cwd=self.project_root,
+            env=env,
+            check=False,
         )
         return result.returncode, result.stdout, result.stderr
 
