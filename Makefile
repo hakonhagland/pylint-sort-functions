@@ -1,6 +1,6 @@
 ROOT := $(shell pwd)
 
-.PHONY: coverage docs eof-fix help mypy ruff-check ruff-fix ruff-format test test-unit test-fast test-integration test-all test-plugin test-plugin-strict tox
+.PHONY: coverage coverage-all coverage-html docs eof-fix help mypy ruff-check ruff-fix ruff-format test test-unit test-fast test-integration test-all test-plugin test-plugin-strict tox
 .PHONY: publish-to-pypi publish-to-pypi-minor publish-to-pypi-major rstcheck rst-list-check rst-toml-check self-check
 .PHONY: build-docker-image run-docker-container stop-docker-container test-documentation
 .PHONY: changelog-add changelog-prepare changelog-validate
@@ -30,12 +30,16 @@ changelog-validate:
 
 
 coverage:
-	coverage run -m pytest tests
+	coverage run -m pytest tests/ --ignore=tests/integration/
 	coverage report -m
 
 coverage-html:
-	coverage run -m pytest tests
+	coverage run -m pytest tests/ --ignore=tests/integration/
 	coverage html
+
+coverage-all:
+	coverage run -m pytest tests/
+	coverage report -m
 
 docs:
 	cd "$(ROOT)"/docs && make clean && make html
@@ -53,8 +57,9 @@ help:
 	@echo "  changelog-validate    - Validate changelog format"
 	@echo ""
 	@echo "Testing and quality:"
-	@echo "  coverage              - Run tests with coverage report"
-	@echo "  coverage-html         - Generate HTML coverage report"
+	@echo "  coverage              - Run unit tests with coverage report (~6s)"
+	@echo "  coverage-html         - Generate HTML coverage report (unit tests only)"
+	@echo "  coverage-all          - Run all tests with coverage report (~23s)"
 	@echo "  mypy                  - Run type checking"
 	@echo "  pre-commit            - Run all pre-commit hooks"
 	@echo "  rstcheck              - Check reStructuredText documentation (syntax + formatting + TOML blocks)"
