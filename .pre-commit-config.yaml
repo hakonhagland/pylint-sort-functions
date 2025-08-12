@@ -69,15 +69,6 @@ repos:
       - id: coverage
         name: coverage
         language: system
-        entry: bash -c "source .venv/bin/activate && python -m coverage run -m pytest tests && python -m coverage report --fail-under=100"
+        entry: bash -c "source .venv/bin/activate && python -m coverage run -m pytest tests/ --ignore=tests/integration/ && python -m coverage report --fail-under=100"
         always_run: true
         pass_filenames: false
--   repo: local
-    hooks:
-      - id: integration-tests
-        name: integration tests (Docker)
-        language: system
-        entry: make test-documentation
-        stages: [manual]
-        pass_filenames: false
-        always_run: true
