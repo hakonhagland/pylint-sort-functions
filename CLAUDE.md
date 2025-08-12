@@ -103,9 +103,11 @@ make ruff-fix
 make ruff-format
 
 # Coverage (requires 100%)
-coverage run -m pytest tests
-coverage report -m
-make coverage
+# Uses centralized coverage configuration from scripts/coverage-config.sh
+make coverage       # Fast unit tests only (~6s, recommended)
+make coverage-all   # All tests including integration (~23s)
+make coverage-html  # Generate HTML report
+make view-cover     # Open HTML report in browser
 
 # Verify 100% coverage before commits
 # This project enforces 100% test coverage - always run before committing:

@@ -30,16 +30,13 @@ changelog-validate:
 
 
 coverage:
-	coverage run -m pytest tests/ --ignore=tests/integration/
-	coverage report -m
+	@bash -c "source scripts/coverage-config.sh && coverage_unit_with_report"
 
 coverage-html:
-	coverage run -m pytest tests/ --ignore=tests/integration/
-	coverage html
+	@bash -c "source scripts/coverage-config.sh && coverage_unit_with_html"
 
 coverage-all:
-	coverage run -m pytest tests/
-	coverage report -m
+	@bash -c "source scripts/coverage-config.sh && coverage_all_with_report"
 
 docs:
 	cd "$(ROOT)"/docs && make clean && make html

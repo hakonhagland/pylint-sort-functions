@@ -66,16 +66,16 @@ jobs:
 
       - name: Code coverage
         run: |
-          uv run coverage run -m pytest tests
-          uv run coverage report -m
+          source scripts/coverage-config.sh
+          uv run bash -c "coverage_unit_with_report"
 
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v5
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
-  integration-tests:
-    name: Integration Tests (Docker)
+  documentation-validation:
+    name: Documentation Validation (Docker)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout source code
@@ -94,7 +94,7 @@ jobs:
           uv venv
           uv sync
 
-      - name: Run integration tests
+      - name: Validate documentation examples
         run: |
-          # Run integration tests that validate all configuration examples
+          # Validate all configuration examples in docs/ against the plugin
           make test-documentation
