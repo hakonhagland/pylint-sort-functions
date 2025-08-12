@@ -3,11 +3,10 @@
 Minimal integration test for privacy fixer CLI functionality.
 
 This test validates that the privacy fixer CLI integration is working correctly.
+Now uses shared fixtures from conftest.py for better maintainability.
 """
 
 import sys
-import tempfile
-from pathlib import Path
 
 import pytest
 
@@ -15,25 +14,9 @@ from pylint_sort_functions.cli import main as cli_main
 
 
 class TestPrivacyFixerCLIIntegration:
-    """Test privacy fixer CLI integration."""
+    """Test privacy fixer CLI integration using shared fixtures."""
 
-    def setup_method(self) -> None:
-        """Set up test environment."""
-        self.test_dir = Path(tempfile.mkdtemp())
-
-    def teardown_method(self) -> None:
-        """Clean up test environment."""
-        import shutil
-
-        shutil.rmtree(self.test_dir, ignore_errors=True)
-
-    def create_test_file(self, name: str, content: str) -> Path:
-        """Create a test file."""
-        file_path = self.test_dir / name
-        file_path.write_text(content, encoding="utf-8")
-        return file_path
-
-    def test_privacy_dry_run_cli_integration(self) -> None:
+    def test_privacy_dry_run_cli_integration(self, file_creator) -> None:
         """Test that privacy dry-run CLI integration doesn't crash."""
         content = '''"""Test module."""
 
@@ -47,7 +30,7 @@ def main():
     public_function()
 '''
 
-        test_file = self.create_test_file("test_module.py", content)
+        test_file = file_creator("test_module.py", content)
 
         # Test that CLI can handle privacy dry-run without crashing
         try:
@@ -73,7 +56,7 @@ def main():
         # File should be unchanged
         assert test_file.read_text() == content
 
-    def test_integrated_privacy_and_sorting_cli(self) -> None:
+    def test_integrated_privacy_and_sorting_cli(self, file_creator) -> None:
         """Test integrated privacy and sorting CLI options."""
         content = '''"""Test unsorted module."""
 
@@ -90,7 +73,7 @@ def helper_a():
     return "a"
 '''
 
-        test_file = self.create_test_file("test_sorting.py", content)
+        test_file = file_creator("test_sorting.py", content)
 
         # Test integrated privacy + sorting
         try:
