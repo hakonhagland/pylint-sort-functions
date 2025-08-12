@@ -204,8 +204,16 @@ if [ -z "$NO_VERIFY_FLAG" ]; then
             exit 1
         fi
 
+        # Identify which files were modified by hooks
+        MODIFIED_FILES=$(git diff --name-only | sort)
+
         RETRY_COUNT=$((RETRY_COUNT + 1))
         echo -e "${YELLOW}⚠️  Pre-commit hooks modified files (attempt $RETRY_COUNT/$MAX_RETRIES)${NC}"
+
+        if [ -n "$MODIFIED_FILES" ]; then
+            echo "📝 Files modified by pre-commit hooks:"
+            echo "$MODIFIED_FILES" | sed 's/^/   - /'
+        fi
 
         # Auto-stage modified files and retry
         echo "Staging formatting changes and retrying..."
@@ -223,15 +231,20 @@ if [ -z "$NO_VERIFY_FLAG" ]; then
 
             echo -e "${RED}❌ Maximum retries reached${NC}"
             echo "Pre-commit hooks are still making formatting changes after $MAX_RETRIES attempts."
-            echo "This suggests an unstable formatting configuration."
+            echo ""
+            echo "🔍 Potential causes:"
+            echo "  - Conflicting formatter configurations in .pre-commit-config.yaml"
+            echo "  - pylint-sort-functions plugin auto-fixing during pre-commit"
+            echo "  - Multiple formatters (ruff, black, isort) with conflicting settings"
             echo ""
             echo -e "${YELLOW}💾 Your commit message has been saved to: $TEMP_MSG_FILE${NC}"
             echo ""
             echo "To continue manually:"
             echo "1. Review changes: git diff --cached"
-            echo "2. Check for conflicting formatter configurations"
-            echo "3. Fix issues manually, stage fixes: git add <fixed-files>"
-            echo "4. Re-run with saved message: bash scripts/safe-commit.sh --file '$TEMP_MSG_FILE'"
+            echo "2. Run pre-commit cleanup first: pre-commit run --all-files"
+            echo "3. Check .pre-commit-config.yaml for conflicting hooks"
+            echo "4. Fix issues manually, stage fixes: git add <fixed-files>"
+            echo "5. Re-run with saved message: bash scripts/safe-commit.sh --file '$TEMP_MSG_FILE'"
             echo ""
             echo "The temporary file will be automatically cleaned up after successful commit."
             exit 1

@@ -414,6 +414,34 @@ git add .
 bash scripts/safe-commit.sh 'fix: something'
 ```
 
+### Publish Workflow Improvements (v1.4.0+)
+
+**Issue Resolved**: The `make publish-to-pypi-minor` command experienced timeout failures due to pre-commit hook modification loops during the v1.4.0 release.
+
+**Root Cause**: The `pylint-sort-functions` pre-commit hook was auto-fixing files during the commit process, creating a retry loop that eventually timed out.
+
+**Solution Implemented**: Enhanced the publish script (`scripts/publish-to-pypi.py`) with a pre-commit cleanup step:
+
+```bash
+# New publish workflow (automatic in make publish-to-pypi-minor):
+# 1. Run pre-commit cleanup FIRST (before version bump)
+pre-commit run --all-files
+git add -A  # Stage any formatting changes
+git commit -m 'style: pre-commit cleanup before release'  # If needed
+
+# 2. Then proceed with version bump and release
+python scripts/bump-version.py minor
+# ... rest of release process
+```
+
+**Enhanced Safe-commit Script**: Added better loop detection and logging:
+- Shows which files are being modified by hooks
+- Provides specific troubleshooting steps for infinite loops
+- Identifies common causes (conflicting formatters, pylint-sort-functions auto-fixing)
+- Improved error messages with actionable solutions
+
+**Best Practice for Releases**: Always run `make pre-commit` before initiating a release to ensure clean state and prevent modification loops.
+
 ### Commit Message Format
 
 This project follows [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) specification. All commit messages must follow this format:

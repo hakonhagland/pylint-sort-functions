@@ -69,13 +69,44 @@ def main():
 
     print(f"🚀 Publishing to PyPI with {args.version_type} version bump...")
 
-    # Step 1: Bump version
+    # Step 1: Run pre-commit cleanup to prevent modification loops during release
+    print("🔧 Running pre-commit cleanup to ensure clean state...")
+    run_command(
+        "pre-commit run --all-files",
+        "Running pre-commit hooks to clean up all files",
+        check=False,  # Allow pre-commit to fix files without failing
+    )
+
+    # Stage any changes made by pre-commit hooks
+    run_command(
+        "git add -A",
+        "Staging pre-commit cleanup changes",
+        check=False,  # May have no changes to stage
+    )
+
+    # Check if there are any changes to commit
+    result = run_command(
+        "git diff --cached --quiet",
+        "Checking for staged pre-commit cleanup changes",
+        check=False,
+    )
+
+    if result.returncode != 0:  # There are staged changes
+        print("📝 Committing pre-commit cleanup changes...")
+        run_command(
+            "git commit -m 'style: pre-commit cleanup before release'",
+            "Committing pre-commit cleanup changes",
+        )
+    else:
+        print("✅ No pre-commit cleanup changes needed")
+
+    # Step 2: Bump version
     run_command(
         f"python scripts/bump-version.py --no-commit {args.version_type}",
         f"Bumping version ({args.version_type})",
     )
 
-    # Step 2: Prepare changelog for release
+    # Step 3: Prepare changelog for release
     print("📝 Preparing changelog for release...")
     run_command(
         "python scripts/prepare-release-changelog.py",
@@ -83,11 +114,11 @@ def main():
         check=False,  # Script may return non-zero but continue
     )
 
-    # Step 3: Get new version for commit message
+    # Step 4: Get new version for commit message
     new_version = get_current_version()
     commit_message = f"chore: bump version to {new_version} and prepare changelog"
 
-    # Step 4: Stage all changes and commit using safe-commit workflow
+    # Step 5: Stage all changes and commit using safe-commit workflow
     run_command("git add -A", "Staging version bump and changelog changes")
 
     # Use safe-commit.sh to handle pre-commit hooks properly
@@ -96,20 +127,20 @@ def main():
         "Committing version bump and changelog with safe-commit workflow",
     )
 
-    # Step 5: Clean old builds
+    # Step 6: Clean old builds
     print("🧹 Cleaning old builds...")
     if Path("dist").exists():
         shutil.rmtree("dist")
 
-    # Step 6: Build package
+    # Step 7: Build package
     run_command("uv build", "Building package")
 
-    # Step 7: Upload to PyPI
+    # Step 8: Upload to PyPI
     run_command(
         f"twine upload dist/pylint_sort_functions-{new_version}*", "Uploading to PyPI"
     )
 
-    # Step 8: Create and push git tag
+    # Step 9: Create and push git tag
     tag_name = f"v{new_version}"
     run_command(
         f"git tag -a {tag_name} -m 'Release {tag_name}'", f"Creating git tag {tag_name}"
