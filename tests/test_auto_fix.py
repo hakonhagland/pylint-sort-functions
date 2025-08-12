@@ -420,19 +420,23 @@ def beta_function():
     return "beta"
 '''
 
+        # Create temporary file and close it immediately to avoid Windows file locks
         with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False) as f:
             f.write(content)
             f.flush()
+            temp_file_path = Path(f.name)
+        # File handle is now closed
 
+        try:
             config = AutoFixConfig(dry_run=False, backup=False)
             sorter = FunctionSorter(config)
 
-            result = sorter.sort_file(Path(f.name))
+            result = sorter.sort_file(temp_file_path)
 
             assert result is True  # File was modified
 
             # Verify comments moved with their respective functions
-            sorted_content = Path(f.name).read_text()
+            sorted_content = temp_file_path.read_text()
 
             # Check functions and comments are preserved
             assert "def alpha_function():" in sorted_content
@@ -462,9 +466,9 @@ def beta_function():
             beta_comment_pos = sorted_content.find(beta_comment)
             assert zebra_comment_pos < func_positions["zebra"]
             assert beta_comment_pos < func_positions["beta"]
-
-            # Close file handle before deletion to avoid Windows permission error
-            Path(f.name).unlink(missing_ok=True)
+        finally:
+            # Clean up temp file - should work on Windows now that file is closed
+            temp_file_path.unlink(missing_ok=True)
 
     def test_empty_file_handling(self) -> None:
         """Test handling of empty files."""
