@@ -182,10 +182,12 @@ bash<span class="w"> </span>scripts/safe-commit.sh<span class="w"> </span><span 
 <span class="s1">Co-Authored-By: Claude &lt;noreply@anthropic.com&gt;&#39;</span>
 </pre></div>
 </div>
-<p><strong>Why staging first is important:</strong>
-- Prevents confusing pre-commit warnings about unstaged files
-- Makes your commit intent explicit and clear
-- Allows pre-commit to run cleanly on staged files only</p>
+<p><strong>Why staging first is important:</strong></p>
+<ul class="simple">
+<li><p>Prevents confusing pre-commit warnings about unstaged files</p></li>
+<li><p>Makes your commit intent explicit and clear</p></li>
+<li><p>Allows pre-commit to run cleanly on staged files only</p></li>
+</ul>
 <p><strong>Legacy compatibility (also supported):</strong></p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Traditional flag-based usage still works</span>
 bash<span class="w"> </span>scripts/safe-commit.sh<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;Your message&quot;</span>

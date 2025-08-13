@@ -57,6 +57,7 @@ Required Workflow
    Co-Authored-By: Claude <noreply@anthropic.com>'
 
 **Why staging first is important:**
+
 - Prevents confusing pre-commit warnings about unstaged files
 - Makes your commit intent explicit and clear
 - Allows pre-commit to run cleanly on staged files only

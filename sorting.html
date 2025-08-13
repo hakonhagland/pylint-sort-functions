@@ -176,12 +176,14 @@ and class methods using a flexible multi-category system. Beyond traditional bin
 public/private sorting, the plugin supports framework-specific presets and custom
 categorization that creates predictable code structure improving navigation and
 reducing cognitive overhead when reading code.</p>
-<p><strong>Key Features:</strong>
-- <strong>Traditional binary sorting</strong>: Public functions before private functions (default)
-- <strong>Multi-category system</strong>: Framework-aware method organization (Phase 1)
-- <strong>Framework presets</strong>: Built-in configurations for pytest, unittest, PyQt
-- <strong>Custom categorization</strong>: JSON-configurable method categories with pattern matching
-- <strong>Functional section headers</strong>: Validated headers that enforce organizational structure (Phase 2)</p>
+<p><strong>Key Features:</strong></p>
+<ul class="simple">
+<li><p><strong>Traditional binary sorting</strong>: Public functions before private functions (default)</p></li>
+<li><p><strong>Multi-category system</strong>: Framework-aware method organization (Phase 1)</p></li>
+<li><p><strong>Framework presets</strong>: Built-in configurations for pytest, unittest, PyQt</p></li>
+<li><p><strong>Custom categorization</strong>: JSON-configurable method categories with pattern matching</p></li>
+<li><p><strong>Functional section headers</strong>: Validated headers that enforce organizational structure (Phase 2)</p></li>
+</ul>
 </section>
 <section id="sorting-rules">
 <h2>Sorting Rules<a class="headerlink" href="#sorting-rules" title="Link to this heading"></a></h2>
@@ -652,14 +654,18 @@ pylint-sort-functions<span class="w"> </span>--fix<span class="w"> </span>--add-
 <p>Section headers are automatically inserted <strong>only when both public and private functions/methods
 exist in the same scope</strong>. This smart behavior ensures headers add value by clearly separating
 different visibility levels, while avoiding unnecessary headers for single-visibility scopes.</p>
-<p><strong>Headers added:</strong>
-- Module with both public and private functions ✓
-- Class with both public and private methods ✓</p>
-<p><strong>Headers NOT added:</strong>
-- Module with only public functions ✗
-- Module with only private functions ✗
-- Class with only public methods ✗
-- Class with only private methods ✗</p>
+<p><strong>Headers added:</strong></p>
+<ul class="simple">
+<li><p>Module with both public and private functions ✓</p></li>
+<li><p>Class with both public and private methods ✓</p></li>
+</ul>
+<p><strong>Headers NOT added:</strong></p>
+<ul class="simple">
+<li><p>Module with only public functions ✗</p></li>
+<li><p>Module with only private functions ✗</p></li>
+<li><p>Class with only public methods ✗</p></li>
+<li><p>Class with only private methods ✗</p></li>
+</ul>
 </section>
 <section id="examples">
 <h3>Examples<a class="headerlink" href="#examples" title="Link to this heading"></a></h3>

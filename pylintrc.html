@@ -65,8 +65,8 @@
 <li class="toctree-l2"><a class="reference internal" href="#plugin-specific-configuration">Plugin-Specific Configuration</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#decorator-exclusions">Decorator Exclusions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#privacy-detection-settings">Privacy Detection Settings</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#method-categorization-configuration-phase-1">Method Categorization Configuration (Phase 1)</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#section-header-configuration-phase-2">Section Header Configuration (Phase 2)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#method-categorization-configuration">Method Categorization Configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#section-header-configuration">Section Header Configuration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#privacy-configuration-options">Privacy Configuration Options</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#directory-exclusions-future-feature">Directory Exclusions (Future Feature)</a></li>
 </ul>
@@ -194,7 +194,7 @@ when used with PyLint.</p>
 <dt>W9005: function-should-be-public</dt><dd><p>Private function is used externally and should be made public by removing underscore prefix.</p>
 </dd>
 </dl>
-<p><strong>Section Header Violations (Phase 2):</strong></p>
+<p><strong>Section Header Violations:</strong></p>
 <dl class="simple">
 <dt>W9006: method-wrong-section</dt><dd><p>Method appears in incorrect section according to its categorization when section header validation is enabled.</p>
 </dd>
@@ -286,8 +286,8 @@ when used with PyLint.</p>
 </pre></div>
 </div>
 </section>
-<section id="method-categorization-configuration-phase-1">
-<h3>Method Categorization Configuration (Phase 1)<a class="headerlink" href="#method-categorization-configuration-phase-1" title="Link to this heading"></a></h3>
+<section id="method-categorization-configuration">
+<h3>Method Categorization Configuration<a class="headerlink" href="#method-categorization-configuration" title="Link to this heading"></a></h3>
 <p>Control multi-category method organization with these options:</p>
 <p><strong>.pylintrc:</strong></p>
 <div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[function-sort]</span>
@@ -325,8 +325,8 @@ when used with PyLint.</p>
 </pre></div>
 </div>
 </section>
-<section id="section-header-configuration-phase-2">
-<h3>Section Header Configuration (Phase 2)<a class="headerlink" href="#section-header-configuration-phase-2" title="Link to this heading"></a></h3>
+<section id="section-header-configuration">
+<h3>Section Header Configuration<a class="headerlink" href="#section-header-configuration" title="Link to this heading"></a></h3>
 <p>Control functional section header validation with these options:</p>
 <p><strong>.pylintrc:</strong></p>
 <div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[function-sort]</span>

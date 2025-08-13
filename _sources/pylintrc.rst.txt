@@ -60,7 +60,7 @@ W9004: function-should-be-private
 W9005: function-should-be-public
   Private function is used externally and should be made public by removing underscore prefix.
 
-**Section Header Violations (Phase 2):**
+**Section Header Violations:**
 
 W9006: method-wrong-section
   Method appears in incorrect section according to its categorization when section header validation is enabled.
@@ -172,8 +172,8 @@ Configure the privacy detection feature that suggests functions should be made p
    enable-privacy-detection = true
    public-api-patterns = ["main", "run", "execute", "setup", "teardown"]
 
-Method Categorization Configuration (Phase 1)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Method Categorization Configuration
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Control multi-category method organization with these options:
 
@@ -216,8 +216,8 @@ Control multi-category method organization with these options:
    # Sort within categories
    category-sorting = "alphabetical"
 
-Section Header Configuration (Phase 2)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Section Header Configuration
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Control functional section header validation with these options:
 
