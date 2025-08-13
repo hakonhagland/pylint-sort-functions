@@ -64,8 +64,10 @@ class RSTListFormatChecker:
         patterns = [
             # Text ending with colon, immediately followed by list marker
             (r"^(.+):\n([-*+]) ", "text-colon-list"),
-            # Bold/strong text with colon, immediately followed by list
-            (r"\*\*(.+)\*\*:\n([-*+]) ", "bold-colon-list"),
+            # Bold/strong text with colon AFTER closing **, immediately followed by list
+            (r"\*\*([^*]+?)\*\*:\n([-*+]) ", "bold-colon-list"),
+            # Bold/strong text with colon INSIDE markup, immediately followed by list
+            (r"\*\*([^*]+?):\*\*\n([-*+]) ", "bold-colon-inside-list"),
             # Italic/emphasis text with colon, immediately followed by list
             (r"\*([^*]+)\*:\n([-*+]) ", "italic-colon-list"),
             # Closing parenthesis with colon, immediately followed by list

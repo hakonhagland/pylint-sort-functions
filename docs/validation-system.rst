@@ -9,6 +9,7 @@ Overview
 The validation system addresses a critical need: ensuring all configuration examples in ``docs/pylintrc.rst`` actually work correctly. Currently, numerous ``.pylintrc``, ``pyproject.toml``, and framework-specific configurations are untested, potentially leading to user frustration when examples don't work.
 
 **Problem Solved:**
+
 - Configuration examples that don't match actual plugin options
 - Framework decorator exclusions that may not work as documented
 - "Future feature" labels that may actually be implemented

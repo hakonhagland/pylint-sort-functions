@@ -14,6 +14,7 @@ categorization that creates predictable code structure improving navigation and
 reducing cognitive overhead when reading code.
 
 **Key Features:**
+
 - **Traditional binary sorting**: Public functions before private functions (default)
 - **Multi-category system**: Framework-aware method organization (Phase 1)
 - **Framework presets**: Built-in configurations for pytest, unittest, PyQt
@@ -544,10 +545,12 @@ exist in the same scope**. This smart behavior ensures headers add value by clea
 different visibility levels, while avoiding unnecessary headers for single-visibility scopes.
 
 **Headers added:**
+
 - Module with both public and private functions ✓
 - Class with both public and private methods ✓
 
 **Headers NOT added:**
+
 - Module with only public functions ✗
 - Module with only private functions ✗
 - Class with only public methods ✗
